@@ -13,7 +13,7 @@ export class FastifyGenerator extends ServerGenerator {
     super(parser)
   }
 
-  async generate(): Promise<string> {
+  async generate(): Promise<Map<string, string>> {
     throw new Error('Method not implemented.')
   }
 }

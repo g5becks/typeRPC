@@ -13,7 +13,7 @@ export class FetchGenerator extends ClientGenerator {
     super(parser)
   }
 
-  generate(): Promise<string> {
+  generate(): Promise<Map<string, string>> {
     throw new Error('Method not implemented.')
   }
 }

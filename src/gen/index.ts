@@ -9,9 +9,11 @@ import {tsConfigExists} from './util'
  * @export
  * @class GeneratorError
  */
-export class GeneratorError {
+export class GeneratorError extends Error {
   // eslint-disable-next-line no-useless-constructor
-  constructor(public readonly errorMessage: string) {}
+  constructor(public readonly errorMessage: string) {
+    super(errorMessage)
+  }
 }
 
 /**
@@ -21,7 +23,7 @@ export class GeneratorError {
  * @param {ClientHttpOption} client choice of which http client to use
  * @returns {(Promise<string | GeneratorError>)} generated code as string or Error
  */
-export const generateClient = async (tsConfigFilePath: string, client: ClientHttpOption): Promise<string | GeneratorError> => {
+export const generateClient = async (tsConfigFilePath: string, client: ClientHttpOption): Promise<Map<string, string> | GeneratorError> => {
   const clientGen = await getClientGenerator(tsConfigFilePath, client)
   if (typeof clientGen === 'string') {
     return new GeneratorError(clientGen)
@@ -41,7 +43,7 @@ export const generateClient = async (tsConfigFilePath: string, client: ClientHtt
  * @param {ServerFrameWorkOption} serverFramework choich of server framework
  * @returns {(Promise<string | GeneratorError>)} generated code as string or Error
  */
-export const generateServer = async (tsConfigFilePath: string, serverFramework: ServerFrameworkOption): Promise<string | GeneratorError> => {
+export const generateServer = async (tsConfigFilePath: string, serverFramework: ServerFrameworkOption): Promise<Map<string, string> | GeneratorError> => {
   const serverGen = await getServerGenerator(serverFramework, tsConfigFilePath)
   if (typeof serverGen === 'string') {
     return new GeneratorError(serverGen)
