@@ -1,8 +1,15 @@
+/* eslint-disable no-useless-constructor */
 /* eslint-disable max-params */
 import {MethodSignature, SourceFile} from 'ts-morph'
 import {Parser} from './parser'
 
-export class Generator {
+/**
+ *  Base class that all generators extend from, contains various utility method for parsing and generating code
+ *
+ * @export
+ * @class Generator
+ */
+abstract class Generator {
   // eslint-disable-next-line no-useless-constructor
   constructor(protected readonly parser: Parser) { }
 
@@ -53,10 +60,34 @@ export class Generator {
   }
 }
 
+/**
+ * Abstract class that all ServerGenerator implementations extend from
+ *
+ * @export
+ * @abstract
+ * @class ServerGenerator
+ * @extends {Generator}
+ */
 export abstract class ServerGenerator extends Generator {
+  constructor(parser: Parser) {
+    super(parser)
+  }
+
   abstract async generate(): Promise<string>
 }
 
+/**
+ * Abstract class that all ClientGenerators Extend from
+ *
+ * @export
+ * @abstract
+ * @class ClientGenerator
+ * @extends {Generator}
+ */
 export abstract class ClientGenerator extends Generator {
+  constructor(parser: Parser) {
+    super(parser)
+  }
+
   abstract async generate(): Promise<string>
 }

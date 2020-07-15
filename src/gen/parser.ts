@@ -2,6 +2,12 @@ import {pathExists} from 'fs-extra'
 import {InterfaceDeclaration, MethodSignature, Project, SourceFile} from 'ts-morph'
 import * as TJS from 'typescript-json-schema'
 
+/**
+ * Parses specified project source code files
+ *
+ * @export
+ * @class Parser
+ */
 export class Parser {
   public readonly project: Project
 
