@@ -5,7 +5,6 @@ export const generateClient = async (tsConfigFilePath: string, outputPath: strin
 
 }
 
-type ServerFrameWorkOption = 'express' | 'fastify' | 'koa'
 export const generateServer = async (tsConfigFilePath: string, outputPath: string, serverFrameWork: ServerFrameWorkOption) => {
 
 }
