@@ -1,4 +1,5 @@
 import {ServerGenerator} from '../generator'
+import {Parser} from '../parser'
 
 /**
  * Generates server side code using https://expressjs.com/
@@ -8,6 +9,11 @@ import {ServerGenerator} from '../generator'
  * @extends {ServerGenerator}
  */
 export class ExpressGenerator extends ServerGenerator {
+  // eslint-disable-next-line no-useless-constructor
+  constructor(parser: Parser) {
+    super(parser)
+  }
+
   generate(): Promise<string> {
     throw new Error('Method not implemented.')
   }
