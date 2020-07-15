@@ -1,4 +1,5 @@
 import {Command, flags} from '@oclif/command'
+import {isValidServerFrameworkOption} from '../gen/server'
 import {tsConfigExists} from '../gen/util'
 
 export default class Server extends Command {
@@ -13,20 +14,28 @@ export default class Server extends Command {
 
   }
 
-  async run() {
+  async run(): Promise<void> {
     const {flags} = this.parse(Server)
 
     const tsConfig = flags.tsConfig ?? ''
     const outputPath = flags.output ?? ''
     const serverFramework = flags.framework ?? ''
-    const exists = await tsConfigExists(tsConfig)
-    if (tsConfig === '' || !exists) {
-      this.handleBadTsConfigFile()
+    await this.validateTsConfigFile(tsConfig)
+    this.validateServerFramework(serverFramework)
+  }
+
+  private async validateTsConfigFile(tsConfigFile: string): Promise<void> {
+    const exists = await tsConfigExists(tsConfigFile)
+    if (tsConfigFile === '' || !exists) {
+      this.log('error: please provide a path to a valid tsconfig.json file')
+      throw new Error('tsconfig.json is invalid or does not exist')
     }
   }
 
-  private handleBadTsConfigFile() {
-    this.log('error: please provide a path to a valid tsconfig.json file')
-    throw new Error('tsconfig.json is invalid or does not exist')
+  private async validateServerFramework(framework: string): Promise<void> {
+    if (!isValidServerFrameworkOption(framework)) {
+      this.log(`sorry ${framework} is not a valid server framework option or has not yet been implemented`)
+      throw new Error('bad server framework option')
+    }
   }
 }
