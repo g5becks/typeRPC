@@ -13,7 +13,7 @@ abstract class Generator {
   // eslint-disable-next-line no-useless-constructor
   constructor(protected readonly parser: Parser) { }
 
-  protected messagesText(file: SourceFile) {
+  protected messagesText(file: SourceFile): string {
     const messages = this.parser.getTypeAliases(file)
     let messagesText = ''
     for (const msg of messages) {
@@ -23,7 +23,7 @@ abstract class Generator {
     return messagesText
   }
 
-  protected messageSchemas(file: SourceFile) {
+  protected messageSchemas(file: SourceFile): string {
     const messages = this.parser.getTypeAliases(file)
     let schemas = ''
     for (const msg of messages) {
@@ -32,7 +32,7 @@ abstract class Generator {
     return schemas
   }
 
-  protected returnTypeSchemas(file: SourceFile) {
+  protected returnTypeSchemas(file: SourceFile): string {
     const results = this.parser.getMethodsForFile(file)
     let schemas = ''
     for (const res of results) {
@@ -41,7 +41,7 @@ abstract class Generator {
     return schemas
   }
 
-  protected servicesText(file: SourceFile) {
+  protected servicesText(file: SourceFile): string {
     const services = this.parser.getInterfaces(file)
     let servicesText = ''
     for (const srvc of services) {
@@ -50,11 +50,11 @@ abstract class Generator {
     return servicesText
   }
 
-  protected getSchemaForMessage(symbol: string) {
+  protected getSchemaForMessage(symbol: string): string {
     return `const ${symbol}Schema = ${JSON.stringify(this.parser.jsonSchemaGenerator?.getSchemaForSymbol(symbol))}\n`
   }
 
-  protected getSchemaForReturnType(method: MethodSignature) {
+  protected getSchemaForReturnType(method: MethodSignature): string {
     const returnType = this.parser.getMethodReturnType(method)
     return `const ${method.getName()}ResponseSchema = ${JSON.stringify(this.parser.jsonSchemaGenerator?.getSchemaForSymbol(returnType.getText()))}`
   }
