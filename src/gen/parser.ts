@@ -1,7 +1,5 @@
-import {outputFile} from 'fs-extra'
-import {InterfaceDeclaration, MethodSignature, Project} from 'ts-morph'
+import {InterfaceDeclaration, MethodSignature, Project, SourceFile} from 'ts-morph'
 import * as TJS from 'typescript-json-schema'
-import {Generator} from './generator'
 
 export class Parser {
   public readonly project: Project
@@ -37,16 +35,17 @@ export class Parser {
   getMethodName(method: MethodSignature) {
     return method.getName()
   }
+
+  getFileName(file: SourceFile)  {
+    return file.getBaseName()
+  }
+
+  getInterfaces(file: SourceFile) {
+    return file.getInterfaces()
+  }
+
+  getTypeAliases(file: SourceFile) {
+    return file.getTypeAliases()
+  }
 }
 
-const createSchemas = (project: Project) => {
-  return files.map(file => new Generator(file.getBaseName(), gen, file.getInterfaces(), file.getTypeAliases(), file.getEnums()))
-}
-
-export const generateClient1 = async (tsConfigFilePath: string, outputPath: string) => {
-  const project = new Project({tsConfigFilePath})
-  const schemas = createSchemas(project)
-  schemas.forEach(async schema => {
-    await outputFile(`${outputPath}/${schema.fileName}`, schema.getOutput())
-  })
-}

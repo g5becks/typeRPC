@@ -1,56 +1,41 @@
 /* eslint-disable max-params */
-import {EnumDeclaration, InterfaceDeclaration, TypeAliasDeclaration} from 'ts-morph'
-import * as TJS from 'typescript-json-schema'
+import {SourceFile} from 'ts-morph'
 import {Parser} from './parser'
 
 export class Generator {
   // eslint-disable-next-line no-useless-constructor
-  constructor(protected readonly outputPath: string, protected readonly parser: Parser, protected readonly jsonGen: TJS.JsonSchemaGenerator | null, protected readonly services: InterfaceDeclaration[], protected readonly messages: TypeAliasDeclaration[], protected readonly enums: EnumDeclaration[]) { }
+  constructor(protected readonly outputPath: string, protected readonly parser: Parser) { }
 
-  toString() {
-    return `{"sourceFiles": ${this.parser.sourceFiles}, "services": ${this.services.map(srvc => srvc.getText(false))}, "messages": ${this.messages.map(msg => msg.getText(false))}, "enums":
- ${this.enums.map(enu => enu.getText(false))}}`
-  }
-
-  protected enumsText() {
-    let enums = ''
-    for (const enu of this.enums) {
-      enums += `${enu.getFullText()}\n`
-    }
-    return enums
-  }
-
-  protected messagesText() {
-    let messages = ''
-    for (const msg of this.messages) {
-      messages += `${msg.getFullText()}\n`
+  protected messagesText(file: SourceFile) {
+    const messages = this.parser.getTypeAliases(file)
+    let messagesText = ''
+    for (const msg of messages) {
+      messagesText += `${msg.getFullText()}\n`
     }
 
-    return messages
+    return messagesText
   }
 
-  protected messageSchemas() {
+  protected messageSchemas(file: SourceFile) {
+    const messages = this.parser.getTypeAliases(file)
     let schemas = ''
-    for (const msg of this.messages) {
+    for (const msg of messages) {
       schemas += `${this.getSchema(msg.getName())}\n`
     }
     return schemas
   }
 
-  protected servicesText() {
-    let services = ''
-    for (const srvc of this.services) {
-      services += `${srvc.getFullText()}\n`
+  protected servicesText(file: SourceFile) {
+    const services = this.parser.getInterfaces(file)
+    let servicesText = ''
+    for (const srvc of services) {
+      servicesText += `${srvc.getFullText()}\n`
     }
-    return services
-  }
-
-  protected getOutput() {
-    return `${this.enumsText()}${this.messagesText()}${this.messageSchemas()}${this.servicesText()}`
+    return servicesText
   }
 
   protected getSchema(symbol: string) {
-    return `const ${symbol}Schema = ${JSON.stringify(this.jsonGen?.getSchemaForSymbol(symbol))}\n`
+    return `const ${symbol}Schema = ${JSON.stringify(this.parser.jsonSchemaGenerator?.getSchemaForSymbol(symbol))}\n`
   }
 }
 
