@@ -20,15 +20,22 @@ export class Parser {
     this.project = new Project({tsConfigFilePath: this.tsConfigFilePath})
   }
 
-  getMethods(interfce: InterfaceDeclaration) {
+  getMethodsForInterface(interfce: InterfaceDeclaration) {
     return interfce.getMethods()
+  }
+
+  getMethodsForFile(file: SourceFile) {
+    const interfaces = this.getInterfaces(file)
+    const methods: MethodSignature[] = []
+    interfaces.forEach(interfc => methods.push(...this.getMethodsForInterface(interfc)))
+    return methods
   }
 
   getParams(method: MethodSignature) {
     return method.getParameters()
   }
 
-  getReturns(method: MethodSignature) {
+  getMethodReturnType(method: MethodSignature) {
     return method.getReturnType()
   }
 
@@ -46,6 +53,10 @@ export class Parser {
 
   getTypeAliases(file: SourceFile) {
     return file.getTypeAliases()
+  }
+
+  getAllReturnTypes(file: SourceFile) {
+    return this.getMethodsForFile(file).map(method => this.getMethodReturnType(method))
   }
 }
 

@@ -1,5 +1,5 @@
 /* eslint-disable max-params */
-import {SourceFile} from 'ts-morph'
+import {MethodSignature, SourceFile} from 'ts-morph'
 import {Parser} from './parser'
 
 export class Generator {
@@ -20,9 +20,17 @@ export class Generator {
     const messages = this.parser.getTypeAliases(file)
     let schemas = ''
     for (const msg of messages) {
-      schemas += `${this.getSchema(msg.getName())}\n`
+      schemas += `${this.getSchemaForMessage(msg.getName())}\n`
     }
     return schemas
+  }
+
+  protected returnTypeSchemas(file: SourceFile) {
+    const results = this.parser.getAllReturnTypes(file)
+    let schemas = ''
+    for (const res of results) {
+      schemas += this
+    }
   }
 
   protected servicesText(file: SourceFile) {
@@ -34,8 +42,13 @@ export class Generator {
     return servicesText
   }
 
-  protected getSchema(symbol: string) {
+  protected getSchemaForMessage(symbol: string) {
     return `const ${symbol}Schema = ${JSON.stringify(this.parser.jsonSchemaGenerator?.getSchemaForSymbol(symbol))}\n`
+  }
+
+  protected getSchemaForReturnType(method: MethodSignature) {
+    const returnType = this.parser.getMethodReturnType(method)
+    return `const ${method.getName()}ResponseSchema = ${JSON.stringify(this.parser.jsonSchemaGenerator?.getSchemaForSymbol(returnType.getText()))}`
   }
 }
 
