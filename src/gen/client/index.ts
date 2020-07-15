@@ -16,7 +16,7 @@ export type ClientHttpOption = 'axios' | 'fetch'
  * @returns {(Promise<string | AxiosGenerator | FetchGenerator>)} error description or a client generator
  */
 export const getClientGenerator = async (tsConfigFilePath: string, client: ClientHttpOption): Promise<string | AxiosGenerator | FetchGenerator> => {
-  const parserResult = await Parser.create(tsConfigFilePath)
+  const parserResult = new Parser(tsConfigFilePath)
   if (parserResult instanceof Parser) {
     return clients[client](parserResult)
   }

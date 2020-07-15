@@ -8,19 +8,20 @@ export default class Server extends Command {
     // flag with a value (-n, --name=VALUE)
     tsConfig: flags.string({char: 't', name: 'tsconfig', description: 'path to tsconfig.json for schema project'}),
     output: flags.string({char: 'o', name: 'output', description: 'path to output directory for generated files'}),
-    // flag with no value (-f, --force)
-    force: flags.boolean({char: 'f'}),
+    framework: flags.string({char: 'f', name: 'framework', description: 'which framework to use for generating the server code. Option are express | koa | fastify'}),
+
   }
 
-  static args = [{name: 'file'}]
-
   async run() {
-    const {args, flags} = this.parse(Server)
+    const {flags} = this.parse(Server)
 
     const tsConfig = flags.tsConfig ?? ''
-    this.log(`hello ${name} from /home/beckspoppn/Dev/typeRPC/src/commands/server.ts`)
-    if (args.file && flags.force) {
-      this.log(`you input --force and --file: ${args.file}`)
+    const outputPath = flags.output ?? ''
+    const serverFramework = flags.framework ?? ''
+    if (tsConfig === '') {
+      this.log('error: please provide a path to a valid tsconfig.json file')
+      throw new Error('tsconfig.json is invalid or does not exist')
     }
   }
 }
+
