@@ -1,5 +1,5 @@
 import {pathExists} from 'fs-extra'
-import {InterfaceDeclaration, MethodSignature, Project, SourceFile} from 'ts-morph'
+import {InterfaceDeclaration, MethodSignature, ParameterDeclaration, Project, SourceFile, ts, Type, TypeAliasDeclaration} from 'ts-morph'
 import * as TJS from 'typescript-json-schema'
 
 /**
@@ -27,7 +27,7 @@ export class Parser {
     this.project = new Project({tsConfigFilePath: this.tsConfigFilePath})
   }
 
-  public static async create(tsConfigFilePath: string) {
+  public static async create(tsConfigFilePath: string): Promise<string | Parser> {
     try {
       const exists = await pathExists(tsConfigFilePath)
       if (!exists) {
@@ -39,42 +39,42 @@ export class Parser {
     }
   }
 
-  getMethodsForInterface(interfce: InterfaceDeclaration) {
+  getMethodsForInterface(interfce: InterfaceDeclaration): MethodSignature[] {
     return interfce.getMethods()
   }
 
-  getMethodsForFile(file: SourceFile) {
+  getMethodsForFile(file: SourceFile): MethodSignature[] {
     const interfaces = this.getInterfaces(file)
     const methods: MethodSignature[] = []
     interfaces.forEach(interfc => methods.push(...this.getMethodsForInterface(interfc)))
     return methods
   }
 
-  getParams(method: MethodSignature) {
+  getParams(method: MethodSignature): ParameterDeclaration[] {
     return method.getParameters()
   }
 
-  getMethodReturnType(method: MethodSignature) {
+  getMethodReturnType(method: MethodSignature): Type<ts.Type> {
     return method.getReturnType()
   }
 
-  getMethodName(method: MethodSignature) {
+  getMethodName(method: MethodSignature): string {
     return method.getName()
   }
 
-  getFileName(file: SourceFile)  {
+  getFileName(file: SourceFile): string  {
     return file.getBaseName()
   }
 
-  getInterfaces(file: SourceFile) {
+  getInterfaces(file: SourceFile): InterfaceDeclaration[] {
     return file.getInterfaces()
   }
 
-  getTypeAliases(file: SourceFile) {
+  getTypeAliases(file: SourceFile): TypeAliasDeclaration[] {
     return file.getTypeAliases()
   }
 
-  getAllReturnTypes(file: SourceFile) {
+  getAllReturnTypes(file: SourceFile): Type<ts.Type>[] {
     return this.getMethodsForFile(file).map(method => this.getMethodReturnType(method))
   }
 }
