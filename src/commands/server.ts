@@ -1,6 +1,6 @@
 import {Command, flags} from '@oclif/command'
-import {isValidServerFrameworkOption} from '../gen/server'
-import {tsConfigExists} from '../gen/util'
+import {generateServer, tsConfigExists} from '../gen'
+import {isValidServerFrameworkOption, ServerFrameworkOption} from '../gen/server'
 
 export default class Server extends Command {
   static description = 'describe the command here'
@@ -22,6 +22,7 @@ export default class Server extends Command {
     const serverFramework = flags.framework ?? ''
     await this.validateTsConfigFile(tsConfig)
     this.validateServerFramework(serverFramework)
+    const code = await generateServer(tsConfig, serverFramework as ServerFrameworkOption)
   }
 
   private async validateTsConfigFile(tsConfigFile: string): Promise<void> {

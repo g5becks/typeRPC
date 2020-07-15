@@ -1,6 +1,7 @@
 
 import {ClientHttpOption, getClientGenerator} from './client'
 import {getServerGenerator, ServerFrameworkOption} from './server'
+import {tsConfigExists} from './util'
 
 /**
  * An error that occurs either creating a creating Generator or from the result of a Generator attempting to generate code
@@ -52,3 +53,6 @@ export const generateServer = async (tsConfigFilePath: string, serverFramework: 
     return new GeneratorError(error)
   }
 }
+
+export {tsConfigExists}
+

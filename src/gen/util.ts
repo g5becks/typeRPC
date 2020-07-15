@@ -8,3 +8,7 @@ export const tsConfigExists = async (path: string) => {
     return `error occurred: ${error}, failed to check if tsconfig file exists`
   }
 }
+
+export const writeOutput = (code: string, outputPath: string) => {
+
+}

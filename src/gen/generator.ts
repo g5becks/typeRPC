@@ -73,7 +73,7 @@ export abstract class ServerGenerator extends Generator {
     super(parser)
   }
 
-  abstract async generate(): Promise<string>
+  abstract async generate(): Promise<Map<string, string>>
 }
 
 /**
@@ -89,5 +89,5 @@ export abstract class ClientGenerator extends Generator {
     super(parser)
   }
 
-  abstract async generate(): Promise<string>
+  abstract async generate(): Promise<Map<string, string>>
 }
