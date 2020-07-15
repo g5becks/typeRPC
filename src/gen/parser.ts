@@ -53,6 +53,10 @@ export class Parser {
     return file.getBaseName()
   }
 
+  getFileNameWithoutExtension(file: SourceFile): string {
+    return file.getBaseNameWithoutExtension()
+  }
+
   getInterfaces(file: SourceFile): InterfaceDeclaration[] {
     return file.getInterfaces()
   }

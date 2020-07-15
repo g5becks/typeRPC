@@ -9,6 +9,6 @@ export const tsConfigExists = async (path: string) => {
   }
 }
 
-export const writeOutput = (code: string, outputPath: string) => {
+export const writeOutput = (outputPath: string, code: Map<string, string>) => {
 
 }
