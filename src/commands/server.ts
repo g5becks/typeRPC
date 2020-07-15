@@ -1,4 +1,5 @@
 import {Command, flags} from '@oclif/command'
+import {tsConfigExists} from '../gen/util'
 
 export default class Server extends Command {
   static description = 'describe the command here'
@@ -18,10 +19,14 @@ export default class Server extends Command {
     const tsConfig = flags.tsConfig ?? ''
     const outputPath = flags.output ?? ''
     const serverFramework = flags.framework ?? ''
-    if (tsConfig === '') {
-      this.log('error: please provide a path to a valid tsconfig.json file')
-      throw new Error('tsconfig.json is invalid or does not exist')
+    const exists = await tsConfigExists(tsConfig)
+    if (tsConfig === '' || !exists) {
+      this.handleBadTsConfigFile()
     }
   }
-}
 
+  private handleBadTsConfigFile() {
+    this.log('error: please provide a path to a valid tsconfig.json file')
+    throw new Error('tsconfig.json is invalid or does not exist')
+  }
+}
