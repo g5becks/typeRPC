@@ -4,7 +4,7 @@ import {Parser} from './parser'
 
 export class Generator {
   // eslint-disable-next-line no-useless-constructor
-  constructor(protected readonly outputPath: string, protected readonly parser: Parser) { }
+  constructor(protected readonly parser: Parser) { }
 
   protected messagesText(file: SourceFile) {
     const messages = this.parser.getTypeAliases(file)
@@ -26,11 +26,12 @@ export class Generator {
   }
 
   protected returnTypeSchemas(file: SourceFile) {
-    const results = this.parser.getAllReturnTypes(file)
+    const results = this.parser.getMethodsForFile(file)
     let schemas = ''
     for (const res of results) {
-      schemas += this
+      schemas += this.getSchemaForReturnType(res)
     }
+    return schemas
   }
 
   protected servicesText(file: SourceFile) {
@@ -53,9 +54,9 @@ export class Generator {
 }
 
 export abstract class ServerGenerator extends Generator {
-  abstract async generate(): Promise<void>
+  abstract async generate(): Promise<string>
 }
 
 export abstract class ClientGenerator extends Generator {
-  abstract async generate(): Promise<void>
+  abstract async generate(): Promise<string>
 }

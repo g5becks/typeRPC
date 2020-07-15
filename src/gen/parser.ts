@@ -1,3 +1,4 @@
+import {pathExists} from 'fs-extra'
 import {InterfaceDeclaration, MethodSignature, Project, SourceFile} from 'ts-morph'
 import * as TJS from 'typescript-json-schema'
 
@@ -16,8 +17,20 @@ export class Parser {
     return TJS.buildGenerator(this.program)
   }
 
-  constructor(private readonly tsConfigFilePath: string) {
+  private constructor(private readonly tsConfigFilePath: string) {
     this.project = new Project({tsConfigFilePath: this.tsConfigFilePath})
+  }
+
+  public static async create(tsConfigFilePath: string) {
+    try {
+      const exists = await pathExists(tsConfigFilePath)
+      if (!exists) {
+        return `error: ${tsConfigFilePath} does not exist, please provide a valid tsconfig.json file`
+      }
+      return new Parser(tsConfigFilePath)
+    } catch (error) {
+      return `error occurred: ${error}, please try running the command again`
+    }
   }
 
   getMethodsForInterface(interfce: InterfaceDeclaration) {
