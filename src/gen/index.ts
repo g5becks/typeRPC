@@ -1,10 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import {getServerGenerator, ServerFrameWorkOption} from './server'
 
-type ClientHttpOption = 'axios' | 'fetch'
-export const generateClient = async (tsConfigFilePath: string, outputPath: string, client: ClientHttpOption) => {
+export const generateClient = async (tsConfigFilePath: string, client: ClientHttpOption) => {
 
 }
 
-export const generateServer = async (tsConfigFilePath: string, outputPath: string, serverFrameWork: ServerFrameWorkOption) => {
-
+export const generateServer = async (tsConfigFilePath: string, serverFrameWork: ServerFrameWorkOption) => {
+  const serverGen = await getServerGenerator(serverFrameWork, tsConfigFilePath)
+  if (typeof serverGen === 'string') {
+    return serverGen
+  }
+  return serverGen.generate()
 }
