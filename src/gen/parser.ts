@@ -2,22 +2,48 @@ import {outputFile} from 'fs-extra'
 import {InterfaceDeclaration, MethodSignature, Project} from 'ts-morph'
 import * as TJS from 'typescript-json-schema'
 import {Generator} from './generator'
-export const getMethods = (interfce: InterfaceDeclaration) => interfce.getMethods()
 
-export const getParams = (method: MethodSignature) => method.getParameters()
+export class Parser {
+  public readonly project: Project
 
-export const getReturns = (method: MethodSignature) => method.getReturnType()
+  private get program() {
+    return TJS.getProgramFromFiles(this.sourceFiles.map(file => file.getFilePath()))
+  }
 
-export const getMethodName = (method: MethodSignature) => method.getName()
+  public get sourceFiles() {
+    return this.project.getSourceFiles()
+  }
 
-const createSchemas = (project: Project) => {
-  const files = project.getSourceFiles()
-  const program = TJS.getProgramFromFiles(files.map(file => file.getFilePath()))
-  const gen = TJS.buildGenerator(program)
-  return files.map(file => new Generator(file.getBaseName(), file.getFilePath(), gen, file.getInterfaces(), file.getTypeAliases(), file.getEnums()))
+  public get jsonSchemaGenerator() {
+    return TJS.buildGenerator(this.program)
+  }
+
+  constructor(private readonly tsConfigFilePath: string) {
+    this.project = new Project({tsConfigFilePath: this.tsConfigFilePath})
+  }
+
+  getMethods(interfce: InterfaceDeclaration) {
+    return interfce.getMethods()
+  }
+
+  getParams(method: MethodSignature) {
+    return method.getParameters()
+  }
+
+  getReturns(method: MethodSignature) {
+    return method.getReturnType()
+  }
+
+  getMethodName(method: MethodSignature) {
+    return method.getName()
+  }
 }
 
-export const generateClient = async (tsConfigFilePath: string, outputPath: string) => {
+const createSchemas = (project: Project) => {
+  return files.map(file => new Generator(file.getBaseName(), gen, file.getInterfaces(), file.getTypeAliases(), file.getEnums()))
+}
+
+export const generateClient1 = async (tsConfigFilePath: string, outputPath: string) => {
   const project = new Project({tsConfigFilePath})
   const schemas = createSchemas(project)
   schemas.forEach(async schema => {
