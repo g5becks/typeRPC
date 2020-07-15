@@ -3,7 +3,7 @@ import {ClientHttpOption, getClientGenerator} from './client'
 import {getServerGenerator, ServerFrameworkOption} from './server'
 
 /**
- * An error that occurs creating a Generator
+ * An error that occurs either creating a creating Generator or from the result of a Generator attempting to generate code
  *
  * @export
  * @class GeneratorError
@@ -12,6 +12,7 @@ export class GeneratorError {
   // eslint-disable-next-line no-useless-constructor
   constructor(public readonly errorMessage: string) {}
 }
+
 /**
  * Generates client side code from typeRPC schema file
  * @async
@@ -24,7 +25,12 @@ export const generateClient = async (tsConfigFilePath: string, client: ClientHtt
   if (typeof clientGen === 'string') {
     return new GeneratorError(clientGen)
   }
-  return clientGen.generate()
+  try {
+    const code = await clientGen.generate()
+    return code
+  } catch (error) {
+    return new GeneratorError(error)
+  }
 }
 
 /**
@@ -39,5 +45,10 @@ export const generateServer = async (tsConfigFilePath: string, serverFramework: 
   if (typeof serverGen === 'string') {
     return new GeneratorError(serverGen)
   }
-  return serverGen.generate()
+  try {
+    const code = await serverGen.generate()
+    return code
+  } catch (error) {
+    return new GeneratorError(error)
+  }
 }
