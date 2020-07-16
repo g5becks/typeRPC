@@ -13,7 +13,44 @@ export class FastifyGenerator extends ServerGenerator {
     super(parser)
   }
 
+  private imports(): string {
+    return `
+/* eslint-disable new-cap */
+import {FastifyPluginAsync, LogLevel} from 'fastify'
+import fp, {PluginOptions} from 'fastify-plugin'
+import {pluginOpts, registerOptions, TypeRpcPlugin} from './rpc.server.util'`
+  }
+
+  private util() {
+    return `
+import {FastifyPluginCallback, LogLevel, RegisterOptions} from 'fastify'
+import {PluginOptions} from 'fastify-plugin'
+
+export const pluginOpts = (name: string, opts?: PluginOptions): PluginOptions => {
+  return {
+    ...opts,
+    fastify: '3.x',
+    name,
+  }
+}
+
+export type TypeRpcPlugin = {
+  plugin: FastifyPluginCallback;
+  opts: RegisterOptions;
+}
+
+export const registerOptions = (prefix: string, logLevel: LogLevel): RegisterOptions => {
+  return {prefix, logLevel}
+}
+`
+  }
+
+  private utilsFile(): [string, string] {
+    return ['rpc.server.util.ts', this.util()]
+  }
+
   async generate(): Promise<Map<string, string>> {
     throw new Error('Method not implemented.')
   }
 }
+
