@@ -1,6 +1,7 @@
 import {Command, flags} from '@oclif/command'
-import {generateServer, tsConfigExists} from '../gen'
+import {generateServer, GeneratorError, tsConfigExists} from '../gen'
 import {isValidServerFrameworkOption, ServerFrameworkOption} from '../gen/server'
+import {writeOutput} from '../gen/util'
 
 export default class Server extends Command {
   static description = 'describe the command here'
@@ -22,7 +23,19 @@ export default class Server extends Command {
     const serverFramework = flags.framework ?? ''
     await this.validateTsConfigFile(tsConfig)
     this.validateServerFramework(serverFramework)
+    this.validateOutputPath(outputPath)
     const code = await generateServer(tsConfig, serverFramework as ServerFrameworkOption)
+    if (code instanceof GeneratorError) {
+      throw code
+    }
+    this.log(`generating server code using ${serverFramework}`)
+    try {
+      await writeOutput(outputPath, code, 'server')
+      this.log(`server code generation complete, please check ${outputPath} for your files `)
+    } catch (error) {
+      this.log(`error occurred: ${error}`)
+      throw error
+    }
   }
 
   private async validateTsConfigFile(tsConfigFile: string): Promise<void> {
@@ -33,10 +46,17 @@ export default class Server extends Command {
     }
   }
 
-  private async validateServerFramework(framework: string): Promise<void> {
+  private validateServerFramework(framework: string): void {
     if (!isValidServerFrameworkOption(framework)) {
       this.log(`sorry ${framework} is not a valid server framework option or has not yet been implemented`)
       throw new Error('bad server framework option')
+    }
+  }
+
+  private validateOutputPath(outputPath: string): void {
+    if (outputPath === '') {
+      this.log('please provide a directory path to write generated output')
+      throw new Error('no output path provided')
     }
   }
 }
