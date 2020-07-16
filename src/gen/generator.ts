@@ -13,7 +13,7 @@ abstract class Generator {
   // eslint-disable-next-line no-useless-constructor
   constructor(protected readonly parser: Parser) { }
 
-  protected messagesText(file: SourceFile): string {
+  protected types(file: SourceFile): string {
     const messages = this.parser.getTypeAliases(file)
     let messagesText = ''
     for (const msg of messages) {
@@ -41,7 +41,7 @@ abstract class Generator {
     return schemas
   }
 
-  protected servicesText(file: SourceFile): string {
+  protected interfaces(file: SourceFile): string {
     const services = this.parser.getInterfaces(file)
     let servicesText = ''
     for (const srvc of services) {
@@ -86,7 +86,7 @@ export abstract class ServerGenerator extends Generator {
     super(parser)
   }
 
-  abstract async generate(): Promise<Map<string, string>>
+  abstract generate(): Map<string, string>
 }
 
 /**
@@ -102,5 +102,5 @@ export abstract class ClientGenerator extends Generator {
     super(parser)
   }
 
-  abstract async generate(): Promise<Map<string, string>>
+  abstract generate(): Map<string, string>
 }

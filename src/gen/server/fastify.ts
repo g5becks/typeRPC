@@ -1,4 +1,4 @@
-import {MethodSignature, ParameterDeclaration} from 'ts-morph'
+import {MethodSignature, ParameterDeclaration, SourceFile} from 'ts-morph'
 import {ServerGenerator} from '../generator'
 import {Parser} from '../parser'
 /**
@@ -12,14 +12,6 @@ export class FastifyGenerator extends ServerGenerator {
   // eslint-disable-next-line no-useless-constructor
   constructor(parser: Parser)  {
     super(parser)
-  }
-
-  private imports(): string {
-    return `
-/* eslint-disable new-cap */
-import {FastifyPluginAsync, LogLevel} from 'fastify'
-import fp, {PluginOptions} from 'fastify-plugin'
-import {pluginOpts, registerOptions, TypeRpcPlugin} from './rpc.server.util'\n`
   }
 
   private util() {
@@ -44,6 +36,14 @@ export const registerOptions = (prefix: string, logLevel: LogLevel): RegisterOpt
   return {prefix, logLevel}
 }
 `
+  }
+
+  private imports(): string {
+    return `
+/* eslint-disable new-cap */
+import {FastifyPluginAsync, LogLevel} from 'fastify'
+import fp, {PluginOptions} from 'fastify-plugin'
+import {pluginOpts, registerOptions, TypeRpcPlugin} from './rpc.server.util'\n`
   }
 
   // generates the RequestGenericInterface parameter for each route
@@ -74,11 +74,11 @@ export const registerOptions = (prefix: string, logLevel: LogLevel): RegisterOpt
     return ['rpc.server.util.ts', this.util()]
   }
 
-  generateFile(): string {
-    return `${this.imports()}`
+  generateFile(file: SourceFile): string {
+    return `${this.imports()}${this.types(file)}${this.interfaces(file)}`
   }
 
-  async generate(): Promise<Map<string, string>> {
+  generate(): Map<string, string> {
     const code = new Map<string, string>()
     const util = this.utilsFile()
     code.set(util[0], util[1])
