@@ -58,11 +58,11 @@ import {pluginOpts, registerOptions, TypeRpcPlugin} from './rpc.server.util'\n`
       return `{Body: {${params[0]}}}`
 
     default:
-      return `{Body: {${this.buildBody(params)}}}`
+      return `{Body: {${this.buildRequestGenericInterfaceBody(params)}}}`
     }
   }
 
-  private buildBody(params: ParameterDeclaration[]): string {
+  private buildRequestGenericInterfaceBody(params: ParameterDeclaration[]): string {
     let body = ''
     params.forEach(param => {
       body += `${param}\n`
