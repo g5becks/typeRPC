@@ -29,12 +29,11 @@ export default class Server extends Command {
       throw code
     }
     this.log(`generating server code using ${serverFramework}`)
-    try {
-      await writeOutput(outputPath, code, 'server')
-      this.log(`server code generation complete, please check ${outputPath} for your files `)
-    } catch (error) {
-      this.log(`error occurred: ${error}`)
-      throw error
+    const res = await writeOutput(outputPath, code, 'server')
+    if (res instanceof GeneratorError) {
+      this.log(res.errorMessage)
+    } else {
+      this.log(res)
     }
   }
 
