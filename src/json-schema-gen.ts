@@ -11,7 +11,6 @@ import {GeneratorError} from './gen'
 export const jsonSchemaGen = (filePath: string, type: string): string => {
   const config: Config = {path: path.join(__dirname, filePath), type}
   try {
-    createGenerator(config).createSchema(config.type)
     return JSON.stringify(createGenerator(config).createSchema(config.type), null, 2)
   } catch (error) {
     throw new GeneratorError(error.message)
