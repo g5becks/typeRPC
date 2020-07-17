@@ -130,6 +130,10 @@ abstract class Generator {
     return `${this.buildTypes(file)}${this.buildInterfaces(file)}${this.buildInputTypesForFile(file)}${this.buildReturnTypesForFile(file)}`
   }
 
+  protected getGeneratedTypesFilePath(file: SourceFile): string {
+    return `${path.join(this.outputPath, `${file.getBaseNameWithoutExtension}.rpc.types.ts`)}`
+  }
+
   // Generates types for the input schema file
   // Types files contain the rpc schema types along with
   // Request and Response type, but not json schemas

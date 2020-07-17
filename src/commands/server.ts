@@ -26,7 +26,7 @@ export default class Server extends Command {
     await this.validateTsConfigFile(tsConfig)
     this.validateServerFramework(serverFramework)
     this.validateOutputPath(outputPath)
-    const code = await generateServer(tsConfig, serverFramework as ServerFrameworkOption)
+    const code = await generateServer(tsConfig, outputPath, serverFramework as ServerFrameworkOption)
     if (code instanceof GeneratorError) {
       throw code
     }
