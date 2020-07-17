@@ -55,8 +55,8 @@ abstract class Generator {
     return servicesText
   }
 
-  // Builds a single input type for a method
-  protected buildInputType(method: MethodSignature): string {
+  // Builds a single request type for a method
+  protected buildRequestType(method: MethodSignature): string {
     let typeParams = ''
     const params = this.parser.getParams(method)
     if (params.length === 0) {
@@ -71,29 +71,31 @@ abstract class Generator {
     }\n`
   }
 
-  // Builds input types for all methods in a file
+  // Builds request types for all methods in a file
   // All parameters must be merged into one object and a separate type
   // alias created so that they can be used by the jsonSchemaGenerator
-  protected buildInputTypesForFile(file: SourceFile): string {
+  protected buildRequestTypesForFile(file: SourceFile): string {
     const methods = this.parser.getMethodsForFile(file)
     let inputTypes = ''
     methods.forEach(method => {
-      inputTypes += `${this.buildInputType(method)}`
+      inputTypes += `${this.buildRequestType(method)}`
     })
     return `${this.buildTypes(file)}${inputTypes}`
   }
 
-  protected buildReturnType(method: MethodSignature): string {
+  // builds a single response type for a method
+  protected buildResponseType(method: MethodSignature): string {
     return `type ${method.getName()}Response = {
       data: ${method.getReturnType()}
     }\n`
   }
 
-  protected buildReturnTypesForFile(file: SourceFile): string {
+  // builds response types for all methods in a file
+  protected buildResponseTypesForFile(file: SourceFile): string {
     const methods = this.parser.getMethodsForFile(file)
     let returnTypes = ''
     methods.forEach(method => {
-      returnTypes += `${this.buildReturnType(method)}`
+      returnTypes += `${this.buildResponseType(method)}`
     })
     return returnTypes
   }
@@ -108,14 +110,18 @@ abstract class Generator {
     }
   }
 
-  protected buildJsonSchemaForAllTypes(filePath: string, types: string[]): string {
+  protected buildShemasForFile(file: SourceFile): string {
+    const typesFile = this.getGeneratedTypesFilePath(file)
+    const inputTypes = ''
+
     let schema = ''
     for (const type of types) {
-      schema += this.buildJsonSchemaForType(filePath, type)
+      schema += this.buildJsonSchemaForType(typesFile, type)
     }
     return schema
   }
 
+  // Generates a request method based on the method signature's jsdoc
   protected buildRequestMethod(method: MethodSignature) {
     const docs = method.getJsDocs()
     let requestMethod: RequestMethod = 'POST'
@@ -126,12 +132,12 @@ abstract class Generator {
     return requestMethod
   }
 
-  private generateTypesFile(file: SourceFile): string {
-    return `${this.buildTypes(file)}${this.buildInterfaces(file)}${this.buildInputTypesForFile(file)}${this.buildReturnTypesForFile(file)}`
-  }
-
   protected getGeneratedTypesFilePath(file: SourceFile): string {
     return `${path.join(this.outputPath, `${file.getBaseNameWithoutExtension}.rpc.types.ts`)}`
+  }
+
+  private generateTypesFile(file: SourceFile): string {
+    return `${this.buildTypes(file)}${this.buildInterfaces(file)}${this.buildRequestTypesForFile(file)}${this.buildResponseTypesForFile(file)}`
   }
 
   // Generates types for the input schema file
