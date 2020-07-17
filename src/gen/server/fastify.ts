@@ -1,5 +1,5 @@
 import {InterfaceDeclaration, MethodSignature, ParameterDeclaration} from 'ts-morph'
-import {ServerGenerator} from '../generator'
+import {Code, ServerGenerator} from '../generator'
 import {Parser} from '../parser'
 /**
  * Generates server side code using https://www.fastify.io/
@@ -135,6 +135,14 @@ import {pluginOpts, registerOptions, TypeRpcPlugin} from './rpc.server.util'\n`
     const util = this.utilsFile()
     code.set(util[0], util[1])
     return code
+  }
+
+  generateTypes(): Code {
+    throw new Error('Method not implemented.')
+  }
+
+  generateRpc(): Code {
+    throw new Error('Method not implemented.')
   }
 }
 
