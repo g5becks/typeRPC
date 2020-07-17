@@ -89,24 +89,6 @@ abstract class Generator {
     return returnTypes
   }
 
-  protected getReturnTypeSchemas(file: SourceFile): string {
-    const results = this.parser.getMethodsForFile(file)
-    let schemas = ''
-    for (const res of results) {
-      schemas += this.getSchemaForReturnType(res)
-    }
-    return schemas
-  }
-
-  protected getMethodInputSchema(symbol: string): string {
-    return `const ${symbol}Schema = ${JSON.stringify(this.parser.jsonSchemaGenerator?.getSchemaForSymbol(symbol))}\n`
-  }
-
-  protected getSchemaForReturnType(method: MethodSignature): string {
-    const returnType = this.parser.getMethodReturnType(method)
-    return `const ${method.getName()}ResponseSchema = ${JSON.stringify(this.parser.jsonSchemaGenerator?.getSchemaForSymbol(returnType.getText()))}`
-  }
-
   private generateTypesFile(file: SourceFile): string {
     return `${this.types(file)}${this.interfaces(file)}${this.buildInputTypesForFile(file)}${this.buildReturnTypesForFile(file)}`
   }
