@@ -3,7 +3,7 @@ import {ExpressGenerator} from './express'
 import {FastifyGenerator} from './fastify'
 import {KoaGenerator} from './koa'
 
-const servers = {express: (parser: Parser): ExpressGenerator => new ExpressGenerator(parser), fastify: (parser: Parser): FastifyGenerator => new FastifyGenerator(parser), koa: (parser: Parser): KoaGenerator => new KoaGenerator(parser)}
+const servers = {express: (parser: Parser, outputPath: string): ExpressGenerator => new ExpressGenerator(parser, outputPath), fastify: (parser: Parser, outputPath: string): FastifyGenerator => new FastifyGenerator(parser, outputPath), koa: (parser: Parser, outputPath: string): KoaGenerator => new KoaGenerator(parser, outputPath)}
 
 export type ServerFrameworkOption = 'express' | 'fastify' | 'koa'
 
@@ -24,12 +24,13 @@ export const isValidServerFrameworkOption = (framework: string): framework is Se
  * @function getServerGenerator
  * @param {ServerFrameWorkOption} framework server framework option
  * @param {string} tsConfigFilePath path to tsconfig.json
+ * @param {string} outputPath path to directory to store generated code
  * @returns {(Promise<string | ExpressGenerator | FastifyGenerator | KoaGenerator>)} error details as string or server generator class
  */
-export const getServerGenerator = async (framework: ServerFrameworkOption, tsConfigFilePath: string): Promise<string | ExpressGenerator | FastifyGenerator | KoaGenerator> => {
+export const getServerGenerator = (framework: ServerFrameworkOption, tsConfigFilePath: string, outputPath: string): string | ExpressGenerator | FastifyGenerator | KoaGenerator => {
   const parserResult = new Parser(tsConfigFilePath)
   if (parserResult instanceof Parser) {
-    return servers[framework](parserResult)
+    return servers[framework](parserResult, outputPath)
   }
   return parserResult
 }

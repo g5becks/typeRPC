@@ -1,5 +1,6 @@
 
 import {ClientHttpOption, getClientGenerator} from './client'
+import {Code} from './generator'
 import {getServerGenerator, ServerFrameworkOption} from './server'
 import {tsConfigExists} from './util'
 
@@ -20,16 +21,17 @@ export class GeneratorError extends Error {
  * Generates client side code from typeRPC schema file
  * @async
  * @param {string} tsConfigFilePath path to tsconfig.json
+ * @param {string} outputPath path to output direcory
  * @param {ClientHttpOption} client choice of which http client to use
  * @returns {(Promise<string | GeneratorError>)} generated code as string or Error
  */
-export const generateClient = async (tsConfigFilePath: string, client: ClientHttpOption): Promise<Map<string, string> | GeneratorError> => {
-  const clientGen = await getClientGenerator(tsConfigFilePath, client)
+export const generateClient = (tsConfigFilePath: string, outputPath: string,  client: ClientHttpOption): Code | GeneratorError => {
+  const clientGen = getClientGenerator(tsConfigFilePath, outputPath, client)
   if (typeof clientGen === 'string') {
     return new GeneratorError(clientGen)
   }
   try {
-    const code = await clientGen.generate()
+    const code = clientGen.generateRpc()
     return code
   } catch (error) {
     return new GeneratorError(error)
@@ -43,8 +45,8 @@ export const generateClient = async (tsConfigFilePath: string, client: ClientHtt
  * @param {ServerFrameWorkOption} serverFramework choich of server framework
  * @returns {(Promise<string | GeneratorError>)} generated code as string or Error
  */
-export const generateServer = async (tsConfigFilePath: string, serverFramework: ServerFrameworkOption): Promise<Map<string, string> | GeneratorError> => {
-  const serverGen = await getServerGenerator(serverFramework, tsConfigFilePath)
+export const generateServer = async (tsConfigFilePath: string, serverFramework: ServerFrameworkOption): Code | GeneratorError => {
+  const serverGen = getServerGenerator(serverFramework, tsConfigFilePath)
   if (typeof serverGen === 'string') {
     return new GeneratorError(serverGen)
   }

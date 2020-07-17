@@ -10,8 +10,8 @@ import {Parser} from '../parser'
  */
 export class FastifyGenerator extends ServerGenerator {
   // eslint-disable-next-line no-useless-constructor
-  constructor(parser: Parser)  {
-    super(parser)
+  constructor(parser: Parser, protected readonly outputPath: string)  {
+    super(parser, outputPath)
   }
 
   private util() {
@@ -69,9 +69,9 @@ import {pluginOpts, registerOptions, TypeRpcPlugin} from './rpc.server.util'\n`
             method: 'POST',
             url: '/${method.getName()}',
             schema: {
-                body: BookSchema,
+                body: ${method.getName()}RequestSchema,
                 response: {
-                    200: OtherSchema,
+                    200: ${method.getName()}ResponseSchema,
                 },
 
             },
@@ -93,10 +93,6 @@ import {pluginOpts, registerOptions, TypeRpcPlugin} from './rpc.server.util'\n`
  `
   }
 
-  private buildControllers(): string {
-
-  }
-
   private utilsFile(): [string, string] {
     return ['rpc.server.util.ts', this.util()]
   }
@@ -105,6 +101,9 @@ import {pluginOpts, registerOptions, TypeRpcPlugin} from './rpc.server.util'\n`
     const code: Code = {}
     const util = this.utilsFile()
     code[util[0]] = util[1]
+    for (const file of this.parser.sourceFiles) {
+
+    }
     return code
   }
 }

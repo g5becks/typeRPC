@@ -24,7 +24,7 @@ const isRequestMethod = (method: string): method is RequestMethod => {
  */
 abstract class Generator {
   // eslint-disable-next-line no-useless-constructor
-  constructor(protected readonly parser: Parser) { }
+  constructor(protected readonly parser: Parser, protected readonly outputPath: string) { }
 
   protected isExportedTypeAlias(alias: TypeAliasDeclaration): boolean {
     return alias.isExported()
@@ -108,7 +108,7 @@ abstract class Generator {
     }
   }
 
-  buildJsonSchemaForAllTypes(filePath: string, types: string[]): string {
+  protected buildJsonSchemaForAllTypes(filePath: string, types: string[]): string {
     let schema = ''
     for (const type of types) {
       schema += this.buildJsonSchemaForType(filePath, type)
@@ -151,8 +151,8 @@ abstract class Generator {
  * @extends {Generator}
  */
 export abstract class ServerGenerator extends Generator {
-  constructor(parser: Parser) {
-    super(parser)
+  constructor(protected readonly parser: Parser, protected readonly outputPath: string) {
+    super(parser, outputPath)
   }
 
   abstract generateRpc(): Code
@@ -167,8 +167,8 @@ export abstract class ServerGenerator extends Generator {
  * @extends {Generator}
  */
 export abstract class ClientGenerator extends Generator {
-  constructor(parser: Parser) {
-    super(parser)
+  constructor(protected readonly parser: Parser, protected readonly outputPath: string) {
+    super(parser, outputPath)
   }
 
   abstract generateRpc(): Code

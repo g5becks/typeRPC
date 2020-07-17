@@ -12,7 +12,9 @@ export const tsConfigExists = async (filePath: string): Promise<string | boolean
   }
 }
 
-export const writeTypesOutput = async (outputPath: string, code: Code): Promise<string | GeneratorError> => {
+export type OutputType = 'types'| 'rpc'
+
+export const writeOutput = async (outputPath: string, code: Code, outputType: OutputType): Promise<string | GeneratorError> => {
   const results = []
   for (const [file, source] of  Object.entries(code)) {
     results.push(outputFile(path.join(outputPath, `${file}`), source))
@@ -20,8 +22,9 @@ export const writeTypesOutput = async (outputPath: string, code: Code): Promise<
 
   try {
     await Promise.all(results)
-    return `server code generation complete, please check ${outputPath} for your files`
+    return `${outputType} generation complete, please check ${outputPath} for generated code`
   } catch (error) {
     return new GeneratorError(`error occurred writing files: ${error}`)
   }
 }
+

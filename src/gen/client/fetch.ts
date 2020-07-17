@@ -13,7 +13,7 @@ export class FetchGenerator extends ClientGenerator {
   }
 
   // eslint-disable-next-line no-useless-constructor
-  constructor(parser: Parser) {
-    super(parser)
+  constructor(parser: Parser, protected readonly outputPath: string) {
+    super(parser, outputPath)
   }
 }

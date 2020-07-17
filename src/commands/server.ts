@@ -31,7 +31,7 @@ export default class Server extends Command {
       throw code
     }
     this.log(`generating server code using ${serverFramework}`)
-    const res = await writeOutput(outputPath, code, 'server')
+    const res = await writeOutput(outputPath, code, 'types')
     if (res instanceof GeneratorError) {
       this.log(res.errorMessage)
     } else {
