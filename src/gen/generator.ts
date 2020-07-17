@@ -3,6 +3,10 @@
 import {MethodSignature, SourceFile} from 'ts-morph'
 import {Parser} from './parser'
 
+export type Code = {
+  [key: string]: string;
+}
+
 /**
  *  Base class that all generators extend from, contains various utility method for parsing and generating code
  *
@@ -22,6 +26,16 @@ abstract class Generator {
     }
 
     return messagesText
+  }
+
+  // Copies all interfaces from schema to output
+  protected interfaces(file: SourceFile): string {
+    const services = this.parser.getInterfaces(file)
+    let servicesText = ''
+    for (const srvc of services) {
+      servicesText += `${srvc.getFullText()}\n`
+    }
+    return servicesText
   }
 
   // Builds a single input type for a method
@@ -73,15 +87,6 @@ abstract class Generator {
     return schemas
   }
 
-  protected interfaces(file: SourceFile): string {
-    const services = this.parser.getInterfaces(file)
-    let servicesText = ''
-    for (const srvc of services) {
-      servicesText += `${srvc.getFullText()}\n`
-    }
-    return servicesText
-  }
-
   protected getMethodInputSchema(symbol: string): string {
     return `const ${symbol}Schema = ${JSON.stringify(this.parser.jsonSchemaGenerator?.getSchemaForSymbol(symbol))}\n`
   }
@@ -90,10 +95,18 @@ abstract class Generator {
     const returnType = this.parser.getMethodReturnType(method)
     return `const ${method.getName()}ResponseSchema = ${JSON.stringify(this.parser.jsonSchemaGenerator?.getSchemaForSymbol(returnType.getText()))}`
   }
-}
 
-export type Code = {
-  [key: string]: string;
+  private generateTypesFile(file: SourceFile): string {
+    return `${this.types(file)}${this.interfaces(file)}${this.buildInputTypesForFile(file)}${this.buildReturnTypesForFile(file)}`
+  }
+
+  public generateTypes(): Code {
+    const code: Code = {}
+    this.parser.sourceFiles.forEach(file => {
+      code[`${file.getBaseNameWithoutExtension}.rpc.types.ts`] = this.generateTypesFile(file)
+    })
+    return code
+  }
 }
 
 /**
@@ -108,8 +121,6 @@ export abstract class ServerGenerator extends Generator {
   constructor(parser: Parser) {
     super(parser)
   }
-
-  abstract generateTypes(): Code
 
   abstract generateRpc(): Code
 }
@@ -126,8 +137,6 @@ export abstract class ClientGenerator extends Generator {
   constructor(parser: Parser) {
     super(parser)
   }
-
-  abstract generateTypes(): Code
 
   abstract generateRpc(): Code
 }
