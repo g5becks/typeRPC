@@ -31,7 +31,7 @@ abstract class Generator {
   }
 
   // Copies all type aliases from schema to output
-  protected types(file: SourceFile): string {
+  protected buildTypes(file: SourceFile): string {
     const aliases = this.parser.getTypeAliases(file)
     let messagesText = ''
     for (const alias of aliases) {
@@ -46,7 +46,7 @@ abstract class Generator {
   }
 
   // Copies all interfaces from schema to output
-  protected interfaces(file: SourceFile): string {
+  protected buildInterfaces(file: SourceFile): string {
     const services = this.parser.getInterfaces(file)
     let servicesText = ''
     for (const srvc of services) {
@@ -80,7 +80,7 @@ abstract class Generator {
     methods.forEach(method => {
       inputTypes += `${this.buildInputType(method)}`
     })
-    return `${this.types(file)}${inputTypes}`
+    return `${this.buildTypes(file)}${inputTypes}`
   }
 
   protected buildReturnType(method: MethodSignature): string {
@@ -99,7 +99,7 @@ abstract class Generator {
   }
 
   // Generates a jsonSchema for a single type
-  protected genJsonSchemaForType(filePath: string, type: string): string {
+  protected buildJsonSchemaForType(filePath: string, type: string): string {
     const config: Config = {path: path.join(__dirname, filePath), type}
     try {
       return `export const ${type}Schema = ${JSON.stringify(createGenerator(config).createSchema(config.type), null, 2)}\n`
@@ -108,7 +108,15 @@ abstract class Generator {
     }
   }
 
-  protected getRequestMethod(method: MethodSignature) {
+  buildJsonSchemaForAllTypes(filePath: string, types: string[]): string {
+    let schema = ''
+    for (const type of types) {
+      schema += this.buildJsonSchemaForType(filePath, type)
+    }
+    return schema
+  }
+
+  protected buildRequestMethod(method: MethodSignature) {
     const docs = method.getJsDocs()
     let requestMethod: RequestMethod = 'POST'
     if (docs.length > 0) {
@@ -119,13 +127,16 @@ abstract class Generator {
   }
 
   private generateTypesFile(file: SourceFile): string {
-    return `${this.types(file)}${this.interfaces(file)}${this.buildInputTypesForFile(file)}${this.buildReturnTypesForFile(file)}`
+    return `${this.buildTypes(file)}${this.buildInterfaces(file)}${this.buildInputTypesForFile(file)}${this.buildReturnTypesForFile(file)}`
   }
 
+  // Generates types for the input schema file
+  // Types files contain the rpc schema types along with
+  // Request and Response type, but not json schemas
   public generateTypes(): Code {
     const code: Code = {}
     this.parser.sourceFiles.forEach(file => {
-      code[`${file.getBaseNameWithoutExtension}.rpc.types.ts`] = this.generateTypesFile(file)
+      code[`${file.getBaseNameWithoutExtension()}.rpc.types.ts`] = this.generateTypesFile(file)
     })
     return code
   }

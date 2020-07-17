@@ -88,24 +88,7 @@ import {pluginOpts, registerOptions, TypeRpcPlugin} from './rpc.server.util'\n`
     const serviceName = service.getName()
     return `
     const ${serviceName} (${serviceName.toLowerCase()}: ${serviceName}): FastifyPluginAsync => async (instance, _) => {
-    instance.route<>(
-        {
-            method: 'POST',
-            url: '',
-            schema: {
-                body: BookSchema,
-                response: {
-                    200: OtherSchema,
-                },
-
-            },
-            handler: async (request, reply) => {
-                const { publisher } = request.body
-
-                reply.send({ publisher })
-            },
-        }
-    )
+    ${service.getMethods().map(method => this.buildRouteHandler(method))}
 }
  `
   }
