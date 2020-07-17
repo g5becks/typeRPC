@@ -1,6 +1,9 @@
 /* eslint-disable no-useless-constructor */
 /* eslint-disable max-params */
+import path from 'path'
+import {Config, createGenerator} from 'ts-json-schema-generator'
 import {MethodSignature, SourceFile, TypeAliasDeclaration} from 'ts-morph'
+import {GeneratorError} from '.'
 import {Parser} from './parser'
 
 export type Code = {
@@ -87,6 +90,15 @@ abstract class Generator {
       returnTypes += `${this.buildReturnType(method)}`
     })
     return returnTypes
+  }
+
+  protected genJsonSchema(filePath: string, type: string): string {
+    const config: Config = {path: path.join(__dirname, filePath), type}
+    try {
+      return JSON.stringify(createGenerator(config).createSchema(config.type), null, 2)
+    } catch (error) {
+      throw new GeneratorError(error.message)
+    }
   }
 
   private generateTypesFile(file: SourceFile): string {
