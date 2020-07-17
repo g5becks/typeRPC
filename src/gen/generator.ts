@@ -1,6 +1,6 @@
 /* eslint-disable no-useless-constructor */
 /* eslint-disable max-params */
-import {MethodSignature, SourceFile} from 'ts-morph'
+import {MethodSignature, SourceFile, TypeAliasDeclaration} from 'ts-morph'
 import {Parser} from './parser'
 
 export type Code = {
@@ -17,12 +17,20 @@ abstract class Generator {
   // eslint-disable-next-line no-useless-constructor
   constructor(protected readonly parser: Parser) { }
 
+  protected isExportedTypeAlias(alias: TypeAliasDeclaration): boolean {
+    return alias.isExported()
+  }
+
   // Copies all type aliases from schema to output
   protected types(file: SourceFile): string {
-    const messages = this.parser.getTypeAliases(file)
+    const aliases = this.parser.getTypeAliases(file)
     let messagesText = ''
-    for (const msg of messages) {
-      messagesText += `${msg.getFullText()}\n`
+    for (const alias of aliases) {
+      if (alias.isExported()) {
+        messagesText += `${alias.getFullText()}\n`
+      } else {
+        messagesText += `export ${alias.getFullText()}\n`
+      }
     }
 
     return messagesText
@@ -49,7 +57,7 @@ abstract class Generator {
       typeParams += `${param.getText()}\n`
     })
     return `
-    type ${method.getName()}Input = {
+    type ${method.getName()}Request = {
       ${typeParams}
     }\n`
   }
@@ -67,8 +75,8 @@ abstract class Generator {
   }
 
   protected buildReturnType(method: MethodSignature): string {
-    return `type ${method.getName()}Return = {
-      returns: ${method.getReturnType()}
+    return `type ${method.getName()}Response = {
+      data: ${method.getReturnType()}
     }\n`
   }
 
@@ -81,7 +89,7 @@ abstract class Generator {
     return returnTypes
   }
 
-  protected returnTypeSchemas(file: SourceFile): string {
+  protected getReturnTypeSchemas(file: SourceFile): string {
     const results = this.parser.getMethodsForFile(file)
     let schemas = ''
     for (const res of results) {
