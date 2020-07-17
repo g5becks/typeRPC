@@ -1,4 +1,4 @@
-import {ClientGenerator} from '../generator'
+import {ClientGenerator, Code} from '../generator'
 import {Parser} from '../parser'
 /**
  * Generates client side code using https://www.npmjs.com/package/axios
@@ -8,12 +8,16 @@ import {Parser} from '../parser'
  * @extends {ClientGenerator}
  */
 export class AxiosGenerator extends ClientGenerator {
+  generateTypes(): Code {
+    throw new Error('Method not implemented.')
+  }
+
+  generateRpc(): Code {
+    throw new Error('Method not implemented.')
+  }
+
   // eslint-disable-next-line no-useless-constructor
   constructor(parser: Parser) {
     super(parser)
-  }
-
-  generate(): Promise<Map<string, string>> {
-    throw new Error('Method not implemented.')
   }
 }

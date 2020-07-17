@@ -92,6 +92,10 @@ abstract class Generator {
   }
 }
 
+export type Code = {
+  [key: string]: string;
+}
+
 /**
  * Abstract class that all ServerGenerator implementations extend from
  *
@@ -105,7 +109,9 @@ export abstract class ServerGenerator extends Generator {
     super(parser)
   }
 
-  abstract generate(): Map<string, string>
+  abstract generateTypes(): Code
+
+  abstract generateRpc(): Code
 }
 
 /**
@@ -121,5 +127,7 @@ export abstract class ClientGenerator extends Generator {
     super(parser)
   }
 
-  abstract generate(): Map<string, string>
+  abstract generateTypes(): Code
+
+  abstract generateRpc(): Code
 }
