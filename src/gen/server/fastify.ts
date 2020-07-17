@@ -70,6 +70,10 @@ import {pluginOpts, registerOptions, TypeRpcPlugin} from './rpc.server.util'\n`
     return body
   }
 
+  private buildControllers(): string {
+
+  }
+
   private utilsFile(): [string, string] {
     return ['rpc.server.util.ts', this.util()]
   }

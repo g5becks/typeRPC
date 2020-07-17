@@ -12,6 +12,8 @@ export default class Server extends Command {
     tsConfig: flags.string({char: 't', name: 'tsconfig', description: 'path to tsconfig.json for schema project'}),
     output: flags.string({char: 'o', name: 'output', description: 'path to output directory for generated files'}),
     framework: flags.string({char: 'f', name: 'framework', description: 'which framework to use for generating the server code. Option are express | koa | fastify'}),
+    https: flags.boolean({name: 'https', description: 'controls whether the server should use https'}),
+    http2: flags.boolean({name: 'http2', description: 'controls whether the server should use http2'}),
 
   }
 
