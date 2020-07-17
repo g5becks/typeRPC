@@ -1,7 +1,7 @@
 /* eslint-disable no-useless-constructor */
 /* eslint-disable max-params */
-import { MethodSignature, SourceFile } from 'ts-morph'
-import { Parser } from './parser'
+import {MethodSignature, SourceFile} from 'ts-morph'
+import {Parser} from './parser'
 
 /**
  *  Base class that all generators extend from, contains various utility method for parsing and generating code
@@ -48,19 +48,6 @@ abstract class Generator {
       servicesText += `${srvc.getFullText()}\n`
     }
     return servicesText
-  }
-  // generates the RequestGenericInterface parameter for each route
-  // see https://www.fastify.io/docs/latest/TypeScript/#using-generics
-  protected getIncomingMessageType(method: MethodSignature): string {
-    const params = this.parser.getParams(method)
-    switch (params.length) {
-      case 0: {
-        return '{Body: {}}'
-      },
-      case 1: {
-        return `{Body: {${params[0]}}}`
-      }
-    } `{Body: {${params}}}`
   }
 
   protected getSchemaForMessage(symbol: string): string {
