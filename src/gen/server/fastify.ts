@@ -1,4 +1,4 @@
-import {MethodSignature, ParameterDeclaration, SourceFile} from 'ts-morph'
+import {InterfaceDeclaration, MethodSignature, ParameterDeclaration} from 'ts-morph'
 import {ServerGenerator} from '../generator'
 import {Parser} from '../parser'
 /**
@@ -68,6 +68,54 @@ import {pluginOpts, registerOptions, TypeRpcPlugin} from './rpc.server.util'\n`
       body += `${param}\n`
     })
     return body
+  }
+
+  private buildRouteHandler(method: MethodSignature): string {
+    return `
+    instance.route<${this.getIncomingMessageType(method)}>(
+        {
+            method: 'POST',
+            url: '/${method.getName()}',
+            schema: {
+                body: BookSchema,
+                response: {
+                    200: OtherSchema,
+                },
+
+            },
+            handler: async (request, reply) => {
+                const { publisher } = request.body
+
+                reply.send({ publisher })
+            },
+        }
+    )`
+  }
+
+  private buildService(service: InterfaceDeclaration): string {
+    const serviceName = service.getName()
+    return `
+    const ${serviceName} (${serviceName.toLowerCase()}: ${serviceName}): FastifyPluginAsync => async (instance, _) => {
+    instance.route<>(
+        {
+            method: 'POST',
+            url: '',
+            schema: {
+                body: BookSchema,
+                response: {
+                    200: OtherSchema,
+                },
+
+            },
+            handler: async (request, reply) => {
+                const { publisher } = request.body
+
+                reply.send({ publisher })
+            },
+        }
+    )
+}
+ `
   }
 
   private buildControllers(): string {

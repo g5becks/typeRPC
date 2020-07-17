@@ -13,6 +13,7 @@ abstract class Generator {
   // eslint-disable-next-line no-useless-constructor
   constructor(protected readonly parser: Parser) { }
 
+  // Copies all type aliases from schema to output
   protected types(file: SourceFile): string {
     const messages = this.parser.getTypeAliases(file)
     let messagesText = ''
@@ -23,13 +24,44 @@ abstract class Generator {
     return messagesText
   }
 
-  protected messageSchemas(file: SourceFile): string {
-    const messages = this.parser.getTypeAliases(file)
-    let schemas = ''
-    for (const msg of messages) {
-      schemas += `${this.getSchemaForMessage(msg.getName())}\n`
-    }
-    return schemas
+  // Builds a single input type for a method
+  protected buildInputType(method: MethodSignature): string {
+    let typeParams = ''
+    const params = this.parser.getParams(method)
+    params.forEach(param => {
+      typeParams += `${param.getText()}\n`
+    })
+    return `
+    type ${method.getName()}Input = {
+      ${typeParams}
+    }\n`
+  }
+
+  // Builds input types for all methods in a file
+  // All parameters must be merged into one object and a separate type
+  // alias created so that they can be used by the jsonSchemaGenerator
+  protected buildInputTypesForFile(file: SourceFile): string {
+    const methods = this.parser.getMethodsForFile(file)
+    let inputTypes = ''
+    methods.forEach(method => {
+      inputTypes += `${this.buildInputType(method)}`
+    })
+    return `${this.types(file)}${inputTypes}`
+  }
+
+  protected buildReturnType(method: MethodSignature): string {
+    return `type ${method.getName()}Return = {
+      returns: ${method.getReturnType()}
+    }\n`
+  }
+
+  protected buildReturnTypesForFile(file: SourceFile): string {
+    const methods = this.parser.getMethodsForFile(file)
+    let returnTypes = ''
+    methods.forEach(method => {
+      returnTypes += `${this.buildReturnType(method)}`
+    })
+    return returnTypes
   }
 
   protected returnTypeSchemas(file: SourceFile): string {
@@ -50,7 +82,7 @@ abstract class Generator {
     return servicesText
   }
 
-  protected getSchemaForMessage(symbol: string): string {
+  protected getMethodInputSchema(symbol: string): string {
     return `const ${symbol}Schema = ${JSON.stringify(this.parser.jsonSchemaGenerator?.getSchemaForSymbol(symbol))}\n`
   }
 
