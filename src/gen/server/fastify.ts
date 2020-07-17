@@ -1,6 +1,6 @@
-import { InterfaceDeclaration, MethodSignature, ParameterDeclaration } from 'ts-morph'
-import { ServerGenerator } from '../generator'
-import { Parser } from '../parser'
+import {InterfaceDeclaration, MethodSignature} from 'ts-morph'
+import {Code, ServerGenerator} from '../generator'
+import {Parser} from '../parser'
 /**
  * Generates server side code using https://www.fastify.io/
  *
@@ -55,19 +55,11 @@ import {pluginOpts, registerOptions, TypeRpcPlugin} from './rpc.server.util'\n`
       return '{Body: {}}'
 
     case 1:
-      return `{Body: {${params[0]}}}`
+      return `{Body: ${method.getName()}Input}`
 
     default:
-      return `{Body: {${this.buildRequestGenericInterfaceBody(params)}}}`
+      return '{Body: {}}'
     }
-  }
-
-  private buildRequestGenericInterfaceBody(params: ParameterDeclaration[]): string {
-    let body = ''
-    params.forEach(param => {
-      body += `${param}\n`
-    })
-    return body
   }
 
   private buildRouteHandler(method: MethodSignature): string {
@@ -126,17 +118,11 @@ import {pluginOpts, registerOptions, TypeRpcPlugin} from './rpc.server.util'\n`
     return ['rpc.server.util.ts', this.util()]
   }
 
-  generate(): Map<string, string> {
-    const code = new Map<string, string>()
+  public generateRpc(): Code {
+    const code: Code = {}
     const util = this.utilsFile()
-    code.set(util[0], util[1])
+    code[util[0]] = util[1]
     return code
-  }
-
-  }
-
-  generateRpc(): Code {
-    throw new Error('Method not implemented.')
   }
 }
 

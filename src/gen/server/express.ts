@@ -9,10 +9,6 @@ import {Parser} from '../parser'
  * @extends {ServerGenerator}
  */
 export class ExpressGenerator extends ServerGenerator {
-  generateTypes(): Code {
-    throw new Error('Method not implemented.')
-  }
-
   generateRpc(): Code {
     throw new Error('Method not implemented.')
   }

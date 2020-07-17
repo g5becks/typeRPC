@@ -42,6 +42,9 @@ abstract class Generator {
   protected buildInputType(method: MethodSignature): string {
     let typeParams = ''
     const params = this.parser.getParams(method)
+    if (params.length === 0) {
+      return ''
+    }
     params.forEach(param => {
       typeParams += `${param.getText()}\n`
     })

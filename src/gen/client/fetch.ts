@@ -8,10 +8,6 @@ import {Parser} from '../parser'
  * @extends {ClientGenerator}
  */
 export class FetchGenerator extends ClientGenerator {
-  generateTypes(): Code {
-    throw new Error('Method not implemented.')
-  }
-
   generateRpc(): Code {
     throw new Error('Method not implemented.')
   }

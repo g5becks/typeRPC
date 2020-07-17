@@ -8,10 +8,6 @@ import {Parser} from '../parser'
  * @extends {ClientGenerator}
  */
 export class AxiosGenerator extends ClientGenerator {
-  generateTypes(): Code {
-    throw new Error('Method not implemented.')
-  }
-
   generateRpc(): Code {
     throw new Error('Method not implemented.')
   }
