@@ -10,6 +10,12 @@ export type Code = {
   [key: string]: string;
 }
 
+export type RequestMethod = 'POST'|'PUT'|'GET'|'HEAD'|'DELETE'|'OPTIONS'|'PATCH'
+
+const isRequestMethod = (method: string): method is RequestMethod => {
+  return ['POST', 'PUT', 'GET', 'HEAD', 'DELETE', 'OPTIONS', 'PATCH'].includes(method)
+}
+
 /**
  *  Base class that all generators extend from, contains various utility method for parsing and generating code
  *
@@ -92,13 +98,24 @@ abstract class Generator {
     return returnTypes
   }
 
-  protected genJsonSchema(filePath: string, type: string): string {
+  // Generates a jsonSchema for a single type
+  protected genJsonSchemaForType(filePath: string, type: string): string {
     const config: Config = {path: path.join(__dirname, filePath), type}
     try {
-      return JSON.stringify(createGenerator(config).createSchema(config.type), null, 2)
+      return `export const ${type}Schema = ${JSON.stringify(createGenerator(config).createSchema(config.type), null, 2)}\n`
     } catch (error) {
       throw new GeneratorError(error.message)
     }
+  }
+
+  protected getRequestMethod(method: MethodSignature) {
+    const docs = method.getJsDocs()
+    let requestMethod: RequestMethod = 'POST'
+    if (docs.length > 0) {
+      const rMethod = docs[0].getDescription()
+      requestMethod = isRequestMethod(rMethod) ? rMethod : 'POST'
+    }
+    return requestMethod
   }
 
   private generateTypesFile(file: SourceFile): string {
