@@ -55,6 +55,10 @@ abstract class Generator {
     return servicesText
   }
 
+  protected requestTypeName(method: MethodSignature): string {
+    return `${method.getName()}Request`
+  }
+
   // Builds a single request type for a method
   protected buildRequestType(method: MethodSignature): string {
     let typeParams = ''
@@ -66,7 +70,7 @@ abstract class Generator {
       typeParams += `${param.getText()}\n`
     })
     return `
-    type ${method.getName()}Request = {
+    type ${this.requestTypeName(method)} = {
       ${typeParams}
     }\n`
   }
@@ -83,9 +87,14 @@ abstract class Generator {
     return `${this.buildTypes(file)}${inputTypes}`
   }
 
+  // generates name for method response type
+  protected responseTypeName(method: MethodSignature): string {
+    return `${method.getName()}Response`
+  }
+
   // builds a single response type for a method
   protected buildResponseType(method: MethodSignature): string {
-    return `type ${method.getName()}Response = {
+    return `type ${this.responseTypeName(method)} = {
       data: ${method.getReturnType()}
     }\n`
   }
@@ -101,7 +110,7 @@ abstract class Generator {
   }
 
   // Generates a jsonSchema for a single type
-  protected buildJsonSchemaForType(filePath: string, type: string): string {
+  protected buildSchemaForType(filePath: string, type: string): string {
     const config: Config = {path: path.join(__dirname, filePath), type}
     try {
       return `export const ${type}Schema = ${JSON.stringify(createGenerator(config).createSchema(config.type), null, 2)}\n`
@@ -110,13 +119,37 @@ abstract class Generator {
     }
   }
 
+  // creates request schema variable name
+  // used in subclasses during code generation to prevent string
+  // concatenation and spelling mistakes
+  protected requestTypeSchemaName(method: MethodSignature): string {
+    return `${this.requestTypeName(method)}Schema`
+  }
+
+  // creates request schema variable name
+  // used in subclasses during code generation to prevent string
+  // concatenation and spelling mistakes
+  protected responseTypeSchemeName(method: MethodSignature): string {
+    return `${this.responseTypeName(method)}Schema`
+  }
+
+  // builds json schema for all request and response types
+  // in a generated types file
   protected buildShemasForFile(file: SourceFile): string {
     const typesFile = this.getGeneratedTypesFilePath(file)
-    const inputTypes = ''
-
+    const methods = this.parser.getMethodsForFile(file)
+    const requestTypes: string[] = []
+    methods.forEach(method => {
+      requestTypes.push(this.requestTypeName(method))
+    })
+    const responseTypes: string[] = []
+    methods.forEach(method => {
+      responseTypes.push(this.responseTypeName(method))
+    })
+    const types = requestTypes.concat(...responseTypes)
     let schema = ''
     for (const type of types) {
-      schema += this.buildJsonSchemaForType(typesFile, type)
+      schema += this.buildSchemaForType(typesFile, type)
     }
     return schema
   }

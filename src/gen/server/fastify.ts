@@ -102,7 +102,7 @@ import {pluginOpts, registerOptions, TypeRpcPlugin} from './rpc.server.util'\n`
     const util = this.utilsFile()
     code[util[0]] = util[1]
     for (const file of this.parser.sourceFiles) {
-      this.buildShemasForFile(`${this.getGeneratedTypesFilePath(file)}`, [])
+      const schemas = this.buildShemasForFile(file)
     }
     return code
   }
