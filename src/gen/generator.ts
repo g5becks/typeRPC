@@ -16,6 +16,8 @@ const isRequestMethod = (method: string): method is RequestMethod => {
   return ['POST', 'PUT', 'GET', 'HEAD', 'DELETE', 'OPTIONS', 'PATCH'].includes(method)
 }
 
+const capitalize = (text: string): string => text.replace(/^\w/, c => c.toUpperCase())
+
 /**
  *  Base class that all generators extend from, contains various utility method for parsing and generating code
  *
@@ -49,7 +51,7 @@ abstract class Generator {
   }
 
   protected requestTypeName(method: MethodSignature): string {
-    return `${method.getName()}Request`
+    return `${capitalize(method.getName())}Request`
   }
 
   // Builds a single request type for a method
@@ -62,8 +64,7 @@ abstract class Generator {
     params.forEach(param => {
       typeParams += `${param.getText()}\n`
     })
-    return `
-   export type ${this.requestTypeName(method)} = {
+    return `export type ${this.requestTypeName(method)} = {
       ${typeParams}
     }\n`
   }
@@ -82,7 +83,7 @@ abstract class Generator {
 
   // generates name for method response type
   protected responseTypeName(method: MethodSignature): string {
-    return `${method.getName()}Response`
+    return `${capitalize(method.getName())}Response`
   }
 
   // builds a single response type for a method
