@@ -43,6 +43,7 @@ export default class Server extends Command {
     }
   }
 
+  // ensure that the path to tsconfig.json actually exists
   private async validateTsConfigFile(tsConfigFile: string): Promise<void> {
     const exists = await tsConfigExists(tsConfigFile)
     if (tsConfigFile === '' || !exists) {
@@ -51,6 +52,7 @@ export default class Server extends Command {
     }
   }
 
+  // ensure that the ServerFrameworkOption is valid
   private validateServerFramework(framework: string): void {
     if (!isValidServerFrameworkOption(framework)) {
       this.log(`sorry ${framework} is not a valid server framework option or has not yet been implemented`)
@@ -58,6 +60,7 @@ export default class Server extends Command {
     }
   }
 
+  // ensure the output path is not empty
   private validateOutputPath(outputPath: string): void {
     if (outputPath === '') {
       this.log('please provide a directory path to write generated output')
