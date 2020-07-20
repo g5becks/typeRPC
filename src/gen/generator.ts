@@ -1,10 +1,10 @@
 /* eslint-disable no-useless-constructor */
 /* eslint-disable max-params */
 import path from 'path'
-import { Config, createGenerator } from 'ts-json-schema-generator'
-import { MethodSignature, SourceFile } from 'ts-morph'
-import { GeneratorError } from '.'
-import { Parser } from './parser'
+import {Config, createGenerator} from 'ts-json-schema-generator'
+import {MethodSignature, SourceFile} from 'ts-morph'
+import {GeneratorError} from '.'
+import {Parser} from './parser'
 
 export type Code = {
   [key: string]: string;
@@ -107,7 +107,7 @@ export type ${this.responseTypeName(method)} = {
 
   // Generates a jsonSchema for a single type
   protected buildSchemaForType(filePath: string, type: string): string {
-    const config: Config = {path: path.join(__dirname, filePath), type}
+    const config: Config = {path: filePath, type}
     try {
       return `export const ${type}Schema = ${JSON.stringify(createGenerator(config).createSchema(config.type), null, 2)}\n`
     } catch (error) {
@@ -136,7 +136,9 @@ export type ${this.responseTypeName(method)} = {
     const methods = this.parser.getMethodsForFile(file)
     const requestTypes: string[] = []
     methods.forEach(method => {
-      requestTypes.push(this.requestTypeName(method))
+      if (method.getParameters().length > 0) {
+        requestTypes.push(this.requestTypeName(method))
+      }
     })
     const responseTypes: string[] = []
     methods.forEach(method => {
@@ -162,7 +164,8 @@ export type ${this.responseTypeName(method)} = {
   }
 
   protected getGeneratedTypesFilePath(file: SourceFile): string {
-    return `${path.join(this.outputPath, `${file.getBaseNameWithoutExtension}.rpc.types.ts`)}`
+    const typesFile = path.join(this.outputPath, file.getBaseNameWithoutExtension())
+    return `${typesFile}.rpc.types.ts`
   }
 
   private generateTypesFile(file: SourceFile): string {
