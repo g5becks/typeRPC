@@ -31,13 +31,9 @@ abstract class Generator {
     const aliases = this.parser.getTypeAliases(file)
     let messagesText = ''
     for (const alias of aliases) {
-      if (alias.isExported()) {
-        messagesText += `${alias.getFullText()}\n`
-      } else {
-        messagesText += `export ${alias.getFullText()}\n`
-      }
+      alias.setIsExported(true)
+      messagesText += `${alias.getFullText()}\n`
     }
-
     return messagesText
   }
 
@@ -46,11 +42,8 @@ abstract class Generator {
     const services = this.parser.getInterfaces(file)
     let servicesText = ''
     for (const srvc of services) {
-      if (srvc.isExported()) {
-        servicesText += `${srvc.getFullText()}\n`
-      } else {
-        servicesText += `export ${srvc.getFullText()}\n`
-      }
+      srvc.setIsExported(true)
+      servicesText += `${srvc.getFullText()}\n`
     }
     return servicesText
   }
