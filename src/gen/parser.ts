@@ -1,4 +1,4 @@
-import {InterfaceDeclaration, MethodSignature, ParameterDeclaration, Project, SourceFile, ts, Type, TypeAliasDeclaration} from 'ts-morph'
+import {InterfaceDeclaration, MethodSignature, ParameterDeclaration, Project, SourceFile, ts, Type} from 'ts-morph'
 /**
  * Parses specified project source code files
  *
@@ -37,10 +37,6 @@ export class Parser {
 
   getInterfaces(file: SourceFile): InterfaceDeclaration[] {
     return file.getInterfaces()
-  }
-
-  getTypeAliases(file: SourceFile): TypeAliasDeclaration[] {
-    return file.getTypeAliases()
   }
 
   getAllReturnTypes(file: SourceFile): Type<ts.Type>[] {

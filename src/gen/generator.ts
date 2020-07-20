@@ -28,7 +28,7 @@ abstract class Generator {
 
   // Copies all type aliases from schema to output
   protected buildTypes(file: SourceFile): string {
-    const aliases = this.parser.getTypeAliases(file)
+    const aliases = file.getTypeAliases()
     let messagesText = ''
     for (const alias of aliases) {
       alias.setIsExported(true)
@@ -39,7 +39,7 @@ abstract class Generator {
 
   // Copies all interfaces from schema to output
   protected buildInterfaces(file: SourceFile): string {
-    const services = this.parser.getInterfaces(file)
+    const services = file.getInterfaces()
     let servicesText = ''
     for (const srvc of services) {
       srvc.setIsExported(true)
@@ -77,7 +77,7 @@ abstract class Generator {
     methods.forEach(method => {
       inputTypes += `${this.buildRequestType(method)}`
     })
-    return `${this.buildTypes(file)}${inputTypes}`
+    return `${inputTypes}`
   }
 
   // generates name for method response type
