@@ -1,6 +1,5 @@
 import {Command, flags} from '@oclif/command'
 import {pathExists} from 'fs-extra'
-import {generateClient} from '../gen/parser'
 
 export default class Client extends Command {
   static description = 'generates client side code from your schemas'
@@ -19,12 +18,12 @@ export default class Client extends Command {
   async run() {
     const {args, flags} = this.parse(Client)
     const config = flags.configPath ?? ''
-    const output = flags.output ?? ''
+
     const doesExist = await pathExists(config)
     if (!doesExist) {
       this.log('sorry, that path does not exist')
     }
-    await generateClient(config, output)
+
     if (args.file && flags.force) {
       this.log(`you input --force and --file: ${args.file}`)
     }
