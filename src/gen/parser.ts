@@ -39,6 +39,14 @@ export class Parser {
     return file.getInterfaces()
   }
 
+  getTypeAliasesText(file: SourceFile): string[] {
+    return file.getTypeAliases().map(alias => alias.getNameNode().getText())
+  }
+
+  getInterfacesText(file: SourceFile): string[] {
+    return file.getInterfaces().map(srvc => srvc.getNameNode().getText())
+  }
+
   getAllReturnTypes(file: SourceFile): Type<ts.Type>[] {
     return this.getMethodsForFile(file).map(method => this.getMethodReturnType(method))
   }

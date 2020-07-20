@@ -38,28 +38,19 @@ export const registerOptions = (prefix: string, logLevel: LogLevel): RegisterOpt
 `
   }
 
-  private imports(): string {
+  private imports(file: SourceFile): string {
     return `
 /* eslint-disable new-cap */
 import {FastifyPluginAsync, LogLevel} from 'fastify'
 import fp, {PluginOptions} from 'fastify-plugin'
-import {pluginOpts, registerOptions, TypeRpcPlugin} from './rpc.server.util'\n`
+import {pluginOpts, registerOptions, TypeRpcPlugin} from './utils.rpc.server'
+${this.getImportedTypes(file)}\n`
   }
 
   // generates the RequestGenericInterface parameter for each route
   // see https://www.fastify.io/docs/latest/TypeScript/#using-generics
   protected getIncomingMessageType(method: MethodSignature): string {
-    const params = this.parser.getParams(method)
-    switch (params.length) {
-    case 0:
-      return '{Body: {}}'
-
-    case 1:
-      return `{Body: ${this.requestTypeName(method)}`
-
-    default:
-      return '{Body: {}}'
-    }
+    return this.parser.getParams(method).length > 0 ? `{Body: ${this.requestTypeName(method)}` : '{Body: {}}'
   }
 
   private buildRouteHandler(method: MethodSignature): string {
@@ -88,10 +79,10 @@ import {pluginOpts, registerOptions, TypeRpcPlugin} from './rpc.server.util'\n`
   private buildController(service: InterfaceDeclaration): string {
     const serviceName = service.getName()
     return `
-    const ${serviceName}Controller (${serviceName.toLowerCase()}: ${serviceName}): FastifyPluginAsync => async (instance, _) => {
+    export const ${serviceName}Controller = (${serviceName.toLowerCase()}: ${serviceName}): FastifyPluginAsync => async (instance, _) => {
     ${service.getMethods().map(method => this.buildRouteHandler(method))}
 }\n
- `
+ `.trimLeft()
   }
 
   private buildControllersForFile(file: SourceFile): string {
@@ -118,7 +109,7 @@ import {pluginOpts, registerOptions, TypeRpcPlugin} from './rpc.server.util'\n`
     for (const file of this.parser.sourceFiles) {
       const schemas = this.buildShemasForFile(file)
       const controllers = this.buildControllersForFile(file)
-      code[this.buildServerFileName(file)] = `${schemas}${controllers}`
+      code[this.buildServerFileName(file)] = `${this.imports(file)}${schemas}${controllers}`
     }
     return code
   }

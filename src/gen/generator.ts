@@ -172,6 +172,23 @@ export type ${this.responseTypeName(method)} = {
     return `${this.buildTypes(file)}${this.buildInterfaces(file)}${this.buildRequestTypesForFile(file)}${this.buildResponseTypesForFile(file)}`
   }
 
+  protected getImportedTypes(file: SourceFile): string {
+    return `import {${this.parser.getInterfacesText(file)},${this.parser.getTypeAliasesText(file)},${this.buildRequestTypesImports(file)}} from './${file.getBaseNameWithoutExtension()}.rpc.types'`
+  }
+
+  // builds a list of generated request types to be used when
+  // generating imports declarations
+  private buildRequestTypesImports(file: SourceFile): string[] {
+    const requestTypeNames: string[] = []
+    const methods = this.parser.getMethodsForFile(file)
+    methods.forEach(method => {
+      if (method.getParameters().length > 0) {
+        requestTypeNames.push(this.requestTypeName(method))
+      }
+    })
+    return requestTypeNames
+  }
+
   // Generates types for the input schema file
   // Types files contain the rpc schema types along with
   // Request and Response type, but not json schemas
