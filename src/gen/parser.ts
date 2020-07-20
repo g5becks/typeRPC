@@ -35,18 +35,6 @@ export class Parser {
     return method.getReturnType()
   }
 
-  getMethodName(method: MethodSignature): string {
-    return method.getName()
-  }
-
-  getFileName(file: SourceFile): string  {
-    return file.getBaseName()
-  }
-
-  getFileNameWithoutExtension(file: SourceFile): string {
-    return file.getBaseNameWithoutExtension()
-  }
-
   getInterfaces(file: SourceFile): InterfaceDeclaration[] {
     return file.getInterfaces()
   }
