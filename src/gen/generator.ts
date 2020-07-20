@@ -2,7 +2,7 @@
 /* eslint-disable max-params */
 import path from 'path'
 import {Config, createGenerator} from 'ts-json-schema-generator'
-import {MethodSignature, SourceFile, TypeAliasDeclaration} from 'ts-morph'
+import {MethodSignature, SourceFile} from 'ts-morph'
 import {GeneratorError} from '.'
 import {Parser} from './parser'
 
@@ -26,10 +26,6 @@ abstract class Generator {
   // eslint-disable-next-line no-useless-constructor
   constructor(protected readonly parser: Parser, protected readonly outputPath: string) { }
 
-  protected isExportedTypeAlias(alias: TypeAliasDeclaration): boolean {
-    return alias.isExported()
-  }
-
   // Copies all type aliases from schema to output
   protected buildTypes(file: SourceFile): string {
     const aliases = this.parser.getTypeAliases(file)
@@ -50,7 +46,11 @@ abstract class Generator {
     const services = this.parser.getInterfaces(file)
     let servicesText = ''
     for (const srvc of services) {
-      servicesText += `${srvc.getFullText()}\n`
+      if (srvc.isExported()) {
+        servicesText += `${srvc.getFullText()}\n`
+      } else {
+        servicesText += `export ${srvc.getFullText()}\n`
+      }
     }
     return servicesText
   }
