@@ -1,10 +1,10 @@
 /* eslint-disable no-useless-constructor */
 /* eslint-disable max-params */
 import path from 'path'
-import {Config, createGenerator} from 'ts-json-schema-generator'
-import {MethodSignature, SourceFile} from 'ts-morph'
-import {GeneratorError} from '.'
-import {Parser} from './parser'
+import { Config, createGenerator } from 'ts-json-schema-generator'
+import { MethodSignature, SourceFile } from 'ts-morph'
+import { GeneratorError } from '.'
+import { Parser } from './parser'
 
 export type Code = {
   [key: string]: string;
@@ -62,11 +62,12 @@ abstract class Generator {
       return ''
     }
     params.forEach(param => {
-      typeParams += `${param.getText()};\n`
+      typeParams += `${param.getText().trim()};\n`
     })
-    return `export type ${this.requestTypeName(method)} = {
-      ${typeParams}
-    }\n`
+    return `
+export type ${this.requestTypeName(method)} = {
+  ${typeParams}
+}\n`
   }
 
   // Builds request types for all methods in a file
@@ -88,9 +89,10 @@ abstract class Generator {
 
   // builds a single response type for a method
   protected buildResponseType(method: MethodSignature): string {
-    return `export type ${this.responseTypeName(method)} = {
-      data: ${method.getReturnTypeNode()?.getText()};
-    }\n`
+    return `
+export type ${this.responseTypeName(method)} = {
+  data: ${method.getReturnTypeNode()?.getText().trim()};
+}\n`
   }
 
   // builds response types for all methods in a file
