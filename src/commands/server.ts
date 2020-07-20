@@ -11,7 +11,9 @@ export default class Server extends Command {
     // flag with a value (-n, --name=VALUE)
     tsConfig: flags.string({char: 't', name: 'tsconfig', description: 'path to tsconfig.json for schema project'}),
     output: flags.string({char: 'o', name: 'output', description: 'path to output directory for generated files'}),
-    framework: flags.string({char: 'f', name: 'framework', description: 'which framework to use for generating the server code. Option are express | koa | fastify'}),
+
+    /*     framework: flags.string({char: 'f', name: 'framework', description: 'which framework to use for generating the server code. Option are express | koa | fastify'}),
+ */
     https: flags.boolean({name: 'https', description: 'controls whether the server should use https'}),
     http2: flags.boolean({name: 'http2', description: 'controls whether the server should use http2'}),
 
@@ -22,7 +24,9 @@ export default class Server extends Command {
 
     const tsConfig = flags.tsConfig ?? ''
     const outputPath = flags.output ?? ''
-    const serverFramework = flags.framework ?? ''
+    // Set the server framework option to fastify by default for now
+    // until other framework are implemented.
+    const serverFramework: ServerFrameworkOption = 'fastify'
     await this.validateTsConfigFile(tsConfig)
     this.validateServerFramework(serverFramework)
     this.validateOutputPath(outputPath)
