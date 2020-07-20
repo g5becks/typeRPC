@@ -33,4 +33,21 @@ export class TypeRpcCommand extends Command {
       throw error
     }
   }
+
+  // ensure that the path to tsconfig.json actually exists
+  protected async validateTsConfigFile(tsConfigFile: string): Promise<void> {
+    const exists = await this.tsconfigFileExists(tsConfigFile)
+    if (tsConfigFile === '' || !exists) {
+      this.log('error: please provide a path to a valid tsconfig.json file')
+      throw new Error('tsconfig.json is invalid or does not exist')
+    }
+  }
+
+  // ensure the output path is not empty
+  protected validateOutputPath(outputPath: string): void {
+    if (outputPath === '') {
+      this.log('please provide a directory path to write generated output')
+      throw new Error('no output path provided')
+    }
+  }
 }

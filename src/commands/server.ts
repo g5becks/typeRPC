@@ -1,5 +1,5 @@
 import {flags} from '@oclif/command'
-import {generateServer, GeneratorError, tsConfigExists} from '../gen'
+import {generateServer, GeneratorError} from '../gen'
 import {Code} from '../gen/generator'
 import {getServerGenerator, isValidServerFrameworkOption, ServerFrameworkOption} from '../gen/server'
 import {TypeRpcCommand} from './typerpc'
@@ -46,28 +46,11 @@ export default class Server extends TypeRpcCommand {
     await this.writeOutput(outputPath, code, 'types')
   }
 
-  // ensure that the path to tsconfig.json actually exists
-  private async validateTsConfigFile(tsConfigFile: string): Promise<void> {
-    const exists = await tsConfigExists(tsConfigFile)
-    if (tsConfigFile === '' || !exists) {
-      this.log('error: please provide a path to a valid tsconfig.json file')
-      throw new Error('tsconfig.json is invalid or does not exist')
-    }
-  }
-
   // ensure that the ServerFrameworkOption is valid
   private validateServerFramework(framework: string): void {
     if (!isValidServerFrameworkOption(framework)) {
       this.log(`sorry ${framework} is not a valid server framework option or has not yet been implemented`)
       throw new Error('bad server framework option')
-    }
-  }
-
-  // ensure the output path is not empty
-  private validateOutputPath(outputPath: string): void {
-    if (outputPath === '') {
-      this.log('please provide a directory path to write generated output')
-      throw new Error('no output path provided')
     }
   }
 }
