@@ -42,7 +42,7 @@ export const generateClient = (tsConfigFilePath: string, outputPath: string,  cl
  * Generates server side code from typeRPC schema file
  *
  * @param {string} tsConfigFilePath path to tsconfig.json
-  * @param {string} outputPath path to directory to store generated files
+ * @param {string} outputPath path to directory to store generated files
  * @param {ServerFrameWorkOption} serverFramework choich of server framework
  * @returns {Code | GeneratorError} generated code as string or Error
  */

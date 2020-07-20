@@ -1,9 +1,10 @@
-import {Command, flags} from '@oclif/command'
+import {flags} from '@oclif/command'
 import {generateServer, GeneratorError, tsConfigExists} from '../gen'
-import {isValidServerFrameworkOption, ServerFrameworkOption} from '../gen/server'
-import {writeOutput} from '../gen/util'
+import {Code} from '../gen/generator'
+import {getServerGenerator, isValidServerFrameworkOption, ServerFrameworkOption} from '../gen/server'
+import {TypeRpcCommand} from './typerpc'
 
-export default class Server extends Command {
+export default class Server extends TypeRpcCommand {
   static description = 'describe the command here'
 
   static flags = {
@@ -30,12 +31,18 @@ export default class Server extends Command {
     await this.validateTsConfigFile(tsConfig)
     this.validateServerFramework(serverFramework)
     this.validateOutputPath(outputPath)
-    const code = await generateServer(tsConfig, outputPath, serverFramework as ServerFrameworkOption)
+    const serverGen = getServerGenerator(serverFramework, tsConfig, outputPath)
+    const types: Code = typeof serverGen === 'string' ? {} : serverGen.generateTypes()
+    if (types) {
+      const res = await this.writeOutput(outputPath, types, 'types')
+    }
+
+    const code = generateServer(tsConfig, outputPath, serverFramework as ServerFrameworkOption)
     if (code instanceof GeneratorError) {
       throw code
     }
     this.log(`generating server code using ${serverFramework}`)
-    const res = await writeOutput(outputPath, code, 'types')
+    const res = await this.writeOutput(outputPath, code, 'types')
     if (res instanceof GeneratorError) {
       this.log(res.errorMessage)
     } else {
