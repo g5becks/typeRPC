@@ -50,14 +50,14 @@ ${this.getImportedTypes(file)}\n`
   // generates the RequestGenericInterface parameter for each route
   // see https://www.fastify.io/docs/latest/TypeScript/#using-generics
   protected getIncomingMessageType(method: MethodSignature): string {
-    return this.parser.getParams(method).length > 0 ? `{Body: ${this.requestTypeName(method)}` : '{Body: {}}'
+    return this.parser.getParams(method).length > 0 ? `{Body: ${this.requestTypeName(method)}}` : '{Body: {}}'
   }
 
   private buildRouteHandler(method: MethodSignature): string {
     return `
     instance.route<${this.getIncomingMessageType(method)}>(
         {
-            method: 'POST',
+            method: '${this.buildRequestMethod(method)}',
             url: '/${method.getName()}',
             schema: {
                 body: ${this.requestTypeSchemaName(method)},
@@ -72,15 +72,19 @@ ${this.getImportedTypes(file)}\n`
                 reply.send({ publisher })
             },
         }
-    )`
+    )\n`
   }
 
   // Builds a controller function for an interface definition
   private buildController(service: InterfaceDeclaration): string {
     const serviceName = service.getName()
+    let handlers = ''
+    service.getMethods().forEach(method => {
+      handlers += this.buildRouteHandler(method)
+    })
     return `
     export const ${serviceName}Controller = (${serviceName.toLowerCase()}: ${serviceName}): FastifyPluginAsync => async (instance, _) => {
-    ${service.getMethods().map(method => this.buildRouteHandler(method))}
+    ${handlers}
 }\n
  `.trimLeft()
   }

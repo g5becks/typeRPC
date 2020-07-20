@@ -155,12 +155,13 @@ export type ${this.responseTypeName(method)} = {
   // Generates a request method based on the method signature's jsdoc
   protected buildRequestMethod(method: MethodSignature) {
     const docs = method.getJsDocs()
-    let requestMethod: RequestMethod = 'POST'
-    if (docs.length > 0) {
-      const rMethod = docs[0].getDescription()
-      requestMethod = isRequestMethod(rMethod) ? rMethod : 'POST'
-    }
-    return requestMethod
+    // eslint-disable-next-line no-console
+    console.log(docs)
+
+    const rMethod = docs[0]?.getDescription()
+    // eslint-disable-next-line no-console
+    console.log(rMethod)
+    return isRequestMethod(rMethod) ? rMethod : 'POST'
   }
 
   protected getGeneratedTypesFilePath(file: SourceFile): string {
