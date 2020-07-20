@@ -1,4 +1,4 @@
-import {InterfaceDeclaration, MethodSignature} from 'ts-morph'
+import {InterfaceDeclaration, MethodSignature, SourceFile} from 'ts-morph'
 import {Code, ServerGenerator} from '../generator'
 import {Parser} from '../parser'
 /**
@@ -55,7 +55,7 @@ import {pluginOpts, registerOptions, TypeRpcPlugin} from './rpc.server.util'\n`
       return '{Body: {}}'
 
     case 1:
-      return `{Body: ${method.getName()}Input}`
+      return `{Body: ${this.requestTypeName(method)}`
 
     default:
       return '{Body: {}}'
@@ -69,9 +69,9 @@ import {pluginOpts, registerOptions, TypeRpcPlugin} from './rpc.server.util'\n`
             method: 'POST',
             url: '/${method.getName()}',
             schema: {
-                body: ${method.getName()}RequestSchema,
+                body: ${this.requestTypeSchemaName(method)},
                 response: {
-                    200: ${method.getName()}ResponseSchema,
+                    200: ${this.responseTypeSchemeName(method)},
                 },
 
             },
@@ -84,17 +84,31 @@ import {pluginOpts, registerOptions, TypeRpcPlugin} from './rpc.server.util'\n`
     )`
   }
 
-  private buildService(service: InterfaceDeclaration): string {
+  // Builds a controller function for an interface definition
+  private buildController(service: InterfaceDeclaration): string {
     const serviceName = service.getName()
     return `
-    const ${serviceName} (${serviceName.toLowerCase()}: ${serviceName}): FastifyPluginAsync => async (instance, _) => {
+    const ${serviceName}Controller (${serviceName.toLowerCase()}: ${serviceName}): FastifyPluginAsync => async (instance, _) => {
     ${service.getMethods().map(method => this.buildRouteHandler(method))}
-}
+}\n
  `
   }
 
+  private buildControllersForFile(file: SourceFile): string {
+    const services = this.parser.getInterfaces(file)
+    let controllers = ''
+    for (const service of services) {
+      controllers += this.buildController(service)
+    }
+    return controllers
+  }
+
   private utilsFile(): [string, string] {
-    return ['rpc.server.util.ts', this.util()]
+    return ['utils.rpc.server.ts', this.util()]
+  }
+
+  private buildServerFileName(file: SourceFile): string {
+    return `${file.getBaseNameWithoutExtension()}.rpc.server.ts`
   }
 
   public generateRpc(): Code {
@@ -103,6 +117,8 @@ import {pluginOpts, registerOptions, TypeRpcPlugin} from './rpc.server.util'\n`
     code[util[0]] = util[1]
     for (const file of this.parser.sourceFiles) {
       const schemas = this.buildShemasForFile(file)
+      const controllers = this.buildControllersForFile(file)
+      code[this.buildServerFileName(file)] = `${schemas}${controllers}`
     }
     return code
   }
