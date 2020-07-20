@@ -62,7 +62,7 @@ abstract class Generator {
       return ''
     }
     params.forEach(param => {
-      typeParams += `${param.getText()}\n`
+      typeParams += `${param.getText()};\n`
     })
     return `export type ${this.requestTypeName(method)} = {
       ${typeParams}
@@ -89,7 +89,7 @@ abstract class Generator {
   // builds a single response type for a method
   protected buildResponseType(method: MethodSignature): string {
     return `export type ${this.responseTypeName(method)} = {
-      data: ${method.getReturnType()}
+      data: ${method.getReturnTypeNode()?.getText()};
     }\n`
   }
 
