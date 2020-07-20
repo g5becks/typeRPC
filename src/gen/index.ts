@@ -23,7 +23,7 @@ export class GeneratorError extends Error {
  * @param {string} tsConfigFilePath path to tsconfig.json
  * @param {string} outputPath path to output direcory
  * @param {ClientHttpOption} client choice of which http client to use
- * @returns {(Promise<string | GeneratorError>)} generated code as string or Error
+ * @returns {Code | GeneratorError} generated code as string or Error
  */
 export const generateClient = (tsConfigFilePath: string, outputPath: string,  client: ClientHttpOption): Code | GeneratorError => {
   const clientGen = getClientGenerator(tsConfigFilePath, outputPath, client)
@@ -44,9 +44,9 @@ export const generateClient = (tsConfigFilePath: string, outputPath: string,  cl
  * @param {string} tsConfigFilePath path to tsconfig.json
   * @param {string} outputPath path to directory to store generated files
  * @param {ServerFrameWorkOption} serverFramework choich of server framework
- * @returns {(Promise<string | GeneratorError>)} generated code as string or Error
+ * @returns {Code | GeneratorError} generated code as string or Error
  */
-export const generateServer = async (tsConfigFilePath: string, outputPath: string, serverFramework: ServerFrameworkOption): Promise<Code | GeneratorError> => {
+export const generateServer = (tsConfigFilePath: string, outputPath: string, serverFramework: ServerFrameworkOption): Code | GeneratorError => {
   const serverGen = getServerGenerator(serverFramework, tsConfigFilePath, outputPath)
   if (typeof serverGen === 'string') {
     return new GeneratorError(serverGen)
