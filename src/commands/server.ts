@@ -34,20 +34,16 @@ export default class Server extends TypeRpcCommand {
     const serverGen = getServerGenerator(serverFramework, tsConfig, outputPath)
     const types: Code = typeof serverGen === 'string' ? {} : serverGen.generateTypes()
     if (types) {
-      const res = await this.writeOutput(outputPath, types, 'types')
+      await this.writeOutput(outputPath, types, 'types')
     }
 
     const code = generateServer(tsConfig, outputPath, serverFramework as ServerFrameworkOption)
     if (code instanceof GeneratorError) {
+      this.log(code.errorMessage)
       throw code
     }
     this.log(`generating server code using ${serverFramework}`)
-    const res = await this.writeOutput(outputPath, code, 'types')
-    if (res instanceof GeneratorError) {
-      this.log(res.errorMessage)
-    } else {
-      this.log(res)
-    }
+    await this.writeOutput(outputPath, code, 'types')
   }
 
   // ensure that the path to tsconfig.json actually exists
