@@ -13,7 +13,7 @@ export class Parser {
   }
 
   constructor(private readonly tsConfigFilePath: string) {
-    this.project = new Project({tsConfigFilePath: this.tsConfigFilePath})
+    this.project = new Project({tsConfigFilePath: this.tsConfigFilePath, skipFileDependencyResolution: true})
   }
 
   // determines if the interface extends RpcService interface
