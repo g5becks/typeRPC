@@ -50,18 +50,18 @@ ${this.getImportedTypes(file)}\n`
   // generates the RequestGenericInterface parameter for each route
   // see https://www.fastify.io/docs/latest/TypeScript/#using-generics
   protected getIncomingMessageType(method: MethodSignature): string {
-    return this.parser.getParams(method).length > 0 ? `{Body: ${this.requestTypeName(method)}}` : '{Body: {}}'
+    const payload = this.isGetMethod(method) ? 'Querystring' : 'Body'
+    return this.parser.getParams(method).length > 0 ? `{${payload}: ${this.requestTypeName(method)}}` : `{${payload}: {}}`
   }
 
-  private buildRouteHandler(method: MethodSignature): string {
-    const isGet = this.isGetMethod(method)
-    const schemaType = isGet ? 'querystring' : 'body'
-    const url = isGet
+  private buildRouteHandler(method: MethodSignature, serviceName: string): string {
+    const schemaType = this.isGetMethod(method) ? 'querystring' : 'body'
+    const payLoad = this.isGetMethod(method) ? 'query' : 'body'
     return `
     instance.route<${this.getIncomingMessageType(method)}>(
         {
             method: '${this.buildRequestMethod(method)}',
-            url: '/${method.getName()}',
+            url: ${this.buildServerRoute(method)},
             schema: {
                 ${schemaType}: ${this.requestTypeSchemaName(method)},
                 response: {
@@ -70,9 +70,11 @@ ${this.getImportedTypes(file)}\n`
 
             },
             handler: async (request, reply) => {
-                const { publisher } = request.body
-
-                reply.send({ publisher })
+                const {${this.buildDestructuredParams(method)}} = request.${payLoad}
+                try {
+                  const data = await ${this.lowerCase(serviceName)}.${method.getNameNode().getText().trim()}(${this.buildDestructuredParams(method)})
+                }
+                reply.send({ publisher})
             },
         }
     )\n`
@@ -83,10 +85,10 @@ ${this.getImportedTypes(file)}\n`
     const serviceName = service.getName()
     let handlers = ''
     service.getMethods().forEach(method => {
-      handlers += this.buildRouteHandler(method)
+      handlers += this.buildRouteHandler(method, serviceName)
     })
     return `
-    export const ${serviceName}Controller = (${serviceName.toLowerCase()}: ${serviceName}): FastifyPluginAsync => async (instance, _) => {
+    export const ${serviceName}Controller = (${this.lowerCase(serviceName)}: ${serviceName}): FastifyPluginAsync => async (instance, _) => {
     ${handlers}
 }\n
  `.trimLeft()

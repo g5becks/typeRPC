@@ -16,8 +16,6 @@ const isRequestMethod = (method: string): method is RequestMethod => {
   return ['POST', 'PUT', 'GET', 'HEAD', 'DELETE', 'OPTIONS', 'PATCH'].includes(method)
 }
 
-const capitalize = (text: string): string => text.replace(/^\w/, c => c.toUpperCase())
-
 /**
  *  Base class that all generators extend from, contains various utility method for parsing and generating code
  *
@@ -27,6 +25,14 @@ const capitalize = (text: string): string => text.replace(/^\w/, c => c.toUpperC
 abstract class Generator {
   // eslint-disable-next-line no-useless-constructor
   constructor(protected readonly parser: Parser, protected readonly outputPath: string) { }
+
+  protected capitalize(text: string): string {
+    return text.replace(/^\w/, c => c.toUpperCase())
+  }
+
+  protected lowerCase(text: string): string {
+    return text.replace(/^\w/, c => c.toLowerCase())
+  }
 
   // Copies all type aliases from schema to output
   protected buildTypes(file: SourceFile): string {
@@ -51,7 +57,7 @@ abstract class Generator {
   }
 
   protected requestTypeName(method: MethodSignature): string {
-    return `${capitalize(method.getName())}Request`
+    return `${this.capitalize(method.getName())}Request`
   }
 
   // Builds a single request type for a method
@@ -84,7 +90,7 @@ export type ${this.requestTypeName(method)} = {
 
   // generates name for method response type
   protected responseTypeName(method: MethodSignature): string {
-    return `${capitalize(method.getName())}Response`
+    return `${this.capitalize(method.getName())}Response`
   }
 
   // builds a single response type for a method
@@ -195,6 +201,11 @@ export type ${this.responseTypeName(method)} = {
     return requestTypeNames
   }
 
+  // Builds the destructured parameters from request body or query
+  protected buildDestructuredParams(method: MethodSignature): string {
+    return `${method.getParameters().map(param => param.getNameNode().getText().trim())}`
+  }
+
   // Generates types for the input schema file
   // Types files contain the rpc schema types along with
   // Request and Response type, but not json schemas
@@ -222,12 +233,8 @@ export abstract class ServerGenerator extends Generator {
 
   private buildRouteParams(params: ParameterDeclaration[]): string {
     let paramsList = ''
-    params.forEach((param, i) => {
-      if (i === params.length - 1) {
-        paramsList += `${param.getNameNode().getText().trim()}`
-      } else {
-        paramsList += `${param.getNameNode().getText().trim()}:`
-      }
+    params.forEach(param => {
+      paramsList += `:${param.getNameNode().getText().trim()}`
     })
     return paramsList
   }
