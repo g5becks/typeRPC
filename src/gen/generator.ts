@@ -36,7 +36,7 @@ abstract class Generator {
 
   private promisifyMethod(method: MethodSignature): void {
     const returnType = method.getReturnTypeNode()?.getText().trim()
-    const promisified = `Promise<${returnType}>;`
+    const promisified = `Promise<${returnType}>`
     if (returnType?.includes('Promise<')) {
       return
     }
@@ -217,7 +217,9 @@ export type ${this.responseTypeName(method)} = {
   }
 
   private generateTypesFile(file: SourceFile): string {
-    return `${this.buildTypes(file)}${this.buildInterfaces(file)}${this.buildRequestTypesForFile(file)}${this.buildResponseTypesForFile(file)}`
+    // build interfaces must be called last because the response
+    // types cannot be modifies prior to building response types
+    return `${this.buildTypes(file)}${this.buildRequestTypesForFile(file)}${this.buildResponseTypesForFile(file)}${this.buildInterfaces(file)}`
   }
 
   // Generates types for the input schema file
