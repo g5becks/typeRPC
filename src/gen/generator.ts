@@ -172,12 +172,7 @@ export type ${this.responseTypeName(method)} = {
   // Note: Jsdoc must NOT use @desc or @description annotation
   protected buildRequestMethod(method: MethodSignature) {
     const docs = method.getJsDocs()
-    // eslint-disable-next-line no-console
-    console.log(docs[0])
-
     const rMethod = docs[0]?.getDescription().trim()
-    // eslint-disable-next-line no-console
-    console.log(rMethod)
     return isRequestMethod(rMethod) ? rMethod : 'POST'
   }
 

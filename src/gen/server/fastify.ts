@@ -100,7 +100,10 @@ ${this.getImportedTypes(file)}\n`
     const services = this.parser.getInterfaces(file)
     let controllers = ''
     for (const service of services) {
-      controllers += this.buildController(service)
+      // Ensure the interface implements RpcService
+      if (this.isRpcService(service)) {
+        controllers += this.buildController(service)
+      }
     }
     return controllers
   }
