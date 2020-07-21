@@ -42,6 +42,7 @@ export const registerOptions = (prefix: string, logLevel: LogLevel): RegisterOpt
     return `
 /* eslint-disable new-cap */
 import {FastifyPluginAsync, LogLevel} from 'fastify'
+import fastifySensible from 'fastify-sensible'
 import fp, {PluginOptions} from 'fastify-plugin'
 import {pluginOpts, registerOptions, TypeRpcPlugin} from './utils.rpc.server'
 ${this.getImportedTypes(file)}\n`
@@ -58,6 +59,7 @@ ${this.getImportedTypes(file)}\n`
     const schemaType = this.isGetMethod(method) ? 'querystring' : 'body'
     const payLoad = this.isGetMethod(method) ? 'query' : 'body'
     return `
+    instance.register(fastifySensible)
     instance.route<${this.getIncomingMessageType(method)}>(
         {
             method: '${this.buildRequestMethod(method)}',
