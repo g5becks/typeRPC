@@ -34,11 +34,6 @@ abstract class Generator {
     return text.replace(/^\w/, c => c.toLowerCase())
   }
 
-  // determines if the interface extends RpcService interface
-  protected isRpcService(service: InterfaceDeclaration): boolean {
-    return this.parser.isRpcService(service)
-  }
-
   private promisifyMethod(method: MethodSignature): void {
     const returnType = method.getReturnTypeNode()?.getText().trim()
     const promisified = `Promise<${returnType}>`
@@ -58,9 +53,9 @@ abstract class Generator {
     let servicesText = ''
     for (const srvc of services) {
       srvc.setIsExported(true)
-      if (this.isRpcService(srvc)) {
-        this.promisifyMethods(srvc)
-      }
+
+      this.promisifyMethods(srvc)
+
       servicesText += `${srvc.getFullText()}\n`
     }
     return servicesText
@@ -125,8 +120,6 @@ export type ${this.responseTypeName(method)} = {
   protected buildSchemaForType(filePath: string, type: string): string {
     const config: Config = {path: filePath, type}
     try {
-      // eslint-disable-next-line no-console
-      console.log(`building schema for type ${type}`)
       return `export const ${type}Schema = ${JSON.stringify(createGenerator(config).createSchema(config.type), null, 2)}\n`
     } catch (error) {
       throw new GeneratorError(error.message)
@@ -223,14 +216,17 @@ export type ${this.responseTypeName(method)} = {
   private generateTypesFile(file: SourceFile): string {
     // build interfaces must be called last because the response
     // types cannot be modifies prior to building response types
-    return `${this.buildTypes(file)}${this.buildRequestTypesForFile(file)}${this.buildResponseTypesForFile(file)}${this.buildInterfaces(file)}`
+    return `import {RpcService} from './rpc-service'\n${this.buildTypes(file)}${this.buildRequestTypesForFile(file)}${this.buildResponseTypesForFile(file)}${this.buildInterfaces(file)}`
   }
 
   // Generates types for the input schema file
   // Types files contain the rpc schema types along with
   // Request and Response type, but not json schemas
   public generateTypes(): Code {
-    const code: Code = {}
+    const code: Code = {'rpc-service.ts': `
+export interface RpcService {
+  handleErr(err: Error): void | Promise<void> ;
+}`}
     this.parser.sourceFiles.forEach(file => {
       code[`${file.getBaseNameWithoutExtension()}.rpc.types.ts`] = this.generateTypesFile(file)
     })

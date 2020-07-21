@@ -28,11 +28,9 @@ export class Parser {
   getMethodsForFile(file: SourceFile): MethodSignature[] {
     const interfaces = this.getInterfaces(file)
     const methods: MethodSignature[] = []
-    interfaces.forEach(interfc => {
-      if (this.isRpcService(interfc)) {
-        methods.push(...this.getMethodsForInterface(interfc))
-      }
-    })
+    interfaces.forEach(interfc =>
+      methods.push(...this.getMethodsForInterface(interfc))
+    )
     return methods
   }
 
