@@ -74,8 +74,11 @@ ${this.getImportedTypes(file)}\n`
             handler: async (request, reply) => {
                 const {${this.buildDestructuredParams(method)}} = request.${payLoad}
 
-                  const data = await ${this.lowerCase(serviceName)}.${method.getNameNode().getText().trim()}(${this.buildDestructuredParams(method)})
+                  const [err, data] = await instance.to(${this.lowerCase(serviceName)}.${method.getNameNode().getText().trim()}(${this.buildDestructuredParams(method)}))
+                  if (err) {
+                    await ${this.lowerCase(serviceName)}.handleErr(err)
 
+                  }
                 reply.send({ data})
             },
         }
