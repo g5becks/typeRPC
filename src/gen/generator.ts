@@ -1,10 +1,10 @@
 /* eslint-disable no-useless-constructor */
 /* eslint-disable max-params */
 import path from 'path'
-import { Config, createGenerator } from 'ts-json-schema-generator'
-import { InterfaceDeclaration, MethodSignature, ParameterDeclaration, SourceFile } from 'ts-morph'
-import { GeneratorError } from '.'
-import { Parser } from './parser'
+import {Config, createGenerator} from 'ts-json-schema-generator'
+import {InterfaceDeclaration, MethodSignature, ParameterDeclaration, SourceFile} from 'ts-morph'
+import {GeneratorError} from '.'
+import {Parser} from './parser'
 
 export type Code = {
   [key: string]: string;
@@ -34,8 +34,9 @@ abstract class Generator {
     return text.replace(/^\w/, c => c.toLowerCase())
   }
 
+  // determines if the interface extends RpcService interface
   protected isRpcService(service: InterfaceDeclaration): boolean {
-    return service.getExtends().some(clause => clause.getText().trim() === 'RpcService')
+    return this.parser.isRpcService(service)
   }
 
   private promisifyMethod(method: MethodSignature): void {
@@ -57,8 +58,9 @@ abstract class Generator {
     let servicesText = ''
     for (const srvc of services) {
       srvc.setIsExported(true)
-      if ()
-      this.promisifyMethods(srvc)
+      if (this.isRpcService(srvc)) {
+        this.promisifyMethods(srvc)
+      }
       servicesText += `${srvc.getFullText()}\n`
     }
     return servicesText

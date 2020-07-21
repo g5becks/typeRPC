@@ -16,6 +16,11 @@ export class Parser {
     this.project = new Project({tsConfigFilePath: this.tsConfigFilePath})
   }
 
+  // determines if the interface extends RpcService interface
+  isRpcService(service: InterfaceDeclaration): boolean {
+    return service.getExtends().some(clause => clause.getText().trim() === 'RpcService')
+  }
+
   getMethodsForInterface(interfce: InterfaceDeclaration): MethodSignature[] {
     return interfce.getMethods()
   }
@@ -23,7 +28,11 @@ export class Parser {
   getMethodsForFile(file: SourceFile): MethodSignature[] {
     const interfaces = this.getInterfaces(file)
     const methods: MethodSignature[] = []
-    interfaces.forEach(interfc => methods.push(...this.getMethodsForInterface(interfc)))
+    interfaces.forEach(interfc => {
+      if (this.isRpcService(interfc)) {
+        methods.push(...this.getMethodsForInterface(interfc))
+      }
+    })
     return methods
   }
 
