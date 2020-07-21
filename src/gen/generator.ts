@@ -34,7 +34,9 @@ abstract class Generator {
     return text.replace(/^\w/, c => c.toLowerCase())
   }
 
-  protected
+  protected isRpcService(service: InterfaceDeclaration): boolean {
+    return service.getExtends().some(clause => clause.getText().trim() === 'RpcService')
+  }
 
   private promisifyMethod(method: MethodSignature): void {
     const returnType = method.getReturnTypeNode()?.getText().trim()
