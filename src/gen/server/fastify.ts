@@ -71,10 +71,10 @@ ${this.getImportedTypes(file)}\n`
             },
             handler: async (request, reply) => {
                 const {${this.buildDestructuredParams(method)}} = request.${payLoad}
-                try {
+
                   const data = await ${this.lowerCase(serviceName)}.${method.getNameNode().getText().trim()}(${this.buildDestructuredParams(method)})
-                }
-                reply.send({ publisher})
+
+                reply.send({ data})
             },
         }
     )\n`

@@ -2,7 +2,7 @@
 /* eslint-disable max-params */
 import path from 'path'
 import {Config, createGenerator} from 'ts-json-schema-generator'
-import {MethodSignature, ParameterDeclaration, SourceFile} from 'ts-morph'
+import {InterfaceDeclaration, MethodSignature, ParameterDeclaration, SourceFile} from 'ts-morph'
 import {GeneratorError} from '.'
 import {Parser} from './parser'
 
@@ -43,6 +43,15 @@ abstract class Generator {
       messagesText += `${alias.getFullText()}\n`
     }
     return messagesText
+  }
+
+  private promisifyMethod(method: MethodSignature): void {
+    const returnType = `Promise<${method.getReturnTypeNode()?.getText().trim()}>;`
+    method.setReturnType(returnType)
+  }
+
+  private promisifyMethods(service: InterfaceDeclaration): void {
+    service.getMethods().forEach(method => this.promisifyMethod(method))
   }
 
   // Copies all interfaces from schema to output
