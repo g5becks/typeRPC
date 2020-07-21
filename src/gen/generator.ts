@@ -34,20 +34,13 @@ abstract class Generator {
     return text.replace(/^\w/, c => c.toLowerCase())
   }
 
-  // Copies all type aliases from schema to output
-  protected buildTypes(file: SourceFile): string {
-    const aliases = file.getTypeAliases()
-    let messagesText = ''
-    for (const alias of aliases) {
-      alias.setIsExported(true)
-      messagesText += `${alias.getFullText()}\n`
-    }
-    return messagesText
-  }
-
   private promisifyMethod(method: MethodSignature): void {
-    const returnType = `Promise<${method.getReturnTypeNode()?.getText().trim()}>;`
-    method.setReturnType(returnType)
+    const returnType = method.getReturnTypeNode()?.getText().trim()
+    const promisified = `Promise<${returnType}>;`
+    if (returnType?.includes('Promise<')) {
+      return
+    }
+    method.setReturnType(promisified)
   }
 
   private promisifyMethods(service: InterfaceDeclaration): void {
@@ -60,6 +53,7 @@ abstract class Generator {
     let servicesText = ''
     for (const srvc of services) {
       srvc.setIsExported(true)
+      this.promisifyMethods(srvc)
       servicesText += `${srvc.getFullText()}\n`
     }
     return servicesText
@@ -185,10 +179,6 @@ export type ${this.responseTypeName(method)} = {
     return `${typesFile}.rpc.types.ts`
   }
 
-  private generateTypesFile(file: SourceFile): string {
-    return `${this.buildTypes(file)}${this.buildInterfaces(file)}${this.buildRequestTypesForFile(file)}${this.buildResponseTypesForFile(file)}`
-  }
-
   protected isGetMethod(method: MethodSignature): boolean {
     return this.buildRequestMethod(method).toLowerCase().includes('get')
   }
@@ -213,6 +203,21 @@ export type ${this.responseTypeName(method)} = {
   // Builds the destructured parameters from request body or query
   protected buildDestructuredParams(method: MethodSignature): string {
     return `${method.getParameters().map(param => param.getNameNode().getText().trim())}`
+  }
+
+  // Copies all type aliases from schema to output
+  protected buildTypes(file: SourceFile): string {
+    const aliases = file.getTypeAliases()
+    let messagesText = ''
+    for (const alias of aliases) {
+      alias.setIsExported(true)
+      messagesText += `${alias.getFullText()}\n`
+    }
+    return messagesText
+  }
+
+  private generateTypesFile(file: SourceFile): string {
+    return `${this.buildTypes(file)}${this.buildInterfaces(file)}${this.buildRequestTypesForFile(file)}${this.buildResponseTypesForFile(file)}`
   }
 
   // Generates types for the input schema file
