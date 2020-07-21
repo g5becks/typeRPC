@@ -54,15 +54,18 @@ ${this.getImportedTypes(file)}\n`
   }
 
   private buildRouteHandler(method: MethodSignature): string {
+    const isGet = this.isGetMethod(method)
+    const schemaType = isGet ? 'querystring' : 'body'
+    const url = isGet
     return `
     instance.route<${this.getIncomingMessageType(method)}>(
         {
             method: '${this.buildRequestMethod(method)}',
             url: '/${method.getName()}',
             schema: {
-                body: ${this.requestTypeSchemaName(method)},
+                ${schemaType}: ${this.requestTypeSchemaName(method)},
                 response: {
-                    200: ${this.responseTypeSchemeName(method)},
+                    '2xx': ${this.responseTypeSchemeName(method)},
                 },
 
             },

@@ -2,7 +2,7 @@
 /* eslint-disable max-params */
 import path from 'path'
 import {Config, createGenerator} from 'ts-json-schema-generator'
-import {MethodSignature, SourceFile} from 'ts-morph'
+import {MethodSignature, ParameterDeclaration, SourceFile} from 'ts-morph'
 import {GeneratorError} from '.'
 import {Parser} from './parser'
 
@@ -153,12 +153,13 @@ export type ${this.responseTypeName(method)} = {
   }
 
   // Generates a request method based on the method signature's jsdoc
+  // Note: Jsdoc must NOT use @desc or @description annotation
   protected buildRequestMethod(method: MethodSignature) {
     const docs = method.getJsDocs()
     // eslint-disable-next-line no-console
-    console.log(docs)
+    console.log(docs[0])
 
-    const rMethod = docs[0]?.getDescription()
+    const rMethod = docs[0]?.getDescription().trim()
     // eslint-disable-next-line no-console
     console.log(rMethod)
     return isRequestMethod(rMethod) ? rMethod : 'POST'
@@ -171,6 +172,10 @@ export type ${this.responseTypeName(method)} = {
 
   private generateTypesFile(file: SourceFile): string {
     return `${this.buildTypes(file)}${this.buildInterfaces(file)}${this.buildRequestTypesForFile(file)}${this.buildResponseTypesForFile(file)}`
+  }
+
+  protected isGetMethod(method: MethodSignature): boolean {
+    return this.buildRequestMethod(method).toLowerCase().includes('get')
   }
 
   protected getImportedTypes(file: SourceFile): string {
@@ -213,6 +218,24 @@ export type ${this.responseTypeName(method)} = {
 export abstract class ServerGenerator extends Generator {
   constructor(protected readonly parser: Parser, protected readonly outputPath: string) {
     super(parser, outputPath)
+  }
+
+  private buildRouteParams(params: ParameterDeclaration[]): string {
+    let paramsList = ''
+    params.forEach((param, i) => {
+      if (i === params.length - 1) {
+        paramsList += `${param.getNameNode().getText().trim()}`
+      } else {
+        paramsList += `${param.getNameNode().getText().trim()}:`
+      }
+    })
+    return paramsList
+  }
+
+  // builds the route for server handler methods
+  protected buildServerRoute(method: MethodSignature): string {
+    const params = method.getParameters()
+    return (!this.isGetMethod(method) || params?.length === 0) ? `'/${method.getName().trim()}'` : `'/${method.getName().trim()}/${this.buildRouteParams(params)}'`
   }
 
   abstract generateRpc(): Code
