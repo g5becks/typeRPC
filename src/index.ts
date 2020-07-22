@@ -1,8 +1,7 @@
 import {Command, flags} from '@oclif/command'
-import {Bar, Options} from 'cli-progress'
 import {outputFile, pathExists} from 'fs-extra'
 import path from 'path'
-import {Code, generateCode, GeneratorError, isTarget} from './gen'
+import {Code, generateCode, generateTypes, GeneratorError, isTarget} from './gen'
 
 type OutputType = 'types' | 'rpc'
 
@@ -40,19 +39,14 @@ class TypeRpc extends Command {
     this.validateOutputPath(outputPath)
     this.log(`generating code for ${target}`)
 
-    const code = generateCode(target, tsConfig, outputPath)
-    await this.writeOutput(outputPath, code.types, 'types')
-    await this.writeOutput(outputPath, code.rpc, 'rpc')
-  }
-
-  createBar() {
-    const opts: Options = {
-      format: 'CLI Progress | {percentage}% || {value}/{total} Chunks || Speed: {speed}',
-      barCompleteChar: '\u2588',
-      barIncompleteChar: '\u2591',
-      hideCursor: true,
+    try {
+      const types = generateTypes(target, tsConfig, outputPath)
+      await this.writeOutput(outputPath, types, 'types')
+      const code = generateCode(target, tsConfig, outputPath)
+      await this.writeOutput(outputPath, code, 'rpc')
+    } catch (error) {
+      this.log(error)
     }
-    return new Bar(opts)
   }
 
   async tsconfigFileExists(filePath: string): Promise<boolean> {
@@ -97,10 +91,6 @@ class TypeRpc extends Command {
       this.log('please provide a directory path to write generated output')
       throw new Error('no output path provided')
     }
-  }
-
-  private logFin(): void {
-    this.log('fin')
   }
 }
 

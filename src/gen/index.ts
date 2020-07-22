@@ -3,10 +3,6 @@ import {Code, Target} from './generator'
 import {FastifyGenerator} from './server'
 
 export {Code, Target}
-export type GeneratorResult = {
-  types: Code;
-  rpc: Code;
-}
 
 export const isTarget = (target: string): target is Target => {
   return ['client', 'server'].includes(target)
@@ -24,10 +20,13 @@ export class GeneratorError extends Error {
   }
 }
 
-export const generateCode = (target: Target, tsConfigFilePath: string, outputPath: string): GeneratorResult => {
+export const generateTypes = (target: Target, tsConfigFilePath: string, outputPath: string) => {
   const generator = target === 'client' ? new AxiosGenerator(tsConfigFilePath, outputPath) : new FastifyGenerator(tsConfigFilePath, outputPath)
-  const types = generator.generateTypes()
-  const rpc = generator.generateRpc()
-  return {types, rpc}
+  return generator.generateTypes()
+}
+
+export const generateCode = (target: Target, tsConfigFilePath: string, outputPath: string): Code => {
+  const generator = target === 'client' ? new AxiosGenerator(tsConfigFilePath, outputPath) : new FastifyGenerator(tsConfigFilePath, outputPath)
+  return generator.generateRpc()
 }
 

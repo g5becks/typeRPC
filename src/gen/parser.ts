@@ -13,7 +13,9 @@ export class Parser {
   }
 
   constructor(private readonly tsConfigFilePath: string) {
-    this.project = new Project({tsConfigFilePath: this.tsConfigFilePath, skipFileDependencyResolution: true})
+    // eslint-disable-next-line no-console
+    console.log(tsConfigFilePath)
+    this.project = new Project({tsConfigFilePath: tsConfigFilePath, skipFileDependencyResolution: true})
   }
 
   // determines if the interface extends RpcService interface
