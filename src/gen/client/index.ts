@@ -1,4 +1,4 @@
-import { ClientGenerator, Code } from '../generator'
+import {ClientGenerator, Code} from '../generator'
 /**
  * Generates client side code using https://www.npmjs.com/package/axios
  *
@@ -7,6 +7,10 @@ import { ClientGenerator, Code } from '../generator'
  * @extends {ClientGenerator}
  */
 export class AxiosGenerator extends ClientGenerator {
+  public generateTypes(): Code {
+    throw new Error('Method not implemented.')
+  }
+
   generateRpc(): Code {
     throw new Error('Method not implemented.')
   }
