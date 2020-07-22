@@ -227,7 +227,7 @@ export type ${this.responseTypeName(method)} = {
   // Generates types for the input schema file
   // Types files contain the rpc schema types along with
   // Request and Response type, but not json schemas
-  protected generateTypes(target: Target, code: Code = {}): Code {
+  protected generateTypesDefault(target: Target, code: Code = {}): Code {
     this.parser.sourceFiles.forEach(file => {
       code[`${file.getBaseNameWithoutExtension()}.${target}.rpc.types.ts`] = this.generateTypesFile(file)
     })

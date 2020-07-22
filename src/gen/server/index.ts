@@ -1,5 +1,5 @@
-import { InterfaceDeclaration, MethodSignature, SourceFile } from 'ts-morph'
-import { Code, ServerGenerator } from '../generator'
+import {InterfaceDeclaration, MethodSignature, SourceFile} from 'ts-morph'
+import {Code, ServerGenerator} from '../generator'
 /**
  * Generates server side code using https://www.fastify.io/
  *
@@ -8,6 +8,10 @@ import { Code, ServerGenerator } from '../generator'
  * @extends {ServerGenerator}
  */
 export class FastifyGenerator extends ServerGenerator {
+  public generateTypes(): Code {
+
+  }
+
   // eslint-disable-next-line no-useless-constructor
   constructor(protected tsConfigFilePath: string, protected readonly outputPath: string) {
     super(tsConfigFilePath, outputPath)
