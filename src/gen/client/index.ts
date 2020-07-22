@@ -1,25 +1,19 @@
-import {Parser} from '../parser'
-import {AxiosGenerator} from './axios'
-import {FetchGenerator} from './fetch'
-const clients = {
-  axios: (parser: Parser, outputPath: string) => new AxiosGenerator(parser, outputPath),
-  fetch: (parser: Parser, outputPath: string) => new FetchGenerator(parser, outputPath),
-}
-
-export type ClientHttpOption = 'axios' | 'fetch'
-
+import { ClientGenerator, Code } from '../generator'
+import { Parser } from '../parser'
 /**
- * Gets an instance of a ClientGenerator
- * @async
- * @param {string} tsConfigFilePath path to tsconfig.json
- * @param {string} outputPath path to the output directory
- * @param {ClientHttpOption} client http client option
- * @returns {(Promise<string | AxiosGenerator | FetchGenerator>)} error description or a client generator
+ * Generates client side code using https://www.npmjs.com/package/axios
+ *
+ * @export
+ * @class AxiosGenerator
+ * @extends {ClientGenerator}
  */
-export const getClientGenerator = (tsConfigFilePath: string, outputPath: string, client: ClientHttpOption): string | AxiosGenerator | FetchGenerator => {
-  const parserResult = new Parser(tsConfigFilePath)
-  if (parserResult instanceof Parser) {
-    return clients[client](parserResult, outputPath)
+export class AxiosGenerator extends ClientGenerator {
+  generateRpc(): Code {
+    throw new Error('Method not implemented.')
   }
-  return parserResult
+
+  // eslint-disable-next-line no-useless-constructor
+  constructor(parser: Parser, protected readonly outputPath: string) {
+    super(parser, outputPath)
+  }
 }

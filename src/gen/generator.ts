@@ -53,7 +53,7 @@ abstract class Generator {
     let servicesText = ''
     for (const srvc of services) {
       srvc.setIsExported(true)
-      srvc.insertExtends(1, 'RpcService')
+      srvc.insertExtends(0, 'RpcService')
       this.promisifyMethods(srvc)
 
       servicesText += `${srvc.getFullText()}\n`
