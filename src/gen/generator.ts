@@ -2,6 +2,7 @@
 /* eslint-disable max-params */
 import path from 'path'
 import {Config, createGenerator} from 'ts-json-schema-generator'
+import {Md5} from 'ts-md5/dist/md5'
 import {InterfaceDeclaration, MethodSignature, ParameterDeclaration, SourceFile} from 'ts-morph'
 import {GeneratorError} from '.'
 import {Parser} from './parser'
@@ -29,6 +30,20 @@ abstract class Generator {
 
   constructor(protected readonly tsConfigFilePath: string, protected readonly outputPath: string) {
     this.parser = new Parser(tsConfigFilePath)
+  }
+
+  protected createVersionHash(types: Code, code: Code): string {
+    let assembly = ''
+    for (const [file, source] of Object.entries(types)) {
+      assembly += file
+      assembly += source
+    }
+    for (const [file, source] of Object.entries(code)) {
+      assembly += file
+      assembly += source
+    }
+
+    return Md5.hashStr(assembly).toString()
   }
 
   protected capitalize(text: string): string {

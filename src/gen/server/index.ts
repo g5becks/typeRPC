@@ -1,4 +1,3 @@
-import {Md5} from 'ts-md5/dist/md5'
 import {InterfaceDeclaration, MethodSignature, SourceFile} from 'ts-morph'
 import {Code, ServerGenerator} from '../generator'
 
@@ -10,12 +9,9 @@ import {Code, ServerGenerator} from '../generator'
  * @extends {ServerGenerator}
  */
 export class FastifyGenerator extends ServerGenerator {
-  private hash: string|Int32Array
-
   // eslint-disable-next-line no-useless-constructor
   constructor(protected tsConfigFilePath: string, protected readonly outputPath: string) {
     super(tsConfigFilePath, outputPath)
-    this.hash = Md5.hashStr(Date.now().toLocaleString())
   }
 
   private util() {
