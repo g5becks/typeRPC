@@ -53,8 +53,9 @@ class TypeRpc extends Command {
 
   async writeOutput(outputPath: string, code: Code, outputType: OutputType): Promise<void> {
     const results = []
+    const filePath = (file: string) => outputType === 'types' ? path.join(outputPath, 'types', file) : path.join(outputPath, `${file}`)
     for (const [file, source] of Object.entries(code)) {
-      results.push(outputFile(path.join(outputPath, `${file}`), source))
+      results.push(outputFile(filePath(file), source))
     }
 
     try {
