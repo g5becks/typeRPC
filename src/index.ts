@@ -1,4 +1,5 @@
 import {Command, flags} from '@oclif/command'
+import {Bar, Options} from 'cli-progress'
 import {outputFile, pathExists} from 'fs-extra'
 import path from 'path'
 import {Code, generateCode, GeneratorError, isTarget} from './gen'
@@ -38,7 +39,21 @@ class TypeRpc extends Command {
     await this.validateTsConfigFile(tsConfig)
     this.validateOutputPath(outputPath)
     this.log(`generating code for ${target}`)
+
     const code = generateCode(target, tsConfig, outputPath)
+    await this.writeOutput(outputPath, code.types, 'types')
+    await this.writeOutput(outputPath, code.rpc, 'rpc')
+    this.log('code generation complete')
+  }
+
+  createBar() {
+    const opts: Options = {
+      format: 'CLI Progress | {percentage}% || {value}/{total} Chunks || Speed: {speed}',
+      barCompleteChar: '\u2588',
+      barIncompleteChar: '\u2591',
+      hideCursor: true,
+    }
+    return new Bar(opts)
   }
 
   async tsconfigFileExists(filePath: string): Promise<boolean> {
@@ -59,6 +74,7 @@ class TypeRpc extends Command {
     }
 
     try {
+      this.log(`saving ${outputType} code to ${outputPath}`)
       await Promise.all(results)
       this.log(`${outputType} generation complete, please check ${outputPath} for generated code`)
     } catch (error) {
