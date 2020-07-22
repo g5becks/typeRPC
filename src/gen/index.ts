@@ -1,7 +1,6 @@
-
-import {ClientHttpOption, getClientGenerator} from './client'
-import {Code} from './generator'
-import {getServerGenerator, ServerFrameworkOption} from './server'
+import { AxiosGenerator } from './client';
+import { Code } from './generator';
+import { Parser } from './parser';
 
 /**
  * An error that occurs either creating a creating Generator or from the result of a Generator attempting to generate code
@@ -24,10 +23,13 @@ export class GeneratorError extends Error {
  * @param {ClientHttpOption} client choice of which http client to use
  * @returns {Code | GeneratorError} generated code as string or Error
  */
-export const generateClient = (tsConfigFilePath: string, outputPath: string,  client: ClientHttpOption): Code | GeneratorError => {
-  const clientGen = getClientGenerator(tsConfigFilePath, outputPath, client)
-  if (typeof clientGen === 'string') {
-    return new GeneratorError(clientGen)
+export const generateClient = (tsConfigFilePath: string, outputPath: string): Code | GeneratorError => {
+  const parserResult = new Parser(tsConfigFilePath)
+  let clientGen: AxiosGenerator
+  if (parserResult instanceof Parser) {
+    clientGen = new AxiosGenerator(parserResult, outputPath)
+  } else {
+    return new GeneratorError(parserResult)
   }
   try {
     const code = clientGen.generateRpc()
@@ -45,8 +47,8 @@ export const generateClient = (tsConfigFilePath: string, outputPath: string,  cl
  * @param {ServerFrameWorkOption} serverFramework choich of server framework
  * @returns {Code | GeneratorError} generated code as string or Error
  */
-export const generateServer = (tsConfigFilePath: string, outputPath: string, serverFramework: ServerFrameworkOption): Code | GeneratorError => {
-  const serverGen = getServerGenerator(serverFramework, tsConfigFilePath, outputPath)
+export const generateServer = (tsConfigFilePath: string, outputPath: string): Code | GeneratorError => {
+  const parserResult = new Parser(tsConfigFilePath)
   if (typeof serverGen === 'string') {
     return new GeneratorError(serverGen)
   }

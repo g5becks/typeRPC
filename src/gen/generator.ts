@@ -1,16 +1,16 @@
 /* eslint-disable no-useless-constructor */
 /* eslint-disable max-params */
 import path from 'path'
-import {Config, createGenerator} from 'ts-json-schema-generator'
-import {InterfaceDeclaration, MethodSignature, ParameterDeclaration, SourceFile} from 'ts-morph'
-import {GeneratorError} from '.'
-import {Parser} from './parser'
+import { Config, createGenerator } from 'ts-json-schema-generator'
+import { InterfaceDeclaration, MethodSignature, ParameterDeclaration, SourceFile } from 'ts-morph'
+import { GeneratorError } from '.'
+import { Parser } from './parser'
 
 export type Code = {
   [key: string]: string;
 }
 
-export type RequestMethod = 'POST'|'PUT'|'GET'|'HEAD'|'DELETE'|'OPTIONS'|'PATCH'
+export type RequestMethod = 'POST' | 'PUT' | 'GET' | 'HEAD' | 'DELETE' | 'OPTIONS' | 'PATCH'
 
 const isRequestMethod = (method: string): method is RequestMethod => {
   return ['POST', 'PUT', 'GET', 'HEAD', 'DELETE', 'OPTIONS', 'PATCH'].includes(method)
@@ -23,8 +23,10 @@ const isRequestMethod = (method: string): method is RequestMethod => {
  * @class Generator
  */
 abstract class Generator {
-  // eslint-disable-next-line no-useless-constructor
-  constructor(protected readonly parser: Parser, protected readonly outputPath: string) { }
+  protected readonly parser: Parser
+  constructor(protected readonly tsConfigFilePath: string, protected readonly outputPath: string) {
+    this.parser = new Parser(tsConfigFilePath)
+  }
 
   protected capitalize(text: string): string {
     return text.replace(/^\w/, c => c.toUpperCase())
@@ -118,7 +120,7 @@ export type ${this.responseTypeName(method)} = {
 
   // Generates a jsonSchema for a single type
   protected buildSchemaForType(filePath: string, type: string): string {
-    const config: Config = {path: filePath, type}
+    const config: Config = { path: filePath, type }
     try {
       return `export const ${type}Schema = ${JSON.stringify(createGenerator(config).createSchema(config.type), null, 2)}\n`
     } catch (error) {
@@ -223,7 +225,8 @@ export type ${this.responseTypeName(method)} = {
   // Types files contain the rpc schema types along with
   // Request and Response type, but not json schemas
   public generateTypes(): Code {
-    const code: Code = {'rpc-service.ts': `
+    const code: Code = {
+      'rpc-service.ts': `
 export interface RpcService {
   handleErr(err: Error): void | Promise<void> ;
 }`}
