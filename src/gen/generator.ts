@@ -231,9 +231,9 @@ export type ${this.responseTypeName(method)} = {
   // abstract generateTypes method, this default method does
   // most of the work, and it should be possible to simply add
   // in any needed generated code using the code param
-  protected generateTypesDefault(target: Target, code: Code = {}): Code {
+  protected generateTypesDefault(code: Code = {}): Code {
     this.parser.sourceFiles.forEach(file => {
-      code[`${file.getBaseNameWithoutExtension()}.${target}.rpc.types.ts`] = this.generateTypesFile(file)
+      code[`${file.getBaseNameWithoutExtension()}.rpc.types.ts`] = this.generateTypesFile(file)
     })
     return code
   }

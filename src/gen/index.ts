@@ -7,6 +7,10 @@ export type GeneratorResult = {
   types: Code;
   rpc: Code;
 }
+
+export const isTarget = (target: string): target is Target => {
+  return ['client', 'server'].includes(target)
+}
 /**
  * An error that occurs either creating a creating Generator or from the result of a Generator attempting to generate code
  *
