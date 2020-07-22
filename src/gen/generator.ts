@@ -1,14 +1,16 @@
 /* eslint-disable no-useless-constructor */
 /* eslint-disable max-params */
 import path from 'path'
-import { Config, createGenerator } from 'ts-json-schema-generator'
-import { InterfaceDeclaration, MethodSignature, ParameterDeclaration, SourceFile } from 'ts-morph'
-import { GeneratorError } from '.'
-import { Parser } from './parser'
+import {Config, createGenerator} from 'ts-json-schema-generator'
+import {InterfaceDeclaration, MethodSignature, ParameterDeclaration, SourceFile} from 'ts-morph'
+import {GeneratorError} from '.'
+import {Parser} from './parser'
 
 export type Code = {
   [key: string]: string;
 }
+
+export type Target = 'client'| 'server'
 
 export type RequestMethod = 'POST' | 'PUT' | 'GET' | 'HEAD' | 'DELETE' | 'OPTIONS' | 'PATCH'
 
@@ -24,6 +26,7 @@ const isRequestMethod = (method: string): method is RequestMethod => {
  */
 abstract class Generator {
   protected readonly parser: Parser
+
   constructor(protected readonly tsConfigFilePath: string, protected readonly outputPath: string) {
     this.parser = new Parser(tsConfigFilePath)
   }
@@ -120,7 +123,7 @@ export type ${this.responseTypeName(method)} = {
 
   // Generates a jsonSchema for a single type
   protected buildSchemaForType(filePath: string, type: string): string {
-    const config: Config = { path: filePath, type }
+    const config: Config = {path: filePath, type}
     try {
       return `export const ${type}Schema = ${JSON.stringify(createGenerator(config).createSchema(config.type), null, 2)}\n`
     } catch (error) {
@@ -224,14 +227,9 @@ export type ${this.responseTypeName(method)} = {
   // Generates types for the input schema file
   // Types files contain the rpc schema types along with
   // Request and Response type, but not json schemas
-  public generateTypes(): Code {
-    const code: Code = {
-      'rpc-service.ts': `
-export interface RpcService {
-  handleErr(err: Error): void | Promise<void> ;
-}`}
+  protected generateTypes(target: Target, code: Code = {}): Code {
     this.parser.sourceFiles.forEach(file => {
-      code[`${file.getBaseNameWithoutExtension()}.rpc.types.ts`] = this.generateTypesFile(file)
+      code[`${file.getBaseNameWithoutExtension()}.${target}.rpc.types.ts`] = this.generateTypesFile(file)
     })
     return code
   }
@@ -264,7 +262,9 @@ export abstract class ServerGenerator extends Generator {
     return (!this.isGetMethod(method) || params?.length === 0) ? `'/${method.getName().trim()}'` : `'/${method.getName().trim()}/${this.buildRouteParams(params)}'`
   }
 
-  abstract generateRpc(): Code
+  public abstract generateTypes(): Code
+
+  public abstract generateRpc(): Code
 }
 
 /**
@@ -280,5 +280,7 @@ export abstract class ClientGenerator extends Generator {
     super(tsConfigFilePath, outputPath)
   }
 
-  abstract generateRpc(): Code
+  public abstract generateTypes(): Code
+
+  public  abstract generateRpc(): Code
 }
