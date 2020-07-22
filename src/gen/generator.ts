@@ -28,22 +28,18 @@ const isRequestMethod = (method: string): method is RequestMethod => {
 abstract class Generator {
   protected readonly parser: Parser
 
+  protected typesHash: string
+
+  protected rpcHash: string
+
   constructor(protected readonly tsConfigFilePath: string, protected readonly outputPath: string) {
     this.parser = new Parser(tsConfigFilePath)
+    this.typesHash = Generator.createHash()
+    this.rpcHash = Generator.createHash()
   }
 
-  protected createVersionHash(types: Code, code: Code): string {
-    let assembly = ''
-    for (const [file, source] of Object.entries(types)) {
-      assembly += file
-      assembly += source
-    }
-    for (const [file, source] of Object.entries(code)) {
-      assembly += file
-      assembly += source
-    }
-
-    return Md5.hashStr(assembly).toString()
+  protected static createHash(): string {
+    return Md5.hashStr(Date.now().toLocaleString()).toString()
   }
 
   protected capitalize(text: string): string {
