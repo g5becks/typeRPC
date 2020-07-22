@@ -8,10 +8,6 @@ import {Code, ServerGenerator} from '../generator'
  * @extends {ServerGenerator}
  */
 export class FastifyGenerator extends ServerGenerator {
-  public generateTypes(): Code {
-
-  }
-
   // eslint-disable-next-line no-useless-constructor
   constructor(protected tsConfigFilePath: string, protected readonly outputPath: string) {
     super(tsConfigFilePath, outputPath)
@@ -117,6 +113,14 @@ ${this.getImportedTypes(file)}\n`
 
   private buildServerFileName(file: SourceFile): string {
     return `${file.getBaseNameWithoutExtension()}.rpc.server.ts`
+  }
+
+  public generateTypes(): Code {
+    return this.generateTypesDefault('server', {
+      'rpc-service.ts': `
+export interface RpcService {
+  handleErr(err: Error): void | Promise<void> ;
+}`})
   }
 
   public generateRpc(): Code {
