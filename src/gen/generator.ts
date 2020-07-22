@@ -246,8 +246,8 @@ export interface RpcService {
  * @extends {Generator}
  */
 export abstract class ServerGenerator extends Generator {
-  constructor(protected readonly parser: Parser, protected readonly outputPath: string) {
-    super(parser, outputPath)
+  constructor(protected readonly tsConfigFilePath: string, protected readonly outputPath: string) {
+    super(tsConfigFilePath, outputPath)
   }
 
   private buildRouteParams(params: ParameterDeclaration[]): string {
@@ -276,8 +276,8 @@ export abstract class ServerGenerator extends Generator {
  * @extends {Generator}
  */
 export abstract class ClientGenerator extends Generator {
-  constructor(protected readonly parser: Parser, protected readonly outputPath: string) {
-    super(parser, outputPath)
+  constructor(protected readonly tsConfigFilePath: string, protected readonly outputPath: string) {
+    super(tsConfigFilePath, outputPath)
   }
 
   abstract generateRpc(): Code

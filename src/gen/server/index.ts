@@ -1,6 +1,5 @@
 import { InterfaceDeclaration, MethodSignature, SourceFile } from 'ts-morph'
 import { Code, ServerGenerator } from '../generator'
-import { Parser } from '../parser'
 /**
  * Generates server side code using https://www.fastify.io/
  *
@@ -10,8 +9,8 @@ import { Parser } from '../parser'
  */
 export class FastifyGenerator extends ServerGenerator {
   // eslint-disable-next-line no-useless-constructor
-  constructor(parser: Parser, protected readonly outputPath: string) {
-    super(parser, outputPath)
+  constructor(protected tsConfigFilePath: string, protected readonly outputPath: string) {
+    super(tsConfigFilePath, outputPath)
   }
 
   private util() {
