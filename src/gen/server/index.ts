@@ -44,7 +44,7 @@ export const registerOptions = (prefix: string, logLevel: LogLevel): RegisterOpt
 import {FastifyPluginAsync, LogLevel} from 'fastify'
 import fastifySensible from 'fastify-sensible'
 import fp, {PluginOptions} from 'fastify-plugin'
-import {pluginOpts, registerOptions, TypeRpcPlugin} from './${this.hash.toString()}'
+import {pluginOpts, registerOptions, TypeRpcPlugin} from './${this.versionHash}'
 ${this.getImportedTypes(file)}\n`
   }
 
@@ -109,8 +109,7 @@ ${this.getImportedTypes(file)}\n`
   }
 
   private utilsFile(): [string, string] {
-    const fileName = this.hash.toString()
-    return [`${fileName}.ts`, this.util()]
+    return [`${this.versionHash}.ts`, this.util()]
   }
 
   private buildServerFileName(file: SourceFile): string {
@@ -118,8 +117,9 @@ ${this.getImportedTypes(file)}\n`
   }
 
   public generateTypes(): Code {
+    const file = `${this.versionHash}.ts`
     return this.generateTypesDefault({
-      'rpc-service.ts': `
+      [file]: `
 export interface RpcService {
   handleErr(err: Error): void | Promise<void> ;
 }`})

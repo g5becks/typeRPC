@@ -28,18 +28,10 @@ const isRequestMethod = (method: string): method is RequestMethod => {
 abstract class Generator {
   protected readonly parser: Parser
 
-  protected typesHash: string
-
-  protected rpcHash: string
+  protected readonly versionHash: string = Md5.hashStr(Date.now().toLocaleString()).toString()
 
   constructor(protected readonly tsConfigFilePath: string, protected readonly outputPath: string) {
     this.parser = new Parser(tsConfigFilePath)
-    this.typesHash = Generator.createHash()
-    this.rpcHash = Generator.createHash()
-  }
-
-  protected static createHash(): string {
-    return Md5.hashStr(Date.now().toLocaleString()).toString()
   }
 
   protected capitalize(text: string): string {
@@ -234,7 +226,7 @@ export type ${this.responseTypeName(method)} = {
   private generateTypesFile(file: SourceFile): string {
     // build interfaces must be called last because the response
     // types cannot be modifies prior to building response types
-    return `import {RpcService} from './rpc-service'\n${this.buildTypes(file)}${this.buildRequestTypesForFile(file)}${this.buildResponseTypesForFile(file)}${this.buildInterfaces(file)}`
+    return `import {RpcService} from './${this.versionHash}'\n${this.buildTypes(file)}${this.buildRequestTypesForFile(file)}${this.buildResponseTypesForFile(file)}${this.buildInterfaces(file)}`
   }
 
   // Generates types for the input schema file
