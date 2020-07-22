@@ -1,7 +1,6 @@
 import {flags} from '@oclif/command'
 import {generateServer, GeneratorError} from '../gen'
 import {Code} from '../gen/generator'
-import {getServerGenerator, isValidServerFrameworkOption, ServerFrameworkOption} from '../gen/server'
 import {TypeRpcCommand} from './typerpc'
 
 export default class Server extends TypeRpcCommand {
@@ -25,11 +24,8 @@ export default class Server extends TypeRpcCommand {
 
     const tsConfig = flags.tsConfig ?? ''
     const outputPath = flags.output ?? ''
-    // Set the server framework option to fastify by default for now
-    // until other framework are implemented.
-    const serverFramework: ServerFrameworkOption = 'fastify'
     await this.validateTsConfigFile(tsConfig)
-    this.validateServerFramework(serverFramework)
+
     this.validateOutputPath(outputPath)
     const serverGen = getServerGenerator(serverFramework, tsConfig, outputPath)
     const types: Code = typeof serverGen === 'string' ? {} : serverGen.generateTypes()
@@ -37,20 +33,12 @@ export default class Server extends TypeRpcCommand {
       await this.writeOutput(outputPath, types, 'types')
     }
 
-    const code = generateServer(tsConfig, outputPath, serverFramework as ServerFrameworkOption)
+    const code = generateServer(tsConfig, outputPath)
     if (code instanceof GeneratorError) {
       this.log(code.errorMessage)
       throw code
     }
     this.log(`generating server code using ${serverFramework}`)
     await this.writeOutput(outputPath, code, 'types')
-  }
-
-  // ensure that the ServerFrameworkOption is valid
-  private validateServerFramework(framework: string): void {
-    if (!isValidServerFrameworkOption(framework)) {
-      this.log(`sorry ${framework} is not a valid server framework option or has not yet been implemented`)
-      throw new Error('bad server framework option')
-    }
   }
 }

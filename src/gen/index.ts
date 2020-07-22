@@ -1,6 +1,6 @@
-import { AxiosGenerator } from './client';
-import { Code } from './generator';
-import { FastifyGenerator } from './server';
+import {AxiosGenerator} from './client'
+import {Code} from './generator'
+import {FastifyGenerator} from './server'
 
 /**
  * An error that occurs either creating a creating Generator or from the result of a Generator attempting to generate code
@@ -24,7 +24,7 @@ export class GeneratorError extends Error {
  * @returns {Code | GeneratorError} generated code as string or Error
  */
 export const generateClient = (tsConfigFilePath: string, outputPath: string): Code | GeneratorError => {
-  let clientGen = new AxiosGenerator(tsConfigFilePath, outputPath)
+  const clientGen = new AxiosGenerator(tsConfigFilePath, outputPath)
   try {
     const code = clientGen.generateRpc()
     return code
