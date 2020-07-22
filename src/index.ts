@@ -43,7 +43,6 @@ class TypeRpc extends Command {
     const code = generateCode(target, tsConfig, outputPath)
     await this.writeOutput(outputPath, code.types, 'types')
     await this.writeOutput(outputPath, code.rpc, 'rpc')
-    this.log('code generation complete')
   }
 
   createBar() {
@@ -98,6 +97,10 @@ class TypeRpc extends Command {
       this.log('please provide a directory path to write generated output')
       throw new Error('no output path provided')
     }
+  }
+
+  private logFin(): void {
+    this.log('fin')
   }
 }
 

@@ -207,7 +207,7 @@ export type ${this.responseTypeName(method)} = {
     return `${method.getParameters().map(param => param.getNameNode().getText().trim())}`
   }
 
-  // Copies all type aliases from schema to output
+  // Copies all type aliases from schema to output type
   protected buildTypes(file: SourceFile): string {
     const aliases = file.getTypeAliases()
     let messagesText = ''
