@@ -1,6 +1,6 @@
 import { AxiosGenerator } from './client';
 import { Code } from './generator';
-import { Parser } from './parser';
+import { FastifyGenerator } from './server';
 
 /**
  * An error that occurs either creating a creating Generator or from the result of a Generator attempting to generate code
@@ -24,13 +24,7 @@ export class GeneratorError extends Error {
  * @returns {Code | GeneratorError} generated code as string or Error
  */
 export const generateClient = (tsConfigFilePath: string, outputPath: string): Code | GeneratorError => {
-  const parserResult = new Parser(tsConfigFilePath)
-  let clientGen: AxiosGenerator
-  if (parserResult instanceof Parser) {
-    clientGen = new AxiosGenerator(parserResult, outputPath)
-  } else {
-    return new GeneratorError(parserResult)
-  }
+  let clientGen = new AxiosGenerator(tsConfigFilePath, outputPath)
   try {
     const code = clientGen.generateRpc()
     return code
@@ -48,10 +42,7 @@ export const generateClient = (tsConfigFilePath: string, outputPath: string): Co
  * @returns {Code | GeneratorError} generated code as string or Error
  */
 export const generateServer = (tsConfigFilePath: string, outputPath: string): Code | GeneratorError => {
-  const parserResult = new Parser(tsConfigFilePath)
-  if (typeof serverGen === 'string') {
-    return new GeneratorError(serverGen)
-  }
+  const serverGen = new FastifyGenerator(tsConfigFilePath, outputPath)
   try {
     const code = serverGen.generateRpc()
     return code
