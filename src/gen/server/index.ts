@@ -1,5 +1,7 @@
+import {Md5} from 'ts-md5/dist/md5'
 import {InterfaceDeclaration, MethodSignature, SourceFile} from 'ts-morph'
 import {Code, ServerGenerator} from '../generator'
+
 /**
  * Generates server side code using https://www.fastify.io/
  *
@@ -8,9 +10,12 @@ import {Code, ServerGenerator} from '../generator'
  * @extends {ServerGenerator}
  */
 export class FastifyGenerator extends ServerGenerator {
+  private hash: string|Int32Array
+
   // eslint-disable-next-line no-useless-constructor
   constructor(protected tsConfigFilePath: string, protected readonly outputPath: string) {
     super(tsConfigFilePath, outputPath)
+    this.hash = Md5.hashStr(Date.now().toLocaleString())
   }
 
   private util() {
@@ -43,7 +48,7 @@ export const registerOptions = (prefix: string, logLevel: LogLevel): RegisterOpt
 import {FastifyPluginAsync, LogLevel} from 'fastify'
 import fastifySensible from 'fastify-sensible'
 import fp, {PluginOptions} from 'fastify-plugin'
-import {pluginOpts, registerOptions, TypeRpcPlugin} from './utils.rpc.server'
+import {pluginOpts, registerOptions, TypeRpcPlugin} from './${this.hash.toString()}'
 ${this.getImportedTypes(file)}\n`
   }
 
@@ -108,11 +113,12 @@ ${this.getImportedTypes(file)}\n`
   }
 
   private utilsFile(): [string, string] {
-    return ['utils.rpc.server.ts', this.util()]
+    const fileName = this.hash.toString()
+    return [`${fileName}.ts`, this.util()]
   }
 
   private buildServerFileName(file: SourceFile): string {
-    return `${file.getBaseNameWithoutExtension()}.rpc.server.ts`
+    return `${file.getBaseNameWithoutExtension()}.rpc.ts`
   }
 
   public generateTypes(): Code {
