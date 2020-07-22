@@ -186,7 +186,7 @@ export type ${this.responseTypeName(method)} = {
   }
 
   protected getImportedTypes(file: SourceFile): string {
-    return `import {${this.parser.getInterfacesText(file)},${this.parser.getTypeAliasesText(file)},${this.buildRequestTypesImports(file)}} from './${file.getBaseNameWithoutExtension()}.rpc.types'`
+    return `import {${this.parser.getInterfacesText(file)},${this.parser.getTypeAliasesText(file)},${this.buildRequestTypesImports(file)}} from './types/${file.getBaseNameWithoutExtension()}.rpc'`
   }
 
   // builds a list of generated request types to be used when
@@ -233,7 +233,7 @@ export type ${this.responseTypeName(method)} = {
   // in any needed generated code using the code param
   protected generateTypesDefault(code: Code = {}): Code {
     this.parser.sourceFiles.forEach(file => {
-      code[`${file.getBaseNameWithoutExtension()}.rpc.types.ts`] = this.generateTypesFile(file)
+      code[`${file.getBaseNameWithoutExtension()}.rpc.ts`] = this.generateTypesFile(file)
     })
     return code
   }

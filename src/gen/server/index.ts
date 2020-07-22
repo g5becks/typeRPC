@@ -116,7 +116,7 @@ ${this.getImportedTypes(file)}\n`
   }
 
   public generateTypes(): Code {
-    return this.generateTypesDefault('server', {
+    return this.generateTypesDefault({
       'rpc-service.ts': `
 export interface RpcService {
   handleErr(err: Error): void | Promise<void> ;
