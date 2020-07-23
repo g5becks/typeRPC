@@ -52,27 +52,40 @@ ${this.getImportedTypes(file)}\n`
 
                   const [err, data] = await instance.to(${this.lowerCase(serviceName)}.${method.getNameNode().getText().trim()}(${this.buildDestructuredParams(method)}))
                   if (err) {
-                    await ${this.lowerCase(serviceName)}.handleErr(err)
-
+                    await ${this.lowerCase(serviceName)}.handleErr(err, reply)
+                  } else {
+                    reply.send({ data})
                   }
-                reply.send({ data})
             },
         }
     )\n`
   }
 
   // Builds a controller function for an interface definition
-  private buildController(service: InterfaceDeclaration): string {
-    const serviceName = service.getName()
+  private buildService(service: InterfaceDeclaration): string {
+    const serviceName = service.getNameNode().getText()
     let handlers = ''
     service.getMethods().forEach(method => {
       handlers += this.buildRouteHandler(method, serviceName)
     })
     return `
-    export const ${serviceName}Controller = (${this.lowerCase(serviceName)}: ${serviceName}): FastifyPluginAsync => async (instance, _) => {
+    const ${serviceName} = (${this.lowerCase(serviceName)}: ${serviceName}): FastifyPluginAsync => async (instance, _) => {
     ${handlers}
 }\n
  `.trimLeft()
+  }
+
+  private buildController(service: InterfaceDeclaration): string {
+    const serviceName = service.getNameNode().getText()
+    return `
+    ${this.buildService(service)}
+
+    export const ${serviceName}Controller = (${this.lowerCase(serviceName)}: ${serviceName}, logLevel: LogLevel, opts?: PluginOptions): TypeRpcPlugin => {
+      return {plugin: fp(${serviceName}(${this.lowerCase(serviceName)}), pluginOpts('${this.lowerCase(serviceName)}Controller', opts)),
+      opts: registerOptions('/${this.lowerCase(serviceName)}', logLevel)
+      }
+    }\n
+    `
   }
 
   private buildControllersForFile(file: SourceFile): string {

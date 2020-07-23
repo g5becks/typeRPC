@@ -1,6 +1,5 @@
 /* eslint-disable no-useless-constructor */
 /* eslint-disable max-params */
-import {nanoid} from 'nanoid'
 import path from 'path'
 import {Config, createGenerator} from 'ts-json-schema-generator'
 import {InterfaceDeclaration, MethodSignature, ParameterDeclaration, SourceFile} from 'ts-morph'
@@ -28,9 +27,7 @@ const isRequestMethod = (method: string): method is RequestMethod => {
 abstract class Generator {
   protected readonly parser: Parser
 
-  protected readonly id: string = nanoid().toLowerCase()
-
-  constructor(protected readonly tsConfigFilePath: string, protected readonly outputPath: string) {
+  constructor(protected readonly tsConfigFilePath: string, protected readonly outputPath: string, protected readonly jobId: string) {
     this.parser = new Parser(tsConfigFilePath)
   }
 
@@ -226,7 +223,7 @@ export type ${this.responseTypeName(method)} = {
   private generateTypesFile(file: SourceFile): string {
     // build interfaces must be called last because the response
     // types cannot be modifies prior to building response types
-    return `import {RpcService} from './${this.id}'\n${this.buildTypes(file)}${this.buildRequestTypesForFile(file)}${this.buildResponseTypesForFile(file)}${this.buildInterfaces(file)}`
+    return `import {RpcService} from './${this.jobId}'\n${this.buildTypes(file)}${this.buildRequestTypesForFile(file)}${this.buildResponseTypesForFile(file)}${this.buildInterfaces(file)}`
   }
 
   // Generates types for the input schema file
@@ -253,8 +250,8 @@ export type ${this.responseTypeName(method)} = {
  * @extends {Generator}
  */
 export abstract class ServerGenerator extends Generator {
-  constructor(protected readonly tsConfigFilePath: string, protected readonly outputPath: string) {
-    super(tsConfigFilePath, outputPath)
+  constructor(protected readonly tsConfigFilePath: string, protected readonly outputPath: string, protected readonly jobId: string) {
+    super(tsConfigFilePath, outputPath, jobId)
   }
 
   private buildRouteParams(params: ParameterDeclaration[]): string {
@@ -285,8 +282,8 @@ export abstract class ServerGenerator extends Generator {
  * @extends {Generator}
  */
 export abstract class ClientGenerator extends Generator {
-  constructor(protected readonly tsConfigFilePath: string, protected readonly outputPath: string) {
-    super(tsConfigFilePath, outputPath)
+  constructor(protected readonly tsConfigFilePath: string, protected readonly outputPath: string, protected readonly jobId: string) {
+    super(tsConfigFilePath, outputPath, jobId)
   }
 
   public abstract generateTypes(): Code
