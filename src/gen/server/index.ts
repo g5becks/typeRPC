@@ -43,9 +43,9 @@ ${this.getImportedTypes(file)}\n`
             method: '${this.buildRequestMethod(method)}',
             url: ${this.buildServerRoute(method)},
             schema: {
-                ${schemaType}: ${this.requestTypeSchemaName(method)},
+                ${schemaType}: ${hasParams ? this.requestTypeSchemaName(method) : false},
                 response: {
-                    '2xx': ${this.responseTypeSchemeName(method)},
+                    '2xx': ${hasReturn ? this.responseTypeSchemeName(method) : false},
                 },
 
             },
