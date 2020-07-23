@@ -1,8 +1,10 @@
 import {Command, flags} from '@oclif/command'
 import {outputFile, pathExists} from 'fs-extra'
+import Listr from 'listr'
 import {nanoid} from 'nanoid'
 import path from 'path'
 import {Code, generateCode, generateTypes, GeneratorError, isTarget} from './gen'
+import {Target} from './gen/generator'
 
 type OutputType = 'types' | 'rpc'
 
@@ -28,37 +30,84 @@ class TypeRpc extends Command {
     },
   ]
 
+  validateInputs(target: Target, tsConfigFile: string, outputPath: string) {
+    return new Listr([{
+      title: 'Validating Inputs',
+      task: () => new Listr([{
+        title: 'Validating Target',
+        task: () => {
+          if (isTarget(target)) {
+            return true
+          }
+          throw new GeneratorError(`error: invalid target ${target}`)
+        },
+      },
+      {
+        title: 'Validating tsconfig.json',
+        task: async () => this.validateTsConfigFile(tsConfigFile),
+      },
+      {
+        title: 'Validating Output Path',
+        task: () => this.validateOutputPath(outputPath),
+      },
+      {
+        title: 'Validation Successful, Generating JobId',
+        task: () => true,
+      }]),
+    }])
+  }
+
+  generateTypes(target: Target, tsConfigFile: string, outputPath: string, jobId: string) {
+    let types: Code
+    return new Listr([
+
+      {
+        title: `Generating Rpc types for ${target}, jobId: ${jobId}`,
+        task: () => {
+          types = generateTypes(target, tsConfigFile, outputPath, jobId)
+        },
+      },
+      {
+        title: `Saving ${target} types to ${outputPath}`,
+        task: async () => this.writeOutput(outputPath, types, 'types'),
+      },
+    ])
+  }
+
+  generateRpc(target: Target, tsConfigFile: string, outputPath: string, jobId: string) {
+    let code: Code
+    return new Listr([
+      {
+        title: `Generating Rpc code for ${target}, jobId: ${jobId}`,
+        task: () => {
+          code = generateCode(target, tsConfigFile, outputPath, jobId)
+        },
+      },
+      {
+        title: `Saving ${target} Rpc code to ${outputPath}`,
+        task: async () => this.writeOutput(outputPath, code, 'rpc'),
+      },
+    ])
+  }
+
   async run() {
     const {args, flags} = this.parse(TypeRpc)
     const target = args.target.trim()
     const tsConfig = flags.tsConfig?.trim() ?? ''
     const outputPath = flags.output?.trim() ?? ''
-    if (!isTarget(target)) {
-      throw new GeneratorError(`${target} is not a valid target`)
-    }
-    await this.validateTsConfigFile(tsConfig)
-    this.validateOutputPath(outputPath)
-    this.log(`generating code for ${target}`)
-
-    try {
-      const jobId = nanoid().toLowerCase()
-      const types = generateTypes(target, tsConfig, outputPath, jobId)
-      await this.writeOutput(outputPath, types, 'types')
-      const code = generateCode(target, tsConfig, outputPath, jobId)
-      await this.writeOutput(outputPath, code, 'rpc')
-    } catch (error) {
-      this.log(error)
-    }
+    const jobId = nanoid().toLowerCase()
+    await Promise.all(
+      [
+        this.validateInputs(target, tsConfig, outputPath),
+        this.generateTypes(target, tsConfig, outputPath, jobId),
+        this.generateRpc(target, tsConfig, outputPath, jobId),
+      ]
+    )
+    this.log(`JobId: ${jobId} complete, check ${outputPath} for generated ${target} code.`)
   }
 
   async tsconfigFileExists(filePath: string): Promise<boolean> {
-    try {
-      const exists = await pathExists(filePath)
-      return exists
-    } catch (error) {
-      this.log(`error occurred: ${error}, failed to check if tsconfig file exists`)
-      throw error
-    }
+    return pathExists(filePath)
   }
 
   async writeOutput(outputPath: string, code: Code, outputType: OutputType): Promise<void> {
@@ -82,7 +131,6 @@ class TypeRpc extends Command {
   async validateTsConfigFile(tsConfigFile: string): Promise<void> {
     const exists = await this.tsconfigFileExists(tsConfigFile)
     if (tsConfigFile === '' || !exists) {
-      this.log('error: please provide a path to a valid tsconfig.json file')
       throw new Error('tsconfig.json is invalid or does not exist')
     }
   }
@@ -90,8 +138,7 @@ class TypeRpc extends Command {
   // ensure the output path is not empty
   validateOutputPath(outputPath: string): void {
     if (outputPath === '') {
-      this.log('please provide a directory path to write generated output')
-      throw new Error('no output path provided')
+      throw new Error('error: no output path provided')
     }
   }
 }

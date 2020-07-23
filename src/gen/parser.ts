@@ -13,8 +13,6 @@ export class Parser {
   }
 
   constructor(private readonly tsConfigFilePath: string) {
-    // eslint-disable-next-line no-console
-    console.log(tsConfigFilePath)
     this.project = new Project({tsConfigFilePath: tsConfigFilePath, skipFileDependencyResolution: true})
   }
 

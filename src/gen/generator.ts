@@ -124,8 +124,6 @@ export type ${this.responseTypeName(method)} = {
   // Generates a jsonSchema for a single type
   protected buildSchemaForType(filePath: string, type: string): string {
     const config: Config = {path: filePath, type}
-    // eslint-disable-next-line no-console
-    console.log(filePath)
     try {
       return `export const ${type}Schema = ${JSON.stringify(createGenerator(config).createSchema(config.type), null, 2)}\n`
     } catch (error) {
