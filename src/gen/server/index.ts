@@ -14,37 +14,13 @@ export class FastifyGenerator extends ServerGenerator {
     super(tsConfigFilePath, outputPath)
   }
 
-  private util() {
-    return `
-import {FastifyPluginCallback, LogLevel, RegisterOptions} from 'fastify'
-import {PluginOptions} from 'fastify-plugin'
-
-export const pluginOpts = (name: string, opts?: PluginOptions): PluginOptions => {
-  return {
-    ...opts,
-    fastify: '3.x',
-    name,
-  }
-}
-
-export type TypeRpcPlugin = {
-  plugin: FastifyPluginCallback;
-  opts: RegisterOptions;
-}
-
-export const registerOptions = (prefix: string, logLevel: LogLevel): RegisterOptions => {
-  return {prefix, logLevel}
-}
-`
-  }
-
   private imports(file: SourceFile): string {
     return `
 /* eslint-disable new-cap */
 import {FastifyPluginAsync, LogLevel} from 'fastify'
 import fastifySensible from 'fastify-sensible'
 import fp, {PluginOptions} from 'fastify-plugin'
-import {pluginOpts, registerOptions, TypeRpcPlugin} from './${this.versionHash}'
+import {pluginOpts, registerOptions, TypeRpcPlugin} from './types/${this.id}'
 ${this.getImportedTypes(file)}\n`
   }
 
@@ -108,27 +84,47 @@ ${this.getImportedTypes(file)}\n`
     return controllers
   }
 
-  private utilsFile(): [string, string] {
-    return [`${this.versionHash}.ts`, this.util()]
-  }
-
   private buildServerFileName(file: SourceFile): string {
     return `${file.getBaseNameWithoutExtension()}.rpc.ts`
   }
 
-  public generateTypes(): Code {
-    const file = `${this.versionHash}.ts`
-    return this.generateTypesDefault({
-      [file]: `
+  private typesCode(): string {
+    return `
+import {FastifyPluginCallback, LogLevel, RegisterOptions, FastifyReply} from 'fastify'
+import {PluginOptions} from 'fastify-plugin'
+
+export const pluginOpts = (name: string, opts?: PluginOptions): PluginOptions => {
+  return {
+    ...opts,
+    fastify: '3.x',
+    name,
+  }
+}
+
+export type TypeRpcPlugin = {
+  plugin: FastifyPluginCallback;
+  opts: RegisterOptions;
+}
+
+export const registerOptions = (prefix: string, logLevel: LogLevel): RegisterOptions => {
+  return {prefix, logLevel}
+}
+
 export interface RpcService {
-  handleErr(err: Error): void | Promise<void> ;
-}`})
+  handleErr(err: Error, reply: FastifyReply): void | Promise<void> ;
+}
+`
+  }
+
+  public generateTypes(): Code {
+    const file = `${this.id}.ts`
+    return this.generateTypesDefault({
+      [file]: this.typesCode(),
+    })
   }
 
   public generateRpc(): Code {
     const code: Code = {}
-    const util = this.utilsFile()
-    code[util[0]] = util[1]
     for (const file of this.parser.sourceFiles) {
       const schemas = this.buildShemasForFile(file)
       const controllers = this.buildControllersForFile(file)

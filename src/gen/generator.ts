@@ -1,8 +1,8 @@
 /* eslint-disable no-useless-constructor */
 /* eslint-disable max-params */
+import {nanoid} from 'nanoid'
 import path from 'path'
 import {Config, createGenerator} from 'ts-json-schema-generator'
-import {Md5} from 'ts-md5/dist/md5'
 import {InterfaceDeclaration, MethodSignature, ParameterDeclaration, SourceFile} from 'ts-morph'
 import {GeneratorError} from '.'
 import {Parser} from './parser'
@@ -28,7 +28,7 @@ const isRequestMethod = (method: string): method is RequestMethod => {
 abstract class Generator {
   protected readonly parser: Parser
 
-  protected readonly versionHash: string = Md5.hashStr(Date.now().toLocaleString()).toString()
+  protected readonly id: string = nanoid()
 
   constructor(protected readonly tsConfigFilePath: string, protected readonly outputPath: string) {
     this.parser = new Parser(tsConfigFilePath)
@@ -226,7 +226,7 @@ export type ${this.responseTypeName(method)} = {
   private generateTypesFile(file: SourceFile): string {
     // build interfaces must be called last because the response
     // types cannot be modifies prior to building response types
-    return `import {RpcService} from './${this.versionHash}'\n${this.buildTypes(file)}${this.buildRequestTypesForFile(file)}${this.buildResponseTypesForFile(file)}${this.buildInterfaces(file)}`
+    return `import {RpcService} from './${this.id}'\n${this.buildTypes(file)}${this.buildRequestTypesForFile(file)}${this.buildResponseTypesForFile(file)}${this.buildInterfaces(file)}`
   }
 
   // Generates types for the input schema file
