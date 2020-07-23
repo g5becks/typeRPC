@@ -63,38 +63,38 @@ ${this.getImportedTypes(file)}\n`
   }
 
   // Builds a controller function for an interface definition
-  private buildService(service: InterfaceDeclaration): string {
+  private buildController(service: InterfaceDeclaration): string {
     const serviceName = service.getNameNode().getText()
     let handlers = ''
     service.getMethods().forEach(method => {
       handlers += this.buildRouteHandler(method, serviceName)
     })
     return `
-    const ${serviceName} = (${this.lowerCase(serviceName)}: ${serviceName}): FastifyPluginAsync => async (instance, _) => {
+    const ${serviceName}Controller = (${this.lowerCase(serviceName)}: ${serviceName}): FastifyPluginAsync => async (instance, _) => {
       instance.register(fastifySensible)
     ${handlers}
 }\n
  `.trimLeft()
   }
 
-  private buildController(service: InterfaceDeclaration): string {
+  private buildPlugin(service: InterfaceDeclaration): string {
     const serviceName = service.getNameNode().getText()
     return `
-    ${this.buildService(service)}
+    ${this.buildController(service)}
 
-    export const ${serviceName}Controller = (${this.lowerCase(serviceName)}: ${serviceName}, logLevel: LogLevel, opts?: PluginOptions): TypeRpcPlugin => {
-      return {plugin: fp(${serviceName}(${this.lowerCase(serviceName)}), pluginOpts('${this.lowerCase(serviceName)}Controller', opts)),
+    export const ${serviceName}Plugin = (${this.lowerCase(serviceName)}: ${serviceName}, logLevel: LogLevel, opts?: PluginOptions): TypeRpcPlugin => {
+      return {plugin: fp(${serviceName}Controller(${this.lowerCase(serviceName)}), pluginOpts('${this.lowerCase(serviceName)}Controller', opts)),
       opts: registerOptions('/${this.lowerCase(serviceName)}', logLevel)
       }
     }\n
     `
   }
 
-  private buildControllersForFile(file: SourceFile): string {
+  private buildPluginsForFile(file: SourceFile): string {
     const services = this.parser.getInterfaces(file)
     let controllers = ''
     for (const service of services) {
-      controllers += this.buildController(service)
+      controllers += this.buildPlugin(service)
     }
     return controllers
   }
@@ -143,7 +143,7 @@ export interface RpcService {
     const code: Code = {}
     for (const file of this.parser.sourceFiles) {
       const schemas = this.buildShemasForFile(file)
-      const controllers = this.buildControllersForFile(file)
+      const controllers = this.buildPluginsForFile(file)
       code[this.buildServerFileName(file)] = `${this.imports(file)}${this.fileHeader()}${schemas}${controllers}`
     }
     return code

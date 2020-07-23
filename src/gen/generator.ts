@@ -50,9 +50,11 @@ abstract class Generator {
 \n`
   }
 
-  protected schemasHeader(method: MethodSignature, schemaType: SchemaType): string {
+  protected schemaComment(service: InterfaceDeclaration, method: MethodSignature, schemaType: SchemaType): string {
     return `
-// ${method.getNameNode().getText().trim()} ${schemaType} Schema\n`
+/**
+* {@link ${this.capitalize(service.getNameNode().getText().trim())}#${method.getNameNode().getText().trim()}} ${this.capitalize(schemaType)} Schema
+*/`
   }
 
   protected capitalize(text: string): string {
@@ -146,10 +148,13 @@ export type ${this.responseTypeName(method)} = {
   }
 
   // Generates a jsonSchema for a single type
-  protected buildSchemaForType(filePath: string, type: string): string {
+  protected buildSchemaForType(filePath: string, type: string, service: InterfaceDeclaration, method: MethodSignature, schemaType: SchemaType): string {
     const config: Config = {path: filePath, type}
     try {
-      return `export const ${type}Schema = ${JSON.stringify(createGenerator(config).createSchema(config.type), null, 2)}\n`
+      return `
+${this.schemaComment(service, method, schemaType)}
+export const ${type}Schema = ${JSON.stringify(createGenerator(config).createSchema(config.type), null, 2)}\n
+`
     } catch (error) {
       throw new GeneratorError(error)
     }
@@ -159,36 +164,31 @@ export type ${this.responseTypeName(method)} = {
   // used in subclasses during code generation to prevent string
   // concatenation and spelling mistakes
   protected requestTypeSchemaName(method: MethodSignature): string {
-    return `${this.schemasHeader(method, 'request')}${this.requestTypeName(method)}Schema`
+    return `${this.requestTypeName(method)}Schema`
   }
 
   // creates request schema variable name
   // used in subclasses during code generation to prevent string
   // concatenation and spelling mistakes
   protected responseTypeSchemeName(method: MethodSignature): string {
-    return `${this.schemasHeader(method, 'response')}${this.responseTypeName(method)}Schema`
+    return `${this.responseTypeName(method)}Schema`
   }
 
   // builds json schema for all request and response types
   // in a generated types file
   protected buildShemasForFile(file: SourceFile): string {
     const typesFile = this.getGeneratedTypesFilePath(file)
-    const methods = this.parser.getMethodsForFile(file)
-    const requestTypes: string[] = []
-    methods.forEach(method => {
-      if (method.getParameters().length > 0) {
-        requestTypes.push(this.requestTypeName(method))
-      }
-    })
-    const responseTypes: string[] = []
-    methods.forEach(method => {
-      responseTypes.push(this.responseTypeName(method))
-    })
-    const types = requestTypes.concat(...responseTypes)
+
     let schema = ''
-    for (const type of types) {
-      schema += this.buildSchemaForType(typesFile, type)
+    for (const service of this.parser.getInterfaces(file)) {
+      for (const method of this.parser.getMethodsForInterface(service)) {
+        if (method.getParameters().length > 0) {
+          schema += this.buildSchemaForType(typesFile, this.requestTypeName(method), service, method, 'request')
+        }
+        schema += this.buildSchemaForType(typesFile, this.responseTypeName(method), service, method, 'response')
+      }
     }
+
     return schema
   }
 
