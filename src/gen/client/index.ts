@@ -16,7 +16,7 @@ export class AxiosGenerator extends ClientGenerator {
   }
 
   // eslint-disable-next-line no-useless-constructor
-  constructor(protected tsConfigFilePath: string, protected readonly outputPath: string) {
-    super(tsConfigFilePath, outputPath)
+  constructor(protected tsConfigFilePath: string, protected readonly outputPath: string, protected readonly jobId: string) {
+    super(tsConfigFilePath, outputPath, jobId)
   }
 }
