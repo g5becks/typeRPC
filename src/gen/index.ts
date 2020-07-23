@@ -20,13 +20,13 @@ export class GeneratorError extends Error {
   }
 }
 
-export const generateTypes = (target: Target, tsConfigFilePath: string, outputPath: string) => {
-  const generator = target === 'client' ? new AxiosGenerator(tsConfigFilePath, outputPath) : new FastifyGenerator(tsConfigFilePath, outputPath)
+export const generateTypes = (target: Target, tsConfigFilePath: string, outputPath: string, jobId: string) => {
+  const generator = target === 'client' ? new AxiosGenerator(tsConfigFilePath, outputPath) : new FastifyGenerator(tsConfigFilePath, outputPath, jobId)
   return generator.generateTypes()
 }
 
-export const generateCode = (target: Target, tsConfigFilePath: string, outputPath: string): Code => {
-  const generator = target === 'client' ? new AxiosGenerator(tsConfigFilePath, outputPath) : new FastifyGenerator(tsConfigFilePath, outputPath)
+export const generateCode = (target: Target, tsConfigFilePath: string, outputPath: string, jobId: string): Code => {
+  const generator = target === 'client' ? new AxiosGenerator(tsConfigFilePath, outputPath) : new FastifyGenerator(tsConfigFilePath, outputPath, jobId)
   return generator.generateRpc()
 }
 

@@ -10,8 +10,8 @@ import {Code, ServerGenerator} from '../generator'
  */
 export class FastifyGenerator extends ServerGenerator {
   // eslint-disable-next-line no-useless-constructor
-  constructor(protected tsConfigFilePath: string, protected readonly outputPath: string) {
-    super(tsConfigFilePath, outputPath)
+  constructor(protected tsConfigFilePath: string, protected readonly outputPath: string, protected readonly jobId: string) {
+    super(tsConfigFilePath, outputPath, jobId)
   }
 
   private imports(file: SourceFile): string {
@@ -20,7 +20,7 @@ export class FastifyGenerator extends ServerGenerator {
 import {FastifyPluginAsync, LogLevel} from 'fastify'
 import fastifySensible from 'fastify-sensible'
 import fp, {PluginOptions} from 'fastify-plugin'
-import {pluginOpts, registerOptions, TypeRpcPlugin} from './types/${this.id}'
+import {pluginOpts, registerOptions, TypeRpcPlugin} from './types/${this.jobId}'
 ${this.getImportedTypes(file)}\n`
   }
 
@@ -130,7 +130,7 @@ export interface RpcService {
   }
 
   public generateTypes(): Code {
-    const file = `${this.id}.ts`
+    const file = `${this.jobId}.ts`
     return this.generateTypesDefault({
       [file]: this.typesCode(),
     })
