@@ -182,10 +182,12 @@ export const ${type}Schema = ${JSON.stringify(createGenerator(config).createSche
     let schema = ''
     for (const service of this.parser.getInterfaces(file)) {
       for (const method of this.parser.getMethodsForInterface(service)) {
-        if (method.getParameters().length > 0) {
+        if (this.parser.hasParams(method)) {
           schema += this.buildSchemaForType(typesFile, this.requestTypeName(method), service, method, 'request')
         }
-        schema += this.buildSchemaForType(typesFile, this.responseTypeName(method), service, method, 'response')
+        if (this.parser.hasReturn(method)) {
+          schema += this.buildSchemaForType(typesFile, this.responseTypeName(method), service, method, 'response')
+        }
       }
     }
 
