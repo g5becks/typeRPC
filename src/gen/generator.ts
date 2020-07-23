@@ -50,7 +50,7 @@ abstract class Generator {
 \n`
   }
 
-  protected schemaComment(service: InterfaceDeclaration, method: MethodSignature, schemaType: SchemaType): string {
+  protected schemaDoc(service: InterfaceDeclaration, method: MethodSignature, schemaType: SchemaType): string {
     return `
 /**
 * {@link ${this.capitalize(service.getNameNode().getText().trim())}Controller} /${method.getNameNode().getText().trim()} ${this.capitalize(schemaType)} Schema
@@ -152,7 +152,7 @@ export type ${this.responseTypeName(method)} = {
     const config: Config = {path: filePath, type}
     try {
       return `
-${this.schemaComment(service, method, schemaType)}
+${this.schemaDoc(service, method, schemaType)}
 export const ${type}Schema = ${JSON.stringify(createGenerator(config).createSchema(config.type), null, 2)}\n
 `
     } catch (error) {
