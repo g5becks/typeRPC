@@ -108,6 +108,7 @@ ${this.getImportedTypes(file)}\n`
 import {FastifyPluginCallback, LogLevel, RegisterOptions, FastifyReply} from 'fastify'
 import {PluginOptions} from 'fastify-plugin'
 
+${this.fileHeader()}
 export const pluginOpts = (name: string, opts?: PluginOptions): PluginOptions => {
   return {
     ...opts,
@@ -143,7 +144,7 @@ export interface RpcService {
     for (const file of this.parser.sourceFiles) {
       const schemas = this.buildShemasForFile(file)
       const controllers = this.buildControllersForFile(file)
-      code[this.buildServerFileName(file)] = `${this.imports(file)}${schemas}${controllers}`
+      code[this.buildServerFileName(file)] = `${this.imports(file)}${this.fileHeader()}${schemas}${controllers}`
     }
     return code
   }
