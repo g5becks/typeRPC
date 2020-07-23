@@ -43,7 +43,7 @@ abstract class Generator {
 // EDITING BY HAND IS DISCOURAGED
 // EDITING SCHEMAS AND REGENERATING IS PREFERRED
 // ****************************************************
-`
+\n`
   }
 
   protected capitalize(text: string): string {

@@ -38,7 +38,6 @@ ${this.getImportedTypes(file)}\n`
     const payLoad = this.isGetMethod(method) ? 'query' : 'body'
     const parsePayload = `const {${this.buildDestructuredParams(method)}} = request.${payLoad}`
     return `
-    instance.register(fastifySensible)
     instance.route<${this.getIncomingMessageType(method)}>(
         {
             method: '${this.buildRequestMethod(method)}',
@@ -72,6 +71,7 @@ ${this.getImportedTypes(file)}\n`
     })
     return `
     const ${serviceName} = (${this.lowerCase(serviceName)}: ${serviceName}): FastifyPluginAsync => async (instance, _) => {
+      instance.register(fastifySensible)
     ${handlers}
 }\n
  `.trimLeft()
