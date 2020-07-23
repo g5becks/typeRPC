@@ -52,7 +52,7 @@ ${this.getImportedTypes(file)}\n`
 
                   const [err, data] = await instance.to(${this.lowerCase(serviceName)}.${method.getNameNode().getText().trim()}(${this.buildDestructuredParams(method)}))
                   if (err) {
-                    await ${this.lowerCase(serviceName)}.handleErr(err, reply)
+                    return ${this.lowerCase(serviceName)}.handleErr(err, reply)
                   } else {
                     reply.send({ data})
                   }
@@ -124,7 +124,7 @@ export const registerOptions = (prefix: string, logLevel: LogLevel): RegisterOpt
 }
 
 export interface RpcService {
-  handleErr(err: Error, reply: FastifyReply): void | Promise<void> ;
+  handleErr(err: Error, reply: FastifyReply): FastifyReply;
 }
 `
   }
