@@ -96,13 +96,11 @@ class TypeRpc extends Command {
     const tsConfig = flags.tsConfig?.trim() ?? ''
     const outputPath = flags.output?.trim() ?? ''
     const jobId = nanoid().toLowerCase()
-    await Promise.all(
-      [
-        this.validateInputs(target, tsConfig, outputPath),
-        this.generateTypes(target, tsConfig, outputPath, jobId),
-        this.generateRpc(target, tsConfig, outputPath, jobId),
-      ]
-    )
+
+    await this.validateInputs(target, tsConfig, outputPath).run()
+    await this.generateTypes(target, tsConfig, outputPath, jobId).run()
+    await this.generateRpc(target, tsConfig, outputPath, jobId).run()
+
     this.log(`JobId: ${jobId} complete, check ${outputPath} for generated ${target} code.`)
   }
 
