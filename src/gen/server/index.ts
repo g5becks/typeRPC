@@ -32,6 +32,8 @@ ${this.getImportedTypes(file)}\n`
   }
 
   private buildRouteHandler(method: MethodSignature, serviceName: string): string {
+    const hasParams = this.parser.hasParams(method)
+    const hasReturn = this.parser.hasReturn(method)
     const schemaType = this.isGetMethod(method) ? 'querystring' : 'body'
     const payLoad = this.isGetMethod(method) ? 'query' : 'body'
     return `

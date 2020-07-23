@@ -16,6 +16,19 @@ export class Parser {
     this.project = new Project({tsConfigFilePath: tsConfigFilePath, skipFileDependencyResolution: true})
   }
 
+  hasParams(method: MethodSignature): boolean {
+    return method.getParameters().length > 0
+  }
+
+  hasReturn(method: MethodSignature): boolean {
+    const nonValids = ['void', 'Promise<void>', '', 'undefined']
+    const returnType = method.getReturnTypeNode()?.getText().trim()
+    if (typeof returnType !== 'undefined') {
+      return !nonValids.includes(returnType)
+    }
+    return false
+  }
+
   // determines if the interface extends RpcService interface
   isRpcService(service: InterfaceDeclaration): boolean {
     return service.getExtends().some(clause => clause.getText().trim() === 'RpcService')
