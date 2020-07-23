@@ -53,7 +53,7 @@ class TypeRpc extends Command {
       {
         title: 'Validation Successful, Generating JobId',
         task: () => true,
-      }]),
+      }], {concurrent: true}),
     }])
   }
 
