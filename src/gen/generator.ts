@@ -53,7 +53,7 @@ abstract class Generator {
   protected schemaComment(service: InterfaceDeclaration, method: MethodSignature, schemaType: SchemaType): string {
     return `
 /**
-* {@link ${this.capitalize(service.getNameNode().getText().trim())}#${method.getNameNode().getText().trim()}} ${this.capitalize(schemaType)} Schema
+* {@link ${this.capitalize(service.getNameNode().getText().trim())}Controller} /${method.getNameNode().getText().trim()} ${this.capitalize(schemaType)} Schema
 */`
   }
 
