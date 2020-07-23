@@ -1,5 +1,6 @@
 import {Command, flags} from '@oclif/command'
 import {outputFile, pathExists} from 'fs-extra'
+import {nanoid} from 'nanoid'
 import path from 'path'
 import {Code, generateCode, generateTypes, GeneratorError, isTarget} from './gen'
 
@@ -40,9 +41,10 @@ class TypeRpc extends Command {
     this.log(`generating code for ${target}`)
 
     try {
-      const types = generateTypes(target, tsConfig, outputPath)
+      const jobId = nanoid().toLowerCase()
+      const types = generateTypes(target, tsConfig, outputPath, jobId)
       await this.writeOutput(outputPath, types, 'types')
-      const code = generateCode(target, tsConfig, outputPath)
+      const code = generateCode(target, tsConfig, outputPath, jobId)
       await this.writeOutput(outputPath, code, 'rpc')
     } catch (error) {
       this.log(error)
