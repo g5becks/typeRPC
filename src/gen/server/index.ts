@@ -36,6 +36,7 @@ ${this.getImportedTypes(file)}\n`
     const hasReturn = this.parser.hasReturn(method)
     const schemaType = this.isGetMethod(method) ? 'querystring' : 'body'
     const payLoad = this.isGetMethod(method) ? 'query' : 'body'
+    const parsePayload = `const {${this.buildDestructuredParams(method)}} = request.${payLoad}`
     return `
     instance.register(fastifySensible)
     instance.route<${this.getIncomingMessageType(method)}>(
@@ -50,13 +51,12 @@ ${this.getImportedTypes(file)}\n`
 
             },
             handler: async (request, reply) => {
-                const {${this.buildDestructuredParams(method)}} = request.${payLoad}
-
-                  const [err, data] = await instance.to(${this.lowerCase(serviceName)}.${method.getNameNode().getText().trim()}(${this.buildDestructuredParams(method)}))
+                  ${hasParams ? parsePayload : ''}
+                  const [err${hasReturn ? ', data' : ''}] = await instance.to(${this.lowerCase(serviceName)}.${method.getNameNode().getText().trim()}(${hasParams ? this.buildDestructuredParams(method) : ''}))
                   if (err) {
                     return ${this.lowerCase(serviceName)}.handleErr(err, reply)
                   } else {
-                    reply.send({ data})
+                    reply.send(${hasReturn ? '{data}' : ''})
                   }
             },
         }
