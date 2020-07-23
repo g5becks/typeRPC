@@ -28,7 +28,7 @@ const isRequestMethod = (method: string): method is RequestMethod => {
 abstract class Generator {
   protected readonly parser: Parser
 
-  protected readonly id: string = nanoid()
+  protected readonly id: string = nanoid().toLowerCase()
 
   constructor(protected readonly tsConfigFilePath: string, protected readonly outputPath: string) {
     this.parser = new Parser(tsConfigFilePath)
