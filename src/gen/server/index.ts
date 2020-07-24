@@ -65,8 +65,9 @@ ${this.getImportedTypes(file)}\n`
   private controllerDoc(serviceName: string): string {
     return `
 /**
-* Http Controller for {@link ${serviceName}}
+* Creates an Http Controller for {@link ${serviceName}}
 *
+* @function ${serviceName}Controller
 * @param {${serviceName}} ${this.lowerCase(serviceName)} ${serviceName} Implementation
 * @returns {FastifyPluginAsync} fastify plugin instance
 */`
@@ -93,6 +94,7 @@ ${this.controllerDoc(serviceName)}
 /**
 * Creates a {@link TypeRpcPlugin} for {@link ${serviceName}}
 *
+* @function ${serviceName}Plugin
 * @param {${serviceName}} ${this.lowerCase(serviceName)} ${serviceName} Implementation
 * @param {LogLevel} logLevel for this plugin
 * @param {PluginOptions} opts options for this plugin
@@ -138,6 +140,7 @@ ${this.fileHeader()}
  * Creates an implementation of {@link PluginOptions} for a fastify-plugin
  * @see {@link https://github.com/fastify/fastify-plugin#metadata}
  *
+ * @function pluginOpts
  * @param {string} name @see {@link https://github.com/fastify/fastify-plugin#name}
  * @param {PluginOptions} opts additional options for the generated plugin
  * @returns {PluginOptions} PluginOptions
@@ -166,6 +169,7 @@ export type TypeRpcPlugin = {
 /**
  * A helper function used for creating {@link RegisterOptions}
  *
+ * @function registerOptions
  * @param {string} prefix prefix for the routes @see {@link https://www.fastify.io/docs/latest/Plugins/#plugin-options}
  * @param {LogLevel} logLevel logLevel for the plugin
  * @returns {RegisterOptions} returns the RegisterOptions
