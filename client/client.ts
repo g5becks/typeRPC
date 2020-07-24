@@ -18,7 +18,26 @@ export class AxiosBookService implements BookService {
   }
 
   protected stringify(): string {
-    fastJson()
+    const stringify = fastJson({
+      title: 'Example Schema',
+      type: 'object',
+      properties: {
+        firstName: {
+          type: 'string',
+        },
+        lastName: {
+          type: 'string',
+        },
+        age: {
+          description: 'Age in years',
+          type: 'integer',
+        },
+        reg: {
+          type: 'string',
+        },
+      },
+    })
+    return stringify({})
   }
 
   async getBooksByPublisher(publisher: string, publisherName: string): Promise<Book[]> {

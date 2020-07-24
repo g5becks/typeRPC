@@ -152,7 +152,13 @@ export type ${this.responseTypeName(method)} = {
     return returnTypes
   }
 
+  protected buildRpcFileName(file: SourceFile): string {
+    return `${file.getBaseNameWithoutExtension()}.rpc.ts`
+  }
+
   // Generates a jsonSchema for a single type
+  // if target is server, if target is client
+  // generates a fastJson function to call
   protected buildSchemaForType(filePath: string, type: string, service: InterfaceDeclaration, method: MethodSignature, schemaType: SchemaType): string {
     const config: Config = {path: filePath, type}
     try {

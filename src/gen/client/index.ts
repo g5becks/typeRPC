@@ -1,4 +1,4 @@
-import {ClientGenerator, Code, Target} from '../generator'
+import { ClientGenerator, Code, Target } from '../generator'
 /**
  * Generates client side code using https://www.npmjs.com/package/axios
  *
@@ -69,6 +69,12 @@ export type RpcClientConfig = {
   }
 
   generateRpc(): Code {
-    return {}
+    const code: Code = {}
+    for (const file of this.parser.sourceFiles) {
+      const schemas = this.buildShemasForFile(file)
+      code[this.buildServerFileName(file)] = `${this.imports(file)}${this.fileHeader()}${schemas}$`
+    }
+    return code
+  }
   }
 }

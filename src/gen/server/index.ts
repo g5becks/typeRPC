@@ -125,10 +125,6 @@ ${this.controllerDoc(serviceName)}
     return controllers
   }
 
-  private buildServerFileName(file: SourceFile): string {
-    return `${file.getBaseNameWithoutExtension()}.rpc.ts`
-  }
-
   private typesCode(): string {
     return `
 // eslint-disable-next-line unicorn/filename-case
@@ -211,7 +207,7 @@ export interface RpcService {
     for (const file of this.parser.sourceFiles) {
       const schemas = this.buildShemasForFile(file)
       const controllers = this.buildPluginsForFile(file)
-      code[this.buildServerFileName(file)] = `${this.imports(file)}${this.fileHeader()}${schemas}${controllers}`
+      code[this.buildRpcFileName(file)] = `${this.imports(file)}${this.fileHeader()}${schemas}${controllers}`
     }
     return code
   }
