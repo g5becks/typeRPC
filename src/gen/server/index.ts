@@ -1,5 +1,6 @@
 import {InterfaceDeclaration, MethodSignature, SourceFile} from 'ts-morph'
 import {Code, ServerGenerator} from '../generator'
+import {server} from './server'
 
 /**
  * Generates server side code using https://www.fastify.io/
@@ -206,7 +207,7 @@ export interface RpcService {
   }
 
   public generateRpc(): Code {
-    const code: Code = {}
+    const code: Code = {...server}
     for (const file of this.parser.sourceFiles) {
       const schemas = this.buildShemasForFile(file)
       const controllers = this.buildPluginsForFile(file)
