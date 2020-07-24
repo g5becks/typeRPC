@@ -83,7 +83,7 @@ ${this.getImportedTypes(file)}
     const code: Code = {}
     for (const file of this.parser.sourceFiles) {
       const schemas = this.buildShemasForFile(file)
-      code[this.buildRpcFileName(file)] = `${this.imports(file)}${this.fileHeader()}${schemas}$`
+      code[this.buildRpcFileName(file)] = `${this.imports(file)}${this.fileHeader()}${schemas}`
     }
     return code
   }
