@@ -107,9 +107,9 @@ abstract class Generator {
     if (params.length === 0) {
       return ''
     }
-    params.forEach(param => {
+    for (const param of params) {
       typeParams += `${param.getText().trim()};\n`
-    })
+    }
     return `
 export type ${this.requestTypeName(method)} = {
   ${typeParams}
@@ -122,9 +122,9 @@ export type ${this.requestTypeName(method)} = {
   protected buildRequestTypesForFile(file: SourceFile): string {
     const methods = this.parser.getMethodsForFile(file)
     let inputTypes = ''
-    methods.forEach(method => {
+    for (const method of methods) {
       inputTypes += `${this.buildRequestType(method)}`
-    })
+    }
     return `${inputTypes}`
   }
 
