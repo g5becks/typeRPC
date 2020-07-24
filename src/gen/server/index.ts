@@ -1,5 +1,5 @@
-import {InterfaceDeclaration, MethodSignature, SourceFile} from 'ts-morph'
-import {Code, ServerGenerator} from '../generator'
+import { InterfaceDeclaration, MethodSignature, SourceFile } from 'ts-morph'
+import { Code, ServerGenerator } from '../generator'
 
 /**
  * Generates server side code using https://www.fastify.io/
@@ -62,6 +62,15 @@ ${this.getImportedTypes(file)}\n`
     )\n`
   }
 
+  private controllerDoc(serviceName: string): string {
+    return `
+/**
+* Http Controller for {@link ${serviceName}}
+* @param {${serviceName}} ${this.lowerCase(serviceName)} ${serviceName} Implementation
+* @returns {FastifyPluginAsync} fastify plugin instance
+*/`
+  }
+
   // Builds a controller function for an interface definition
   private buildController(service: InterfaceDeclaration): string {
     const serviceName = service.getNameNode().getText()
@@ -70,6 +79,7 @@ ${this.getImportedTypes(file)}\n`
       handlers += this.buildRouteHandler(method, serviceName)
     }
     return `
+${this.controllerDoc(serviceName)}
     const ${serviceName}Controller = (${this.lowerCase(serviceName)}: ${serviceName}): FastifyPluginAsync => async (instance, _) => {
       instance.register(fastifySensible)
     ${handlers}
