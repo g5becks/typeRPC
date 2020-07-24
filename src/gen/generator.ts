@@ -173,9 +173,18 @@ export const ${type}Schema = ${schema}\n
   }
 
   protected buildStringifyFuncForType(type: string, schema: string): string {
+    const parsed = JSON.parse(schema)
+    // eslint-disable-next-line no-console
+    console.log(parsed)
+    const gotten = parsed.definitions[type]
+    const json = JSON.stringify(gotten)
+    // eslint-disable-next-line no-console
+    console.log(`attempting to use ${type} to get data`)
+    // eslint-disable-next-line no-console
+    console.log(`got data ${json}`)
     return `
 const ${type}Stringify = fastJson(
-  ${schema}
+  ${json}
 )
     `
   }
