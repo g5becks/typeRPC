@@ -133,6 +133,15 @@ import {FastifyPluginCallback, LogLevel, RegisterOptions, FastifyReply} from 'fa
 import {PluginOptions} from 'fastify-plugin'
 
 ${this.fileHeader()}
+
+/**
+ * Creates an implementation of {@link PluginOptions} for a fastify-plugin
+ * @see {@link https://github.com/fastify/fastify-plugin#metadata}
+ *
+ * @param {string} name @see {@link https://github.com/fastify/fastify-plugin#name}
+ * @param {PluginOptions} opts additional options for the generated plugin
+ * @returns {PluginOptions} PluginOptions
+ */
 export const pluginOpts = (name: string, opts?: PluginOptions): PluginOptions => {
   return {
     ...opts,
@@ -141,6 +150,14 @@ export const pluginOpts = (name: string, opts?: PluginOptions): PluginOptions =>
   }
 }
 
+/**
+ * Used as a container for the plugin and the options to pass to
+ * fastify.register() function @see {@link https://www.fastify.io/docs/latest/TypeScript/#register}
+ *
+ * @type {object}
+ * @property {FastifyPluginCallback} plugin the plugin to register
+ * @property {RegisterOptions} opts options to pass to register function
+ */
 export type TypeRpcPlugin = {
   plugin: FastifyPluginCallback;
   opts: RegisterOptions;
