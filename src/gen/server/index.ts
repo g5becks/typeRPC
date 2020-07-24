@@ -1,5 +1,5 @@
 import {InterfaceDeclaration, MethodSignature, SourceFile} from 'ts-morph'
-import {Code, ServerGenerator} from '../generator'
+import {Code, ServerGenerator, Target} from '../generator'
 import {server} from './server'
 
 /**
@@ -11,8 +11,8 @@ import {server} from './server'
  */
 export class FastifyGenerator extends ServerGenerator {
   // eslint-disable-next-line no-useless-constructor
-  constructor(protected tsConfigFilePath: string, protected readonly outputPath: string, protected readonly jobId: string) {
-    super(tsConfigFilePath, outputPath, jobId)
+  constructor(protected readonly target: Target, protected tsConfigFilePath: string, protected readonly outputPath: string, protected readonly jobId: string) {
+    super(target, tsConfigFilePath, outputPath, jobId)
   }
 
   private imports(file: SourceFile): string {
