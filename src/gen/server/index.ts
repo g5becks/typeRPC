@@ -163,6 +163,13 @@ export type TypeRpcPlugin = {
   opts: RegisterOptions;
 }
 
+/**
+ * A helper function used for creating {@link RegisterOptions}
+ *
+ * @param {string} prefix prefix for the routes @see {@link https://www.fastify.io/docs/latest/Plugins/#plugin-options}
+ * @param {LogLevel} logLevel logLevel for the plugin
+ * @returns {RegisterOptions} returns the RegisterOptions
+ */
 export const registerOptions = (prefix: string, logLevel: LogLevel): RegisterOptions => {
   return {prefix, logLevel}
 }
