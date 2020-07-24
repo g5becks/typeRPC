@@ -6,6 +6,8 @@ import {InterfaceDeclaration, MethodSignature, ParameterDeclaration, SourceFile}
 import {GeneratorError} from '.'
 import {Parser} from './parser'
 
+// TODO Convert All forEach loops and map calls to for of loops
+// TODO ADD full support for jsDoc comments of all code
 export type Code = {
   [key: string]: string;
 }
