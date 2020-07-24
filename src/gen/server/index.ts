@@ -178,7 +178,21 @@ export const registerOptions = (prefix: string, logLevel: LogLevel): RegisterOpt
   return {prefix, logLevel}
 }
 
+/**
+ * Interface that all generated RpcServices inherit
+ *
+ * @interface RpcService
+ */
 export interface RpcService {
+  /**
+   * Used for error handling inside of generated
+   * fastify handler functions
+   *
+   * @param {Error} err error that occurred when calling interface method
+   * @param {FastifyReply} reply instance of {@link FastifyReply} used to send a reply to the client
+   * @returns {FastifyReply}
+   * @memberof RpcService
+   */
   handleErr(err: Error, reply: FastifyReply): FastifyReply;
 }
 `
