@@ -14,6 +14,19 @@ export class AxiosGenerator extends ClientGenerator {
 
   private typesCode(): string {
     return `
+export const isValidHttpUrl = (urlString: string): boolean => {
+  let url: URL
+
+  try {
+    // eslint-disable-next-line node/no-unsupported-features/node-builtins
+    url = new URL(urlString)
+  } catch (_) {
+    return false
+  }
+
+  return url.protocol === 'http:' || url.protocol === 'https:'
+}
+
 /**
  * Interface that all generated RpcServices inherit
  *

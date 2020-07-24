@@ -15,3 +15,16 @@ export interface RpcService {
    */
   handleErr<T>(err: Error): T;
 }
+
+export const isValidHttpUrl = (urlString: string) => {
+  let url: URL
+
+  try {
+    // eslint-disable-next-line node/no-unsupported-features/node-builtins
+    url = new URL(urlString)
+  } catch (_) {
+    return false
+  }
+
+  return url.protocol === 'http:' || url.protocol === 'https:'
+}
