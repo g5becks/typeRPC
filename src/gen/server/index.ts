@@ -66,9 +66,9 @@ ${this.getImportedTypes(file)}\n`
   private buildController(service: InterfaceDeclaration): string {
     const serviceName = service.getNameNode().getText()
     let handlers = ''
-    service.getMethods().forEach(method => {
+    for (const method of service.getMethods()) {
       handlers += this.buildRouteHandler(method, serviceName)
-    })
+    }
     return `
     const ${serviceName}Controller = (${this.lowerCase(serviceName)}: ${serviceName}): FastifyPluginAsync => async (instance, _) => {
       instance.register(fastifySensible)

@@ -36,9 +36,9 @@ export class Parser {
   getMethodsForFile(file: SourceFile): MethodSignature[] {
     const interfaces = this.getInterfaces(file)
     const methods: MethodSignature[] = []
-    interfaces.forEach(interfc =>
+    for (const interfc of interfaces) {
       methods.push(...this.getMethodsForInterface(interfc))
-    )
+    }
     return methods
   }
 
