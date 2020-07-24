@@ -12,6 +12,7 @@
     "@oclif/config": "^1",
     "@oclif/plugin-help": "^3",
     "@oclif/plugin-not-found": "^1.2.4",
+    "axios": "^0.19.2",
     "cli-ux": "^5.4.9",
     "fastify": "^3.1.1",
     "fastify-plugin": "^2.0.1",

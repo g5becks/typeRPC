@@ -30,7 +30,7 @@ type SchemaType = 'request'| 'response'
 abstract class Generator {
   protected readonly parser: Parser
 
-  constructor(protected readonly tsConfigFilePath: string, protected readonly outputPath: string, protected readonly jobId: string) {
+  constructor(protected readonly target: Target, protected readonly tsConfigFilePath: string, protected readonly outputPath: string, protected readonly jobId: string) {
     this.parser = new Parser(tsConfigFilePath)
   }
 
@@ -277,8 +277,8 @@ export const ${type}Schema = ${JSON.stringify(createGenerator(config).createSche
  * @extends {Generator}
  */
 export abstract class ServerGenerator extends Generator {
-  constructor(protected readonly tsConfigFilePath: string, protected readonly outputPath: string, protected readonly jobId: string) {
-    super(tsConfigFilePath, outputPath, jobId)
+  constructor(protected readonly target: Target, protected readonly tsConfigFilePath: string, protected readonly outputPath: string, protected readonly jobId: string) {
+    super(target, tsConfigFilePath, outputPath, jobId)
   }
 
   private buildRouteParams(params: ParameterDeclaration[]): string {
@@ -309,8 +309,8 @@ export abstract class ServerGenerator extends Generator {
  * @extends {Generator}
  */
 export abstract class ClientGenerator extends Generator {
-  constructor(protected readonly tsConfigFilePath: string, protected readonly outputPath: string, protected readonly jobId: string) {
-    super(tsConfigFilePath, outputPath, jobId)
+  constructor(protected readonly target: Target, protected readonly tsConfigFilePath: string, protected readonly outputPath: string, protected readonly jobId: string) {
+    super(target, tsConfigFilePath, outputPath, jobId)
   }
 
   public abstract generateTypes(): Code

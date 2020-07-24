@@ -8,11 +8,11 @@ import {ClientGenerator, Code} from '../generator'
  */
 export class AxiosGenerator extends ClientGenerator {
   public generateTypes(): Code {
-    throw new Error('Method not implemented.')
+    return this.generateTypesDefault()
   }
 
   generateRpc(): Code {
-    throw new Error('Method not implemented.')
+    return {}
   }
 
   // eslint-disable-next-line no-useless-constructor
