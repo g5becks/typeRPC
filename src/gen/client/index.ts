@@ -1,4 +1,5 @@
-import { ClientGenerator, Code, Target } from '../generator'
+import {SourceFile} from 'ts-morph'
+import {ClientGenerator, Code, Target} from '../generator'
 /**
  * Generates client side code using https://www.npmjs.com/package/axios
  *
@@ -61,6 +62,16 @@ export type RpcClientConfig = {
 `
   }
 
+  protected imports(file: SourceFile): string {
+    return `
+import axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
+import fastJson from 'fast-json-stringify'
+import { Book, BookService } from './types/book-service'
+import { isValidHttpUrl, RpcClientConfig, RpcError } from './types/${this.jobId}'
+${this.getImportedTypes(file)}
+    `
+  }
+
   public generateTypes(): Code {
     const file = `${this.jobId}.ts`
     return this.generateTypesDefault({
@@ -72,9 +83,9 @@ export type RpcClientConfig = {
     const code: Code = {}
     for (const file of this.parser.sourceFiles) {
       const schemas = this.buildShemasForFile(file)
-      code[this.buildServerFileName(file)] = `${this.imports(file)}${this.fileHeader()}${schemas}$`
+      code[this.buildRpcFileName(file)] = `${this.imports(file)}${this.fileHeader()}${schemas}$`
     }
     return code
   }
-  }
 }
+

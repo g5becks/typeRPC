@@ -239,7 +239,7 @@ const ${type}Stringify = fastJson(
 
   // builds a list of generated request types to be used when
   // generating imports declarations
-  private buildRequestTypesImports(file: SourceFile): string[] {
+  protected buildRequestTypesImports(file: SourceFile): string[] {
     const requestTypeNames: string[] = []
     const methods = this.parser.getMethodsForFile(file)
     for (const method of methods) {
