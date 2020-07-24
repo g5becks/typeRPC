@@ -1,5 +1,5 @@
-import { InterfaceDeclaration, MethodSignature, SourceFile } from 'ts-morph'
-import { Code, ServerGenerator } from '../generator'
+import {InterfaceDeclaration, MethodSignature, SourceFile} from 'ts-morph'
+import {Code, ServerGenerator} from '../generator'
 
 /**
  * Generates server side code using https://www.fastify.io/
@@ -66,6 +66,7 @@ ${this.getImportedTypes(file)}\n`
     return `
 /**
 * Http Controller for {@link ${serviceName}}
+*
 * @param {${serviceName}} ${this.lowerCase(serviceName)} ${serviceName} Implementation
 * @returns {FastifyPluginAsync} fastify plugin instance
 */`
@@ -87,11 +88,23 @@ ${this.controllerDoc(serviceName)}
  `.trimLeft()
   }
 
+  private pluginDoc(serviceName: string): string {
+    return `
+/**
+* Creates a {@link TypeRpcPlugin} for {@link ${serviceName}}
+*
+* @param {${serviceName}} ${this.lowerCase(serviceName)} ${serviceName} Implementation
+* @param {LogLevel} logLevel for this plugin
+* @param {PluginOptions} opts options for this plugin
+* @returns {TypeRpcPlugin} TypeRpcPlugin instance
+*/`
+  }
+
   private buildPlugin(service: InterfaceDeclaration): string {
     const serviceName = service.getNameNode().getText()
     return `
     ${this.buildController(service)}
-
+    ${this.pluginDoc(serviceName)}
     export const ${serviceName}Plugin = (${this.lowerCase(serviceName)}: ${serviceName}, logLevel: LogLevel, opts?: PluginOptions): TypeRpcPlugin => {
       return {plugin: fp(${serviceName}Controller(${this.lowerCase(serviceName)}), pluginOpts('${this.lowerCase(serviceName)}Controller', opts)),
       opts: registerOptions('/${this.lowerCase(serviceName)}', logLevel)
