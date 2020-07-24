@@ -87,7 +87,9 @@ abstract class Generator {
     let servicesText = ''
     for (const srvc of services) {
       srvc.setIsExported(true)
-      srvc.insertExtends(0, 'RpcService')
+      if (this.target === 'server') {
+        srvc.insertExtends(0, 'RpcService')
+      }
       this.promisifyMethods(srvc)
 
       servicesText += `${srvc.getFullText()}\n`
@@ -248,9 +250,10 @@ export const ${type}Schema = ${JSON.stringify(createGenerator(config).createSche
   }
 
   private generateTypesFile(file: SourceFile): string {
+    const rpcImport = `import {RpcService} from './${this.jobId}'\n`
     // build interfaces must be called last because the response
     // types cannot be modifies prior to building response types
-    return `import {RpcService} from './${this.jobId}'\n${this.fileHeader()}${this.buildTypes(file)}${this.buildRequestTypesForFile(file)}${this.buildResponseTypesForFile(file)}${this.buildInterfaces(file)}`
+    return `${this.target === 'server' ? rpcImport : ''}${this.fileHeader()}${this.buildTypes(file)}${this.buildRequestTypesForFile(file)}${this.buildResponseTypesForFile(file)}${this.buildInterfaces(file)}`
   }
 
   // Generates types for the input schema file

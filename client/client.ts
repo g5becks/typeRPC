@@ -1,15 +1,17 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import axios, { AxiosRequestConfig } from 'axios'
-import { Book, BookService } from './types/book-service'
-export class BookServiceClient implements BookService {
+import to from 'await-to-js'
+import axios, {AxiosInstance, AxiosRequestConfig} from 'axios'
+import {Book, BookService} from './types/book-service'
+export class AxiosBookService implements BookService {
+  protected readonly axios: AxiosInstance
 
-  protected readonly serviceHost: string
-  private constructor(host: string, protected readonly config?: AxiosRequestConfig) {
-    this.serviceHost = new URL(host).toString()
+  private constructor(protected readonly host: string, protected readonly config?: AxiosRequestConfig) {
+    this.axios = axios.create(config)
   }
-  getBooksByPublisher(publisher: string, publisherName: string, ...headers:  ): Promise<Book[]> {
-    const config:AxiosRequestConfig = {}
-    axios({})
+
+  async getBooksByPublisher(publisher: string, publisherName: string): Promise<Book[]> {
+    const config: AxiosRequestConfig = {}
+    const [err] = await to(this.axios.request<string>({responseType: 'json'}))
   }
 
   getBooksReleasedBefore(releaseDate: Date): Promise<Date[]> {
