@@ -77,7 +77,9 @@ abstract class Generator {
   }
 
   private promisifyMethods(service: InterfaceDeclaration): void {
-    service.getMethods().forEach(method => this.promisifyMethod(method))
+    for (const method of service.getMethods()) {
+      this.promisifyMethod(method)
+    }
   }
 
   // Copies all interfaces from schema to output
