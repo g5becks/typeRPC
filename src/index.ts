@@ -16,7 +16,6 @@ class TypeRpc extends Command {
     // flag with a value (-n, --name=VALUE)
     tsConfig: flags.string({char: 't', name: 'tsconfig', description: 'path to tsconfig.json for project containing typeRPC schema files'}),
     output: flags.string({char: 'o', name: 'output', description: 'path to a directory to place generated code'}),
-    http2: flags.boolean({name: 'http2', description: 'controls whether the server should use http2'}),
 
   }
 
