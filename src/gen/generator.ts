@@ -145,9 +145,9 @@ export type ${this.responseTypeName(method)} = {
   protected buildResponseTypesForFile(file: SourceFile): string {
     const methods = this.parser.getMethodsForFile(file)
     let returnTypes = ''
-    methods.forEach(method => {
+    for (const method of methods) {
       returnTypes += `${this.buildResponseType(method)}`
-    })
+    }
     return returnTypes
   }
 
@@ -224,11 +224,11 @@ export const ${type}Schema = ${JSON.stringify(createGenerator(config).createSche
   private buildRequestTypesImports(file: SourceFile): string[] {
     const requestTypeNames: string[] = []
     const methods = this.parser.getMethodsForFile(file)
-    methods.forEach(method => {
+    for (const method of methods) {
       if (method.getParameters().length > 0) {
         requestTypeNames.push(this.requestTypeName(method))
       }
-    })
+    }
     return requestTypeNames
   }
 
@@ -262,9 +262,9 @@ export const ${type}Schema = ${JSON.stringify(createGenerator(config).createSche
   // most of the work, and it should be possible to simply add
   // in any needed generated code using the code param
   protected generateTypesDefault(code: Code = {}): Code {
-    this.parser.sourceFiles.forEach(file => {
+    for (const file of this.parser.sourceFiles) {
       code[`${file.getBaseNameWithoutExtension()}.ts`] = this.generateTypesFile(file)
-    })
+    }
     return code
   }
 }
@@ -284,9 +284,9 @@ export abstract class ServerGenerator extends Generator {
 
   private buildRouteParams(params: ParameterDeclaration[]): string {
     let paramsList = ''
-    params.forEach(param => {
+    for (const param of params) {
       paramsList += `:${param.getNameNode().getText().trim()}`
-    })
+    }
     return paramsList
   }
 

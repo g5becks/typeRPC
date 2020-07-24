@@ -1,4 +1,4 @@
-import {InterfaceDeclaration, MethodSignature, ParameterDeclaration, Project, SourceFile, ts, Type} from 'ts-morph'
+import {InterfaceDeclaration, MethodSignature, ParameterDeclaration, Project, SourceFile} from 'ts-morph'
 /**
  * Parses specified project source code files
  *
@@ -29,11 +29,6 @@ export class Parser {
     return false
   }
 
-  // determines if the interface extends RpcService interface
-  isRpcService(service: InterfaceDeclaration): boolean {
-    return service.getExtends().some(clause => clause.getText().trim() === 'RpcService')
-  }
-
   getMethodsForInterface(interfce: InterfaceDeclaration): MethodSignature[] {
     return interfce.getMethods()
   }
@@ -51,10 +46,6 @@ export class Parser {
     return method.getParameters()
   }
 
-  getMethodReturnType(method: MethodSignature): Type<ts.Type> {
-    return method.getReturnType()
-  }
-
   getInterfaces(file: SourceFile): InterfaceDeclaration[] {
     return file.getInterfaces()
   }
@@ -65,10 +56,6 @@ export class Parser {
 
   getInterfacesText(file: SourceFile): string[] {
     return file.getInterfaces().map(srvc => srvc.getNameNode().getText())
-  }
-
-  getAllReturnTypes(file: SourceFile): Type<ts.Type>[] {
-    return this.getMethodsForFile(file).map(method => this.getMethodReturnType(method))
   }
 }
 
