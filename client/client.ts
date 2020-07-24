@@ -1,17 +1,29 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import to from 'await-to-js'
 import axios, {AxiosInstance, AxiosRequestConfig} from 'axios'
+import fastJson from 'fast-json-stringify'
 import {Book, BookService} from './types/book-service'
+import {isValidHttpUrl, RpcClientConfig, RpcError} from './types/sculuhwvlbhjf5r13sy2f'
 export class AxiosBookService implements BookService {
   protected readonly axios: AxiosInstance
 
-  private constructor(protected readonly host: string, protected readonly config?: AxiosRequestConfig) {
-    this.axios = axios.create(config)
+  private constructor(protected readonly host: string, protected readonly config?: RpcClientConfig) {
+    this.axios = axios.create({baseURL: host, ...config})
+  }
+
+  public static create(host: string, config?: AxiosRequestConfig): AxiosBookService| RpcError {
+    if (!isValidHttpUrl(host)) {
+      return new RpcError(`${host} is not a valid http url`)
+    }
+    return new AxiosBookService(host, config)
+  }
+
+  protected stringify(): string {
+    fastJson()
   }
 
   async getBooksByPublisher(publisher: string, publisherName: string): Promise<Book[]> {
     const config: AxiosRequestConfig = {}
-    const [err] = await to(this.axios.request<string>({responseType: 'json'}))
+    const data = await this.axios.request<string>({url: '/', method: 'GET', responseType: 'json'})
   }
 
   getBooksReleasedBefore(releaseDate: Date): Promise<Date[]> {

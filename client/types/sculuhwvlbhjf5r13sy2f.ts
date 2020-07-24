@@ -1,19 +1,3 @@
-import {ClientGenerator, Code, Target} from '../generator'
-/**
- * Generates client side code using https://www.npmjs.com/package/axios
- *
- * @export
- * @class AxiosGenerator
- * @extends {ClientGenerator}
- */
-export class AxiosGenerator extends ClientGenerator {
-  // eslint-disable-next-line no-useless-constructor
-  constructor(protected readonly target: Target, protected tsConfigFilePath: string, protected readonly outputPath: string, protected readonly jobId: string) {
-    super(target, tsConfigFilePath, outputPath, jobId)
-  }
-
-  private typesCode(): string {
-    return `
 import {AxiosAdapter, AxiosBasicCredentials, AxiosProxyConfig, AxiosTransformer, CancelToken} from 'axios'
 
 export const isValidHttpUrl = (urlString: string): boolean => {
@@ -57,18 +41,4 @@ export type RpcClientConfig = {
   httpsAgent?: any;
   proxy?: AxiosProxyConfig | false;
   cancelToken?: CancelToken;
-}
-`
-  }
-
-  public generateTypes(): Code {
-    const file = `${this.jobId}.ts`
-    return this.generateTypesDefault({
-      [file]: this.typesCode(),
-    })
-  }
-
-  generateRpc(): Code {
-    return {}
-  }
 }

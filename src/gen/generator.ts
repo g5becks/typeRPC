@@ -156,13 +156,22 @@ export type ${this.responseTypeName(method)} = {
   protected buildSchemaForType(filePath: string, type: string, service: InterfaceDeclaration, method: MethodSignature, schemaType: SchemaType): string {
     const config: Config = {path: filePath, type}
     try {
-      return `
+      const schema = JSON.stringify(createGenerator(config).createSchema(config.type), null, 2)
+      return this.target === 'server' ? `
 ${this.schemaDoc(service, method, schemaType)}
-export const ${type}Schema = ${JSON.stringify(createGenerator(config).createSchema(config.type), null, 2)}\n
-`
+export const ${type}Schema = ${schema}\n
+` : this.buildStringifyFuncForType(type, schema)
     } catch (error) {
       throw new GeneratorError(error)
     }
+  }
+
+  protected buildStringifyFuncForType(type: string, schema: string): string {
+    return `
+const ${type}Stringify = fastJson(
+  ${schema}
+)
+    `
   }
 
   // creates request schema variable name
@@ -190,8 +199,10 @@ export const ${type}Schema = ${JSON.stringify(createGenerator(config).createSche
         if (this.parser.hasParams(method)) {
           schema += this.buildSchemaForType(typesFile, this.requestTypeName(method), service, method, 'request')
         }
-        if (this.parser.hasReturn(method)) {
-          schema += this.buildSchemaForType(typesFile, this.responseTypeName(method), service, method, 'response')
+        if (this.target === 'server') {
+          if (this.parser.hasReturn(method)) {
+            schema += this.buildSchemaForType(typesFile, this.responseTypeName(method), service, method, 'response')
+          }
         }
       }
     }
