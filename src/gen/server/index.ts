@@ -128,6 +128,7 @@ ${this.controllerDoc(serviceName)}
 
   private typesCode(): string {
     return `
+// eslint-disable-next-line unicorn/filename-case
 import {FastifyPluginCallback, LogLevel, RegisterOptions, FastifyReply} from 'fastify'
 import {PluginOptions} from 'fastify-plugin'
 
