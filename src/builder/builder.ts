@@ -3,10 +3,9 @@
 import path from 'path'
 import {Config, createGenerator} from 'ts-json-schema-generator'
 import {InterfaceDeclaration, MethodSignature, ParameterDeclaration, SourceFile} from 'ts-morph'
-import {GeneratorError} from '.'
+import {BuilderError} from '.'
 import {Parser} from './parser'
 
-// TODO ADD full support for jsDoc comments of all code
 export type Code = {
   [key: string]: string;
 }
@@ -27,10 +26,10 @@ type SchemaType = 'request'| 'response'
  * @export
  * @class Generator
  */
-abstract class Generator {
+abstract class CodeBuilder {
   protected readonly parser: Parser
 
-  constructor(protected readonly target: Target, protected readonly tsConfigFilePath: string, protected readonly outputPath: string, protected readonly jobId: string) {
+  protected constructor(protected readonly target: Target, protected readonly tsConfigFilePath: string, protected readonly outputPath: string, protected readonly jobId: string) {
     this.parser = new Parser(tsConfigFilePath)
   }
 
@@ -66,7 +65,8 @@ abstract class Generator {
     return text.replace(/^\w/, c => c.toLowerCase())
   }
 
-  private promisifyMethod(method: MethodSignature): void {
+  private static promisifyMethod(method: MethodSignature): void {
+    // noinspection TypeScriptValidateTypes
     const returnType = method.getReturnTypeNode()?.getText().trim()
     const promisified = `Promise<${returnType}>`
     if (returnType?.includes('Promise<')) {
@@ -77,7 +77,7 @@ abstract class Generator {
 
   private promisifyMethods(service: InterfaceDeclaration): void {
     for (const method of service.getMethods()) {
-      this.promisifyMethod(method)
+      CodeBuilder.promisifyMethod(method)
     }
   }
 
@@ -136,6 +136,7 @@ export type ${this.buildRequestTypeName(method)} = {
 
   // builds a single response type for a method
   protected buildResponseType(method: MethodSignature): string {
+    // noinspection TypeScriptValidateTypes
     return `
 export type ${this.buildResponseTypeName(method)} = {
   data: ${method.getReturnTypeNode()?.getText().trim()};
@@ -168,7 +169,7 @@ ${this.buildSchemaDoc(service, method, schemaType)}
 export const ${type}Schema = ${schema}\n
 ` : this.buildStringifyFuncForType(type, schema)
     } catch (error) {
-      throw new GeneratorError(error)
+      throw new BuilderError(error)
     }
   }
 
@@ -187,21 +188,21 @@ const Stringify${type} = fastJson(
   // creates request schema variable name
   // used in subclasses during code generation to prevent string
   // concatenation and spelling mistakes
-  protected requestTypeSchemaName(method: MethodSignature): string {
+  protected buildRequestTypeSchemaName(method: MethodSignature): string {
     return `${this.buildRequestTypeName(method)}Schema`
   }
 
   // creates request schema variable name
   // used in subclasses during code generation to prevent string
   // concatenation and spelling mistakes
-  protected responseTypeSchemeName(method: MethodSignature): string {
+  protected buildResponseTypeSchemeName(method: MethodSignature): string {
     return `${this.buildResponseTypeName(method)}Schema`
   }
 
   // builds json schema for all request and response types
   // in a generated types file
   protected buildShemasForFile(file: SourceFile): string {
-    const typesFile = this.getGeneratedTypesFilePath(file)
+    const typesFile = this.buildGeneratedTypesFilePath(file)
 
     let schema = ''
     for (const service of this.parser.getInterfaces(file)) {
@@ -225,10 +226,10 @@ const Stringify${type} = fastJson(
   protected buildRequestMethod(method: MethodSignature) {
     const docs = method.getJsDocs()
     const rMethod = docs[0]?.getDescription().trim()
-    return isRequestMethod(rMethod) ? rMethod : 'POST'
+    return rMethod && isRequestMethod(rMethod) ? rMethod : 'POST'
   }
 
-  protected getGeneratedTypesFilePath(file: SourceFile): string {
+  protected buildGeneratedTypesFilePath(file: SourceFile): string {
     const typesFile = path.join(this.outputPath, 'types', file.getBaseNameWithoutExtension())
     return `${typesFile}.ts`
   }
@@ -237,7 +238,7 @@ const Stringify${type} = fastJson(
     return this.buildRequestMethod(method).toLowerCase().includes('get')
   }
 
-  protected getImportedTypes(file: SourceFile): string {
+  protected buildImportedTypes(file: SourceFile): string {
     return `import {${this.parser.getInterfacesText(file)},${this.parser.getTypeAliasesText(file)},${this.buildRequestTypesImports(file)}} from './types/${file.getBaseNameWithoutExtension()}'`
   }
 
@@ -260,7 +261,7 @@ const Stringify${type} = fastJson(
   }
 
   // Copies all type aliases from schema to output type
-  protected buildTypes(file: SourceFile): string {
+  protected buildTypesText(file: SourceFile): string {
     const aliases = file.getTypeAliases()
     let messagesText = ''
     for (const alias of aliases) {
@@ -270,11 +271,11 @@ const Stringify${type} = fastJson(
     return messagesText
   }
 
-  private generateTypesFile(file: SourceFile): string {
+  private buildTypesFile(file: SourceFile): string {
     const rpcImport = `import {RpcService} from './${this.jobId}'\n`
     // build interfaces must be called last because the response
     // types cannot be modifies prior to building response types
-    return `${this.target === 'server' ? rpcImport : ''}${this.fileHeader()}${this.buildTypes(file)}${this.buildRequestTypesForFile(file)}${this.buildResponseTypesForFile(file)}${this.buildInterfaces(file)}`
+    return `${this.target === 'server' ? rpcImport : ''}${this.fileHeader()}${this.buildTypesText(file)}${this.buildRequestTypesForFile(file)}${this.buildResponseTypesForFile(file)}${this.buildInterfaces(file)}`
   }
 
   // Generates types for the input schema file
@@ -284,28 +285,28 @@ const Stringify${type} = fastJson(
   // abstract generateTypes method, this default method does
   // most of the work, and it should be possible to simply add
   // in any needed generated code using the code param
-  protected generateTypesDefault(code: Code = {}): Code {
+  protected buildTypesDefault(code: Code = {}): Code {
     for (const file of this.parser.sourceFiles) {
-      code[`${file.getBaseNameWithoutExtension()}.ts`] = this.generateTypesFile(file)
+      code[`${file.getBaseNameWithoutExtension()}.ts`] = this.buildTypesFile(file)
     }
     return code
   }
 }
 
 /**
- * Abstract class that all ServerGenerator implementations extend from
+ * Abstract class that all ServerBuilders implementations extend from
  *
  * @export
  * @abstract
- * @class ServerGenerator
- * @extends {Generator}
+ * @class ServerBuilder
+ * @extends {CodeBuilder}
  */
-export abstract class ServerGenerator extends Generator {
-  constructor(protected readonly target: Target, protected readonly tsConfigFilePath: string, protected readonly outputPath: string, protected readonly jobId: string) {
+export abstract class ServerBuilder extends CodeBuilder {
+  protected constructor(protected readonly target: Target, protected readonly tsConfigFilePath: string, protected readonly outputPath: string, protected readonly jobId: string) {
     super(target, tsConfigFilePath, outputPath, jobId)
   }
 
-  private buildRouteParams(params: ParameterDeclaration[]): string {
+  private static buildRouteParams(params: ParameterDeclaration[]): string {
     let paramsList = ''
     for (const param of params) {
       paramsList += `:${param.getNameNode().getText().trim()}`
@@ -316,28 +317,28 @@ export abstract class ServerGenerator extends Generator {
   // builds the route for server handler methods
   protected buildServerRoute(method: MethodSignature): string {
     const params = method.getParameters()
-    return (!this.isGetMethod(method) || params?.length === 0) ? `'/${method.getName().trim()}'` : `'/${method.getName().trim()}/${this.buildRouteParams(params)}'`
+    return (!this.isGetMethod(method) || params?.length === 0) ? `'/${method.getName().trim()}'` : `'/${method.getName().trim()}/${ServerBuilder.buildRouteParams(params)}'`
   }
 
-  public abstract generateTypes(): Code
+  public abstract buildTypes(): Code
 
-  public abstract generateRpc(): Code
+  public abstract buildRpc(): Code
 }
 
 /**
- * Abstract class that all ClientGenerators Extend from
+ * Abstract class that all ClientBuilders Extend from
  *
  * @export
  * @abstract
- * @class ClientGenerator
- * @extends {Generator}
+ * @class ClientBuilder
+ * @extends {CodeBuilder}
  */
-export abstract class ClientGenerator extends Generator {
-  constructor(protected readonly target: Target, protected readonly tsConfigFilePath: string, protected readonly outputPath: string, protected readonly jobId: string) {
+export abstract class ClientBuilder extends CodeBuilder {
+  protected constructor(protected readonly target: Target, protected readonly tsConfigFilePath: string, protected readonly outputPath: string, protected readonly jobId: string) {
     super(target, tsConfigFilePath, outputPath, jobId)
   }
 
-  public abstract generateTypes(): Code
+  public abstract buildTypes(): Code
 
-  public  abstract generateRpc(): Code
+  public  abstract buildRpc(): Code
 }

@@ -1,5 +1,5 @@
 import {AxiosGenerator} from './client'
-import {Code, Target} from './generator'
+import {Code, Target} from './builder'
 import {FastifyGenerator} from './server'
 
 export {Code, Target}
@@ -13,20 +13,20 @@ export const isTarget = (target: string): target is Target => {
  * @export
  * @class GeneratorError
  */
-export class GeneratorError extends Error {
+export class BuilderError extends Error {
   // eslint-disable-next-line no-useless-constructor
   constructor(public readonly errorMessage: string) {
     super(errorMessage)
   }
 }
 
-export const generateTypes = (target: Target, tsConfigFilePath: string, outputPath: string, jobId: string) => {
+export const buildTypes = (target: Target, tsConfigFilePath: string, outputPath: string, jobId: string) => {
   const generator = target === 'client' ? new AxiosGenerator(target, tsConfigFilePath, outputPath, jobId) : new FastifyGenerator(target, tsConfigFilePath, outputPath, jobId)
-  return generator.generateTypes()
+  return generator.buildTypes()
 }
 
 export const generateCode = (target: Target, tsConfigFilePath: string, outputPath: string, jobId: string): Code => {
   const generator = target === 'client' ? new AxiosGenerator(target, tsConfigFilePath, outputPath, jobId) : new FastifyGenerator(target, tsConfigFilePath, outputPath, jobId)
-  return generator.generateRpc()
+  return generator.buildRpc()
 }
 

@@ -1,19 +1,19 @@
 import {SourceFile} from 'ts-morph'
-import {ClientGenerator, Code, Target} from '../generator'
+import {ClientBuilder, Code, Target} from '../builder'
 /**
  * Generates client side code using https://www.npmjs.com/package/axios
  *
  * @export
  * @class AxiosGenerator
- * @extends {ClientGenerator}
+ * @extends {ClientBuilder}
  */
-export class AxiosGenerator extends ClientGenerator {
+export class AxiosGenerator extends ClientBuilder {
   // eslint-disable-next-line no-useless-constructor
   constructor(protected readonly target: Target, protected tsConfigFilePath: string, protected readonly outputPath: string, protected readonly jobId: string) {
     super(target, tsConfigFilePath, outputPath, jobId)
   }
 
-  private typesCode(): string {
+  private static typesCode(): string {
     return `
 import {AxiosAdapter, AxiosBasicCredentials, AxiosProxyConfig, AxiosTransformer, CancelToken} from 'axios'
 
@@ -68,18 +68,18 @@ import axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
 import fastJson from 'fast-json-stringify'
 import { Book, BookService } from './types/book-service'
 import { isValidHttpUrl, RpcClientConfig, RpcError } from './types/${this.jobId}'
-${this.getImportedTypes(file)}
+${this.buildImportedTypes(file)}
     `
   }
 
-  public generateTypes(): Code {
+  public buildTypes(): Code {
     const file = `${this.jobId}.ts`
-    return this.generateTypesDefault({
-      [file]: this.typesCode(),
+    return this.buildTypesDefault({
+      [file]: AxiosGenerator.typesCode(),
     })
   }
 
-  generateRpc(): Code {
+  buildRpc(): Code {
     const code: Code = {}
     for (const file of this.parser.sourceFiles) {
       const schemas = this.buildShemasForFile(file)

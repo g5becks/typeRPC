@@ -22,6 +22,7 @@ export class Parser {
 
   hasReturn(method: MethodSignature): boolean {
     const nonValids = ['void', 'Promise<void>', '', 'undefined']
+    // noinspection TypeScriptValidateTypes
     const returnType = method.getReturnTypeNode()?.getText().trim()
     if (typeof returnType !== 'undefined') {
       return !nonValids.includes(returnType)

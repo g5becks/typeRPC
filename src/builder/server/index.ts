@@ -1,5 +1,5 @@
 import {InterfaceDeclaration, MethodSignature, SourceFile} from 'ts-morph'
-import {Code, ServerGenerator, Target} from '../generator'
+import {Code, ServerBuilder, Target} from '../builder'
 import {server} from './server'
 
 /**
@@ -7,9 +7,9 @@ import {server} from './server'
  *
  * @export
  * @class FastifyGenerator
- * @extends {ServerGenerator}
+ * @extends {ServerBuilder}
  */
-export class FastifyGenerator extends ServerGenerator {
+export class FastifyGenerator extends ServerBuilder {
   // eslint-disable-next-line no-useless-constructor
   constructor(protected readonly target: Target, protected tsConfigFilePath: string, protected readonly outputPath: string, protected readonly jobId: string) {
     super(target, tsConfigFilePath, outputPath, jobId)
@@ -22,7 +22,7 @@ import {FastifyPluginAsync, LogLevel} from 'fastify'
 import fastifySensible from 'fastify-sensible'
 import fp, {PluginOptions} from 'fastify-plugin'
 import {pluginOpts, registerOptions, TypeRpcPlugin} from './types/${this.jobId}'
-${this.getImportedTypes(file)}\n`
+${this.buildImportedTypes(file)}\n`
   }
 
   // generates the RequestGenericInterface parameter for each route
@@ -44,9 +44,9 @@ ${this.getImportedTypes(file)}\n`
             method: '${this.buildRequestMethod(method)}',
             url: ${this.buildServerRoute(method)},
             schema: {
-                ${schemaType}: ${hasParams ? this.requestTypeSchemaName(method) : false},
+                ${schemaType}: ${hasParams ? this.buildRequestTypeSchemaName(method) : false},
                 response: {
-                    '2xx': ${hasReturn ? this.responseTypeSchemeName(method) : false},
+                    '2xx': ${hasReturn ? this.buildResponseTypeSchemeName(method) : false},
                 },
 
             },
@@ -195,14 +195,14 @@ export interface RpcService {
 `
   }
 
-  public generateTypes(): Code {
+  public buildTypes(): Code {
     const file = `${this.jobId}.ts`
-    return this.generateTypesDefault({
+    return this.buildTypesDefault({
       [file]: this.typesCode(),
     })
   }
 
-  public generateRpc(): Code {
+  public buildRpc(): Code {
     const code: Code = {...server}
     for (const file of this.parser.sourceFiles) {
       const schemas = this.buildShemasForFile(file)

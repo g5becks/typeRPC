@@ -3,8 +3,8 @@ import {outputFile, pathExists} from 'fs-extra'
 import Listr from 'listr'
 import {nanoid} from 'nanoid'
 import path from 'path'
-import {Code, generateCode, generateTypes, GeneratorError, isTarget} from './gen'
-import {Target} from './gen/generator'
+import {BuilderError, buildTypes, Code, generateCode, isTarget} from './builder'
+import {Target} from './builder'
 
 type OutputType = 'types' | 'rpc'
 
@@ -16,7 +16,6 @@ class TypeRpc extends Command {
     // flag with a value (-n, --name=VALUE)
     tsConfig: flags.string({char: 't', name: 'tsconfig', description: 'path to tsconfig.json for project containing typeRPC schema files'}),
     output: flags.string({char: 'o', name: 'output', description: 'path to a directory to place generated code'}),
-
   }
 
   static args = [
@@ -37,7 +36,7 @@ class TypeRpc extends Command {
           if (isTarget(target)) {
             return true
           }
-          throw new GeneratorError(`error: invalid target ${target}`)
+          throw new BuilderError(`error: invalid target ${target}`)
         },
       },
       {
@@ -62,7 +61,7 @@ class TypeRpc extends Command {
       {
         title: `Generating Rpc types for ${target}, jobId: ${jobId}`,
         task: () => {
-          types = generateTypes(target, tsConfigFile, outputPath, jobId)
+          types = buildTypes(target, tsConfigFile, outputPath, jobId)
         },
       },
       {
