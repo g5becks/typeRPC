@@ -1,10 +1,10 @@
 /* eslint-disable no-useless-constructor */
 /* eslint-disable max-params */
 import path from 'path'
-import { Config, createGenerator } from 'ts-json-schema-generator'
-import { InterfaceDeclaration, MethodSignature, ParameterDeclaration, SourceFile } from 'ts-morph'
-import { GeneratorError } from '.'
-import { Parser } from './parser'
+import {Config, createGenerator} from 'ts-json-schema-generator'
+import {InterfaceDeclaration, MethodSignature, ParameterDeclaration, SourceFile} from 'ts-morph'
+import {GeneratorError} from '.'
+import {Parser} from './parser'
 
 // TODO ADD full support for jsDoc comments of all code
 export type Code = {
@@ -173,13 +173,13 @@ export const ${type}Schema = ${schema}\n
   }
 
   protected buildStringifyFuncForType(type: string, schema: string): string {
-    const parsed = JSON.parse(schema)
-    const gotten = parsed.definitions.type
-    const json = JSON.stringify(gotten)
+    const parsed: { [key: string]: any }  = JSON.parse(schema)
+    const gotten = parsed.definitions[type]
+    gotten.title = type
 
     return `
-const ${type}Stringify = fastJson(
-  ${json}
+const Stringify${type} = fastJson(
+  ${JSON.stringify(gotten)}
 )
     `
   }
