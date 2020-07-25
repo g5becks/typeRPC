@@ -51,7 +51,7 @@ abstract class Generator {
 \n`
   }
 
-  protected schemaDoc(service: InterfaceDeclaration, method: MethodSignature, schemaType: SchemaType): string {
+  protected buildSchemaDoc(service: InterfaceDeclaration, method: MethodSignature, schemaType: SchemaType): string {
     return `
 /**
 * {@link ${this.capitalize(service.getNameNode().getText().trim())}Controller} /${method.getNameNode().getText().trim()} ${this.capitalize(schemaType)} Schema
@@ -164,7 +164,7 @@ export type ${this.builldResponseTypeName(method)} = {
     try {
       const schema = JSON.stringify(createGenerator(config).createSchema(config.type), null, 2)
       return this.target === 'server' ? `
-${this.schemaDoc(service, method, schemaType)}
+${this.buildSchemaDoc(service, method, schemaType)}
 export const ${type}Schema = ${schema}\n
 ` : this.buildStringifyFuncForType(type, schema)
     } catch (error) {
