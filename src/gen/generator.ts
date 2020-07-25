@@ -97,7 +97,7 @@ abstract class Generator {
     return servicesText
   }
 
-  protected requestTypeName(method: MethodSignature): string {
+  protected buildRequestTypeName(method: MethodSignature): string {
     return `${this.capitalize(method.getName())}Request`
   }
 
@@ -112,7 +112,7 @@ abstract class Generator {
       typeParams += `${param.getText().trim()};\n`
     }
     return `
-export type ${this.requestTypeName(method)} = {
+export type ${this.buildRequestTypeName(method)} = {
   ${typeParams}
 }\n`
   }
@@ -130,14 +130,14 @@ export type ${this.requestTypeName(method)} = {
   }
 
   // generates name for method response type
-  protected responseTypeName(method: MethodSignature): string {
+  protected builldResponseTypeName(method: MethodSignature): string {
     return `${this.capitalize(method.getName())}Response`
   }
 
   // builds a single response type for a method
   protected buildResponseType(method: MethodSignature): string {
     return `
-export type ${this.responseTypeName(method)} = {
+export type ${this.builldResponseTypeName(method)} = {
   data: ${method.getReturnTypeNode()?.getText().trim()};
 }\n`
   }
@@ -188,14 +188,14 @@ const Stringify${type} = fastJson(
   // used in subclasses during code generation to prevent string
   // concatenation and spelling mistakes
   protected requestTypeSchemaName(method: MethodSignature): string {
-    return `${this.requestTypeName(method)}Schema`
+    return `${this.buildRequestTypeName(method)}Schema`
   }
 
   // creates request schema variable name
   // used in subclasses during code generation to prevent string
   // concatenation and spelling mistakes
   protected responseTypeSchemeName(method: MethodSignature): string {
-    return `${this.responseTypeName(method)}Schema`
+    return `${this.builldResponseTypeName(method)}Schema`
   }
 
   // builds json schema for all request and response types
@@ -207,11 +207,11 @@ const Stringify${type} = fastJson(
     for (const service of this.parser.getInterfaces(file)) {
       for (const method of this.parser.getMethodsForInterface(service)) {
         if (this.parser.hasParams(method)) {
-          schema += this.buildSchemaForType(typesFile, this.requestTypeName(method), service, method, 'request')
+          schema += this.buildSchemaForType(typesFile, this.buildRequestTypeName(method), service, method, 'request')
         }
         if (this.target === 'server') {
           if (this.parser.hasReturn(method)) {
-            schema += this.buildSchemaForType(typesFile, this.responseTypeName(method), service, method, 'response')
+            schema += this.buildSchemaForType(typesFile, this.builldResponseTypeName(method), service, method, 'response')
           }
         }
       }
@@ -248,7 +248,7 @@ const Stringify${type} = fastJson(
     const methods = this.parser.getMethodsForFile(file)
     for (const method of methods) {
       if (method.getParameters().length > 0) {
-        requestTypeNames.push(this.requestTypeName(method))
+        requestTypeNames.push(this.buildRequestTypeName(method))
       }
     }
     return requestTypeNames

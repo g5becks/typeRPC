@@ -29,7 +29,7 @@ ${this.getImportedTypes(file)}\n`
   // see https://www.fastify.io/docs/latest/TypeScript/#using-generics
   protected getIncomingMessageType(method: MethodSignature): string {
     const payload = this.isGetMethod(method) ? 'Querystring' : 'Body'
-    return this.parser.getParams(method).length > 0 ? `{${payload}: ${this.requestTypeName(method)}}` : `{${payload}: {}}`
+    return this.parser.getParams(method).length > 0 ? `{${payload}: ${this.buildRequestTypeName(method)}}` : `{${payload}: {}}`
   }
 
   private buildRouteHandler(method: MethodSignature, serviceName: string): string {
