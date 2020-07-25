@@ -130,14 +130,14 @@ export type ${this.buildRequestTypeName(method)} = {
   }
 
   // generates name for method response type
-  protected builldResponseTypeName(method: MethodSignature): string {
+  protected buildResponseTypeName(method: MethodSignature): string {
     return `${this.capitalize(method.getName())}Response`
   }
 
   // builds a single response type for a method
   protected buildResponseType(method: MethodSignature): string {
     return `
-export type ${this.builldResponseTypeName(method)} = {
+export type ${this.buildResponseTypeName(method)} = {
   data: ${method.getReturnTypeNode()?.getText().trim()};
 }\n`
   }
@@ -195,7 +195,7 @@ const Stringify${type} = fastJson(
   // used in subclasses during code generation to prevent string
   // concatenation and spelling mistakes
   protected responseTypeSchemeName(method: MethodSignature): string {
-    return `${this.builldResponseTypeName(method)}Schema`
+    return `${this.buildResponseTypeName(method)}Schema`
   }
 
   // builds json schema for all request and response types
@@ -211,7 +211,7 @@ const Stringify${type} = fastJson(
         }
         if (this.target === 'server') {
           if (this.parser.hasReturn(method)) {
-            schema += this.buildSchemaForType(typesFile, this.builldResponseTypeName(method), service, method, 'response')
+            schema += this.buildSchemaForType(typesFile, this.buildResponseTypeName(method), service, method, 'response')
           }
         }
       }
