@@ -15,7 +15,7 @@ export type Target = 'client'| 'server'
 export type RequestMethod = 'POST' | 'PUT' | 'GET' | 'HEAD' | 'DELETE' | 'OPTIONS' | 'PATCH'
 
 const isRequestMethod = (method: string): method is RequestMethod => {
-  return ['POST', 'PUT', 'GET', 'HEAD', 'DELETE', 'OPTIONS', 'PATCH'].includes(method)
+  return ['POST', 'PUT', 'GET', 'HEAD', 'DELETE', 'OPTIONS', 'PATCH'].includes(method.toUpperCase())
 }
 
 type SchemaType = 'request'| 'response'
@@ -75,6 +75,7 @@ export abstract class CodeBuilder {
     method.setReturnType(promisified)
   }
 
+  // makes all return types of interface methods return a promise
   private static promisifyMethods(service: InterfaceDeclaration): void {
     for (const method of service.getMethods()) {
       CodeBuilder.promisifyMethod(method)
@@ -97,6 +98,7 @@ export abstract class CodeBuilder {
     return servicesText
   }
 
+  // builds the name for a generated request type
   protected static buildRequestTypeName(method: MethodSignature): string {
     return `${CodeBuilder.capitalize(method.getName())}Request`
   }
@@ -168,22 +170,10 @@ export type ${CodeBuilder.buildResponseTypeName(method)} = {
       return this.target === 'server' ? `
 ${CodeBuilder.buildSchemaDoc(service, method, schemaType)}
 export const ${type}Schema = ${schema}\n
-` : CodeBuilder.buildStringifyFuncForType(type, schema)
+` : schema
     } catch (error) {
       throw new BuilderError(error)
     }
-  }
-
-  protected static buildStringifyFuncForType(type: string, schema: string): string {
-    const parsed: { [key: string]: any }  = JSON.parse(schema)
-    const gotten = parsed.definitions[type]
-    gotten.title = type
-
-    return `
-const Stringify${type} = fastJson(
-  ${JSON.stringify(gotten)}
-)
-    `
   }
 
   // creates request schema variable name
@@ -227,18 +217,21 @@ const Stringify${type} = fastJson(
   protected static buildRequestMethod(method: MethodSignature) {
     const docs = method.getJsDocs()
     const rMethod = docs[0]?.getDescription().trim()
-    return rMethod && isRequestMethod(rMethod) ? rMethod : 'POST'
+    return rMethod && isRequestMethod(rMethod) ? rMethod.toUpperCase() : 'POST'
   }
 
+  // builds the path to a generated file containing types
   protected buildGeneratedTypesFilePath(file: SourceFile): string {
     const typesFile = path.join(this.outputPath, 'types', file.getBaseNameWithoutExtension())
     return `${typesFile}.ts`
   }
 
+  // tells if the method is annotated as a GET request
   protected static isGetMethod(method: MethodSignature): boolean {
     return CodeBuilder.buildRequestMethod(method).toLowerCase().includes('get')
   }
 
+  // builds a list of generated types to import
   protected buildImportedTypes(file: SourceFile): string {
     const requestTypes = CodeBuilder.buildRequestTypesImports(file)
     const responseTypes = CodeBuilder.buildResponseTypeImports(file)
@@ -247,21 +240,23 @@ const Stringify${type} = fastJson(
   }
 
   // builds a list of generated request types to be used when
-  // generating imports declarations
+  // generating import declarations
   protected static buildRequestTypesImports(file: SourceFile): string[] {
     return Parser.getMethodsForFile(file)
     .filter(Parser.hasParams)
     .map(CodeBuilder.buildRequestTypeName)
   }
 
+  // builds a list of generated response types to be used when
+  // generating import declarations
   protected static buildResponseTypeImports(file: SourceFile): string[] {
     return Parser.getMethodsForFile(file)
     .filter(Parser.hasParams)
     .map(CodeBuilder.buildResponseTypeName)
   }
 
-  // Builds the destructured parameters from request body or query
-  protected static buildDestructuredParams(method: MethodSignature): string {
+  // Builds the parameters list for a method call
+  protected static buildParams(method: MethodSignature): string {
     return `${method.getParameters().map(param => param.getNameNode().getText().trim())}`
   }
 
@@ -274,6 +269,10 @@ const Stringify${type} = fastJson(
       messagesText += `${alias.getFullText()}\n`
     }
     return messagesText
+  }
+
+  protected static canHaveBody(method: MethodSignature): boolean {
+    return ['POST', 'PUT', 'PATCH'].includes(CodeBuilder.buildRequestMethod(method))
   }
 
   private buildTypesFile(file: SourceFile): string {
@@ -341,6 +340,58 @@ export abstract class ServerBuilder extends CodeBuilder {
 export abstract class ClientBuilder extends CodeBuilder {
   protected constructor(protected readonly target: Target, protected readonly tsConfigFilePath: string, protected readonly outputPath: string, protected readonly jobId: string) {
     super(target, tsConfigFilePath, outputPath, jobId)
+  }
+
+  protected static buildStringifyFuncForType(type: string, schema: string): string {
+    const parsed: { [key: string]: any }  = JSON.parse(schema)
+    const gotten = parsed.definitions[type]
+    gotten.title = type
+
+    return `fastJson(
+  ${JSON.stringify(gotten)}
+)
+    `
+  }
+
+  protected static buildRequestDataOrParams(method: MethodSignature, requestType: string, schema: string): string {
+    let dataOrParams = ''
+    const params = CodeBuilder.buildParams(method)
+    if (CodeBuilder.isGetMethod(method)) {
+      dataOrParams = `params: {${params}}`
+    } else if (CodeBuilder.canHaveBody(method)) {
+      dataOrParams = `
+      data: ${ClientBuilder.buildStringifyFuncForType(requestType, schema)}({${params}})
+      `
+    }
+    return dataOrParams
+  }
+
+  protected static buildRequestArgs(method: MethodSignature, serviceName: string, requestType: string, schema: string): string {
+    const methodName = method.getNameNode().getText().trim()
+
+    return `
+const ${methodName}Args = (${CodeBuilder.buildParams(method)}): AxiosRequestConfig => {
+      return {
+        url: '${serviceName}/${methodName}', method: '${CodeBuilder.buildRequestMethod(method)}', ${ClientBuilder.buildRequestDataOrParams(method, requestType, schema)}
+      }\n
+    `
+  }
+
+  protected buildRequestArgsForFile(file: SourceFile): string {
+    const typesFile = this.buildGeneratedTypesFilePath(file)
+    let args = ''
+    for (const service of Parser.getInterfaces(file)) {
+      const serviceName = service.getNameNode().getText().trim()
+      for (const method of Parser.getMethodsForInterface(service)) {
+        if (Parser.hasParams(method)) {
+          const type = CodeBuilder.buildRequestTypeName(method)
+          const schema = this.buildSchemaForType(typesFile, type, service, method, 'request')
+          args += ClientBuilder.buildRequestArgs(method, serviceName, type, schema)
+        }
+      }
+    }
+
+    return args
   }
 
   public abstract buildTypes(): Code

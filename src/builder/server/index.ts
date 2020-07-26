@@ -38,7 +38,7 @@ ${this.buildImportedTypes(file)}\n`
     const hasReturn = Parser.hasReturn(method)
     const schemaType = CodeBuilder.isGetMethod(method) ? 'querystring' : 'body'
     const payLoad = CodeBuilder.isGetMethod(method) ? 'query' : 'body'
-    const parsePayload = `const {${CodeBuilder.buildDestructuredParams(method)}} = request.${payLoad}`
+    const parsePayload = `const {${CodeBuilder.buildParams(method)}} = request.${payLoad}`
     return `
     instance.route<${FastifyGenerator.getIncomingMessageType(method)}>(
         {
@@ -53,7 +53,7 @@ ${this.buildImportedTypes(file)}\n`
             },
             handler: async (request, reply) => {
                   ${hasParams ? parsePayload : ''}
-                  const [err${hasReturn ? ', data' : ''}] = await instance.to(${CodeBuilder.lowerCase(serviceName)}.${method.getNameNode().getText().trim()}(${hasParams ? CodeBuilder.buildDestructuredParams(method) : ''}))
+                  const [err${hasReturn ? ', data' : ''}] = await instance.to(${CodeBuilder.lowerCase(serviceName)}.${method.getNameNode().getText().trim()}(${hasParams ? CodeBuilder.buildParams(method) : ''}))
                   if (err) {
                     return ${CodeBuilder.lowerCase(serviceName)}.handleErr(err, reply)
                   } else {

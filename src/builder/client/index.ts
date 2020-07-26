@@ -40,7 +40,6 @@ export class RpcError extends Error {
 export type Headers = {[key: string]: string}
 
 export type RpcClientConfig = {
-  transformRequest?: AxiosTransformer | AxiosTransformer[];
   transformResponse?: AxiosTransformer | AxiosTransformer[];
   headers?: Headers;
   paramsSerializer?: (params: any) => string;
