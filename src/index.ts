@@ -41,11 +41,11 @@ class TypeRpc extends Command {
       },
       {
         title: 'Validating tsconfig.json',
-        task: async () => this.validateTsConfigFile(tsConfigFile),
+        task: async () => TypeRpc.#validateTsConfigFile(tsConfigFile),
       },
       {
         title: 'Validating Output Path',
-        task: () => this.validateOutputPath(outputPath),
+        task: () => TypeRpc.validateOutputPath(outputPath),
       },
       {
         title: 'Validation Successful, Generating JobId',
@@ -94,14 +94,17 @@ class TypeRpc extends Command {
     const outputPath = flags.output?.trim() ?? ''
     const jobId = nanoid().toLowerCase()
 
-    await this.validateInputs(target, tsConfig, outputPath).run()
-    await this.generateTypes(target, tsConfig, outputPath, jobId).run()
-    await this.generateRpc(target, tsConfig, outputPath, jobId).run()
-
+    try {
+      await this.validateInputs(target, tsConfig, outputPath).run()
+      await this.generateTypes(target, tsConfig, outputPath, jobId).run()
+      await this.generateRpc(target, tsConfig, outputPath, jobId).run()
+    } catch (error) {
+      this.log(error.stack)
+    }
     this.log(`JobId: ${jobId} complete, check ${outputPath} for generated ${target} code.`)
   }
 
-  async tsconfigFileExists(filePath: string): Promise<boolean> {
+  static async tsconfigFileExists(filePath: string): Promise<boolean> {
     return pathExists(filePath)
   }
 
@@ -123,15 +126,15 @@ class TypeRpc extends Command {
   }
 
   // ensure that the path to tsconfig.json actually exists
-  async validateTsConfigFile(tsConfigFile: string): Promise<void> {
-    const exists = await this.tsconfigFileExists(tsConfigFile)
+  static async #validateTsConfigFile(tsConfigFile: string): Promise<void> {
+    const exists = await TypeRpc.tsconfigFileExists(tsConfigFile)
     if (tsConfigFile === '' || !exists) {
       throw new Error('tsconfig.json is invalid or does not exist')
     }
   }
 
   // ensure the output path is not empty
-  validateOutputPath(outputPath: string): void {
+  static #validateOutputPath(outputPath: string): void {
     if (outputPath === '') {
       throw new Error('error: no output path provided')
     }

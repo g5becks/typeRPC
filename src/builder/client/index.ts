@@ -1,5 +1,6 @@
 import {SourceFile} from 'ts-morph'
 import {ClientBuilder, Code, Target} from '../builder'
+
 /**
  * Generates client side code using https://www.npmjs.com/package/axios
  *
@@ -36,10 +37,12 @@ export class RpcError extends Error {
   }
 }
 
+export type Headers = {[key: string]: string}
+
 export type RpcClientConfig = {
   transformRequest?: AxiosTransformer | AxiosTransformer[];
   transformResponse?: AxiosTransformer | AxiosTransformer[];
-  headers?: any;
+  headers?: Headers;
   paramsSerializer?: (params: any) => string;
   timeout?: number;
   timeoutErrorMessage?: string;
@@ -65,12 +68,34 @@ export type RpcClientConfig = {
   protected imports(file: SourceFile): string {
     return `
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
-import fastJson from 'fast-json-stringify'
-import { Book, BookService } from './types/book-service'
+import fastJson = require('fast-json-stringify')
 import { isValidHttpUrl, RpcClientConfig, RpcError } from './types/${this.jobId}'
 ${this.buildImportedTypes(file)}
     `
   }
+
+  /*
+  protected buildClient(service: InterfaceDeclaration): string {
+    // eslint-disable-next-line no-template-curly-in-string
+    const errString = '`${host} is not a valid http url`'
+    return `
+export class AxiosBookService implements BookService {
+    protected readonly axios: AxiosInstance
+
+    private constructor(protected readonly host: string, protected readonly config?: RpcClientConfig) {
+      this.axios = axios.create({baseURL: host, ...config})
+    }
+
+    public static create(host: string, config?: AxiosRequestConfig): AxiosBookService | RpcError {
+      if (!isValidHttpUrl(host)) {
+        return new RpcError(${errString})
+      }
+      return new AxiosBookService(host, config)
+    }
+}
+`
+  }
+*/
 
   public buildTypes(): Code {
     const file = `${this.jobId}.ts`
@@ -79,11 +104,11 @@ ${this.buildImportedTypes(file)}
     })
   }
 
-  buildRpc(): Code {
+  public buildRpc(): Code {
     const code: Code = {}
     for (const file of this.parser.sourceFiles) {
       const schemas = this.buildShemasForFile(file)
-      code[this.buildRpcFileName(file)] = `${this.imports(file)}${this.fileHeader()}${schemas}`
+      code[CodeBuilder.buildRpcFileName(file)] = `${this.imports(file)}${CodeBuilder.fileHeader()}${schemas}`
     }
     return code
   }

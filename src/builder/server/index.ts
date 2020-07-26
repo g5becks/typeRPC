@@ -1,5 +1,5 @@
 import {InterfaceDeclaration, MethodSignature, SourceFile} from 'ts-morph'
-import {Code, ServerBuilder, Target} from '../builder'
+import {Code, ServerBuilder, Target, CodeBuilder} from '../builder'
 import {server} from './server'
 
 /**
@@ -28,33 +28,33 @@ ${this.buildImportedTypes(file)}\n`
   // generates the RequestGenericInterface parameter for each route
   // see https://www.fastify.io/docs/latest/TypeScript/#using-generics
   protected getIncomingMessageType(method: MethodSignature): string {
-    const payload = this.isGetMethod(method) ? 'Querystring' : 'Body'
-    return this.parser.getParams(method).length > 0 ? `{${payload}: ${this.buildRequestTypeName(method)}}` : `{${payload}: {}}`
+    const payload = CodeBuilder.isGetMethod(method) ? 'Querystring' : 'Body'
+    return this.parser.getParams(method).length > 0 ? `{${payload}: ${CodeBuilder.buildRequestTypeName(method)}}` : `{${payload}: {}}`
   }
 
   private buildRouteHandler(method: MethodSignature, serviceName: string): string {
     const hasParams = this.parser.hasParams(method)
     const hasReturn = this.parser.hasReturn(method)
-    const schemaType = this.isGetMethod(method) ? 'querystring' : 'body'
-    const payLoad = this.isGetMethod(method) ? 'query' : 'body'
-    const parsePayload = `const {${this.buildDestructuredParams(method)}} = request.${payLoad}`
+    const schemaType = CodeBuilder.isGetMethod(method) ? 'querystring' : 'body'
+    const payLoad = CodeBuilder.isGetMethod(method) ? 'query' : 'body'
+    const parsePayload = `const {${CodeBuilder.buildDestructuredParams(method)}} = request.${payLoad}`
     return `
     instance.route<${this.getIncomingMessageType(method)}>(
         {
-            method: '${this.buildRequestMethod(method)}',
-            url: ${this.buildServerRoute(method)},
+            method: '${CodeBuilder.buildRequestMethod(method)}',
+            url: ${ServerBuilder.buildServerRoute(method)},
             schema: {
-                ${schemaType}: ${hasParams ? this.buildRequestTypeSchemaName(method) : false},
+                ${schemaType}: ${hasParams ? CodeBuilder.buildRequestTypeSchemaName(method) : false},
                 response: {
-                    '2xx': ${hasReturn ? this.buildResponseTypeSchemeName(method) : false},
+                    '2xx': ${hasReturn ? CodeBuilder.buildResponseTypeSchemeName(method) : false},
                 },
 
             },
             handler: async (request, reply) => {
                   ${hasParams ? parsePayload : ''}
-                  const [err${hasReturn ? ', data' : ''}] = await instance.to(${this.lowerCase(serviceName)}.${method.getNameNode().getText().trim()}(${hasParams ? this.buildDestructuredParams(method) : ''}))
+                  const [err${hasReturn ? ', data' : ''}] = await instance.to(${CodeBuilder.lowerCase(serviceName)}.${method.getNameNode().getText().trim()}(${hasParams ? CodeBuilder.buildDestructuredParams(method) : ''}))
                   if (err) {
-                    return ${this.lowerCase(serviceName)}.handleErr(err, reply)
+                    return ${CodeBuilder.lowerCase(serviceName)}.handleErr(err, reply)
                   } else {
                     reply.send(${hasReturn ? '{data}' : ''})
                   }
@@ -63,13 +63,13 @@ ${this.buildImportedTypes(file)}\n`
     )\n`
   }
 
-  private controllerDoc(serviceName: string): string {
+  private static controllerDoc(serviceName: string): string {
     return `
 /**
 * Creates an Http Controller for {@link ${serviceName}}
 *
 * @function ${serviceName}Controller
-* @param {${serviceName}} ${this.lowerCase(serviceName)} ${serviceName} Implementation
+* @param {${serviceName}} ${CodeBuilder.lowerCase(serviceName)} ${serviceName} Implementation
 * @returns {FastifyPluginAsync} fastify plugin instance
 */`
   }
@@ -82,21 +82,21 @@ ${this.buildImportedTypes(file)}\n`
       handlers += this.buildRouteHandler(method, serviceName)
     }
     return `
-${this.controllerDoc(serviceName)}
-    const ${serviceName}Controller = (${this.lowerCase(serviceName)}: ${serviceName}): FastifyPluginAsync => async (instance, _) => {
+${FastifyGenerator.controllerDoc(serviceName)}
+    const ${serviceName}Controller = (${CodeBuilder.lowerCase(serviceName)}: ${serviceName}): FastifyPluginAsync => async (instance, _) => {
       instance.register(fastifySensible)
     ${handlers}
 }\n
  `.trimLeft()
   }
 
-  private pluginDoc(serviceName: string): string {
+  private static pluginDoc(serviceName: string): string {
     return `
 /**
 * Creates a {@link TypeRpcPlugin} for {@link ${serviceName}}
 *
 * @function ${serviceName}Plugin
-* @param {${serviceName}} ${this.lowerCase(serviceName)} ${serviceName} Implementation
+* @param {${serviceName}} ${CodeBuilder.lowerCase(serviceName)} ${serviceName} Implementation
 * @param {LogLevel} logLevel for this plugin
 * @param {PluginOptions} opts options for this plugin
 * @returns {TypeRpcPlugin} TypeRpcPlugin instance
@@ -107,10 +107,10 @@ ${this.controllerDoc(serviceName)}
     const serviceName = service.getNameNode().getText()
     return `
     ${this.buildController(service)}
-    ${this.pluginDoc(serviceName)}
-    export const ${serviceName}Plugin = (${this.lowerCase(serviceName)}: ${serviceName}, logLevel: LogLevel, opts?: PluginOptions): TypeRpcPlugin => {
-      return {plugin: fp(${serviceName}Controller(${this.lowerCase(serviceName)}), pluginOpts('${this.lowerCase(serviceName)}Controller', opts)),
-      opts: registerOptions('/${this.lowerCase(serviceName)}', logLevel)
+    ${FastifyGenerator.pluginDoc(serviceName)}
+    export const ${serviceName}Plugin = (${CodeBuilder.lowerCase(serviceName)}: ${serviceName}, logLevel: LogLevel, opts?: PluginOptions): TypeRpcPlugin => {
+      return {plugin: fp(${serviceName}Controller(${CodeBuilder.lowerCase(serviceName)}), pluginOpts('${CodeBuilder.lowerCase(serviceName)}Controller', opts)),
+      opts: registerOptions('/${CodeBuilder.lowerCase(serviceName)}', logLevel)
       }
     }\n
     `
@@ -125,13 +125,13 @@ ${this.controllerDoc(serviceName)}
     return controllers
   }
 
-  private typesCode(): string {
+  private static typesCode(): string {
     return `
 // eslint-disable-next-line unicorn/filename-case
 import {FastifyPluginCallback, LogLevel, RegisterOptions, FastifyReply} from 'fastify'
 import {PluginOptions} from 'fastify-plugin'
 
-${this.fileHeader()}
+${CodeBuilder.fileHeader()}
 
 /**
  * Creates an implementation of {@link PluginOptions} for a fastify-plugin
@@ -198,7 +198,7 @@ export interface RpcService {
   public buildTypes(): Code {
     const file = `${this.jobId}.ts`
     return this.buildTypesDefault({
-      [file]: this.typesCode(),
+      [file]: FastifyGenerator.typesCode(),
     })
   }
 
@@ -207,7 +207,7 @@ export interface RpcService {
     for (const file of this.parser.sourceFiles) {
       const schemas = this.buildShemasForFile(file)
       const controllers = this.buildPluginsForFile(file)
-      code[this.buildRpcFileName(file)] = `${this.imports(file)}${this.fileHeader()}${schemas}${controllers}`
+      code[CodeBuilder.buildRpcFileName(file)] = `${this.imports(file)}${CodeBuilder.fileHeader()}${schemas}${controllers}`
     }
     return code
   }
