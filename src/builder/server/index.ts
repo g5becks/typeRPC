@@ -23,7 +23,7 @@ import {FastifyPluginAsync, LogLevel} from 'fastify'
 import fastifySensible from 'fastify-sensible'
 import fp, {PluginOptions} from 'fastify-plugin'
 import {pluginOpts, registerOptions, TypeRpcPlugin} from './types/${this.jobId}'
-${CodeBuilder.buildImportedTypes(file)}\n`
+${this.buildImportedTypes(file)}\n`
   }
 
   // generates the RequestGenericInterface parameter for each route
@@ -33,7 +33,7 @@ ${CodeBuilder.buildImportedTypes(file)}\n`
     return Parser.getParams(method).length > 0 ? `{${payload}: ${CodeBuilder.buildRequestTypeName(method)}}` : `{${payload}: {}}`
   }
 
-  private buildRouteHandler(method: MethodSignature, serviceName: string): string {
+  private static buildRouteHandler(method: MethodSignature, serviceName: string): string {
     const hasParams = Parser.hasParams(method)
     const hasReturn = Parser.hasReturn(method)
     const schemaType = CodeBuilder.isGetMethod(method) ? 'querystring' : 'body'
@@ -76,11 +76,11 @@ ${CodeBuilder.buildImportedTypes(file)}\n`
   }
 
   // Builds a controller function for an interface definition
-  private buildController(service: InterfaceDeclaration): string {
+  private static buildController(service: InterfaceDeclaration): string {
     const serviceName = service.getNameNode().getText()
     let handlers = ''
     for (const method of service.getMethods()) {
-      handlers += this.buildRouteHandler(method, serviceName)
+      handlers += FastifyGenerator.buildRouteHandler(method, serviceName)
     }
     return `
 ${FastifyGenerator.controllerDoc(serviceName)}
@@ -104,10 +104,10 @@ ${FastifyGenerator.controllerDoc(serviceName)}
 */`
   }
 
-  private buildPlugin(service: InterfaceDeclaration): string {
+  private static buildPlugin(service: InterfaceDeclaration): string {
     const serviceName = service.getNameNode().getText()
     return `
-    ${this.buildController(service)}
+    ${FastifyGenerator.buildController(service)}
     ${FastifyGenerator.pluginDoc(serviceName)}
     export const ${serviceName}Plugin = (${CodeBuilder.lowerCase(serviceName)}: ${serviceName}, logLevel: LogLevel, opts?: PluginOptions): TypeRpcPlugin => {
       return {plugin: fp(${serviceName}Controller(${CodeBuilder.lowerCase(serviceName)}), pluginOpts('${CodeBuilder.lowerCase(serviceName)}Controller', opts)),
@@ -117,11 +117,11 @@ ${FastifyGenerator.controllerDoc(serviceName)}
     `
   }
 
-  private buildPluginsForFile(file: SourceFile): string {
+  private static buildPluginsForFile(file: SourceFile): string {
     const services = Parser.getInterfaces(file)
     let controllers = ''
     for (const service of services) {
-      controllers += this.buildPlugin(service)
+      controllers += FastifyGenerator.buildPlugin(service)
     }
     return controllers
   }
@@ -216,7 +216,7 @@ export interface RpcService {
     const code: Code = {...server}
     for (const file of this.parser.sourceFiles) {
       const schemas = this.buildShemasForFile(file)
-      const controllers = this.buildPluginsForFile(file)
+      const controllers = FastifyGenerator.buildPluginsForFile(file)
       code[CodeBuilder.buildRpcFileName(file)] = `${this.imports(file)}${CodeBuilder.buildFileHeader()}${schemas}${controllers}`
     }
     return code

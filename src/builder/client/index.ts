@@ -70,7 +70,7 @@ export type RpcClientConfig = {
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
 import fastJson = require('fast-json-stringify')
 import { isValidHttpUrl, RpcClientConfig, RpcError } from './types/${this.jobId}'
-${CodeBuilder.buildImportedTypes(file)}
+${this.buildImportedTypes(file)}
     `
   }
 

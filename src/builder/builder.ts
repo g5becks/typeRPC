@@ -239,8 +239,11 @@ const Stringify${type} = fastJson(
     return CodeBuilder.buildRequestMethod(method).toLowerCase().includes('get')
   }
 
-  protected static buildImportedTypes(file: SourceFile): string {
-    return `import {${Parser.getInterfacesText(file)},${Parser.getTypeAliasesText(file)},${CodeBuilder.buildRequestTypesImports(file)}} from './types/${file.getBaseNameWithoutExtension()}'`
+  protected buildImportedTypes(file: SourceFile): string {
+    const requestTypes = CodeBuilder.buildRequestTypesImports(file)
+    const responseTypes = CodeBuilder.buildResponseTypeImports(file)
+    const imports = this.target === 'client' ? `${requestTypes},${responseTypes}` : requestTypes
+    return `import {${Parser.getInterfacesText(file)},${Parser.getTypeAliasesText(file)},${imports}} from './types/${file.getBaseNameWithoutExtension()}'`
   }
 
   // builds a list of generated request types to be used when
