@@ -131,7 +131,7 @@ ${FastifyGenerator.controllerDoc(serviceName)}
 import {FastifyPluginCallback, LogLevel, RegisterOptions, FastifyReply} from 'fastify'
 import {PluginOptions} from 'fastify-plugin'
 
-${CodeBuilder.fileHeader()}
+${CodeBuilder.buildFileHeader()}
 
 /**
  * Creates an implementation of {@link PluginOptions} for a fastify-plugin
@@ -207,7 +207,7 @@ export interface RpcService {
     for (const file of this.parser.sourceFiles) {
       const schemas = this.buildShemasForFile(file)
       const controllers = this.buildPluginsForFile(file)
-      code[CodeBuilder.buildRpcFileName(file)] = `${this.imports(file)}${CodeBuilder.fileHeader()}${schemas}${controllers}`
+      code[CodeBuilder.buildRpcFileName(file)] = `${this.imports(file)}${CodeBuilder.buildFileHeader()}${schemas}${controllers}`
     }
     return code
   }
