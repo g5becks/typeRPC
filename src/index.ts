@@ -41,7 +41,7 @@ class TypeRpc extends Command {
       },
       {
         title: 'Validating tsconfig.json',
-        task: async () => TypeRpc.#validateTsConfigFile(tsConfigFile),
+        task: async () => TypeRpc.validateTsConfigFile(tsConfigFile),
       },
       {
         title: 'Validating Output Path',
@@ -126,7 +126,7 @@ class TypeRpc extends Command {
   }
 
   // ensure that the path to tsconfig.json actually exists
-  static async #validateTsConfigFile(tsConfigFile: string): Promise<void> {
+  protected static async validateTsConfigFile(tsConfigFile: string): Promise<void> {
     const exists = await TypeRpc.tsconfigFileExists(tsConfigFile)
     if (tsConfigFile === '' || !exists) {
       throw new Error('tsconfig.json is invalid or does not exist')
@@ -134,7 +134,7 @@ class TypeRpc extends Command {
   }
 
   // ensure the output path is not empty
-  static #validateOutputPath(outputPath: string): void {
+  protected static validateOutputPath(outputPath: string): void {
     if (outputPath === '') {
       throw new Error('error: no output path provided')
     }

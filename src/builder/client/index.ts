@@ -1,5 +1,5 @@
 import {SourceFile} from 'ts-morph'
-import {ClientBuilder, Code, Target} from '../builder'
+import {ClientBuilder, Code, CodeBuilder, Target} from '../builder'
 
 /**
  * Generates client side code using https://www.npmjs.com/package/axios
