@@ -1,6 +1,7 @@
 import {InterfaceDeclaration, MethodSignature, SourceFile} from 'ts-morph'
 import {Code, ServerBuilder, Target, CodeBuilder} from '../builder'
 import {server} from './server'
+import {Parser} from '../parser'
 
 /**
  * Generates server side code using https://www.fastify.io/
@@ -27,7 +28,7 @@ ${CodeBuilder.buildImportedTypes(file)}\n`
 
   // generates the RequestGenericInterface parameter for each route
   // see https://www.fastify.io/docs/latest/TypeScript/#using-generics
-  protected getIncomingMessageType(method: MethodSignature): string {
+  protected static getIncomingMessageType(method: MethodSignature): string {
     const payload = CodeBuilder.isGetMethod(method) ? 'Querystring' : 'Body'
     return Parser.getParams(method).length > 0 ? `{${payload}: ${CodeBuilder.buildRequestTypeName(method)}}` : `{${payload}: {}}`
   }
@@ -39,7 +40,7 @@ ${CodeBuilder.buildImportedTypes(file)}\n`
     const payLoad = CodeBuilder.isGetMethod(method) ? 'query' : 'body'
     const parsePayload = `const {${CodeBuilder.buildDestructuredParams(method)}} = request.${payLoad}`
     return `
-    instance.route<${this.getIncomingMessageType(method)}>(
+    instance.route<${FastifyGenerator.getIncomingMessageType(method)}>(
         {
             method: '${CodeBuilder.buildRequestMethod(method)}',
             url: ${ServerBuilder.buildServerRoute(method)},
@@ -126,10 +127,19 @@ ${FastifyGenerator.controllerDoc(serviceName)}
   }
 
   private static typesCode(): string {
+    const handlerErr = 'handleErr<T extends RawServerBase, U extends RawRequestDefaultExpression<T>, R extends RawReplyDefaultExpression<T>, S extends RouteGenericInterface, V>(err: Error, reply: FastifyReply<T, U, R, S, V>): FastifyReply<T, U, R, S, V>;'
     return `
 // eslint-disable-next-line unicorn/filename-case
-import {FastifyPluginCallback, LogLevel, RegisterOptions, FastifyReply} from 'fastify'
+import {
+  FastifyPluginCallback,
+  LogLevel,
+  RegisterOptions,
+  FastifyReply,
+  RawReplyDefaultExpression,
+  RawServerBase, RawRequestDefaultExpression,
+} from 'fastify'
 import {PluginOptions} from 'fastify-plugin'
+import {RouteGenericInterface} from 'fastify/types/route'
 
 ${CodeBuilder.buildFileHeader()}
 
@@ -190,7 +200,7 @@ export interface RpcService {
    * @returns {FastifyReply}
    * @memberof RpcService
    */
-  handleErr(err: Error, reply: FastifyReply): FastifyReply;
+   ${handlerErr}
 }
 `
   }

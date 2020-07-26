@@ -162,6 +162,8 @@ export type ${CodeBuilder.buildResponseTypeName(method)} = {
   protected buildSchemaForType(filePath: string, type: string, service: InterfaceDeclaration, method: MethodSignature, schemaType: SchemaType): string {
     const config: Config = {path: filePath, type}
     try {
+      // eslint-disable-next-line no-console
+      console.log(type)
       const schema = JSON.stringify(createGenerator(config).createSchema(config.type), null, 2)
       return this.target === 'server' ? `
 ${CodeBuilder.buildSchemaDoc(service, method, schemaType)}
