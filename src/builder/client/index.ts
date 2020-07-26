@@ -106,8 +106,8 @@ export class AxiosBookService implements BookService {
   public buildRpc(): Code {
     const code: Code = {}
     for (const file of this.parser.sourceFiles) {
-      const schemas = this.buildShemasForFile(file)
-      code[CodeBuilder.buildRpcFileName(file)] = `${this.imports(file)}${CodeBuilder.buildFileHeader()}${schemas}`
+      const args = this.buildRequestArgsForFile(file)
+      code[CodeBuilder.buildRpcFileName(file)] = `${this.imports(file)}${CodeBuilder.buildFileHeader()}${args}`
     }
     return code
   }
