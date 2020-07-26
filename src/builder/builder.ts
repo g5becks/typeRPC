@@ -347,10 +347,8 @@ export abstract class ClientBuilder extends CodeBuilder {
     const gotten = parsed.definitions[type]
     gotten.title = type
 
-    return `fastJson(
-  ${JSON.stringify(gotten)}
-)
-    `
+    return `fastJson(${JSON.stringify(gotten)})
+    `.trimRight()
   }
 
   protected static buildRequestDataOrParams(method: MethodSignature, requestType: string, schema: string): string {
@@ -373,7 +371,8 @@ export abstract class ClientBuilder extends CodeBuilder {
 const ${methodName}Args = (${CodeBuilder.buildParams(method)}): AxiosRequestConfig => {
       return {
         url: '${serviceName}/${methodName}', method: '${CodeBuilder.buildRequestMethod(method)}', ${ClientBuilder.buildRequestDataOrParams(method, requestType, schema)}
-      }\n
+      }
+  }\n
     `
   }
 
