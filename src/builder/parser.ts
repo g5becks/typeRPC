@@ -16,11 +16,11 @@ export class Parser {
     this.project = new Project({tsConfigFilePath: tsConfigFilePath, skipFileDependencyResolution: true})
   }
 
-  hasParams(method: MethodSignature): boolean {
+  static hasParams(method: MethodSignature): boolean {
     return method.getParameters().length > 0
   }
 
-  hasReturn(method: MethodSignature): boolean {
+  static hasReturn(method: MethodSignature): boolean {
     const nonValids = ['void', 'Promise<void>', '', 'undefined']
     // noinspection TypeScriptValidateTypes
     const returnType = method.getReturnTypeNode()?.getText().trim()
@@ -30,32 +30,32 @@ export class Parser {
     return false
   }
 
-  getMethodsForInterface(interfce: InterfaceDeclaration): MethodSignature[] {
+  static getMethodsForInterface(interfce: InterfaceDeclaration): MethodSignature[] {
     return interfce.getMethods()
   }
 
-  getMethodsForFile(file: SourceFile): MethodSignature[] {
-    const interfaces = this.getInterfaces(file)
+  static getMethodsForFile(file: SourceFile): MethodSignature[] {
+    const interfaces = Parser.getInterfaces(file)
     const methods: MethodSignature[] = []
     for (const interfc of interfaces) {
-      methods.push(...this.getMethodsForInterface(interfc))
+      methods.push(...Parser.getMethodsForInterface(interfc))
     }
     return methods
   }
 
-  getParams(method: MethodSignature): ParameterDeclaration[] {
+  static getParams(method: MethodSignature): ParameterDeclaration[] {
     return method.getParameters()
   }
 
-  getInterfaces(file: SourceFile): InterfaceDeclaration[] {
+  static getInterfaces(file: SourceFile): InterfaceDeclaration[] {
     return file.getInterfaces()
   }
 
-  getTypeAliasesText(file: SourceFile): string[] {
+  static getTypeAliasesText(file: SourceFile): string[] {
     return file.getTypeAliases().map(alias => alias.getNameNode().getText())
   }
 
-  getInterfacesText(file: SourceFile): string[] {
+  static getInterfacesText(file: SourceFile): string[] {
     return file.getInterfaces().map(srvc => srvc.getNameNode().getText())
   }
 }

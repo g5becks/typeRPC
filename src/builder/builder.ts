@@ -102,12 +102,12 @@ export abstract class CodeBuilder {
   }
 
   // Builds a single request type for a method
-  protected buildRequestType(method: MethodSignature): string {
+  protected static buildRequestType(method: MethodSignature): string {
     let typeParams = ''
-    if (!this.parser.hasParams(method)) {
+    if (!Parser.hasParams(method)) {
       return ''
     }
-    for (const param of this.parser.getParams(method)) {
+    for (const param of Parser.getParams(method)) {
       typeParams += `${param.getText().trim()};\n`
     }
     return `
@@ -119,11 +119,11 @@ export type ${CodeBuilder.buildRequestTypeName(method)} = {
   // Builds request types for all methods in a file
   // All parameters must be merged into one object and a separate type
   // alias created so that they can be used by the jsonSchemaGenerator
-  protected buildRequestTypesForFile(file: SourceFile): string {
-    const methods = this.parser.getMethodsForFile(file)
+  protected static buildRequestTypesForFile(file: SourceFile): string {
+    const methods = Parser.getMethodsForFile(file)
     let inputTypes = ''
     for (const method of methods) {
-      inputTypes += `${this.buildRequestType(method)}`
+      inputTypes += `${CodeBuilder.buildRequestType(method)}`
     }
     return `${inputTypes}`
   }
@@ -143,8 +143,8 @@ export type ${CodeBuilder.buildResponseTypeName(method)} = {
   }
 
   // builds response types for all methods in a file
-  protected buildResponseTypesForFile(file: SourceFile): string {
-    const methods = this.parser.getMethodsForFile(file)
+  protected static buildResponseTypesForFile(file: SourceFile): string {
+    const methods = Parser.getMethodsForFile(file)
     let returnTypes = ''
     for (const method of methods) {
       returnTypes += `${CodeBuilder.buildResponseType(method)}`
@@ -204,13 +204,13 @@ const Stringify${type} = fastJson(
     const typesFile = this.buildGeneratedTypesFilePath(file)
 
     let schema = ''
-    for (const service of this.parser.getInterfaces(file)) {
-      for (const method of this.parser.getMethodsForInterface(service)) {
-        if (this.parser.hasParams(method)) {
+    for (const service of Parser.getInterfaces(file)) {
+      for (const method of Parser.getMethodsForInterface(service)) {
+        if (Parser.hasParams(method)) {
           schema += this.buildSchemaForType(typesFile, CodeBuilder.buildRequestTypeName(method), service, method, 'request')
         }
         if (this.target === 'server') {
-          if (this.parser.hasReturn(method)) {
+          if (Parser.hasReturn(method)) {
             schema += this.buildSchemaForType(typesFile, CodeBuilder.buildResponseTypeName(method), service, method, 'response')
           }
         }
@@ -237,16 +237,22 @@ const Stringify${type} = fastJson(
     return CodeBuilder.buildRequestMethod(method).toLowerCase().includes('get')
   }
 
-  protected buildImportedTypes(file: SourceFile): string {
-    return `import {${this.parser.getInterfacesText(file)},${this.parser.getTypeAliasesText(file)},${this.buildRequestTypesImports(file)}} from './types/${file.getBaseNameWithoutExtension()}'`
+  protected static buildImportedTypes(file: SourceFile): string {
+    return `import {${Parser.getInterfacesText(file)},${Parser.getTypeAliasesText(file)},${CodeBuilder.buildRequestTypesImports(file)}} from './types/${file.getBaseNameWithoutExtension()}'`
   }
 
   // builds a list of generated request types to be used when
   // generating imports declarations
-  protected buildRequestTypesImports(file: SourceFile): string[] {
-    return this.parser.getMethodsForFile(file)
-    .filter(this.parser.hasParams)
+  protected static buildRequestTypesImports(file: SourceFile): string[] {
+    return Parser.getMethodsForFile(file)
+    .filter(Parser.hasParams)
     .map(CodeBuilder.buildRequestTypeName)
+  }
+
+  protected static buildResponseTypeImports(file: SourceFile): string[] {
+    return Parser.getMethodsForFile(file)
+    .filter(Parser.hasParams)
+    .map(CodeBuilder.buildResponseTypeName)
   }
 
   // Builds the destructured parameters from request body or query
@@ -269,7 +275,7 @@ const Stringify${type} = fastJson(
     const rpcImport = `import {RpcService} from './${this.jobId}'\n`
     // build interfaces must be called last because the response
     // types cannot be modifies prior to building response types
-    return `${this.target === 'server' ? rpcImport : ''}${CodeBuilder.buildFileHeader()}${CodeBuilder.buildTypesText(file)}${this.buildRequestTypesForFile(file)}${this.buildResponseTypesForFile(file)}${this.buildInterfaces(file)}`
+    return `${this.target === 'server' ? rpcImport : ''}${CodeBuilder.buildFileHeader()}${CodeBuilder.buildTypesText(file)}${CodeBuilder.buildRequestTypesForFile(file)}${CodeBuilder.buildResponseTypesForFile(file)}${this.buildInterfaces(file)}`
   }
 
   // Generates types for the input schema file

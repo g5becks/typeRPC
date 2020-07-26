@@ -22,19 +22,19 @@ import {FastifyPluginAsync, LogLevel} from 'fastify'
 import fastifySensible from 'fastify-sensible'
 import fp, {PluginOptions} from 'fastify-plugin'
 import {pluginOpts, registerOptions, TypeRpcPlugin} from './types/${this.jobId}'
-${this.buildImportedTypes(file)}\n`
+${CodeBuilder.buildImportedTypes(file)}\n`
   }
 
   // generates the RequestGenericInterface parameter for each route
   // see https://www.fastify.io/docs/latest/TypeScript/#using-generics
   protected getIncomingMessageType(method: MethodSignature): string {
     const payload = CodeBuilder.isGetMethod(method) ? 'Querystring' : 'Body'
-    return this.parser.getParams(method).length > 0 ? `{${payload}: ${CodeBuilder.buildRequestTypeName(method)}}` : `{${payload}: {}}`
+    return Parser.getParams(method).length > 0 ? `{${payload}: ${CodeBuilder.buildRequestTypeName(method)}}` : `{${payload}: {}}`
   }
 
   private buildRouteHandler(method: MethodSignature, serviceName: string): string {
-    const hasParams = this.parser.hasParams(method)
-    const hasReturn = this.parser.hasReturn(method)
+    const hasParams = Parser.hasParams(method)
+    const hasReturn = Parser.hasReturn(method)
     const schemaType = CodeBuilder.isGetMethod(method) ? 'querystring' : 'body'
     const payLoad = CodeBuilder.isGetMethod(method) ? 'query' : 'body'
     const parsePayload = `const {${CodeBuilder.buildDestructuredParams(method)}} = request.${payLoad}`
@@ -117,7 +117,7 @@ ${FastifyGenerator.controllerDoc(serviceName)}
   }
 
   private buildPluginsForFile(file: SourceFile): string {
-    const services = this.parser.getInterfaces(file)
+    const services = Parser.getInterfaces(file)
     let controllers = ''
     for (const service of services) {
       controllers += this.buildPlugin(service)
