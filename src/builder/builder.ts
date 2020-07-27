@@ -7,10 +7,13 @@ import {BuilderError} from '.'
 import {
   getInterfaceName,
   getInterfaces,
-  getInterfacesText, getMethodName,
+  getInterfacesText,
+  getMethodName,
   getMethodsForFile,
   getMethodsForInterface,
-  getParams, getReturnType,
+  getParamName,
+  getParams, getParamType,
+  getReturnType,
   getTypeAliasesText,
   hasParams,
   hasReturn,
@@ -120,7 +123,7 @@ export abstract class CodeBuilder {
       return ''
     }
     for (const param of getParams(method)) {
-      typeParams += `${param.getText().trim()};\n`
+      typeParams += `${getParamName(param)};\n`
     }
     return `
 export type ${CodeBuilder.buildRequestTypeName(method)} = {
@@ -150,7 +153,7 @@ export type ${CodeBuilder.buildRequestTypeName(method)} = {
     // noinspection TypeScriptValidateTypes
     return `
 export type ${CodeBuilder.buildResponseTypeName(method)} = {
-  data: ${method.getReturnTypeNode()?.getText().trim()};
+  data: ${getReturnType(method)};
 }\n`
   }
 
@@ -267,14 +270,14 @@ export const ${type}Schema = ${schema}\n
 
   // Builds the parameters list for a method call
   protected static buildParams(method: MethodSignature): string {
-    return `${method.getParameters().map(param => param.getNameNode().getText().trim())}`
+    return `${method.getParameters().map(getParamName)}`
   }
 
   protected static buildParamsWithTypes(method: MethodSignature): string[] {
     const params = []
     if (hasParams(method)) {
       for (const param of method.getParameters()) {
-        params.push(`${param.getNameNode().getText().trim()}: ${param.getTypeNode()?.getText().trim()}`)
+        params.push(`${getParamName(param)}: ${getParamType(param)}`)
       }
     }
     return params

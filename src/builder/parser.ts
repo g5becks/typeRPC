@@ -30,6 +30,17 @@ export const hasReturn = (method: MethodSignature): boolean => {
   return false
 }
 
+export const getParamName = (param: ParameterDeclaration): string => param.getText().trim()
+
+export const getParamType = (param: ParameterDeclaration): string => {
+  const maybeParamType = param.getTypeNode()
+  let paramType = 'any'
+  if (typeof maybeParamType !== 'undefined') {
+    paramType = maybeParamType.getText().trim()
+  }
+  return paramType
+}
+
 export const getReturnType = (method: MethodSignature): string => {
   const maybeReturnType = method.getReturnTypeNode()
   let returnType = 'void'
