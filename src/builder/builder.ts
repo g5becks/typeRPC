@@ -424,7 +424,7 @@ const ${ClientBuilder.buildRequestArgsName(method)} = (${CodeBuilder.buildParams
       }
   }\n
     ` : `
-const ${ClientBuilder.buildRequestArgsName(method)} = () => {
+const ${ClientBuilder.buildRequestArgsName(method)} = (): AxiosRequestConfig => {
       return {
         url: '/${lowerCase(serviceName)}/${lowerCase(methodName)}', method: '${CodeBuilder.buildRequestMethod(method)}'
       }
