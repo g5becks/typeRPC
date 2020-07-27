@@ -12,7 +12,8 @@ import {
   getMethodsForFile,
   getMethodsForInterface,
   getParamName,
-  getParams, getParamType,
+  getParams,
+  getParamType,
   getReturnType,
   getTypeAliasesText,
   hasParams,
@@ -74,7 +75,7 @@ export abstract class CodeBuilder {
 */`
   }
 
-  private static promisifyMethod(method: MethodSignature): void {
+  protected static promisifyMethod(method: MethodSignature): void {
     const returnType = getReturnType(method)
     const promisified = `Promise<${returnType}>`
     if (returnType?.includes('Promise<')) {
@@ -358,6 +359,15 @@ export abstract class ServerBuilder extends CodeBuilder {
 export abstract class ClientBuilder extends CodeBuilder {
   protected constructor(protected readonly target: Target, protected readonly tsConfigFilePath: string, protected readonly outputPath: string, protected readonly jobId: string) {
     super(target, tsConfigFilePath, outputPath, jobId)
+  }
+
+  protected static buildMethod(method: MethodSignature): string {
+    CodeBuilder.promisifyMethod(method)
+    if (method.getFullText().includes(';')) {
+      method.getFullText().replace(';', '')
+    }
+    return `
+    async ${method.getFullText().trim()}\n`
   }
 
   protected static buildStringifyFuncForType(type: string, schema: string): string {
