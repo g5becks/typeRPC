@@ -1,5 +1,6 @@
-import {SourceFile} from 'ts-morph'
+import {InterfaceDeclaration, SourceFile} from 'ts-morph'
 import {ClientBuilder, Code, CodeBuilder, Target} from '../builder'
+import {Parser} from '../parser'
 
 /**
  * Generates client side code using https://www.npmjs.com/package/axios
@@ -73,16 +74,18 @@ ${this.buildImportedTypes(file)}
     `
   }
 
-  /*
-  protected buildClient(service: InterfaceDeclaration): string {
+  protected static buildMethod
+
+  protected static buildClient(service: InterfaceDeclaration): string {
     // eslint-disable-next-line no-template-curly-in-string
     const errString = '`${host} is not a valid http url`'
+    const serviceName = service.getNameNode().getText().trim()
     return `
-export class AxiosBookService implements BookService {
+export class Axios${serviceName} implements ${serviceName} {
     protected readonly axios: AxiosInstance
 
     private constructor(protected readonly host: string, protected readonly config?: RpcClientConfig) {
-      this.axios = axios.create({baseURL: host, ...config})
+      this.client = axios.create({baseURL: host, ...config})
     }
 
     public static create(host: string, config?: AxiosRequestConfig): AxiosBookService | RpcError {
@@ -91,10 +94,17 @@ export class AxiosBookService implements BookService {
       }
       return new AxiosBookService(host, config)
     }
-}
+}\n
 `
   }
-*/
+
+  protected static buildClientsForFile(file: SourceFile): string {
+    let clients = ''
+    for (const service of Parser.getInterfaces(file)) {
+      clients += AxiosGenerator.buildClient(service)
+    }
+    return clients
+  }
 
   public buildTypes(): Code {
     const file = `${this.jobId}.ts`
@@ -107,7 +117,8 @@ export class AxiosBookService implements BookService {
     const code: Code = {}
     for (const file of this.parser.sourceFiles) {
       const args = this.buildRequestArgsForFile(file)
-      code[CodeBuilder.buildRpcFileName(file)] = `${this.imports(file)}${CodeBuilder.buildFileHeader()}${args}`
+      const clients = AxiosGenerator.buildClientsForFile(file)
+      code[CodeBuilder.buildRpcFileName(file)] = `${this.imports(file)}${CodeBuilder.buildFileHeader()}${args}${clients}`
     }
     return code
   }
