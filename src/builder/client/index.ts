@@ -77,8 +77,7 @@ ${this.buildImportedTypes(file)}
   protected static buildClientMethod(method: MethodSignature): string {
     return `
     ${ClientBuilder.buildMethod(method)} {
-      const data = await this.client.request<${CodeBuilder.buildResponseTypeName(method)}, ${CodeBuilder.buildResponseTypeName(method)}>(${ClientBuilder.buildRequestArgsName(method)}(${CodeBuilder.buildParams(method)}))
-      return data
+      return this.client.request<${CodeBuilder.buildResponseTypeName(method)}, ${CodeBuilder.removePromise(method)}>(${ClientBuilder.buildRequestArgsName(method)}(${CodeBuilder.buildParams(method)}))
     }\n`
   }
 
@@ -100,7 +99,7 @@ export class Axios${serviceName} implements ${serviceName} {
 
     private constructor(protected readonly host: string, protected readonly config?: RpcClientConfig) {
       this.client = axios.create({baseURL: host, ...config})
-      this.client.interceptors.response.use(response => response.data)
+      this.client.interceptors.response.use(response => response?.data?.data)
     }
 
     public static create(host: string, config?: AxiosRequestConfig): AxiosBookService | RpcError {

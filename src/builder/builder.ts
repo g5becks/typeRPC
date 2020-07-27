@@ -70,6 +70,19 @@ export abstract class CodeBuilder {
 \n`
   }
 
+  protected static removePromise = (method: MethodSignature): string[] => {
+    const maybeReturnType = method.getReturnType()
+    let returnType: string[] = []
+    if (typeof maybeReturnType !== 'undefined') {
+      const text = maybeReturnType.getText().trim()
+      if (text.includes('Promise<')) {
+        const innerTypes = maybeReturnType.getTypeArguments()
+        returnType = innerTypes.map(type => type.getText().trim())
+      }
+    }
+    return returnType
+  }
+
   protected static buildSchemaDoc(service: InterfaceDeclaration, method: MethodSignature, schemaType: SchemaType): string {
     return `
 /**
@@ -434,3 +447,4 @@ const ${ClientBuilder.buildRequestArgsName(method)} = (${CodeBuilder.buildParams
 
   public  abstract buildRpc(): Code
 }
+
