@@ -13,7 +13,7 @@ import {
   getMethodsForInterface,
   getParamName,
   getParams,
-  getParamType,
+  getParamWithType,
   getReturnType,
   getTypeAliasesText,
   hasParams,
@@ -119,7 +119,7 @@ export abstract class CodeBuilder {
       return ''
     }
     for (const param of getParams(method)) {
-      typeParams += `${getParamName(param)};\n`
+      typeParams += `${getParamWithType(param)};\n`
     }
     return `
 export type ${CodeBuilder.buildRequestTypeName(method)} = {
@@ -158,7 +158,8 @@ export type ${CodeBuilder.buildResponseTypeName(method)} = {
     const methods = getMethodsForFile(file)
     let returnTypes = ''
     for (const method of methods) {
-      returnTypes += `${CodeBuilder.buildResponseType(method)}`
+      if (hasReturn(method))
+        returnTypes += `${CodeBuilder.buildResponseType(method)}`
     }
     return returnTypes
   }
@@ -270,13 +271,7 @@ export const ${type}Schema = ${schema}\n
   }
 
   protected static buildParamsWithTypes(method: MethodSignature): string[] {
-    const params = []
-    if (hasParams(method)) {
-      for (const param of method.getParameters()) {
-        params.push(`${getParamName(param)}: ${getParamType(param)}`)
-      }
-    }
-    return params
+    return hasParams(method) ? method.getParameters().map(getParamWithType) : []
   }
 
   // Copies all type aliases from schema to output type

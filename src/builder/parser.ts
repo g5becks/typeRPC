@@ -30,7 +30,13 @@ export const hasReturn = (method: MethodSignature): boolean => {
   return false
 }
 
-export const getParamName = (param: ParameterDeclaration): string => param.getText().trim()
+export const isVoidReturn = (method: MethodSignature): boolean => {
+  return getReturnType(method) === 'void'
+}
+
+export const getParamName = (param: ParameterDeclaration): string => param.getNameNode().getText().trim()
+
+export const getParamWithType = (param: ParameterDeclaration): string => param.getText().trim()
 
 export const getParamType = (param: ParameterDeclaration): string => {
   const maybeParamType = param.getTypeNode()
@@ -38,6 +44,8 @@ export const getParamType = (param: ParameterDeclaration): string => {
   if (typeof maybeParamType !== 'undefined') {
     paramType = maybeParamType.getText().trim()
   }
+  // eslint-disable-next-line no-console
+  console.log(paramType)
   return paramType
 }
 

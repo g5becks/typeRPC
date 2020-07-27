@@ -1,6 +1,6 @@
-import {InterfaceDeclaration, MethodSignature, SourceFile} from 'ts-morph'
+import {InterfaceDeclaration, SourceFile} from 'ts-morph'
 import {ClientBuilder, Code, CodeBuilder, Target} from '../builder'
-import {getInterfaces, getMethodName} from '../parser'
+import {getInterfaceName, getInterfaces} from '../parser'
 
 /**
  * Generates client side code using https://www.npmjs.com/package/axios
@@ -75,16 +75,17 @@ ${this.buildImportedTypes(file)}
   }
 
   protected static buildMethods(service: InterfaceDeclaration): string {
-    const methods = ''
+    let methods = ''
     for (const method of service.getMethods()) {
       methods += ClientBuilder.buildMethod(method)
     }
+    return methods
   }
 
   protected static buildClient(service: InterfaceDeclaration): string {
     // eslint-disable-next-line no-template-curly-in-string
     const errString = '`${host} is not a valid http url`'
-    const serviceName = service.getNameNode().getText().trim()
+    const serviceName = getInterfaceName(service)
     return `
 export class Axios${serviceName} implements ${serviceName} {
     protected readonly axios: AxiosInstance
@@ -99,6 +100,8 @@ export class Axios${serviceName} implements ${serviceName} {
       }
       return new AxiosBookService(host, config)
     }
+
+    ${AxiosBuilder.buildMethods(service)}
 }\n
 `
   }
