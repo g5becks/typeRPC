@@ -18,6 +18,7 @@ import {
   getTypeAliasesText,
   hasParams,
   hasReturn,
+  isVoidReturn,
   Parser,
 } from './parser'
 
@@ -158,8 +159,9 @@ export type ${CodeBuilder.buildResponseTypeName(method)} = {
     const methods = getMethodsForFile(file)
     let returnTypes = ''
     for (const method of methods) {
-      if (hasReturn(method))
+      if (hasReturn(method) && !isVoidReturn(method)) {
         returnTypes += `${CodeBuilder.buildResponseType(method)}`
+      }
     }
     return returnTypes
   }
