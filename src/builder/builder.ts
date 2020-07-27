@@ -4,7 +4,17 @@ import path from 'path'
 import {Config, createGenerator} from 'ts-json-schema-generator'
 import {InterfaceDeclaration, MethodSignature, ParameterDeclaration, SourceFile} from 'ts-morph'
 import {BuilderError} from '.'
-import {Parser} from './parser'
+import {
+  getInterfaces,
+  getInterfacesText,
+  getMethodsForFile,
+  getMethodsForInterface,
+  getParams,
+  getTypeAliasesText,
+  hasParams,
+  hasReturn,
+  Parser,
+} from './parser'
 
 export type Code = {
   [key: string]: string;
@@ -106,10 +116,10 @@ export abstract class CodeBuilder {
   // Builds a single request type for a method
   protected static buildRequestType(method: MethodSignature): string {
     let typeParams = ''
-    if (!Parser.hasParams(method)) {
+    if (!hasParams(method)) {
       return ''
     }
-    for (const param of Parser.getParams(method)) {
+    for (const param of getParams(method)) {
       typeParams += `${param.getText().trim()};\n`
     }
     return `
@@ -122,7 +132,7 @@ export type ${CodeBuilder.buildRequestTypeName(method)} = {
   // All parameters must be merged into one object and a separate type
   // alias created so that they can be used by the jsonSchemaGenerator
   protected static buildRequestTypesForFile(file: SourceFile): string {
-    const methods = Parser.getMethodsForFile(file)
+    const methods = getMethodsForFile(file)
     let inputTypes = ''
     for (const method of methods) {
       inputTypes += `${CodeBuilder.buildRequestType(method)}`
@@ -146,7 +156,7 @@ export type ${CodeBuilder.buildResponseTypeName(method)} = {
 
   // builds response types for all methods in a file
   protected static buildResponseTypesForFile(file: SourceFile): string {
-    const methods = Parser.getMethodsForFile(file)
+    const methods = getMethodsForFile(file)
     let returnTypes = ''
     for (const method of methods) {
       returnTypes += `${CodeBuilder.buildResponseType(method)}`
@@ -196,13 +206,13 @@ export const ${type}Schema = ${schema}\n
     const typesFile = this.buildGeneratedTypesFilePath(file)
 
     let schema = ''
-    for (const service of Parser.getInterfaces(file)) {
-      for (const method of Parser.getMethodsForInterface(service)) {
-        if (Parser.hasParams(method)) {
+    for (const service of getInterfaces(file)) {
+      for (const method of getMethodsForInterface(service)) {
+        if (hasParams(method)) {
           schema += this.buildSchemaForType(typesFile, CodeBuilder.buildRequestTypeName(method), service, method, 'request')
         }
         if (this.target === 'server') {
-          if (Parser.hasReturn(method)) {
+          if (hasReturn(method)) {
             schema += this.buildSchemaForType(typesFile, CodeBuilder.buildResponseTypeName(method), service, method, 'response')
           }
         }
@@ -236,22 +246,22 @@ export const ${type}Schema = ${schema}\n
     const requestTypes = CodeBuilder.buildRequestTypesImports(file)
     const responseTypes = CodeBuilder.buildResponseTypeImports(file)
     const imports = this.target === 'client' ? `${requestTypes},${responseTypes}` : requestTypes
-    return `import {${Parser.getInterfacesText(file)},${Parser.getTypeAliasesText(file)},${imports}} from './types/${file.getBaseNameWithoutExtension()}'`
+    return `import {${getInterfacesText(file)},${getTypeAliasesText(file)},${imports}} from './types/${file.getBaseNameWithoutExtension()}'`
   }
 
   // builds a list of generated request types to be used when
   // generating import declarations
   protected static buildRequestTypesImports(file: SourceFile): string[] {
-    return Parser.getMethodsForFile(file)
-    .filter(Parser.hasParams)
+    return getMethodsForFile(file)
+    .filter(hasParams)
     .map(CodeBuilder.buildRequestTypeName)
   }
 
   // builds a list of generated response types to be used when
   // generating import declarations
   protected static buildResponseTypeImports(file: SourceFile): string[] {
-    return Parser.getMethodsForFile(file)
-    .filter(Parser.hasParams)
+    return getMethodsForFile(file)
+    .filter(hasParams)
     .map(CodeBuilder.buildResponseTypeName)
   }
 
@@ -262,7 +272,7 @@ export const ${type}Schema = ${schema}\n
 
   protected static buildParamsWithTypes(method: MethodSignature): string[] {
     const params = []
-    if (Parser.hasParams(method)) {
+    if (hasParams(method)) {
       for (const param of method.getParameters()) {
         params.push(`${param.getNameNode().getText().trim()}: ${param.getTypeNode()?.getText().trim()}`)
       }
@@ -389,10 +399,10 @@ const ${methodName}Args = (${CodeBuilder.buildParamsWithTypes(method)}): AxiosRe
   protected buildRequestArgsForFile(file: SourceFile): string {
     const typesFile = this.buildGeneratedTypesFilePath(file)
     let args = ''
-    for (const service of Parser.getInterfaces(file)) {
+    for (const service of getInterfaces(file)) {
       const serviceName = service.getNameNode().getText().trim()
-      for (const method of Parser.getMethodsForInterface(service)) {
-        if (Parser.hasParams(method)) {
+      for (const method of getMethodsForInterface(service)) {
+        if (hasParams(method)) {
           const type = CodeBuilder.buildRequestTypeName(method)
           const schema = this.buildSchemaForType(typesFile, type, service, method, 'request')
           args += ClientBuilder.buildRequestArgs(method, serviceName, type, schema)

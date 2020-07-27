@@ -1,6 +1,6 @@
-import {InterfaceDeclaration, SourceFile} from 'ts-morph'
+import {InterfaceDeclaration, MethodSignature, SourceFile} from 'ts-morph'
 import {ClientBuilder, Code, CodeBuilder, Target} from '../builder'
-import {Parser} from '../parser'
+import {getInterfaces, getMethodName, Parser} from '../parser'
 
 /**
  * Generates client side code using https://www.npmjs.com/package/axios
@@ -74,7 +74,11 @@ ${this.buildImportedTypes(file)}
     `
   }
 
-  protected static buildMethod
+  protected static buildMethod(method: MethodSignature): string {
+    const methodName = getMethodName(method)
+    return `
+    async $`
+  }
 
   protected static buildClient(service: InterfaceDeclaration): string {
     // eslint-disable-next-line no-template-curly-in-string
@@ -100,7 +104,7 @@ export class Axios${serviceName} implements ${serviceName} {
 
   protected static buildClientsForFile(file: SourceFile): string {
     let clients = ''
-    for (const service of Parser.getInterfaces(file)) {
+    for (const service of getInterfaces(file)) {
       clients += AxiosGenerator.buildClient(service)
     }
     return clients

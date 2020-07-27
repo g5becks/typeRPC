@@ -1,7 +1,7 @@
 import {InterfaceDeclaration, MethodSignature, SourceFile} from 'ts-morph'
-import {Code, ServerBuilder, Target, CodeBuilder} from '../builder'
+import {Code, CodeBuilder, ServerBuilder, Target} from '../builder'
 import {server} from './server'
-import {Parser} from '../parser'
+import {getInterfaces, getParams, hasParams, hasReturn} from '../parser'
 
 /**
  * Generates server side code using https://www.fastify.io/
@@ -30,12 +30,12 @@ ${this.buildImportedTypes(file)}\n`
   // see https://www.fastify.io/docs/latest/TypeScript/#using-generics
   protected static getIncomingMessageType(method: MethodSignature): string {
     const payload = CodeBuilder.isGetMethod(method) ? 'Querystring' : 'Body'
-    return Parser.getParams(method).length > 0 ? `{${payload}: ${CodeBuilder.buildRequestTypeName(method)}}` : `{${payload}: {}}`
+    return getParams(method).length > 0 ? `{${payload}: ${CodeBuilder.buildRequestTypeName(method)}}` : `{${payload}: {}}`
   }
 
   private static buildRouteHandler(method: MethodSignature, serviceName: string): string {
-    const hasParams = Parser.hasParams(method)
-    const hasReturn = Parser.hasReturn(method)
+    const hasParameters = hasParams(method)
+    const hasReturnType = hasReturn(method)
     const schemaType = CodeBuilder.isGetMethod(method) ? 'querystring' : 'body'
     const payLoad = CodeBuilder.isGetMethod(method) ? 'query' : 'body'
     const parsePayload = `const {${CodeBuilder.buildParams(method)}} = request.${payLoad}`
@@ -45,19 +45,19 @@ ${this.buildImportedTypes(file)}\n`
             method: '${CodeBuilder.buildRequestMethod(method)}',
             url: ${ServerBuilder.buildServerRoute(method)},
             schema: {
-                ${schemaType}: ${hasParams ? CodeBuilder.buildRequestTypeSchemaName(method) : false},
+                ${schemaType}: ${hasParameters ? CodeBuilder.buildRequestTypeSchemaName(method) : false},
                 response: {
-                    '2xx': ${hasReturn ? CodeBuilder.buildResponseTypeSchemeName(method) : false},
+                    '2xx': ${hasReturnType ? CodeBuilder.buildResponseTypeSchemeName(method) : false},
                 },
 
             },
             handler: async (request, reply) => {
-                  ${hasParams ? parsePayload : ''}
-                  const [err${hasReturn ? ', data' : ''}] = await instance.to(${CodeBuilder.lowerCase(serviceName)}.${method.getNameNode().getText().trim()}(${hasParams ? CodeBuilder.buildParams(method) : ''}))
+                  ${hasParameters ? parsePayload : ''}
+                  const [err${hasReturnType ? ', data' : ''}] = await instance.to(${CodeBuilder.lowerCase(serviceName)}.${method.getNameNode().getText().trim()}(${hasParameters ? CodeBuilder.buildParams(method) : ''}))
                   if (err) {
                     return ${CodeBuilder.lowerCase(serviceName)}.handleErr(err, reply)
                   } else {
-                    reply.send(${hasReturn ? '{data}' : ''})
+                    reply.send(${hasReturnType ? '{data}' : ''})
                   }
             },
         }
@@ -118,7 +118,7 @@ ${FastifyGenerator.controllerDoc(serviceName)}
   }
 
   private static buildPluginsForFile(file: SourceFile): string {
-    const services = Parser.getInterfaces(file)
+    const services = getInterfaces(file)
     let controllers = ''
     for (const service of services) {
       controllers += FastifyGenerator.buildPlugin(service)
