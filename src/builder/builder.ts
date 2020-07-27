@@ -16,6 +16,7 @@ import {
   getParamWithType,
   getReturnType,
   getTypeAliasesText,
+  hasJsDoc,
   hasParams,
   hasReturn,
   isVoidReturn,
@@ -360,11 +361,18 @@ export abstract class ClientBuilder extends CodeBuilder {
 
   protected static buildMethod(method: MethodSignature): string {
     CodeBuilder.promisifyMethod(method)
+    if (hasJsDoc(method)) {
+      for (const doc of method.getJsDocs()) {
+        doc.remove()
+      }
+    }
     if (method.getFullText().includes(';')) {
-      method.getFullText().replace(';', '')
+      return `
+      async ${method.getText().replace(';', '')}\n
+      `
     }
     return `
-    async ${method.getFullText().trim()}\n`
+    async ${method.getText().trim()}\n`
   }
 
   protected static buildStringifyFuncForType(type: string, schema: string): string {

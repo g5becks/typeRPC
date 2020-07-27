@@ -30,6 +30,19 @@ export const hasReturn = (method: MethodSignature): boolean => {
   return false
 }
 
+export const hasJsDoc = (method: MethodSignature): boolean => {
+  return method.getJsDocs().length > 0
+}
+
+export const getReturnType = (method: MethodSignature): string => {
+  const maybeReturnType = method.getReturnTypeNode()
+  let returnType = 'void'
+  if (typeof maybeReturnType !== 'undefined') {
+    returnType = maybeReturnType.getText().trim()
+  }
+  return returnType
+}
+
 export const isVoidReturn = (method: MethodSignature): boolean => {
   return getReturnType(method) === 'void'
 }
@@ -47,15 +60,6 @@ export const getParamType = (param: ParameterDeclaration): string => {
   // eslint-disable-next-line no-console
   console.log(paramType)
   return paramType
-}
-
-export const getReturnType = (method: MethodSignature): string => {
-  const maybeReturnType = method.getReturnTypeNode()
-  let returnType = 'void'
-  if (typeof maybeReturnType !== 'undefined') {
-    returnType = maybeReturnType.getText().trim()
-  }
-  return returnType
 }
 
 export const getMethodName = (method: MethodSignature): string => method.getNameNode().getText().trim()
