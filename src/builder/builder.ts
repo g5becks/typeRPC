@@ -70,15 +70,15 @@ export abstract class CodeBuilder {
 \n`
   }
 
-  protected static removePromise = (method: MethodSignature): string[] => {
+  protected static removePromise = (method: MethodSignature): string => {
     const maybeReturnType = method.getReturnType()
-    let returnType: string[] = []
+    let returnType = ''
     if (typeof maybeReturnType !== 'undefined') {
-      const text = maybeReturnType.getText().trim()
-      if (text.includes('Promise<')) {
-        const innerTypes = maybeReturnType.getTypeArguments()
-        returnType = innerTypes.map(type => type.getText().trim())
+      returnType = maybeReturnType.getText().trim()
+      if (!returnType.includes('Promise<')) {
+        return returnType
       }
+      returnType = maybeReturnType.getTypeArguments().map(type => type.getText().trim()).toString()
     }
     return returnType
   }
@@ -417,13 +417,18 @@ export abstract class ClientBuilder extends CodeBuilder {
   protected static buildRequestArgs(method: MethodSignature, serviceName: string, requestType: string, schema: string): string {
     const methodName = getMethodName(method)
 
-    return `
+    return hasParams(method) ? `
 const ${ClientBuilder.buildRequestArgsName(method)} = (${CodeBuilder.buildParamsWithTypes(method)}): AxiosRequestConfig => {
       return {
         url: '/${lowerCase(serviceName)}/${lowerCase(methodName)}', method: '${CodeBuilder.buildRequestMethod(method)}', ${ClientBuilder.buildRequestDataOrParams(method, requestType, schema)}
       }
   }\n
-    `
+    ` : `
+const ${ClientBuilder.buildRequestArgsName(method)} = () => {
+      return {
+        url: '/${lowerCase(serviceName)}/${lowerCase(methodName)}', method: '${CodeBuilder.buildRequestMethod(method)}'
+      }
+    }\n`
   }
 
   protected buildRequestArgsForFile(file: SourceFile): string {
@@ -436,6 +441,8 @@ const ${ClientBuilder.buildRequestArgsName(method)} = (${CodeBuilder.buildParams
           const type = CodeBuilder.buildRequestTypeName(method)
           const schema = this.buildSchemaForType(typesFile, type, service, method, 'request')
           args += ClientBuilder.buildRequestArgs(method, serviceName, type, schema)
+        } else {
+          args += ClientBuilder.buildRequestArgs(method, serviceName, '', '')
         }
       }
     }

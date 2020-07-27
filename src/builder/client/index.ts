@@ -1,6 +1,6 @@
 import {InterfaceDeclaration, MethodSignature, SourceFile} from 'ts-morph'
 import {ClientBuilder, Code, CodeBuilder, Target} from '../builder'
-import {getInterfaceName, getInterfaces} from '../parser'
+import {getInterfaceName, getInterfaces, hasReturn} from '../parser'
 
 /**
  * Generates client side code using https://www.npmjs.com/package/axios
@@ -75,9 +75,11 @@ ${this.buildImportedTypes(file)}
   }
 
   protected static buildClientMethod(method: MethodSignature): string {
+    const hasReturns = hasReturn(method)
+    const genericType = hasReturns ? `<${CodeBuilder.buildResponseTypeName(method)}, ${CodeBuilder.removePromise(method)}>` : '<void, void>'
     return `
     ${ClientBuilder.buildMethod(method)} {
-      return this.client.request<${CodeBuilder.buildResponseTypeName(method)}, ${CodeBuilder.removePromise(method)}>(${ClientBuilder.buildRequestArgsName(method)}(${CodeBuilder.buildParams(method)}))
+      return this.client.request${genericType}(${ClientBuilder.buildRequestArgsName(method)}(${CodeBuilder.buildParams(method)}))
     }\n`
   }
 
@@ -102,7 +104,7 @@ export class Axios${serviceName} implements ${serviceName} {
       this.client.interceptors.response.use(response => response?.data?.data)
     }
 
-    public static create(host: string, config?: AxiosRequestConfig): AxiosBookService | RpcError {
+    public static create(host: string, config?: AxiosRequestConfig): Axios${serviceName} | RpcError {
       if (!isValidHttpUrl(host)) {
         return new RpcError(${errString})
       }
