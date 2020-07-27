@@ -34,6 +34,9 @@ const isRequestMethod = (method: string): method is RequestMethod => {
 
 type SchemaType = 'request'| 'response'
 
+export const capitalize = (text: string): string => text.replace(/^\w/, c => c.toUpperCase())
+
+export const lowerCase = (text: string): string => text.replace(/^\w/, c => c.toLowerCase())
 /**
  *  Base class that all generators extend from, contains various utility method for parsing and generating code
  *
@@ -67,16 +70,8 @@ export abstract class CodeBuilder {
   protected static buildSchemaDoc(service: InterfaceDeclaration, method: MethodSignature, schemaType: SchemaType): string {
     return `
 /**
-* {@link ${CodeBuilder.capitalize(getInterfaceName(service))}Controller} /${getMethodName(method)} ${CodeBuilder.capitalize(schemaType)} Schema
+* {@link ${capitalize(getInterfaceName(service))}Controller} /${getMethodName(method)} ${capitalize(schemaType)} Schema
 */`
-  }
-
-  protected static capitalize(text: string): string {
-    return text.replace(/^\w/, c => c.toUpperCase())
-  }
-
-  protected static lowerCase(text: string): string {
-    return text.replace(/^\w/, c => c.toLowerCase())
   }
 
   private static promisifyMethod(method: MethodSignature): void {
@@ -113,7 +108,7 @@ export abstract class CodeBuilder {
 
   // builds the name for a generated request type
   protected static buildRequestTypeName(method: MethodSignature): string {
-    return `${CodeBuilder.capitalize(method.getName())}Request`
+    return `${capitalize(method.getName())}Request`
   }
 
   // Builds a single request type for a method
@@ -145,7 +140,7 @@ export type ${CodeBuilder.buildRequestTypeName(method)} = {
 
   // generates name for method response type
   protected static buildResponseTypeName(method: MethodSignature): string {
-    return `${CodeBuilder.capitalize(method.getName())}Response`
+    return `${capitalize(method.getName())}Response`
   }
 
   // builds a single response type for a method
@@ -336,7 +331,7 @@ export abstract class ServerBuilder extends CodeBuilder {
   private static buildRouteParams(params: ParameterDeclaration[]): string {
     let paramsList = ''
     for (const param of params) {
-      paramsList += `:${param.getNameNode().getText().trim()}`
+      paramsList += `:${getParamName(param)}`
     }
     return paramsList
   }
@@ -344,7 +339,7 @@ export abstract class ServerBuilder extends CodeBuilder {
   // builds the route for server handler methods
   protected static buildServerRoute(method: MethodSignature): string {
     const params = method.getParameters()
-    return (!CodeBuilder.isGetMethod(method) || params?.length === 0) ? `'/${method.getName().trim()}'` : `'/${method.getName().trim()}/${ServerBuilder.buildRouteParams(params)}'`
+    return (!CodeBuilder.isGetMethod(method) || params?.length === 0) ? `'/${getMethodName(method)}'` : `'/${getMethodName(method)}/${ServerBuilder.buildRouteParams(params)}'`
   }
 
   public abstract buildTypes(): Code
@@ -388,12 +383,12 @@ export abstract class ClientBuilder extends CodeBuilder {
   }
 
   protected static buildRequestArgs(method: MethodSignature, serviceName: string, requestType: string, schema: string): string {
-    const methodName = method.getNameNode().getText().trim()
+    const methodName = getMethodName(method)
 
     return `
 const ${methodName}Args = (${CodeBuilder.buildParamsWithTypes(method)}): AxiosRequestConfig => {
       return {
-        url: '/${CodeBuilder.lowerCase(serviceName)}/${CodeBuilder.lowerCase(methodName)}', method: '${CodeBuilder.buildRequestMethod(method)}', ${ClientBuilder.buildRequestDataOrParams(method, requestType, schema)}
+        url: '/${lowerCase(serviceName)}/${lowerCase(methodName)}', method: '${CodeBuilder.buildRequestMethod(method)}', ${ClientBuilder.buildRequestDataOrParams(method, requestType, schema)}
       }
   }\n
     `
