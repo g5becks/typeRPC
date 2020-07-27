@@ -1,5 +1,5 @@
 import {InterfaceDeclaration, MethodSignature, SourceFile} from 'ts-morph'
-import {Code, CodeBuilder, ServerBuilder, Target} from '../builder'
+import {Code, CodeBuilder, lowerCase, ServerBuilder, Target} from '../builder'
 import {server} from './server'
 import {getInterfaces, getParams, hasParams, hasReturn} from '../parser'
 
@@ -53,9 +53,9 @@ ${this.buildImportedTypes(file)}\n`
             },
             handler: async (request, reply) => {
                   ${hasParameters ? parsePayload : ''}
-                  const [err${hasReturnType ? ', data' : ''}] = await instance.to(${CodeBuilder.lowerCase(serviceName)}.${method.getNameNode().getText().trim()}(${hasParameters ? CodeBuilder.buildParams(method) : ''}))
+                  const [err${hasReturnType ? ', data' : ''}] = await instance.to(${lowerCase(serviceName)}.${method.getNameNode().getText().trim()}(${hasParameters ? CodeBuilder.buildParams(method) : ''}))
                   if (err) {
-                    return ${CodeBuilder.lowerCase(serviceName)}.handleErr(err, reply)
+                    return ${lowerCase(serviceName)}.handleErr(err, reply)
                   } else {
                     reply.send(${hasReturnType ? '{data}' : ''})
                   }
@@ -70,7 +70,7 @@ ${this.buildImportedTypes(file)}\n`
 * Creates an Http Controller for {@link ${serviceName}}
 *
 * @function ${serviceName}Controller
-* @param {${serviceName}} ${CodeBuilder.lowerCase(serviceName)} ${serviceName} Implementation
+* @param {${serviceName}} ${lowerCase(serviceName)} ${serviceName} Implementation
 * @returns {FastifyPluginAsync} fastify plugin instance
 */`
   }
@@ -84,7 +84,7 @@ ${this.buildImportedTypes(file)}\n`
     }
     return `
 ${FastifyGenerator.controllerDoc(serviceName)}
-    const ${serviceName}Controller = (${CodeBuilder.lowerCase(serviceName)}: ${serviceName}): FastifyPluginAsync => async (instance, _) => {
+    const ${serviceName}Controller = (${lowerCase(serviceName)}: ${serviceName}): FastifyPluginAsync => async (instance, _) => {
       instance.register(fastifySensible)
     ${handlers}
 }\n
@@ -97,7 +97,7 @@ ${FastifyGenerator.controllerDoc(serviceName)}
 * Creates a {@link TypeRpcPlugin} for {@link ${serviceName}}
 *
 * @function ${serviceName}Plugin
-* @param {${serviceName}} ${CodeBuilder.lowerCase(serviceName)} ${serviceName} Implementation
+* @param {${serviceName}} ${lowerCase(serviceName)} ${serviceName} Implementation
 * @param {LogLevel} logLevel for this plugin
 * @param {PluginOptions} opts options for this plugin
 * @returns {TypeRpcPlugin} TypeRpcPlugin instance
@@ -109,9 +109,9 @@ ${FastifyGenerator.controllerDoc(serviceName)}
     return `
     ${FastifyGenerator.buildController(service)}
     ${FastifyGenerator.pluginDoc(serviceName)}
-    export const ${serviceName}Plugin = (${CodeBuilder.lowerCase(serviceName)}: ${serviceName}, logLevel: LogLevel, opts?: PluginOptions): TypeRpcPlugin => {
-      return {plugin: fp(${serviceName}Controller(${CodeBuilder.lowerCase(serviceName)}), pluginOpts('${CodeBuilder.lowerCase(serviceName)}Controller', opts)),
-      opts: registerOptions('/${CodeBuilder.lowerCase(serviceName)}', logLevel)
+    export const ${serviceName}Plugin = (${lowerCase(serviceName)}: ${serviceName}, logLevel: LogLevel, opts?: PluginOptions): TypeRpcPlugin => {
+      return {plugin: fp(${serviceName}Controller(${lowerCase(serviceName)}), pluginOpts('${lowerCase(serviceName)}Controller', opts)),
+      opts: registerOptions('/${lowerCase(serviceName)}', logLevel)
       }
     }\n
     `

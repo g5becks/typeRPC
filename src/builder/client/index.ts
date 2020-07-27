@@ -1,6 +1,6 @@
 import {InterfaceDeclaration, MethodSignature, SourceFile} from 'ts-morph'
 import {ClientBuilder, Code, CodeBuilder, Target} from '../builder'
-import {getInterfaces, getMethodName, Parser} from '../parser'
+import {getInterfaces, getMethodName} from '../parser'
 
 /**
  * Generates client side code using https://www.npmjs.com/package/axios
