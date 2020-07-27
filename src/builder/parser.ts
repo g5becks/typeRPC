@@ -30,7 +30,18 @@ export const hasReturn = (method: MethodSignature): boolean => {
   return false
 }
 
+export const getReturnType = (method: MethodSignature): string => {
+  const maybeReturnType = method.getReturnTypeNode()
+  let returnType = 'void'
+  if (typeof maybeReturnType !== 'undefined') {
+    returnType = maybeReturnType.getText().trim()
+  }
+  return returnType
+}
+
 export const getMethodName = (method: MethodSignature): string => method.getNameNode().getText().trim()
+
+export const getInterfaceName = (service: InterfaceDeclaration): string => service.getNameNode().getText().trim()
 
 export const getMethodsForInterface = (interfce: InterfaceDeclaration): MethodSignature[] => interfce.getMethods()
 

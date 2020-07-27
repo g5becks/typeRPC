@@ -5,11 +5,12 @@ import {Config, createGenerator} from 'ts-json-schema-generator'
 import {InterfaceDeclaration, MethodSignature, ParameterDeclaration, SourceFile} from 'ts-morph'
 import {BuilderError} from '.'
 import {
+  getInterfaceName,
   getInterfaces,
-  getInterfacesText,
+  getInterfacesText, getMethodName,
   getMethodsForFile,
   getMethodsForInterface,
-  getParams,
+  getParams, getReturnType,
   getTypeAliasesText,
   hasParams,
   hasReturn,
@@ -63,7 +64,7 @@ export abstract class CodeBuilder {
   protected static buildSchemaDoc(service: InterfaceDeclaration, method: MethodSignature, schemaType: SchemaType): string {
     return `
 /**
-* {@link ${CodeBuilder.capitalize(service.getNameNode().getText().trim())}Controller} /${method.getNameNode().getText().trim()} ${CodeBuilder.capitalize(schemaType)} Schema
+* {@link ${CodeBuilder.capitalize(getInterfaceName(service))}Controller} /${getMethodName(method)} ${CodeBuilder.capitalize(schemaType)} Schema
 */`
   }
 
@@ -76,8 +77,7 @@ export abstract class CodeBuilder {
   }
 
   private static promisifyMethod(method: MethodSignature): void {
-    // noinspection TypeScriptValidateTypes
-    const returnType = method.getReturnTypeNode()?.getText().trim()
+    const returnType = getReturnType(method)
     const promisified = `Promise<${returnType}>`
     if (returnType?.includes('Promise<')) {
       return
