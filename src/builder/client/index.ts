@@ -77,14 +77,15 @@ ${this.buildImportedTypes(file)}
   protected static buildClientMethod(method: MethodSignature): string {
     return `
     ${ClientBuilder.buildMethod(method)} {
-      const data = await this.client.request<${CodeBuilder.buildResponseTypeName(method)}, ${CodeBuilder.buildResponseTypeName(method)}>()
-    }`
+      const data = await this.client.request<${CodeBuilder.buildResponseTypeName(method)}, ${CodeBuilder.buildResponseTypeName(method)}>(${ClientBuilder.buildRequestArgsName(method)}(${CodeBuilder.buildParams(method)}))
+      return data
+    }\n`
   }
 
   protected static buildMethods(service: InterfaceDeclaration): string {
     let methods = ''
     for (const method of service.getMethods()) {
-      methods += ClientBuilder.buildMethod(method)
+      methods += AxiosBuilder.buildClientMethod(method)
     }
     return methods
   }
@@ -105,7 +106,7 @@ export class Axios${serviceName} implements ${serviceName} {
       if (!isValidHttpUrl(host)) {
         return new RpcError(${errString})
       }
-      return new AxiosBookService(host, config)
+      return new Axios${serviceName}(host, config)
     }
 
     ${AxiosBuilder.buildMethods(service)}
