@@ -397,11 +397,15 @@ export abstract class ClientBuilder extends CodeBuilder {
     return dataOrParams
   }
 
+  protected static buildRequestArgsName(method: MethodSignature): string {
+    return `${getMethodName(method)}Args`
+  }
+
   protected static buildRequestArgs(method: MethodSignature, serviceName: string, requestType: string, schema: string): string {
     const methodName = getMethodName(method)
 
     return `
-const ${methodName}Args = (${CodeBuilder.buildParamsWithTypes(method)}): AxiosRequestConfig => {
+const ${ClientBuilder.buildRequestArgsName(method)} = (${CodeBuilder.buildParamsWithTypes(method)}): AxiosRequestConfig => {
       return {
         url: '/${lowerCase(serviceName)}/${lowerCase(methodName)}', method: '${CodeBuilder.buildRequestMethod(method)}', ${ClientBuilder.buildRequestDataOrParams(method, requestType, schema)}
       }

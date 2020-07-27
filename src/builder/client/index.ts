@@ -1,4 +1,4 @@
-import {InterfaceDeclaration, SourceFile} from 'ts-morph'
+import {InterfaceDeclaration, MethodSignature, SourceFile} from 'ts-morph'
 import {ClientBuilder, Code, CodeBuilder, Target} from '../builder'
 import {getInterfaceName, getInterfaces} from '../parser'
 
@@ -74,6 +74,13 @@ ${this.buildImportedTypes(file)}
     `
   }
 
+  protected static buildClientMethod(method: MethodSignature): string {
+    return `
+    ${ClientBuilder.buildMethod(method)} {
+      const data = await this.client.request<${CodeBuilder.buildResponseTypeName(method)}, ${CodeBuilder.buildResponseTypeName(method)}>()
+    }`
+  }
+
   protected static buildMethods(service: InterfaceDeclaration): string {
     let methods = ''
     for (const method of service.getMethods()) {
@@ -88,7 +95,7 @@ ${this.buildImportedTypes(file)}
     const serviceName = getInterfaceName(service)
     return `
 export class Axios${serviceName} implements ${serviceName} {
-    protected readonly axios: AxiosInstance
+    protected readonly client: AxiosInstance
 
     private constructor(protected readonly host: string, protected readonly config?: RpcClientConfig) {
       this.client = axios.create({baseURL: host, ...config})
