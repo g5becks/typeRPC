@@ -100,6 +100,7 @@ export class Axios${serviceName} implements ${serviceName} {
 
     private constructor(protected readonly host: string, protected readonly config?: RpcClientConfig) {
       this.client = axios.create({baseURL: host, ...config})
+      this.client.interceptors.response.use(response => response.data)
     }
 
     public static create(host: string, config?: AxiosRequestConfig): AxiosBookService | RpcError {
