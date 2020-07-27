@@ -260,6 +260,16 @@ export const ${type}Schema = ${schema}\n
     return `${method.getParameters().map(param => param.getNameNode().getText().trim())}`
   }
 
+  protected static buildParamsWithTypes(method: MethodSignature): string[] {
+    const params = []
+    if (Parser.hasParams(method)) {
+      for (const param of method.getParameters()) {
+        params.push(`${param.getNameNode().getText().trim()}: ${param.getTypeNode()?.getText().trim()}`)
+      }
+    }
+    return params
+  }
+
   // Copies all type aliases from schema to output type
   protected static buildTypesText(file: SourceFile): string {
     const aliases = file.getTypeAliases()
@@ -368,7 +378,7 @@ export abstract class ClientBuilder extends CodeBuilder {
     const methodName = method.getNameNode().getText().trim()
 
     return `
-const ${methodName}Args = (${CodeBuilder.buildParams(method)}): AxiosRequestConfig => {
+const ${methodName}Args = (${CodeBuilder.buildParamsWithTypes(method)}): AxiosRequestConfig => {
       return {
         url: '/${CodeBuilder.lowerCase(serviceName)}/${CodeBuilder.lowerCase(methodName)}', method: '${CodeBuilder.buildRequestMethod(method)}', ${ClientBuilder.buildRequestDataOrParams(method, requestType, schema)}
       }
