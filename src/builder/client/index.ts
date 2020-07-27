@@ -74,15 +74,10 @@ ${this.buildImportedTypes(file)}
     `
   }
 
-  protected static buildMethod(method: MethodSignature): string {
-    const methodName = getMethodName(method)
-    return `${ClientBuilder.buildMethod(method)}`
-  }
-
   protected static buildMethods(service: InterfaceDeclaration): string {
     const methods = ''
     for (const method of service.getMethods()) {
-      methods += Axios
+      methods += ClientBuilder.buildMethod(method)
     }
   }
 
