@@ -6,10 +6,10 @@ import {getInterfaceName, getInterfaces, hasReturn} from '../parser'
  * Generates client side code using https://www.npmjs.com/package/axios
  *
  * @export
- * @class AxiosBuilder
+ * @class TsClientBuilder
  * @extends {ClientBuilder}
  */
-export class AxiosBuilder extends ClientBuilder {
+export class TsClientBuilder extends ClientBuilder {
   // eslint-disable-next-line no-useless-constructor
   constructor(protected readonly target: Target, protected tsConfigFilePath: string, protected readonly outputPath: string, protected readonly jobId: string) {
     super(target, tsConfigFilePath, outputPath, jobId)
@@ -86,7 +86,7 @@ ${this.buildImportedTypes(file)}
   protected static buildMethods(service: InterfaceDeclaration): string {
     let methods = ''
     for (const method of service.getMethods()) {
-      methods += AxiosBuilder.buildClientMethod(method)
+      methods += TsClientBuilder.buildClientMethod(method)
     }
     return methods
   }
@@ -111,7 +111,7 @@ export class Axios${serviceName} implements ${serviceName} {
       return new Axios${serviceName}(host, config)
     }
 
-    ${AxiosBuilder.buildMethods(service)}
+    ${TsClientBuilder.buildMethods(service)}
 }\n
 `
   }
@@ -119,7 +119,7 @@ export class Axios${serviceName} implements ${serviceName} {
   protected static buildClientsForFile(file: SourceFile): string {
     let clients = ''
     for (const service of getInterfaces(file)) {
-      clients += AxiosBuilder.buildClient(service)
+      clients += TsClientBuilder.buildClient(service)
     }
     return clients
   }
@@ -127,7 +127,7 @@ export class Axios${serviceName} implements ${serviceName} {
   public buildTypes(): Code {
     const file = `${this.jobId}.ts`
     return this.buildTypesDefault({
-      [file]: AxiosBuilder.typesCode(),
+      [file]: TsClientBuilder.typesCode(),
     })
   }
 
@@ -135,7 +135,7 @@ export class Axios${serviceName} implements ${serviceName} {
     const code: Code = {}
     for (const file of this.parser.sourceFiles) {
       const args = this.buildRequestArgsForFile(file)
-      const clients = AxiosBuilder.buildClientsForFile(file)
+      const clients = TsClientBuilder.buildClientsForFile(file)
       code[CodeBuilder.buildRpcFileName(file)] = `${this.imports(file)}${CodeBuilder.buildFileHeader()}${args}${clients}`
     }
     return code

@@ -1,16 +1,158 @@
-import {InterfaceDeclaration, MethodSignature, SourceFile} from 'ts-morph'
 import {Code, CodeBuilder, lowerCase, ServerBuilder, Target} from '../builder'
-import {server} from './server'
+import {InterfaceDeclaration, MethodSignature, SourceFile} from 'ts-morph'
 import {getInterfaces, getParams, hasParams, hasReturn} from '../parser'
+
+export const server = {'create-server.ts':
+`
+import fastify, {FastifyInstance, FastifyLoggerInstance, FastifyPluginCallback, FastifyServerOptions, RegisterOptions} from 'fastify'
+import http2 from 'http2'
+import https from 'https'
+import pino from 'pino'
+
+/**
+* Used as opts param to {@link createHttp2SecureServer} function
+*
+* @type {object}
+ */
+export type FastifyHttp2SecureOptions<
+  Server extends http2.Http2SecureServer,
+  Logger extends FastifyLoggerInstance = FastifyLoggerInstance
+  > = FastifyServerOptions<Server, Logger> & {
+    http2: true;
+    https: http2.SecureServerOptions;
+  }
+
+/**
+ * Used as opts param to {@link createHttp2Server} function
+ *
+ * @type {object}
+ */
+export type FastifyHttp2Options<
+  Server extends http2.Http2Server,
+  Logger extends FastifyLoggerInstance = FastifyLoggerInstance
+  > = FastifyServerOptions<Server, Logger> & {
+    http2: true;
+    http2SessionTimeout?: number;
+  }
+
+/**
+* Used as opts param to {@link createSecureServer} function
+*
+* @type {object}
+*/
+export type FastifyHttpsOptions<
+  Server extends https.Server,
+  Logger extends FastifyLoggerInstance = FastifyLoggerInstance
+  > = FastifyServerOptions<Server, Logger> & {
+    https: https.ServerOptions;
+  }
+
+/**
+ * Used as a container for the plugin and the options to pass to
+ * fastify.register() function @see {@link https://www.fastify.io/docs/latest/TypeScript/#register}
+ *
+ * @type {object}
+ * @property {FastifyPluginCallback} plugin the plugin to register
+ * @property {RegisterOptions} opts options to pass to register function
+ */
+export type TypeRpcPlugin = {
+  plugin: FastifyPluginCallback;
+  opts: RegisterOptions;
+}
+
+/**
+ * Creates a {@link FastifyInstance} with http2 and https enabled
+ *
+ * @export
+ * @template Server the type of server to create
+ * @param {FastifyHttp2SecureOptions<Server>} opts @see {@link https://www.fastify.io/docs/latest/Server/}
+ * @param {pino.Logger} logger a pino.Logger instance @see {@link https://github.com/pinojs/pino/blob/HEAD/docs/api.md}
+ * @param {...TypeRpcPlugin[]} plugins list of plugins to register
+ * @returns {FastifyInstance<Server>} configured {@link FastifyInstance}
+ */
+export function createHttp2SecureServer<Server extends http2.Http2SecureServer>(opts: FastifyHttp2SecureOptions<Server>, logger: pino.Logger, ...plugins: TypeRpcPlugin[]): FastifyInstance<Server> {
+  const instance = fastify({
+    ...opts,
+    ...logger,
+  })
+  for (const plugin of plugins) {
+    instance.register(plugin.plugin, plugin.opts)
+  }
+  return instance
+}
+
+/**
+ * Creates a {@link FastifyInstance} with https enables
+ *
+ * @export
+ * @template Server the type of server to create
+ * @param {FastifyHttp2SecureOptions<Server>} opts @see {@link https://www.fastify.io/docs/latest/Server/}
+ * @param {pino.Logger} logger a pino.Logger instance @see {@link https://github.com/pinojs/pino/blob/HEAD/docs/api.md}
+ * @param {...TypeRpcPlugin[]} plugins list of plugins to register
+ * @returns {FastifyInstance<Server>} configured {@link FastifyInstance}
+ */
+export function createHttp2Server<Server extends http2.Http2Server>(opts: FastifyHttp2Options<Server>, logger: pino.Logger, ...plugins: TypeRpcPlugin[]): FastifyInstance<Server> {
+  const instance = fastify({
+    ...opts,
+    ...logger,
+  })
+  for (const plugin of plugins) {
+    instance.register(plugin.plugin, plugin.opts)
+  }
+  return instance
+}
+
+/**
+ * Creates a {@link FastifyInstance} with https enabled
+ *
+ * @export
+ * @template Server the type of server to create
+ * @param {FastifyHttp2SecureOptions<Server>} opts @see {@link https://www.fastify.io/docs/latest/Server/}
+ * @param {pino.Logger} logger a pino.Logger instance @see {@link https://github.com/pinojs/pino/blob/HEAD/docs/api.md}
+ * @param {...TypeRpcPlugin[]} plugins list of plugins to register
+ * @returns {FastifyInstance<Server>} configured {@link FastifyInstance}
+ */
+export function createSecureServer<Server extends https.Server>(opts: FastifyHttpsOptions<Server>, logger: pino.Logger, ...plugins: TypeRpcPlugin[]): FastifyInstance<Server> {
+  const instance = fastify({
+    ...opts,
+    ...logger,
+  })
+  for (const plugin of plugins) {
+    instance.register(plugin.plugin, plugin.opts)
+  }
+  return instance
+}
+
+/**
+ * Creates a {@link FastifyInstance}
+ *
+ * @export
+ * @template Server the type of server to create
+ * @param {FastifyHttp2SecureOptions<Server>} opts @see {@link https://www.fastify.io/docs/latest/Server/}
+ * @param {pino.Logger} logger a pino.Logger instance @see {@link https://github.com/pinojs/pino/blob/HEAD/docs/api.md}
+ * @param {...TypeRpcPlugin[]} plugins list of plugins to register
+ * @returns {FastifyInstance<Server>} configured {@link FastifyInstance}
+ */
+export function createServer(opts: FastifyServerOptions, logger: pino.Logger, ...plugins: TypeRpcPlugin[]): FastifyInstance {
+  const instance = fastify({
+    ...opts,
+    ...logger,
+  })
+  for (const plugin of plugins) {
+    instance.register(plugin.plugin, plugin.opts)
+  }
+  return instance
+}
+`}
 
 /**
  * Generates server side code using https://www.fastify.io/
  *
  * @export
- * @class FastifyGenerator
+ * @class TsServerBuilder
  * @extends {ServerBuilder}
  */
-export class FastifyGenerator extends ServerBuilder {
+export class TsServerBuilder extends ServerBuilder {
   // eslint-disable-next-line no-useless-constructor
   constructor(protected readonly target: Target, protected tsConfigFilePath: string, protected readonly outputPath: string, protected readonly jobId: string) {
     super(target, tsConfigFilePath, outputPath, jobId)
@@ -40,7 +182,7 @@ ${this.buildImportedTypes(file)}\n`
     const payLoad = CodeBuilder.isGetMethod(method) ? 'query' : 'body'
     const parsePayload = `const {${CodeBuilder.buildParams(method)}} = request.${payLoad}`
     return `
-    instance.route<${FastifyGenerator.getIncomingMessageType(method)}>(
+    instance.route<${TsServerBuilder.getIncomingMessageType(method)}>(
         {
             method: '${CodeBuilder.buildRequestMethod(method)}',
             url: ${ServerBuilder.buildServerRoute(method)},
@@ -80,10 +222,10 @@ ${this.buildImportedTypes(file)}\n`
     const serviceName = service.getNameNode().getText()
     let handlers = ''
     for (const method of service.getMethods()) {
-      handlers += FastifyGenerator.buildRouteHandler(method, serviceName)
+      handlers += TsServerBuilder.buildRouteHandler(method, serviceName)
     }
     return `
-${FastifyGenerator.controllerDoc(serviceName)}
+${TsServerBuilder.controllerDoc(serviceName)}
     const ${serviceName}Controller = (${lowerCase(serviceName)}: ${serviceName}): FastifyPluginAsync => async (instance, _) => {
       instance.register(fastifySensible)
     ${handlers}
@@ -107,8 +249,8 @@ ${FastifyGenerator.controllerDoc(serviceName)}
   private static buildPlugin(service: InterfaceDeclaration): string {
     const serviceName = service.getNameNode().getText()
     return `
-    ${FastifyGenerator.buildController(service)}
-    ${FastifyGenerator.pluginDoc(serviceName)}
+    ${TsServerBuilder.buildController(service)}
+    ${TsServerBuilder.pluginDoc(serviceName)}
     export const ${serviceName}Plugin = (${lowerCase(serviceName)}: ${serviceName}, logLevel: LogLevel, opts?: PluginOptions): TypeRpcPlugin => {
       return {plugin: fp(${serviceName}Controller(${lowerCase(serviceName)}), pluginOpts('${lowerCase(serviceName)}Controller', opts)),
       opts: registerOptions('/${lowerCase(serviceName)}', logLevel)
@@ -121,7 +263,7 @@ ${FastifyGenerator.controllerDoc(serviceName)}
     const services = getInterfaces(file)
     let controllers = ''
     for (const service of services) {
-      controllers += FastifyGenerator.buildPlugin(service)
+      controllers += TsServerBuilder.buildPlugin(service)
     }
     return controllers
   }
@@ -208,7 +350,7 @@ export interface RpcService {
   public buildTypes(): Code {
     const file = `${this.jobId}.ts`
     return this.buildTypesDefault({
-      [file]: FastifyGenerator.typesCode(),
+      [file]: TsServerBuilder.typesCode(),
     })
   }
 
@@ -216,10 +358,9 @@ export interface RpcService {
     const code: Code = {...server}
     for (const file of this.parser.sourceFiles) {
       const schemas = this.buildShemasForFile(file)
-      const controllers = FastifyGenerator.buildPluginsForFile(file)
+      const controllers = TsServerBuilder.buildPluginsForFile(file)
       code[CodeBuilder.buildRpcFileName(file)] = `${this.imports(file)}${CodeBuilder.buildFileHeader()}${schemas}${controllers}`
     }
     return code
   }
 }
-

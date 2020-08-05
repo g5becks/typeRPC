@@ -1,12 +1,12 @@
 {
-  "name": "typerpc",
-  "description": "High Perfomance Typescript Rpc Framework",
-  "version": "0.0.2",
-  "author": "Gary Becks",
+  "name": "@typerpc/cli",
+  "description": "Cross Language Rpc Framework",
+  "version": "1.0.1",
+  "author": "Gary Becks techstar.dev@hotmail.com",
   "bin": {
     "typerpc": "./bin/run"
   },
-  "bugs": "https://github.com/getpoppn/typeRPC/issues",
+  "bugs": "https://github.com/typerpc/cli/issues",
   "dependencies": {
     "@oclif/command": "^1",
     "@oclif/config": "^1",
@@ -23,7 +23,8 @@
     "nanoid": "^3.1.10",
     "ts-json-schema-generator": "^0.70.2",
     "ts-morph": "^7.1.2",
-    "tslib": "^1"
+    "tslib": "^1",
+    "@typerpc/types": "^1.0.1"
   },
   "devDependencies": {
     "@oclif/dev-cli": "^1",
@@ -51,25 +52,33 @@
   },
   "files": [
     "/bin",
-    "/lib"
+    "/lib",
+    "/npm-shrinkwrap.json",
+    "/oclif.manifest.json"
   ],
-  "homepage": "https://github.com/getpoppn/typeRPC",
+  "homepage": "https://github.com/typerpc/cli",
   "keywords": [
-    "oclif"
+    "typescript",
+    "go",
+    "rpc",
+    "framework",
+    "rest"
   ],
   "license": "MIT",
   "main": "lib/index.js",
   "oclif": {
+    "commands": "./lib/commands",
     "bin": "typerpc",
     "plugins": [
       "@oclif/plugin-help",
       "@oclif/plugin-not-found"
     ]
   },
-  "repository": "getpoppn/typeRPC",
+  "repository": "typerpc/cli",
   "scripts": {
+    "postpack": "rm -f oclif.manifest.json",
     "posttest": "eslint . --ext .ts --config .eslintrc",
-    "prepack": "rm -rf lib && tsc -b && oclif-dev readme",
+    "prepack": "rm -rf lib && tsc -b && oclif-dev manifest && oclif-dev readme",
     "test": "nyc --extension .ts mocha --forbid-only \"test/**/*.test.ts\"",
     "version": "oclif-dev readme && git add README.md"
   },

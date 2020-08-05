@@ -2,7 +2,7 @@
 /* eslint-disable max-params */
 import path from 'path'
 import {Config, createGenerator} from 'ts-json-schema-generator'
-import {InterfaceDeclaration, MethodSignature, ParameterDeclaration, SourceFile} from 'ts-morph'
+import {InterfaceDeclaration, MethodSignature, ParameterDeclaration, SourceFile, TypeAliasDeclaration} from 'ts-morph'
 import {BuilderError} from '.'
 import {
   getInterfaceName,
@@ -88,6 +88,10 @@ export abstract class CodeBuilder {
 /**
 * {@link ${capitalize(getInterfaceName(service))}Controller} /${getMethodName(method)} ${capitalize(schemaType)} Schema
 */`
+  }
+
+  protected static isBinary(type: TypeAliasDeclaration): boolean {
+    return type.getJsDocs()[0]?.getDescription().trim().toLocaleLowerCase().includes('binary')
   }
 
   protected static promisifyMethod(method: MethodSignature): void {
