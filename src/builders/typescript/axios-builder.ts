@@ -1,15 +1,15 @@
 import {InterfaceDeclaration, MethodSignature, SourceFile} from 'ts-morph'
-import {ClientBuilder, Code, CodeBuilder, Target} from '../builder'
-import {getInterfaceName, getInterfaces, hasReturn} from '../parser'
+import {ClientBuilder, Code, CodeBuilder, Target} from '../../schema/builder'
+import {getInterfaceName, getInterfaces, hasReturn} from '../../parser'
 
 /**
  * Generates client side code using https://www.npmjs.com/package/axios
  *
  * @export
- * @class TsClientBuilder
+ * @class AxiosBuilder
  * @extends {ClientBuilder}
  */
-export class TsClientBuilder extends ClientBuilder {
+export class AxiosBuilder extends ClientBuilder {
   // eslint-disable-next-line no-useless-constructor
   constructor(protected readonly target: Target, protected tsConfigFilePath: string, protected readonly outputPath: string, protected readonly jobId: string) {
     super(target, tsConfigFilePath, outputPath, jobId)
@@ -86,7 +86,7 @@ ${this.buildImportedTypes(file)}
   protected static buildMethods(service: InterfaceDeclaration): string {
     let methods = ''
     for (const method of service.getMethods()) {
-      methods += TsClientBuilder.buildClientMethod(method)
+      methods += AxiosBuilder.buildClientMethod(method)
     }
     return methods
   }
@@ -111,7 +111,7 @@ export class Axios${serviceName} implements ${serviceName} {
       return new Axios${serviceName}(host, config)
     }
 
-    ${TsClientBuilder.buildMethods(service)}
+    ${AxiosBuilder.buildMethods(service)}
 }\n
 `
   }
@@ -119,7 +119,7 @@ export class Axios${serviceName} implements ${serviceName} {
   protected static buildClientsForFile(file: SourceFile): string {
     let clients = ''
     for (const service of getInterfaces(file)) {
-      clients += TsClientBuilder.buildClient(service)
+      clients += AxiosBuilder.buildClient(service)
     }
     return clients
   }
@@ -127,7 +127,7 @@ export class Axios${serviceName} implements ${serviceName} {
   public buildTypes(): Code {
     const file = `${this.jobId}.ts`
     return this.buildTypesDefault({
-      [file]: TsClientBuilder.typesCode(),
+      [file]: AxiosBuilder.typesCode(),
     })
   }
 
@@ -135,7 +135,7 @@ export class Axios${serviceName} implements ${serviceName} {
     const code: Code = {}
     for (const file of this.parser.sourceFiles) {
       const args = this.buildRequestArgsForFile(file)
-      const clients = TsClientBuilder.buildClientsForFile(file)
+      const clients = AxiosBuilder.buildClientsForFile(file)
       code[CodeBuilder.buildRpcFileName(file)] = `${this.imports(file)}${CodeBuilder.buildFileHeader()}${args}${clients}`
     }
     return code

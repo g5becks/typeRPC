@@ -3,7 +3,7 @@
 import path from 'path'
 import {Config, createGenerator} from 'ts-json-schema-generator'
 import {InterfaceDeclaration, MethodSignature, ParameterDeclaration, SourceFile, TypeAliasDeclaration} from 'ts-morph'
-import {BuilderError} from '.'
+import {BuilderError} from '../builders'
 import {
   getInterfaceName,
   getInterfaces,
@@ -21,19 +21,14 @@ import {
   hasReturn,
   isVoidReturn,
   Parser,
-} from './parser'
+} from '../parser'
+import {isRequestMethod} from './method'
 
 export type Code = {
   [key: string]: string;
 }
 
 export type Target = 'client'| 'server'
-
-export type RequestMethod = 'POST' | 'PUT' | 'GET' | 'HEAD' | 'DELETE' | 'OPTIONS' | 'PATCH'
-
-const isRequestMethod = (method: string): method is RequestMethod => {
-  return ['POST', 'PUT', 'GET', 'HEAD', 'DELETE', 'OPTIONS', 'PATCH'].includes(method.toUpperCase())
-}
 
 type SchemaType = 'request'| 'response'
 

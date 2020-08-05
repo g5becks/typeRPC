@@ -1,6 +1,6 @@
-import {TsClientBuilder} from './typescript/client'
-import {Code, Target} from './builder'
-import {TsServerBuilder} from './typescript/server'
+import {AxiosBuilder} from './typescript/axios-builder'
+import {Code, Target} from '../schema/builder'
+import {FastifyBuilder} from './typescript/fastify-builder'
 
 export {Code, Target}
 
@@ -21,12 +21,12 @@ export class BuilderError extends Error {
 }
 
 export const buildTypes = (target: Target, tsConfigFilePath: string, outputPath: string, jobId: string) => {
-  const generator = target === 'client' ? new TsClientBuilder(target, tsConfigFilePath, outputPath, jobId) : new TsServerBuilder(target, tsConfigFilePath, outputPath, jobId)
+  const generator = target === 'client' ? new AxiosBuilder(target, tsConfigFilePath, outputPath, jobId) : new FastifyBuilder(target, tsConfigFilePath, outputPath, jobId)
   return generator.buildTypes()
 }
 
 export const generateCode = (target: Target, tsConfigFilePath: string, outputPath: string, jobId: string): Code => {
-  const generator = target === 'client' ? new TsClientBuilder(target, tsConfigFilePath, outputPath, jobId) : new TsServerBuilder(target, tsConfigFilePath, outputPath, jobId)
+  const generator = target === 'client' ? new AxiosBuilder(target, tsConfigFilePath, outputPath, jobId) : new FastifyBuilder(target, tsConfigFilePath, outputPath, jobId)
   return generator.buildRpc()
 }
 

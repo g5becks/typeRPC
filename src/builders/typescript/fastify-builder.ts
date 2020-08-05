@@ -1,8 +1,8 @@
-import {Code, CodeBuilder, lowerCase, ServerBuilder, Target} from '../builder'
+import {Code, CodeBuilder, lowerCase, ServerBuilder, Target} from '../../schema/builder'
 import {InterfaceDeclaration, MethodSignature, SourceFile} from 'ts-morph'
-import {getInterfaces, getParams, hasParams, hasReturn} from '../parser'
+import {getInterfaces, getParams, hasParams, hasReturn} from '../../parser'
 
-export const server = {'create-server.ts':
+const fastifyBuilder = {'create-server.ts':
 `
 import fastify, {FastifyInstance, FastifyLoggerInstance, FastifyPluginCallback, FastifyServerOptions, RegisterOptions} from 'fastify'
 import http2 from 'http2'
@@ -146,13 +146,13 @@ export function createServer(opts: FastifyServerOptions, logger: pino.Logger, ..
 `}
 
 /**
- * Generates server side code using https://www.fastify.io/
+ * Generates fastifyBuilder side code using https://www.fastify.io/
  *
  * @export
- * @class TsServerBuilder
+ * @class FastifyBuilder
  * @extends {ServerBuilder}
  */
-export class TsServerBuilder extends ServerBuilder {
+export class FastifyBuilder extends ServerBuilder {
   // eslint-disable-next-line no-useless-constructor
   constructor(protected readonly target: Target, protected tsConfigFilePath: string, protected readonly outputPath: string, protected readonly jobId: string) {
     super(target, tsConfigFilePath, outputPath, jobId)
@@ -182,7 +182,7 @@ ${this.buildImportedTypes(file)}\n`
     const payLoad = CodeBuilder.isGetMethod(method) ? 'query' : 'body'
     const parsePayload = `const {${CodeBuilder.buildParams(method)}} = request.${payLoad}`
     return `
-    instance.route<${TsServerBuilder.getIncomingMessageType(method)}>(
+    instance.route<${FastifyBuilder.getIncomingMessageType(method)}>(
         {
             method: '${CodeBuilder.buildRequestMethod(method)}',
             url: ${ServerBuilder.buildServerRoute(method)},
@@ -222,10 +222,10 @@ ${this.buildImportedTypes(file)}\n`
     const serviceName = service.getNameNode().getText()
     let handlers = ''
     for (const method of service.getMethods()) {
-      handlers += TsServerBuilder.buildRouteHandler(method, serviceName)
+      handlers += FastifyBuilder.buildRouteHandler(method, serviceName)
     }
     return `
-${TsServerBuilder.controllerDoc(serviceName)}
+${FastifyBuilder.controllerDoc(serviceName)}
     const ${serviceName}Controller = (${lowerCase(serviceName)}: ${serviceName}): FastifyPluginAsync => async (instance, _) => {
       instance.register(fastifySensible)
     ${handlers}
@@ -249,8 +249,8 @@ ${TsServerBuilder.controllerDoc(serviceName)}
   private static buildPlugin(service: InterfaceDeclaration): string {
     const serviceName = service.getNameNode().getText()
     return `
-    ${TsServerBuilder.buildController(service)}
-    ${TsServerBuilder.pluginDoc(serviceName)}
+    ${FastifyBuilder.buildController(service)}
+    ${FastifyBuilder.pluginDoc(serviceName)}
     export const ${serviceName}Plugin = (${lowerCase(serviceName)}: ${serviceName}, logLevel: LogLevel, opts?: PluginOptions): TypeRpcPlugin => {
       return {plugin: fp(${serviceName}Controller(${lowerCase(serviceName)}), pluginOpts('${lowerCase(serviceName)}Controller', opts)),
       opts: registerOptions('/${lowerCase(serviceName)}', logLevel)
@@ -263,7 +263,7 @@ ${TsServerBuilder.controllerDoc(serviceName)}
     const services = getInterfaces(file)
     let controllers = ''
     for (const service of services) {
-      controllers += TsServerBuilder.buildPlugin(service)
+      controllers += FastifyBuilder.buildPlugin(service)
     }
     return controllers
   }
@@ -350,15 +350,15 @@ export interface RpcService {
   public buildTypes(): Code {
     const file = `${this.jobId}.ts`
     return this.buildTypesDefault({
-      [file]: TsServerBuilder.typesCode(),
+      [file]: FastifyBuilder.typesCode(),
     })
   }
 
   public buildRpc(): Code {
-    const code: Code = {...server}
+    const code: Code = {...fastifyBuilder}
     for (const file of this.parser.sourceFiles) {
       const schemas = this.buildShemasForFile(file)
-      const controllers = TsServerBuilder.buildPluginsForFile(file)
+      const controllers = FastifyBuilder.buildPluginsForFile(file)
       code[CodeBuilder.buildRpcFileName(file)] = `${this.imports(file)}${CodeBuilder.buildFileHeader()}${schemas}${controllers}`
     }
     return code
