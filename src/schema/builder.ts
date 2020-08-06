@@ -65,18 +65,6 @@ export abstract class CodeBuilder {
 \n`
   }
 
-  protected static removePromise = (method: MethodSignature): string => {
-    const maybeReturnType = method.getReturnType()
-    let returnType = ''
-    if (typeof maybeReturnType !== 'undefined') {
-      returnType = maybeReturnType.getText().trim()
-      if (!returnType.includes('Promise<')) {
-        return returnType
-      }
-      returnType = maybeReturnType.getTypeArguments().map(type => type.getText().trim()).toString()
-    }
-    return returnType
-  }
 
   protected static buildSchemaDoc(service: InterfaceDeclaration, method: MethodSignature, schemaType: SchemaType): string {
     return `
