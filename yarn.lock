@@ -273,9 +273,9 @@
     typescript "~3.9.7"
 
 "@typerpc/types@^1.0.1":
-  version "1.0.6"
-  resolved "https://registry.yarnpkg.com/@typerpc/types/-/types-1.0.6.tgz#80493c74ef95d1b0f4c52a216c653393e2060d16"
-  integrity sha512-SJoHiJgn53SbrfwjF0CvjqgmHHGLu6KJBLNK6DBTsqkXXc8xg8mEyKH6DpWrYAAsaoxwdT6QndkrR1esTjXF+g==
+  version "1.0.8"
+  resolved "https://registry.yarnpkg.com/@typerpc/types/-/types-1.0.8.tgz#522fae66411d8eb73b58d9d3c7324038bda72dc0"
+  integrity sha512-bWQ4aMOuvRmCh40aD1ml1rNTrLlWn9oAzQ7wBPI9HlsHEzQe+AvoxtB2K14quLy3vLdHDB+yikB/kmuaXenIQA==
 
 "@types/chai@*", "@types/chai@^4":
   version "4.2.12"
