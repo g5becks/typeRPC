@@ -1,4 +1,4 @@
-import * as t from '@typerpc/types'
+import {t} from '@typerpc/types'
 
 export type Struct = {name: string} | {readonly brand: unique symbol}
 
@@ -29,17 +29,17 @@ export const make = {
 }
 
 export const primitives = {
-  Bool: {_type_: 'Bool'} as unknown as t.Bool,
-  Int8: {_type_: 'Int8'} as unknown as t.Int8,
-  Uint8: {_type_: 'Uint8'} as unknown as t.Uint8,
-  Int16: {_type_: 'Int16'} as unknown as t.Int16,
-  Uint16: {_type_: 'Uint16'} as unknown as t.Uint16,
-  Int32: {_type_: 'Int32'} as unknown as t.Int32,
-  Uint32: {_type_: 'Uint32'} as unknown as t.Uint32,
-  Int64: {_type_: 'Int64'} as unknown as t.Int64,
-  Uint64: {_type_: 'Uint64'} as unknown as t.Uint64,
-  Float32: {_type_: 'Float32'} as unknown as t.Float32,
-  Float64: {_type_: 'Float64'} as unknown as t.Float64,
+  Bool: {_type_: 'Bool', toString: () => 't.Bool'} as unknown as t.Bool,
+  Int8: {_type_: 'Int8', toString: () => 't.Int8'} as unknown as t.Int8,
+  Uint8: {_type_: 'Uint8', toString: () => 't.Uint8'} as unknown as t.Uint8,
+  Int16: {_type_: 'Int16', toString: () => 't.Int16'} as unknown as t.Int16,
+  Uint16: {_type_: 'Uint16', toString: () => 't.Uint16'} as unknown as t.Uint16,
+  Int32: {_type_: 'Int32', toString: () => 't.Int32'} as unknown as t.Int32,
+  Uint32: {_type_: 'Uint32', toString: () => 't.Uint32'} as unknown as t.Uint32,
+  Int64: {_type_: 'Int64', toString: () => 't.Int64'} as unknown as t.Int64,
+  Uint64: {_type_: 'Uint64', toString: () => 't.Uint64'} as unknown as t.Uint64,
+  Float32: {_type_: 'Float32', toString: () => 't.Float32'} as unknown as t.Float32,
+  Float64: {_type_: 'Float64', toString: () => 't.Float64'} as unknown as t.Float64,
   Null: {_type_: 'Null'} as unknown as t.Null,
   String: {_type_: 'String'} as unknown as t.String,
   Error: {_type_: 'Err'} as unknown as t.Err,

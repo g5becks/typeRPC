@@ -1,5 +1,10 @@
 import {InterfaceDeclaration, MethodSignature, ParameterDeclaration, Project, SourceFile} from 'ts-morph'
+import {primitives, VarType} from './schema/types'
+import {Container} from '@typerpc/types'
 
+const PrimitiveMap = new Map<string, Container>(
+  Object.entries()
+)
 /**
  * Parses specified project source code files
  *
@@ -34,11 +39,16 @@ export const hasJsDoc = (method: MethodSignature): boolean => {
   return method.getJsDocs().length > 0
 }
 
+const isValidType = (text: string): boolean {}
+const getType = (text: string): VarType => {
+  if (text.startsWith())
+}
 export const getReturnType = (method: MethodSignature): string => {
-  const maybeReturnType = method.getReturnTypeNode()
-  let returnType = 'void'
+  const maybeReturnType = method.getReturnType()
+  let returnType = ''
   if (typeof maybeReturnType !== 'undefined') {
     returnType = maybeReturnType.getText().trim()
+
   }
   return returnType
 }
