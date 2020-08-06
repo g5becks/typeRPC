@@ -2,15 +2,6 @@ import * as t from '@typerpc/types'
 
 export type Struct = {name: string} | {readonly brand: unique symbol}
 
-export namespace containers {
-  export const Dict: t.Dict = {} as unknown as t.Dict
-  export const List: t.List = {} as unknown as t.List
-  export const Tuple2: t.Tuple2 = {} as unknown as t.Tuple2
-  export const Tuple3: t.Tuple3 = {} as unknown as t.Tuple3
-  export const Tuple4: t.Tuple4 = {} as unknown as t.Tuple4
-  export const Tuple5: t.Tuple5 = {} as unknown as t.Tuple5
-  export const Struct: Struct = {} as unknown as Struct
-}
 
 export const make = {
   Struct: (name: string): Struct => { return {name} as Struct },
@@ -62,17 +53,23 @@ export class OptionalParam {
   }
 }
 
-export const is = {
-  Dict = (type: VarType): type is t.Dict => verifyType(type,'keyType', 'valueType')
-}
-
-const verifyType = (type: VarType, ...props: string[]): boolean => {
+const validateType = (type: VarType, ...props: string[]): boolean => {
   const names = Object.getOwnPropertyNames(type)
   return props.every(prop => names.includes(prop))
 }
 
-export const isDict = (type: VarType): type is t.Dict => verifyType(type,'keyType', 'valueType')
+const validateTuple = (type: VarType, numItems: number): boolean => validateType(type, ...Array(numItems).map(num => `item${num + 1}`))
 
-export const isTuple2 = (type: VarType): type is t.Tuple2 => verifyType(type, props => props.includes('item1') && props.includes('item2'))
 
-export const isTuple3 = (type: VarType): type is t.Tuple3 => verifyType(type, props => props.includes('item1') && props)
+// functions to validate the type of a variable
+export const is = {
+  Dict: (type: VarType): type is t.Dict => validateType(type, 'keyType', 'valType'),
+  Tuple2: (type: VarType): type is t.Tuple2 => validateTuple(type,2),
+  Tuple3: (type: VarType): type is t.Tuple3 => validateTuple(type, 3),
+  Tuple4: (type: VarType): type is t.Tuple4 => validateTuple(type, 4),
+  Tuple5: (type: VarType): type is t.Tuple5 => validateTuple(type, 5),
+  List: (type: VarType): type is t.List => validateType(type, 'elemType'),
+  Struct: (type: VarType): type is Struct => validateType(type, 'name'),
+  Container: (type: VarType): type is Container => [is.Struct, is.List, is.Dict, is.Tuple2, is.Tuple3, is.Tuple4, is.Tuple3, is.Tuple5].some(func => func(type))
+}
+
