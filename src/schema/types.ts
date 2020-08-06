@@ -40,12 +40,13 @@ export const primitives = {
   Uint64: {_type_: 'Uint64', toString: () => 't.Uint64'} as unknown as t.Uint64,
   Float32: {_type_: 'Float32', toString: () => 't.Float32'} as unknown as t.Float32,
   Float64: {_type_: 'Float64', toString: () => 't.Float64'} as unknown as t.Float64,
-  Null: {_type_: 'Null'} as unknown as t.Null,
-  String: {_type_: 'String'} as unknown as t.String,
-  Error: {_type_: 'Err'} as unknown as t.Err,
-  Any: {_type_: 'Any'} as unknown as t.Any,
-  TimeStamp: {_type_: 'TimeStamp'} as unknown as t.TimeStamp,
-  Blob: {_type_: 'Blob'} as unknown as t.Blob,
+  Null: {_type_: 'Null', toString: () => 't.Null'} as unknown as t.Null,
+  String: {_type_: 'String', toString: () => 't.String'} as unknown as t.String,
+  Error: {_type_: 'Err', toString: () => 't.Err'} as unknown as t.Err,
+  Any: {_type_: 'Any', toString: () => 't.Any'} as unknown as t.Any,
+  TimeStamp: {_type_: 'TimeStamp', toString: () => 't.TimeStamp'} as unknown as t.TimeStamp,
+  Blob: {_type_: 'Blob', toString: () => 't.Blob'} as unknown as t.Blob,
+  Unit: {_type_: 'Unit', toString: () => 't.Unit'} as unknown as t.Unit,
 }
 
 type Container = t.Container | Struct
