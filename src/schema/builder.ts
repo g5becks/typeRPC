@@ -65,7 +65,6 @@ export abstract class CodeBuilder {
 \n`
   }
 
-
   protected static buildSchemaDoc(service: InterfaceDeclaration, method: MethodSignature, schemaType: SchemaType): string {
     return `
 /**
