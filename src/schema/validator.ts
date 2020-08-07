@@ -38,6 +38,7 @@ const validateImports = (sourceFile: SourceFile): Error[] => {
   return errs
 }
 
+// Ensure zero exports
 const validateExports = (sourceFile: SourceFile): Error[] => {
   const allExports = sourceFile.getExportAssignments()
   const defExp = sourceFile.getDefaultExportSymbol()
@@ -56,16 +57,19 @@ const validateExports = (sourceFile: SourceFile): Error[] => {
   return errs
 }
 
+// Ensure zero namespaces
 const validateNameSpaces = (sourceFile: SourceFile): Error[] => {
   const spaces = sourceFile.getNamespaces()
   return spaces.length ? [new Error(errMsg(spaces.length, 'namespace', spaces.map(space => space.getName()), sourceFile))] : []
 }
 
+// Ensure zero top level statements
 const validateStatements = (sourceFile: SourceFile): Error[] => {
   const stmnts = sourceFile.getStatements()
   return stmnts.length ? [new Error(errMsg(stmnts.length, 'top level statement', stmnts.map(stmnt => stmnt.getText()), sourceFile))] : []
 }
 
+// Ensure zero references to other files
 const validateRefs = (sourceFile: SourceFile): Error[] => {
   const errs: Error[] = []
   // should be 1
@@ -112,6 +116,8 @@ const isValidTypeAlias = (type: TypeNode | Node, sourceFile: SourceFile): boolea
   return aliases.includes(type.getText().trim())
 }
 
+// Ensure type of method params is either a typerpc type or a type
+// declared in the same source file.
 const validateParams = (method: MethodSignature, sourceFile: SourceFile): Error[] => {
   if (!method.getParameters()) {
     return []
