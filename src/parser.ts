@@ -25,7 +25,6 @@ export class Parser {
     this.project = new Project({tsConfigFilePath: tsConfigFilePath, skipFileDependencyResolution: true})
   }
 
-  isValidType(type: TypeAliasDeclaration):
 }
 
 export const hasParams = (method: MethodSignature): boolean => method.getParameters().length > 0

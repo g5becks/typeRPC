@@ -1,18 +1,9 @@
 import {Node, SourceFile, TypeNode} from 'ts-morph'
 import {t} from '@typerpc/types'
-import {DataType, make, primitives} from './schema/types'
-import {Parser} from './parser'
-import {Target} from './schema/builder'
-
-const primitivesMap = new Map<string, t.Primitive>(
-  Object.entries(primitives).map(([_, v]) => [v.toString(), v])
-)
-
-const containersList = ['t.Dict', 't.Tuple2', 't.Tuple3', 't.Tuple4', 't.Tuple5', 't.List']
-
-const isPrimitive = (type: TypeNode | Node): boolean => primitivesMap.has(type.getText().trim())
-
-const isContainer = (type: TypeNode | Node): boolean => containersList.some(container => type.getText().trim().startsWith(container))
+import {DataType, make, primitives, primitivesMap} from './types'
+import {Parser} from '../parser'
+import {Target} from './builder'
+import {isContainer, isPrimitive} from './validator'
 
 const isType = (type: TypeNode | Node, typeText: string): boolean => type.getText().trim().startsWith(typeText)
 

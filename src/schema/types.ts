@@ -1,5 +1,6 @@
 import {t} from '@typerpc/types'
 
+
 export type Struct = {name: string} | {readonly brand: unique symbol}
 
 export const make = {
@@ -85,3 +86,7 @@ export const is = {
   Container: (type: DataType): type is Container => [is.Struct, is.List, is.Dict, is.Tuple2, is.Tuple3, is.Tuple4, is.Tuple3, is.Tuple5].some(func => func(type)),
 }
 
+export const primitivesMap = new Map<string, t.Primitive>(
+  Object.entries(primitives).map(([_, v]) => [v.toString(), v])
+)
+export const containersList = ['t.Dict', 't.Tuple2', 't.Tuple3', 't.Tuple4', 't.Tuple5', 't.List']
