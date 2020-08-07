@@ -5,18 +5,17 @@ const errMsg = (numInvalids: number, type: string, violators: string[], sourceFi
 
 const validateFunctions =  (sourceFile: SourceFile): Error[] => {
   const functions = sourceFile.getFunctions()
-  if (functions.length) {
-    return [new Error(errMsg(functions.length, 'function', functions.map(func => func.getName() ?? ''), sourceFile))]
-  }
-  return []
+  return functions.length ? [new Error(errMsg(functions.length, 'function', functions.map(func => func.getName() ?? ''), sourceFile))] : []
 }
 
 const validateVariables = (sourceFile: SourceFile): Error[] => {
   const variables = sourceFile.getVariableDeclarations()
-  if (variables.length) {
-    return [new Error(`${sourceFile.getBaseName()} contains ${variables.length} variable declarations`)]
-  }
-  return []
+  return variables.length ? [new Error(`${sourceFile.getBaseName()} contains ${variables.length} variable declarations`)] : []
+}
+
+const validateClasses = (sourceFile: SourceFile): Error[] => {
+  const classes = sourceFile.getClasses()
+  return classes.length ? [new Error(errMsg(classes.length, 'class', classes.map(cls => cls.getName() ?? ''), sourceFile))] : []
 }
 
 const validateImports = (sourceFile: SourceFile): Error[] => {
@@ -34,7 +33,7 @@ const validateImports = (sourceFile: SourceFile): Error[] => {
 }
 
 const validateSchema = (sourceFile: SourceFile): Error[] => {
-  return [...validateFunctions(sourceFile), ...validateVariables(sourceFile), ...validateImports(sourceFile)]
+  return [...validateFunctions(sourceFile), ...validateVariables(sourceFile), ...validateImports(sourceFile), ...validateClasses(sourceFile)]
 }
 
 export const validateSchemas = (schemas: SourceFile[]): Error[] => {
