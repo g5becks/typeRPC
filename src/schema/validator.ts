@@ -1,4 +1,4 @@
-import {MethodSignature, Node, SourceFile, TypeNode} from 'ts-morph'
+import {InterfaceDeclaration, MethodSignature, Node, SourceFile, TypeAliasDeclaration, TypeNode} from 'ts-morph'
 import {containersList, primitivesMap} from './types'
 import {getMethodsForFile} from '../parser'
 
@@ -105,6 +105,19 @@ const validateRefs = (sourceFile: SourceFile): Error[] => {
   return errs
 }
 
+const genericErr = (type: TypeAliasDeclaration | InterfaceDeclaration): Error => new Error(`typeError at: ${type.getStartLineNumber()}. ${type.getName().trim()} defines a generic type constraint. typerpc types cannot be generic`)
+
+const validateTypeAliases = (sourceFile: SourceFile): Error[] => {
+  const aliases = sourceFile.getTypeAliases()
+  const errs: Error[] = []
+  for (const alias of aliases) {
+    if (alias.getTypeParameters.length) {
+      errs.push(genericErr(alias))
+    }
+  }
+  return errs
+}
+
 export const isPrimitive = (type: TypeNode | Node): boolean => primitivesMap.has(type.getText().trim())
 
 export const isContainer = (type: TypeNode | Node): boolean => containersList.some(container => type.getText().trim().startsWith(container))
@@ -122,7 +135,7 @@ const validateParams = (method: MethodSignature, sourceFile: SourceFile): Error[
   if (!method.getParameters()) {
     return []
   }
-  const paramErr = (type: TypeNode, msg: string) => `error in file: ${type.getSourceFile().getBaseName()} at: ${type.getEndLineNumber()}. ${msg}`
+  const paramErr = (type: TypeNode, msg: string) => `error in file: ${type.getSourceFile().getBaseName()} at: ${type.getStartLineNumber()}. ${msg}`
   const paramTypes = method.getParameters().map(param => param.getTypeNode())
   const errs: Error[] = []
   for (const type of paramTypes) {
