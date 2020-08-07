@@ -157,35 +157,49 @@ export const isContainer = (type: TypeNode | Node): boolean => containersList.so
 
 const isValidDataType = (type: TypeNode | Node): boolean => isPrimitive(type) || isContainer(type)
 
-const isValidTypeAlias = (type: TypeNode | Node, sourceFile: SourceFile): boolean => {
-  const aliases = sourceFile.getTypeAliases().map(alias => alias.getNameNode().getText().trim())
+const isValidTypeAlias = (type: TypeNode): boolean => {
+  const aliases = type.getSourceFile().getTypeAliases().map(alias => alias.getNameNode().getText().trim())
   return aliases.includes(type.getText().trim())
 }
 
 // Ensure type of method params is either a typerpc type or a type
 // declared in the same source file.
-const validateParams = (method: MethodSignature, sourceFile: SourceFile): Error[] => {
+const validateParams = (method: MethodSignature): Error[] => {
   if (!method.getParameters()) {
     return []
   }
-  const paramErr = (type: TypeNode, msg: string) => `error in file: ${type.getSourceFile().getBaseName()} at: ${type.getStartLineNumber()}. ${msg}`
+  const paramErr = (type: TypeNode, msg: string) => new Error(`error in file: ${type.getSourceFile().getBaseName()} at: ${type.getStartLineNumber()}. ${msg}`)
   const paramTypes = method.getParameters().map(param => param.getTypeNode())
   const errs: Error[] = []
   for (const type of paramTypes) {
     if (typeof type !== 'undefined') {
-      if (!isValidDataType(type) || !isValidTypeAlias(type, sourceFile)) {
-        errs.push(new Error(paramErr(type, `typeError: ${type} is either not a valid typerpc type or is not defined in this file`)))
+      if (!isValidDataType(type) && !isValidTypeAlias(type)) {
+        errs.push(paramErr(type, `typeError: ${type} is either not a valid typerpc type or is not defined in this file`))
       } else {
-        errs.push(new Error(paramErr(type, 'all params must have a valid type')))
+        errs.push(paramErr(type, 'param has not type. All params must have a valid type'))
       }
     }
   }
   return errs
 }
 
+// Ensures return type of a method is either a valid typerpc type or a type
+// declared in the same file.
+const validateReturnType = (method: MethodSignature): Error[] => {
+  const returnType = method.getReturnTypeNode()
+  const returnTypeErr = (typeName: string) => new Error(`typerc error in file: ${method.getSourceFile().getBaseName()} at: ${method.getStartLineNumber()}. All typerpc interface methods must contain a valid return type. Invalid return type: ${typeName}`)
+  return typeof returnType === 'undefined' ? [returnTypeErr('undefined')] :
+    !isValidDataType(returnType) && !isValidTypeAlias(returnType) ? [returnTypeErr(returnType.getText().trim())] : []
+}
+
+// Validates method params and return types.
 const validateMethods = (sourceFile: SourceFile): Error[] => {
   const methods = getMethodsForFile(sourceFile)
-  const types = sourceFile.getTypeAliases().map(alias => alias.getName().trim())
+  const errs: Error[] = []
+  for (const method of methods) {
+    errs.push(...validateParams(method), ...validateReturnType(method))
+  }
+  return errs
 }
 
 const validateSchema = (sourceFile: SourceFile): Error[] => {
@@ -201,6 +215,7 @@ const validateSchema = (sourceFile: SourceFile): Error[] => {
     ...validateEnums(sourceFile),
     ...validateTypeAliases(sourceFile),
     ...validateInterfaces(sourceFile),
+    ...validateMethods(sourceFile),
   ]
 }
 
