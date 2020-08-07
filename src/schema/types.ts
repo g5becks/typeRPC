@@ -28,7 +28,7 @@ export const make = {
   },
 }
 
-export const primitives = {
+export const primitives : {[key: string]: t.Primitive} = {
   bool: {_type_: 'bool', toString: () => 't.bool'} as unknown as t.bool,
   int8: {_type_: 'int8', toString: () => 't.int8'} as unknown as t.int8,
   uint8: {_type_: 'uint8', toString: () => 't.uint8'} as unknown as t.uint8,
@@ -49,7 +49,6 @@ export const primitives = {
   unit: {_type_: 'unit', toString: () => 't.unit'} as unknown as t.unit,
 }
 
-
 type Container = t.Container | Struct
 
 export type DataType = t.RpcType | Struct
@@ -66,11 +65,12 @@ export class OptionalParam {
 
 export type MethodParam = Param | OptionalParam
 
-const validateType = (type: DataType, ...props: string[]): boolean => {
-  const names = Object.getOwnPropertyNames(type)
-  return props.every(prop => names.includes(prop))
+const validateType = (type: DataType, ...propNames: string[]): boolean => {
+  const props = Object.getOwnPropertyNames(type)
+  return propNames.every(name => props.includes(name))
 }
 
+// validate every TupleN type by ensuring it has itemN property names.
 const validateTuple = (type: DataType, numItems: number): boolean => validateType(type, ...new Array(numItems).map(num => `item${num + 1}`))
 
 // functions to validate the type of a variable
@@ -83,6 +83,5 @@ export const is = {
   List: (type: DataType): type is t.List => validateType(type, 'elemType'),
   Struct: (type: DataType): type is Struct => validateType(type, 'name'),
   Container: (type: DataType): type is Container => [is.Struct, is.List, is.Dict, is.Tuple2, is.Tuple3, is.Tuple4, is.Tuple3, is.Tuple5].some(func => func(type)),
-  OptionalParam: (type: MethodParam): type is OptionalParam => type instanceof OptionalParam,
 }
 

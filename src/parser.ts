@@ -1,19 +1,17 @@
 import {
   InterfaceDeclaration,
   MethodSignature,
+  Node,
   ParameterDeclaration,
   Project,
   SourceFile,
-  ts,
-  Type,
-  Node,
   TypeNode,
 } from 'ts-morph'
-import {make, primitives, DataType} from './schema/types'
-import {Container, t} from '@typerpc/types'
+import {DataType, make, primitives} from './schema/types'
+import {t} from '@typerpc/types'
 
-const PrimitiveMap = new Map<string, Container>(
-  Object.entries(primitives).map(([k, v]) => [v.toString(), v])
+const PrimitiveMap = new Map<string, t.Primitive>(
+  Object.entries(primitives).map(([_, v]) => [v.toString(), v])
 )
 /**
  * Parses specified project source code files
@@ -44,22 +42,32 @@ export const hasJsDoc = (method: MethodSignature): boolean => {
 
 const containersList = ['t.Dict', 't.Tuple2', 't.Tuple3', 't.Tuple4', 't.Tuple5', 't.List']
 
-const isPrimitive = (text: string): boolean => PrimitiveMap.has(text)
-const isContainer = (text: string): text is Container => containersList.some(type => text.startsWith(type))
+const isPrimitive = (type: TypeNode| Node): boolean => PrimitiveMap.has(type.getText().trim())
+const isContainer = (type: TypeNode| Node): boolean => containersList.some(container => type.getText().trim().startsWith(container))
 
-const isList = (type: TypeNode<ts.TypeNode>): boolean => type.getChildAtIndex(0).getText().trim() === 't.List'
+const isType = (type: TypeNode|Node, typeText: string): boolean => type.getText().trim().startsWith(typeText)
 
-const makeList = (type: TypeNode<ts.TypeNode>): t.List => make
-.List(makeElemType(type.getChildAtIndex(2)))
+const makeList = (type: TypeNode| Node): t.List => make
+.List(makeDataType(type.getChildAtIndex(2)))
 
-const makeContainer = (type: TypeNode<ts.TypeNode>): t.Container => {
-  if (isList(type)) {
+const makeDict = (type: TypeNode|Node): t.Dict => make.Dict(PrimitiveMap.get(type.getChildAtIndex(1).getText().trim()) as t.Comparable, makeDataType(type.getChildAtIndex(2)))
+
+const makeDataType = (type: TypeNode| Node): DataType => {
+  const typeText = type.getText().trim()
+  if (isPrimitive(type)) {
+    return PrimitiveMap.get(typeText) as DataType
+  }
+  if (!isContainer(type)) {
+    return make.Struct(typeText)
+  }
+  if (isType(type, 't.List')) {
     return makeList(type)
   }
-}
+  if (isType(type, 't.Dict')) {
+    return makeDict(type)
+  }
 
-const makeElemType = (type: TypeNode<ts.TypeNode>| Node<ts.Node>): DataType => {
-
+  return primitives.dyn
 }
 
 export const getReturnType = (method: MethodSignature): DataType => {
@@ -71,12 +79,6 @@ export const getReturnType = (method: MethodSignature): DataType => {
   let returnText = ''
   if (typeof maybeReturnType !== 'undefined') {
     returnText = maybeReturnType.getText().trim()
-    if (isPrimitive(returnText)) {
-      return PrimitiveMap.get(returnText)
-    }
-    if (!isContainer(returnText)) {
-      return make.Struct(returnText)
-    }
   }
 }
 
