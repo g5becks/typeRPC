@@ -2,25 +2,25 @@ import {InterfaceDeclaration, MethodSignature, Node, SourceFile, TypeAliasDeclar
 import {containersList, primitivesMap} from './types'
 import {getMethodsForFile} from '../parser'
 
-const errMsg = (numInvalids: number, type: string, violators: string[], sourceFile: SourceFile) =>
-  `${sourceFile.getBaseName()} contains ${numInvalids} ${type} declarations => ${violators}. typerpc schemas can only contain a single import statement => import {t} from '@typerpc/types',  enum => (message),  typeAlias => (message), and interface => (service) declarations.`
+const Err = (numInvalids: number, type: string, violators: string[], sourceFile: SourceFile): Error =>
+  new Error(`${sourceFile.getBaseName()} contains ${numInvalids} ${type} declarations => ${violators}. typerpc schemas can only contain a single import statement => import {t} from '@typerpc/types',  enum => (message),  typeAlias => (message), and interface => (service) declarations.`)
 
 // Ensure zero function declarations
 const validateFunctions = (sourceFile: SourceFile): Error[] => {
   const functions = sourceFile.getFunctions()
-  return functions.length ? [new Error(errMsg(functions.length, 'function', functions.map(func => func.getName() ?? ''), sourceFile))] : []
+  return functions.length ? [Err(functions.length, 'function', functions.map(func => func.getName() ?? ''), sourceFile)] : []
 }
 
 // Ensure zero variable declarations
 const validateVariables = (sourceFile: SourceFile): Error[] => {
   const variables = sourceFile.getVariableDeclarations()
-  return variables.length ? [new Error(errMsg(variables.length, 'variable', variables.map(vari => vari.getName() ?? ''), sourceFile))] : []
+  return variables.length ? [Err(variables.length, 'variable', variables.map(vari => vari.getName() ?? ''), sourceFile)] : []
 }
 
 // Ensure zero class declarations
 const validateClasses = (sourceFile: SourceFile): Error[] => {
   const classes = sourceFile.getClasses()
-  return classes.length ? [new Error(errMsg(classes.length, 'class', classes.map(cls => cls.getName() ?? ''), sourceFile))] : []
+  return classes.length ? [Err(classes.length, 'class', classes.map(cls => cls.getName() ?? ''), sourceFile)] : []
 }
 
 // Ensure only one valid import without aliasing the namespace
@@ -44,15 +44,15 @@ const validateExports = (sourceFile: SourceFile): Error[] => {
   const defExp = sourceFile.getDefaultExportSymbol()
   const exportDecs = sourceFile.getExportDeclarations()
   const exportSym = sourceFile.getExportSymbols()
-  const errs = allExports.length ? [new Error(errMsg(allExports.length, 'export', allExports.map(exp => exp.getText().trim()), sourceFile))] : []
+  const errs = allExports.length ? [Err(allExports.length, 'export', allExports.map(exp => exp.getText().trim()), sourceFile)] : []
   if (typeof defExp !== 'undefined') {
-    errs.push(new Error(errMsg(1, 'default export', [defExp.getName()], sourceFile)))
+    errs.push(Err(1, 'default export', [defExp.getName()], sourceFile))
   }
   if (exportDecs.length) {
-    errs.push(new Error(errMsg(exportDecs.length, 'export', exportDecs.map(exp => exp.getText()), sourceFile)))
+    errs.push(Err(exportDecs.length, 'export', exportDecs.map(exp => exp.getText()), sourceFile))
   }
   if (exportSym.length) {
-    errs.push(new Error(errMsg(exportSym.length, 'export', exportSym.map(exp => exp.getName()), sourceFile)))
+    errs.push(Err(exportSym.length, 'export', exportSym.map(exp => exp.getName()), sourceFile))
   }
   return errs
 }
@@ -60,13 +60,13 @@ const validateExports = (sourceFile: SourceFile): Error[] => {
 // Ensure zero namespaces
 const validateNameSpaces = (sourceFile: SourceFile): Error[] => {
   const spaces = sourceFile.getNamespaces()
-  return spaces.length ? [new Error(errMsg(spaces.length, 'namespace', spaces.map(space => space.getName()), sourceFile))] : []
+  return spaces.length ? [Err(spaces.length, 'namespace', spaces.map(space => space.getName()), sourceFile)] : []
 }
 
 // Ensure zero top level statements
 const validateStatements = (sourceFile: SourceFile): Error[] => {
   const stmnts = sourceFile.getStatements()
-  return stmnts.length ? [new Error(errMsg(stmnts.length, 'top level statement', stmnts.map(stmnt => stmnt.getText()), sourceFile))] : []
+  return stmnts.length ? [Err(stmnts.length, 'top level statement', stmnts.map(stmnt => stmnt.getText()), sourceFile)] : []
 }
 
 // Ensure zero references to other files
@@ -75,40 +75,44 @@ const validateRefs = (sourceFile: SourceFile): Error[] => {
   // should be 1
   const nodeSourceRefs = sourceFile.getNodesReferencingOtherSourceFiles()
   if (nodeSourceRefs.length !== 1) {
-    errs.push(new Error(errMsg(nodeSourceRefs.length - 1, 'source reference', nodeSourceRefs.filter(ref => !ref.getText().includes('@typerpc')).map(ref => ref.getText()), sourceFile)))
+    errs.push(Err(nodeSourceRefs.length - 1, 'source reference', nodeSourceRefs.filter(ref => !ref.getText().includes('@typerpc')).map(ref => ref.getText()), sourceFile))
   }
   // should be 1
   const literalSourceRefs = sourceFile.getLiteralsReferencingOtherSourceFiles()
   if (literalSourceRefs.length !== 1) {
-    errs.push(new Error(errMsg(literalSourceRefs.length - 1, 'literal source reference', literalSourceRefs.filter(ref => !ref.getText().includes('@typerpc')).map(ref => ref.getText()), sourceFile)))
+    errs.push(Err(literalSourceRefs.length - 1, 'literal source reference', literalSourceRefs.filter(ref => !ref.getText().includes('@typerpc')).map(ref => ref.getText()), sourceFile))
   }
   // should be 1
   const sourceRefs = sourceFile.getReferencedSourceFiles()
   if (sourceRefs.length !== 1) {
-    errs.push(new Error(errMsg(sourceRefs.length - 1, 'source reference', sourceRefs.filter(ref => !ref.getText().includes('@typerpc')).map(ref => ref.getText()), sourceFile)))
+    errs.push(Err(sourceRefs.length - 1, 'source reference', sourceRefs.filter(ref => !ref.getText().includes('@typerpc')).map(ref => ref.getText()), sourceFile))
   }
   // should be 0
   const libraryRefs = sourceFile.getLibReferenceDirectives()
   if (literalSourceRefs.length) {
-    errs.push(new Error(errMsg(libraryRefs.length, 'library reference', libraryRefs.map(ref => ref.getText()), sourceFile)))
+    errs.push(Err(libraryRefs.length, 'library reference', libraryRefs.map(ref => ref.getText()), sourceFile))
   }
   // should be 0
   const pathRefs = sourceFile.getPathReferenceDirectives()
   if (pathRefs.length) {
-    errs.push(new Error(errMsg(pathRefs.length, 'path reference', pathRefs.map(ref => ref.getText()), sourceFile)))
+    errs.push(Err(pathRefs.length, 'path reference', pathRefs.map(ref => ref.getText()), sourceFile))
   }
   // should be 0
   const typeDirRefs = sourceFile.getTypeReferenceDirectives()
   if (typeDirRefs.length) {
-    errs.push(new Error(errMsg(typeDirRefs.length, 'type reference directive', typeDirRefs.map(ref => ref.getText()), sourceFile)))
+    errs.push(Err(typeDirRefs.length, 'type reference directive', typeDirRefs.map(ref => ref.getText()), sourceFile))
   }
   return errs
 }
 
 const genericErr = (type: TypeAliasDeclaration | InterfaceDeclaration): Error => new Error(`typeError at: ${type.getStartLineNumber()}. ${type.getName().trim()} defines a generic type constraint. typerpc types cannot be generic`)
 
+// Ensures no type aliases are generic
 const validateTypeAliases = (sourceFile: SourceFile): Error[] => {
   const aliases = sourceFile.getTypeAliases()
+  if (!aliases.length) {
+    return []
+  }
   const errs: Error[] = []
   for (const alias of aliases) {
     if (alias.getTypeParameters.length) {
@@ -118,6 +122,20 @@ const validateTypeAliases = (sourceFile: SourceFile): Error[] => {
   return errs
 }
 
+// Ensure at least one interface and no interfaces are generic
+const validateInterfaces = (sourceFile: SourceFile): Error[] => {
+  const interfaces = sourceFile.getInterfaces()
+  if (!interfaces.length) {
+    return [new  Error(`error in file => ${sourceFile.getBaseName()}. All typerpc schema files must contain at least one interface (service) definition`)]
+  }
+  const errs: Error[] = []
+  for (const intrfc of interfaces) {
+    if (intrfc.getTypeParameters().length) {
+      errs.push(genericErr(intrfc))
+    }
+  }
+  return errs
+}
 export const isPrimitive = (type: TypeNode | Node): boolean => primitivesMap.has(type.getText().trim())
 
 export const isContainer = (type: TypeNode | Node): boolean => containersList.some(container => type.getText().trim().startsWith(container))
@@ -165,6 +183,7 @@ const validateSchema = (sourceFile: SourceFile): Error[] => {
     ...validateNameSpaces(sourceFile),
     ...validateStatements(sourceFile),
     ...validateRefs(sourceFile),
+    ...validateTypeAliases(sourceFile),
   ]
 }
 
