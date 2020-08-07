@@ -6,7 +6,7 @@ const errMsg = (numInvalids: number, type: string, violators: string[], sourceFi
   `${sourceFile.getBaseName()} contains ${numInvalids} ${type} declarations => ${violators}. typerpc schemas can only contain typeAlias => (message) and interface => (service) declarations.`
 
 // Ensure zero function declarations
-const validateFunctions =  (sourceFile: SourceFile): Error[] => {
+const validateFunctions = (sourceFile: SourceFile): Error[] => {
   const functions = sourceFile.getFunctions()
   return functions.length ? [new Error(errMsg(functions.length, 'function', functions.map(func => func.getName() ?? ''), sourceFile))] : []
 }
@@ -37,35 +37,91 @@ const validateImports = (sourceFile: SourceFile): Error[] => {
   }
   return errs
 }
+
+const validateExports = (sourceFile: SourceFile): Error[] =>  {
+  const allExports = sourceFile.getExportAssignments()
+  const defExp = sourceFile.getDefaultExportSymbol()
+  const exportDecs = sourceFile.getExportDeclarations()
+  const exportSym = sourceFile.getExportSymbols()
+  const errs = allExports.length ? [new Error(errMsg(allExports.length, 'export', allExports.map(exp => exp.getText().trim()), sourceFile))] : []
+  if (typeof defExp !== 'undefined') {
+    errs.push(new Error(errMsg(1, 'default export', [defExp.getName()], sourceFile)))
+  }
+  if (exportDecs.length) {
+    errs.push(new Error(errMsg(exportDecs.length, 'export', exportDecs.map(exp => exp.getText()), sourceFile)))
+  }
+  if (exportSym.length) {
+    errs.push(new Error(errMsg(exportSym.length, 'export', exportSym.map(exp => exp.getName()), sourceFile)))
+  }
+  return errs
+}
+
+const validateNameSpaces = (sourceFile: SourceFile): Error[] => {
+  const spaces = sourceFile.getNamespaces()
+  return spaces.length ? [new Error(errMsg(spaces.length, 'namespace', spaces.map(space => space.getName()), sourceFile))] : []
+}
+
+const validateStatements = (sourceFile: SourceFile): Error[] => {
+  const stmnts = sourceFile.getStatements()
+  return stmnts.length ? [new Error(errMsg(stmnts.length, 'top level statement', stmnts.map(stmnt => stmnt.getText()), sourceFile))] : []
+}
+
+const validateRefs = (sourceFile: SourceFile): Error[] => {
+  const errs: Error[] = []
+  // should be 1
+  const nodeSourceRefs = sourceFile.getNodesReferencingOtherSourceFiles()
+  if (nodeSourceRefs.length !== 1) {
+    errs.push(new Error(errMsg(nodeSourceRefs.length - 1, 'source reference', nodeSourceRefs.filter(ref => !ref.getText().includes('@typerpc')).map(ref => ref.getText()), sourceFile)))
+  }
+  // should be 1
+  const literalSourceRefs = sourceFile.getLiteralsReferencingOtherSourceFiles()
+  // should be 1
+  const sourceRefs = sourceFile.getReferencedSourceFiles()
+  // should be 0
+  const libraryRefs = sourceFile.getLibReferenceDirectives()
+  // should be 0
+  const pathRefs = sourceFile.getPathReferenceDirectives()
+  // should be 0
+  const typeDirRefs = sourceFile.getTypeReferenceDirectives()
+}
+
 export const isPrimitive = (type: TypeNode | Node): boolean => primitivesMap.has(type.getText().trim())
 
 export const isContainer = (type: TypeNode | Node): boolean => containersList.some(container => type.getText().trim().startsWith(container))
 
 const isValidDataType = (type: TypeNode | Node): boolean => isPrimitive(type) || isContainer(type)
 
-const validateParams = (method: MethodSignature, types: string[]): Error[] {
+const isValidTypeAlias = (type: TypeNode | Node, sourceFile: SourceFile): boolean => {
+  const aliases = sourceFile.getTypeAliases().map(alias => alias.getNameNode().getText().trim())
+  return aliases.includes(type.getText().trim())
+}
+
+const validateParams = (method: MethodSignature, sourceFile: SourceFile): Error[] => {
   if (!method.getParameters()) {
     return []
   }
+  const paramErr = (type: TypeNode, msg: string) => `error in file: ${type.getSourceFile().getBaseName()} at: ${type.getEndLineNumber()}. ${msg}`
   const paramTypes = method.getParameters().map(param => param.getTypeNode())
-    let errs: Error[] = []
+  const errs: Error[] = []
   for (const type of paramTypes) {
     if (typeof type !== 'undefined') {
-      errs.push(new Error(`error in file: ${type.getSourceFile().getBaseName()} at: ${type.getEndLineNumber()}, all method paramaters must have a type`))
-    }
-    if (!isValidDataType()) {
-
+      if (!isValidDataType(type) || !isValidTypeAlias(type, sourceFile)) {
+        errs.push(new Error(paramErr(type, `typeError: ${type} is either not a valid typerpc type or is not defined in this file`)))
+      } else {
+        errs.push(new Error(paramErr(type, 'all params must have a valid type')))
+      }
     }
   }
-
+  return errs
 }
+
 const validateMethods = (sourceFile: SourceFile): Error[] => {
   const methods = getMethodsForFile(sourceFile)
   const types = sourceFile.getTypeAliases().map(alias => alias.getName().trim())
 }
 
 const validateSchema = (sourceFile: SourceFile): Error[] => {
-  return [...validateFunctions(sourceFile), ...validateVariables(sourceFile), ...validateImports(sourceFile), ...validateClasses(sourceFile)]
+  return [...validateFunctions(sourceFile), ...validateVariables(sourceFile), ...validateImports(sourceFile), ...validateClasses(sourceFile), ...validateExports(sourceFile), ...validateNameSpaces(sourceFile), ...validateStatements(sourceFile)]
 }
 
 export const validateSchemas = (schemas: SourceFile[]): Error[] => {
