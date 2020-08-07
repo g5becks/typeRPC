@@ -269,7 +269,7 @@ ${FastifyBuilder.controllerDoc(serviceName)}
   }
 
   private static typesCode(): string {
-    const handlerErr = 'handleErr<T extends RawServerBase, U extends RawRequestDefaultExpression<T>, R extends RawReplyDefaultExpression<T>, S extends RouteGenericInterface, V>(err: Error, reply: FastifyReply<T, U, R, S, V>): FastifyReply<T, U, R, S, V>;'
+    const handlerErr = 'handleErr<T extends RawServerBase, U extends RawRequestDefaultExpression<T>, R extends RawReplyDefaultExpression<T>, S extends RouteGenericInterface, V>(err: err, reply: FastifyReply<T, U, R, S, V>): FastifyReply<T, U, R, S, V>;'
     return `
 // eslint-disable-next-line unicorn/filename-case
 import {

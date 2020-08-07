@@ -1,6 +1,16 @@
-import {InterfaceDeclaration, MethodSignature, ParameterDeclaration, Project, SourceFile} from 'ts-morph'
-import {make, primitives, VarType} from './schema/types'
-import {Container} from '@typerpc/types'
+import {
+  InterfaceDeclaration,
+  MethodSignature,
+  ParameterDeclaration,
+  Project,
+  SourceFile,
+  ts,
+  Type,
+  Node,
+  TypeNode,
+} from 'ts-morph'
+import {make, primitives, DataType} from './schema/types'
+import {Container, t} from '@typerpc/types'
 
 const PrimitiveMap = new Map<string, Container>(
   Object.entries(primitives).map(([k, v]) => [v.toString(), v])
@@ -25,9 +35,8 @@ export class Parser {
 
 export const hasParams = (method: MethodSignature): boolean => method.getParameters().length > 0
 
-export const hasReturn = (method: MethodSignature): boolean =>
-   !['void', 'Promise<void>', '', 'undefined'].some(invalid => invalid === method.getReturnTypeNode()?.getText().trim())
-
+const hasReturn = (method: MethodSignature): boolean =>
+  !['void', 'Promise<void>', '', 'undefined'].some(invalid => invalid === method.getReturnTypeNode()?.getText().trim())
 
 export const hasJsDoc = (method: MethodSignature): boolean => {
   return method.getJsDocs().length > 0
@@ -38,11 +47,27 @@ const containersList = ['t.Dict', 't.Tuple2', 't.Tuple3', 't.Tuple4', 't.Tuple5'
 const isPrimitive = (text: string): boolean => PrimitiveMap.has(text)
 const isContainer = (text: string): text is Container => containersList.some(type => text.startsWith(type))
 
-export const getReturnType = (method: MethodSignature): VarType => {
-  if (!hasReturn(method)) {
-    return primitives.Unit
+const isList = (type: TypeNode<ts.TypeNode>): boolean => type.getChildAtIndex(0).getText().trim() === 't.List'
+
+const makeList = (type: TypeNode<ts.TypeNode>): t.List => make
+.List(makeElemType(type.getChildAtIndex(2)))
+
+const makeContainer = (type: TypeNode<ts.TypeNode>): t.Container => {
+  if (isList(type)) {
+    return makeList(type)
   }
-  const maybeReturnType = method.getReturnType()
+}
+
+const makeElemType = (type: TypeNode<ts.TypeNode>| Node<ts.Node>): DataType => {
+
+}
+
+export const getReturnType = (method: MethodSignature): DataType => {
+  if (!hasReturn(method)) {
+    return primitives.unit
+  }
+  const param = method.getParameters()
+  const maybeReturnType = method.getReturnTypeNode()
   let returnText = ''
   if (typeof maybeReturnType !== 'undefined') {
     returnText = maybeReturnType.getText().trim()
@@ -53,7 +78,6 @@ export const getReturnType = (method: MethodSignature): VarType => {
       return make.Struct(returnText)
     }
   }
-
 }
 
 export const isVoidReturn = (method: MethodSignature): boolean => {

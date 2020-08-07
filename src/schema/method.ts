@@ -1,6 +1,6 @@
 import {MethodSignature} from 'ts-morph'
 import {RpcType} from '@typerpc/types'
-import {VarType} from './types'
+import {DataType} from './types'
 
 export type HTTPVerb = 'POST' | 'PUT' | 'GET' | 'HEAD' | 'DELETE' | 'OPTIONS' | 'PATCH'
 const isRequestMethod = (method: string): method is HTTPVerb => {
@@ -17,7 +17,7 @@ export class Method {
     return rMethod && isRequestMethod(rMethod) ? rMethod as HTTPVerb : 'POST' as HTTPVerb
   }
 
-  public get returnType(): VarType {
+  public get returnType(): DataType {
     this.method.getReturnType().
   }
 
