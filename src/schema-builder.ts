@@ -71,21 +71,42 @@ export class SchemaBuilder {
     this.sourceFiles = this.parser.sourceFiles
   }
 
-  private isValidSchema(sourceFile: SourceFile): Error[]|true {
+  public static create(target: Target, tsConfigFilePath: string, outputPath: string): SchemaBuilder | Error[] {
+    const builder = new SchemaBuilder(target,tsConfigFilePath,outputPath)
+    let errs: Error[] = []
+    for (const file of builder.sourceFiles) {
+      errs.push(...builder.validateSchema(file))
+    }
+    if (errs.length) {
+      return errs
+    }
+    return builder
+  }
+
+  private validateSchema(sourceFile: SourceFile): Error[] {
     const functions = sourceFile.getFunctions()
     const variables = sourceFile.getVariableDeclarations()
+    const imports = sourceFile.getImportDeclarations()
+    const imp = imports[0].getImportClause()?.getNamedImports()[0].getText().trim()
     const errMsg = (numInvalids: number, type: string, violators: string[]) =>
     `${sourceFile.getBaseName()} contains ${numInvalids} ${type} declarations: ${violators} type rpc schemas can only contain typeAlias => (messages) and interface => (service) declarations.`
 
     const errs: Error[] = []
-    if (functions.length !== 0) {
+    if (functions.length) {
       errs.push(
         new Error(errMsg(functions.length, 'function', functions.map(func => func.getName() ?? ''))))
     }
-    if (variables.length !== 0) {
+    if (variables.length) {
       errs.push(
         new Error(`${sourceFile.getBaseName()} contains ${variables.length} variable declarations`)
       )
+    }
+    if (imports.length !== 1) {
+      errs.push(
+        new Error(`typerpc schema files must contain only one import declaration => import {t} from '@typerpc/types'`)
+      )
+    } else if (imports[0].getImportClause()?.getNamedImports()[0].getText().trim() !== 't') {
+      errs.push(new Error(``))
     }
   }
 }
