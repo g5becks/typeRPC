@@ -1,18 +1,13 @@
 import {
   InterfaceDeclaration,
   MethodSignature,
-  Node,
   ParameterDeclaration,
   Project,
   SourceFile,
-  TypeNode,
+  TypeAliasDeclaration,
 } from 'ts-morph'
-import {DataType, make, primitives} from './schema/types'
-import {t} from '@typerpc/types'
+import {DataType, primitives} from './schema/types'
 
-const PrimitiveMap = new Map<string, t.Primitive>(
-  Object.entries(primitives).map(([_, v]) => [v.toString(), v])
-)
 /**
  * Parses specified project source code files
  *
@@ -29,6 +24,8 @@ export class Parser {
   constructor(private readonly tsConfigFilePath: string) {
     this.project = new Project({tsConfigFilePath: tsConfigFilePath, skipFileDependencyResolution: true})
   }
+
+  isValidType(type: TypeAliasDeclaration):
 }
 
 export const hasParams = (method: MethodSignature): boolean => method.getParameters().length > 0
@@ -38,36 +35,6 @@ const hasReturn = (method: MethodSignature): boolean =>
 
 export const hasJsDoc = (method: MethodSignature): boolean => {
   return method.getJsDocs().length > 0
-}
-
-const containersList = ['t.Dict', 't.Tuple2', 't.Tuple3', 't.Tuple4', 't.Tuple5', 't.List']
-
-const isPrimitive = (type: TypeNode| Node): boolean => PrimitiveMap.has(type.getText().trim())
-const isContainer = (type: TypeNode| Node): boolean => containersList.some(container => type.getText().trim().startsWith(container))
-
-const isType = (type: TypeNode|Node, typeText: string): boolean => type.getText().trim().startsWith(typeText)
-
-const makeList = (type: TypeNode| Node): t.List => make
-.List(makeDataType(type.getChildAtIndex(2)))
-
-const makeDict = (type: TypeNode|Node): t.Dict => make.Dict(PrimitiveMap.get(type.getChildAtIndex(1).getText().trim()) as t.Comparable, makeDataType(type.getChildAtIndex(2)))
-
-const makeDataType = (type: TypeNode| Node): DataType => {
-  const typeText = type.getText().trim()
-  if (isPrimitive(type)) {
-    return PrimitiveMap.get(typeText) as DataType
-  }
-  if (!isContainer(type)) {
-    return make.Struct(typeText)
-  }
-  if (isType(type, 't.List')) {
-    return makeList(type)
-  }
-  if (isType(type, 't.Dict')) {
-    return makeDict(type)
-  }
-
-  return primitives.dyn
 }
 
 export const getReturnType = (method: MethodSignature): DataType => {

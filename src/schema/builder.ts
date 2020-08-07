@@ -18,11 +18,9 @@ import {
   getTypeAliasesText,
   hasJsDoc,
   hasParams,
-  hasReturn,
   isVoidReturn,
   Parser,
 } from '../parser'
-import {isRequestMethod} from './method'
 
 export type Code = {
   [key: string]: string;
@@ -35,6 +33,35 @@ type SchemaType = 'request'| 'response'
 export const capitalize = (text: string): string => text.replace(/^\w/, c => c.toUpperCase())
 
 export const lowerCase = (text: string): string => text.replace(/^\w/, c => c.toLowerCase())
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /**
  *  Base class that all generators extend from, contains various utility method for parsing and generating code
  *
