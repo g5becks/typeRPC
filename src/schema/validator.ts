@@ -1,9 +1,17 @@
-import {InterfaceDeclaration, MethodSignature, Node, SourceFile, TypeAliasDeclaration, TypeNode} from 'ts-morph'
+import {
+  EnumDeclaration,
+  InterfaceDeclaration,
+  MethodSignature,
+  Node,
+  SourceFile,
+  TypeAliasDeclaration,
+  TypeNode,
+} from 'ts-morph'
 import {containersList, primitivesMap} from './types'
 import {getMethodsForFile} from '../parser'
 
 const Err = (numInvalids: number, type: string, violators: string[], sourceFile: SourceFile): Error =>
-  new Error(`${sourceFile.getBaseName()} contains ${numInvalids} ${type} declarations => ${violators}. typerpc schemas can only contain a single import statement => import {t} from '@typerpc/types',  enum => (message),  typeAlias => (message), and interface => (service) declarations.`)
+  new Error(`${sourceFile.getBaseName()} contains ${numInvalids} ${type} declarations => ${violators}. typerpc schemas can only contain a single import statement => import {t} from '@typerpc/types', typeAlias => (message), and interface => (service) declarations.`)
 
 // Ensure zero function declarations
 const validateFunctions = (sourceFile: SourceFile): Error[] => {
@@ -67,6 +75,12 @@ const validateNameSpaces = (sourceFile: SourceFile): Error[] => {
 const validateStatements = (sourceFile: SourceFile): Error[] => {
   const stmnts = sourceFile.getStatements()
   return stmnts.length ? [Err(stmnts.length, 'top level statement', stmnts.map(stmnt => stmnt.getText()), sourceFile)] : []
+}
+
+// Ensure no enums
+const validateEnums = (sourceFile: SourceFile): Error[] => {
+  const enums = sourceFile.getEnums()
+  return enums.length ? [Err(enums.length, 'enum', enums.map(enu => enu.getName()), sourceFile)] : []
 }
 
 // Ensure zero references to other files
@@ -136,6 +150,7 @@ const validateInterfaces = (sourceFile: SourceFile): Error[] => {
   }
   return errs
 }
+
 export const isPrimitive = (type: TypeNode | Node): boolean => primitivesMap.has(type.getText().trim())
 
 export const isContainer = (type: TypeNode | Node): boolean => containersList.some(container => type.getText().trim().startsWith(container))
@@ -183,7 +198,9 @@ const validateSchema = (sourceFile: SourceFile): Error[] => {
     ...validateNameSpaces(sourceFile),
     ...validateStatements(sourceFile),
     ...validateRefs(sourceFile),
+    ...validateEnums(sourceFile),
     ...validateTypeAliases(sourceFile),
+    ...validateInterfaces(sourceFile),
   ]
 }
 
