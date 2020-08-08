@@ -1,5 +1,4 @@
-import {t} from '@typerpc/types'
-
+import {t, rpc} from '@typerpc/types'
 
 export type Struct = {name: string} | {readonly brand: unique symbol}
 
@@ -8,7 +7,7 @@ export const make = {
     return {name} as Struct
   },
 
-  Dict: (keyType: t.Comparable, valType: DataType): t.Dict => {
+  Dict: (keyType: rpc.Comparable, valType: DataType): t.Dict => {
     return {keyType, valType} as t.Dict
   },
   Tuple2: (item1: DataType, item2: DataType): t.Tuple2 => {
@@ -27,9 +26,12 @@ export const make = {
   List: (dataType: DataType): t.List => {
     return {dataType} as t.List
   },
+  blob: () => {
+    return {data: ''} as unknown as t.blob
+  },
 }
 
-export const primitives : {[key: string]: t.Primitive} = {
+export const primitives: {[key: string]: rpc.Primitive} = {
   bool: {_type_: 'bool', toString: () => 't.bool'} as unknown as t.bool,
   int8: {_type_: 'int8', toString: () => 't.int8'} as unknown as t.int8,
   uint8: {_type_: 'uint8', toString: () => 't.uint8'} as unknown as t.uint8,
@@ -46,13 +48,12 @@ export const primitives : {[key: string]: t.Primitive} = {
   err: {_type_: 'err', toString: () => 't.err'} as unknown as t.err,
   dyn: {_type_: 'dyn', toString: () => 't.dyn'} as unknown as t.dyn,
   timestamp: {_type_: 'timestamp', toString: () => 't.timestamp'} as unknown as t.timestamp,
-  blob: {_type_: 'blob', toString: () => 't.blob'} as unknown as t.blob,
   unit: {_type_: 'unit', toString: () => 't.unit'} as unknown as t.unit,
 }
 
-type Container = t.Container | Struct
+type Container = rpc.Container | Struct
 
-export type DataType = t.RpcType | Struct
+export type DataType = rpc.RpcType | Struct
 
 export class Param {
   constructor(public readonly name: string, public readonly type: DataType) {
@@ -83,10 +84,11 @@ export const is = {
   Tuple5: (type: DataType): type is t.Tuple5 => validateTuple(type, 5),
   List: (type: DataType): type is t.List => validateType(type, 'elemType'),
   Struct: (type: DataType): type is Struct => validateType(type, 'name'),
+  blob: (type: DataType): type is t.blob => validateType(type, 'data'),
   Container: (type: DataType): type is Container => [is.Struct, is.List, is.Dict, is.Tuple2, is.Tuple3, is.Tuple4, is.Tuple3, is.Tuple5].some(func => func(type)),
 }
 
-export const primitivesMap = new Map<string, t.Primitive>(
+export const primitivesMap = new Map<string, rpc.Primitive>(
   Object.entries(primitives).map(([_, v]) => [v.toString(), v])
 )
 export const containersList = ['t.Dict', 't.Tuple2', 't.Tuple3', 't.Tuple4', 't.Tuple5', 't.List']

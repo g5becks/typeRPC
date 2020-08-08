@@ -3,7 +3,7 @@ import {
   InterfaceDeclaration,
   MethodSignature,
   Node,
-  SourceFile,
+  SourceFile, ts, Type,
   TypeAliasDeclaration,
   TypeNode,
 } from 'ts-morph'
@@ -121,6 +121,13 @@ const validateRefs = (sourceFile: SourceFile): Error[] => {
 
 const genericErr = (type: TypeAliasDeclaration | InterfaceDeclaration): Error => new Error(`typeError at: ${type.getStartLineNumber()}. ${type.getName().trim()} defines a generic type constraint. typerpc types cannot be generic`)
 
+const validateTypeAliasChildren = (type: TypeAliasDeclaration):Error[] => {
+  const children = type.getChildren()
+  for (const child of children) {
+    const childType = child.getType()
+    if (!isValidDataType(childType.getText()) && !isValidTypeAlias(childType))
+  }
+}
 // Ensures no type aliases are generic
 const validateTypeAliases = (sourceFile: SourceFile): Error[] => {
   const aliases = sourceFile.getTypeAliases()
@@ -132,6 +139,8 @@ const validateTypeAliases = (sourceFile: SourceFile): Error[] => {
     if (alias.getTypeParameters.length) {
       errs.push(genericErr(alias))
     }
+
+    if (alias.get)
   }
   return errs
 }
@@ -151,16 +160,14 @@ const validateInterfaces = (sourceFile: SourceFile): Error[] => {
   return errs
 }
 
-export const isPrimitive = (type: TypeNode | Node): boolean => primitivesMap.has(type.getText().trim())
+export const isPrimitive = (typeText: string): boolean => primitivesMap.has(typeText.trim())
 
-export const isContainer = (type: TypeNode | Node): boolean => containersList.some(container => type.getText().trim().startsWith(container))
+export const isContainer = (typeText: string): boolean => containersList.some(container => typeText.trim().startsWith(container))
 
-const isValidDataType = (type: TypeNode | Node): boolean => isPrimitive(type) || isContainer(type)
+const isValidDataType = (typeText: string): boolean => isPrimitive(typeText) || isContainer(typeText)
 
-const isValidTypeAlias = (type: TypeNode): boolean => {
-  const aliases = type.getSourceFile().getTypeAliases().map(alias => alias.getNameNode().getText().trim())
-  return aliases.includes(type.getText().trim())
-}
+const isValidTypeAlias = (type: TypeNode): boolean => type.getSourceFile().getTypeAliases().map(alias => alias.getNameNode().getText().trim()).includes(type.getText().trim())
+
 
 // Ensure type of method params is either a typerpc type or a type
 // declared in the same source file.
@@ -173,7 +180,7 @@ const validateParams = (method: MethodSignature): Error[] => {
   const errs: Error[] = []
   for (const type of paramTypes) {
     if (typeof type !== 'undefined') {
-      if (!isValidDataType(type) && !isValidTypeAlias(type)) {
+      if (!isValidDataType(type.getText()) && !isValidTypeAlias(type)) {
         errs.push(paramErr(type, `typeError: ${type} is either not a valid typerpc type or is not defined in this file`))
       } else {
         errs.push(paramErr(type, 'param has not type. All params must have a valid type'))
@@ -189,7 +196,7 @@ const validateReturnType = (method: MethodSignature): Error[] => {
   const returnType = method.getReturnTypeNode()
   const returnTypeErr = (typeName: string) => new Error(`typerc error in file: ${method.getSourceFile().getBaseName()} at: ${method.getStartLineNumber()}. All typerpc interface methods must contain a valid return type. Invalid return type: ${typeName}`)
   return typeof returnType === 'undefined' ? [returnTypeErr('undefined')] :
-    !isValidDataType(returnType) && !isValidTypeAlias(returnType) ? [returnTypeErr(returnType.getText().trim())] : []
+    !isValidDataType(returnType.getText()) && !isValidTypeAlias(returnType) ? [returnTypeErr(returnType.getText().trim())] : []
 }
 
 // Validates method params and return types.

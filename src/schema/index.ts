@@ -1,3 +1,1 @@
-export class Schema {
-
-}
+export type Schema = {}

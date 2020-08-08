@@ -3,7 +3,8 @@ import {t} from '@typerpc/types'
 import {DataType, make, primitives, primitivesMap} from './types'
 import {Parser} from '../parser'
 import {Target} from './builder'
-import {isContainer, isPrimitive} from './validator'
+import {isContainer, isPrimitive, validateSchemas} from './validator'
+import {Schema} from './index'
 
 const isType = (type: TypeNode | Node, typeText: string): boolean => type.getText().trim().startsWith(typeText)
 
@@ -52,30 +53,11 @@ const makeDataType = (type: TypeNode | Node): DataType => {
   return primitives.dyn
 }
 
-export class SchemaBuilder {
-  private readonly parser: Parser
-
-  private readonly sourceFiles: SourceFile[]
-
-  private constructor(protected readonly target: Target, protected readonly tsConfigFilePath: string, protected readonly outputPath: string) {
-    this.parser = new Parser(tsConfigFilePath)
-    this.sourceFiles = this.parser.sourceFiles
+// TODO finish schema builder
+export const buildSchemas = (sourceFiles: SourceFile[]): Schema[] | Error[] => {
+  const errs = validateSchemas(sourceFiles)
+  if (errs) {
+    return errs
   }
 
-  public static create(target: Target, tsConfigFilePath: string, outputPath: string): SchemaBuilder | Error[] {
-    const builder = new SchemaBuilder(target,tsConfigFilePath,outputPath)
-    let errs: Error[] = []
-    for (const file of builder.sourceFiles) {
-      errs.push(...builder.validateSchema(file))
-    }
-    if (errs.length) {
-      return errs
-    }
-    return builder
-  }
-
-  private validateSchema(sourceFile: SourceFile): Error[] {
-
-
-  }
 }
