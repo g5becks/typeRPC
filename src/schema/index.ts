@@ -1,2 +1,4 @@
 import {Schema} from './schema'
-export {Schema}
+import {buildSchemas} from './builder'
+
+export {Schema, buildSchemas}
