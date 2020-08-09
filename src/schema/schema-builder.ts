@@ -117,6 +117,9 @@ const buildMethod = (method: MethodSignature): Method => {
     httpVerb: buildHttpVerb(method),
     params: new Set(buildParams(method.getParameters())),
     returnType: makeDataType(method.getReturnTypeNode()!),
+    hasParams: function (): boolean {
+      return Boolean(this.params.keys.length)
+    },
   }
 }
 

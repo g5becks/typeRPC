@@ -8,24 +8,7 @@ import {
 } from 'ts-morph'
 import {DataType, primitives} from './schema/types'
 
-/**
- * Parses specified project source code files
- *
- * @export
- * @class Parser
- */
-export class Parser {
-  public readonly project: Project
 
-  public get sourceFiles() {
-    return this.project.getSourceFiles()
-  }
-
-  constructor(private readonly tsConfigFilePath: string) {
-    this.project = new Project({tsConfigFilePath: tsConfigFilePath, skipFileDependencyResolution: true})
-  }
-
-}
 
 export const hasParams = (method: MethodSignature): boolean => method.getParameters().length > 0
 
