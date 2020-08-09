@@ -1,6 +1,5 @@
 import {InterfaceDeclaration, MethodSignature, Node, SourceFile, TypeAliasDeclaration, TypeNode} from 'ts-morph'
 import {containersList, primitivesMap} from './types'
-import {getMethodsForFile} from '../parser'
 
 const Err = (numInvalids: number, type: string, violators: string[], sourceFile: SourceFile): Error =>
   new Error(`${sourceFile.getBaseName()} contains ${numInvalids} ${type} declarations => ${violators}. typerpc schemas can only contain a single import statement => import {t} from '@typerpc/types', typeAlias => (message), and interface => (service) declarations.`)
@@ -203,18 +202,9 @@ const validateReturnType = (method: MethodSignature): Error[] => {
 
 const validateMethodNotGeneric = (method: MethodSignature): Error[] => method.getTypeParameters().length ? [genericErr(method)] : []
 
+const getMethodsForFile = (file: SourceFile): MethodSignature[] => file.getInterfaces().flatMap(interfc => interfc.getMethods())
 // Validates method params and return types.
-const validateMethods = (sourceFile: SourceFile): Error[] => {
-  const methods = getMethodsForFile(sourceFile)
-  const errs: Error[] = []
-  for (const method of methods) {
-    errs.push(...validateParams(method),
-      ...validateReturnType(method),
-      ...validateMethodNotGeneric(method)
-    )
-  }
-  return errs
-}
+const validateMethods = (sourceFile: SourceFile): Error[] => getMethodsForFile(sourceFile).flatMap(method => [...validateParams(method), ...validateReturnType(method), ...validateMethodNotGeneric(method)])
 
 const validateSchema = (sourceFile: SourceFile): Error[] => {
   return [
