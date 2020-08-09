@@ -1,17 +1,16 @@
 import {Node, SourceFile, TypeNode} from 'ts-morph'
-import {t} from '@typerpc/types'
+import {rpc, t} from '@typerpc/types'
 import {DataType, make, primitives, primitivesMap} from './types'
-import {Parser} from '../parser'
-import {Target} from './builder'
 import {isContainer, isPrimitive, validateSchemas} from './validator'
-import {Schema} from './index'
+import {Schema} from '.'
+import {HTTPVerb, Property, TypeDef} from './schema'
 
 const isType = (type: TypeNode | Node, typeText: string): boolean => type.getText().trim().startsWith(typeText)
 
 const makeList = (type: TypeNode | Node): t.List => make
 .List(makeDataType(type.getChildAtIndex(2)))
 
-const makeDict = (type: TypeNode | Node): t.Dict => make.Dict(primitivesMap.get(type.getChildAtIndex(1).getText().trim()) as t.Comparable, makeDataType(type.getChildAtIndex(2)))
+const makeDict = (type: TypeNode | Node): t.Dict => make.Dict(primitivesMap.get(type.getChildAtIndex(1).getText().trim()) as rpc.Comparable, makeDataType(type.getChildAtIndex(2)))
 
 // These makeTuple Functions contain lots of duplication, but also feel like they need to be
 // defined strictly. Explore alternatives in the future.
@@ -25,10 +24,10 @@ const makeTuple5 = (type: TypeNode | Node): t.Tuple5 => make.Tuple5(makeDataType
 
 const makeDataType = (type: TypeNode | Node): DataType => {
   const typeText = type.getText().trim()
-  if (isPrimitive(type)) {
+  if (isPrimitive(typeText)) {
     return primitivesMap.get(typeText) as DataType
   }
-  if (!isContainer(type)) {
+  if (!isContainer(typeText)) {
     return make.Struct(typeText)
   }
   if (isType(type, 't.List')) {
@@ -49,8 +48,39 @@ const makeDataType = (type: TypeNode | Node): DataType => {
   if (isType(type, 't.Tuple5')) {
     return makeTuple5(type)
   }
+  if (isType(type, 't.blob')) {
+    return make.blob()
+  }
 
   return primitives.dyn
+}
+
+const makeDataTypeFromText = (typeText: string): DataType => {
+  if ()
+}
+
+const stripQuestionMark = (text: string): string => text.replace('?', '')
+const isOptional = (text: string): boolean => text.trim().endsWith('?')
+
+const buildType = (properties: Node[]): TypeDef => {
+  const props: Property[] = []
+  for (const prop of properties) {
+    const [name, type] = prop.getText().split(':')
+    properties.push({isOptional: isOptional(name), type: })
+  }
+}
+
+const buildTypes = (sourceFile: SourceFile): TypeDef[] => {
+  const typeAliases = sourceFile.getTypeAliases()
+  if (!typeAliases.length) {
+    return []
+  }
+
+  return typeAliases.map(typeDef => {
+    {
+      const properties = typeDef.getTypeNode()!.forEachChildAsArray()
+    }
+  })
 }
 
 // TODO finish schema builder
@@ -59,5 +89,7 @@ export const buildSchemas = (sourceFiles: SourceFile[]): Schema[] | Error[] => {
   if (errs) {
     return errs
   }
-
+}
+const isRequestMethod = (method: string): method is HTTPVerb => {
+  return ['POST', 'PUT', 'GET', 'HEAD', 'DELETE', 'OPTIONS', 'PATCH'].includes(method)
 }

@@ -55,17 +55,6 @@ type Container = rpc.Container | Struct
 
 export type DataType = rpc.RpcType | Struct
 
-export class Param {
-  constructor(public readonly name: string, public readonly type: DataType) {
-  }
-}
-
-export class OptionalParam {
-  constructor(public readonly name: string, public readonly type: DataType) {
-  }
-}
-
-export type MethodParam = Param | OptionalParam
 
 const validateType = (type: DataType, ...propNames: string[]): boolean => {
   const props = Object.getOwnPropertyNames(type)

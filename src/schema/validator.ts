@@ -1,12 +1,4 @@
-import {
-  EnumDeclaration,
-  InterfaceDeclaration,
-  MethodSignature,
-  Node,
-  SourceFile, ts, Type,
-  TypeAliasDeclaration,
-  TypeNode,
-} from 'ts-morph'
+import {InterfaceDeclaration, MethodSignature, SourceFile, TypeAliasDeclaration, TypeNode, Node} from 'ts-morph'
 import {containersList, primitivesMap} from './types'
 import {getMethodsForFile} from '../parser'
 
@@ -119,23 +111,22 @@ const validateRefs = (sourceFile: SourceFile): Error[] => {
   return errs
 }
 
-const genericErr = (type: TypeAliasDeclaration | InterfaceDeclaration): Error => new Error(`typeError at: ${type.getStartLineNumber()}. ${type.getName().trim()} defines a generic type constraint. typerpc types cannot be generic`)
+const genericErr = (type: TypeAliasDeclaration | InterfaceDeclaration | MethodSignature): Error => new Error(`typeError at: ${type.getStartLineNumber()}. ${type.getName().trim()} defines a generic type constraint. typerpc types cannot be generic`)
 
-const validateTypeAliasChildren = (type: TypeAliasDeclaration):Error[] => {
+const validateTypeAliasChildren = (type: TypeAliasDeclaration): Error[] => {
   // grabs the actual type declaration node e.g. everything after the = sign
   // then returns the children, aka properties.
-   const children = type.getTypeNode()?.forEachChildAsArray()
-    let errs: Error[] = []
+  const children = type.getTypeNode()?.forEachChildAsArray()
+  const errs: Error[] = []
   if (typeof children === 'undefined') {
     errs.push(new Error(`type error in file ${type.getSourceFile().getBaseName()}
     at line number: ${type.getStartLineNumber()}. Empty types not supported`))
   } else {
     for (const child of children) {
-      const file = child.getSourceFile()
-      // get the type signature Text from the property.
-      const typeText= child.getText().split(':')[1].trim()
-      if (!isValidDataType(typeText) && !isValidTypeAlias(typeText, file)) {
-        errs.push(new Error(`type error in file: ${file} at line number ${child.getStartLineNumber()}. Invalid property type. Only types imported from @typerpc/types and other type aliases declared in the same file may be used as property types`))
+      // get the properties type
+      const propType = child.getChildAtIndex(2)
+      if (!isValidDataType(propType.getText().trim()) && !isValidTypeAlias(propType)) {
+        errs.push(new Error(`type error in file: ${child.getSourceFile()} at line number ${child.getStartLineNumber()}. Invalid property type. Only types imported from @typerpc/types and other type aliases declared in the same file may be used as property types`))
       }
     }
   }
@@ -178,8 +169,7 @@ export const isContainer = (typeText: string): boolean => containersList.some(co
 
 const isValidDataType = (typeText: string): boolean => isPrimitive(typeText) || isContainer(typeText)
 
-const isValidTypeAlias = (type: string, sourceFile: SourceFile): boolean => sourceFile.getTypeAliases().map(alias => alias.getNameNode().getText().trim()).includes(type)
-
+const isValidTypeAlias = (type: TypeNode | Node): boolean => type.getSourceFile().getTypeAliases().map(alias => alias.getNameNode().getText().trim()).includes(type.getText().trim())
 
 // Ensure type of method params is either a typerpc type or a type
 // declared in the same source file.
@@ -192,7 +182,7 @@ const validateParams = (method: MethodSignature): Error[] => {
   const errs: Error[] = []
   for (const type of paramTypes) {
     if (typeof type !== 'undefined') {
-      if (!isValidDataType(type.getText()) && !isValidTypeAlias(type.getText().trim(), type.getSourceFile())) {
+      if (!isValidDataType(type.getText()) && !isValidTypeAlias(type)) {
         errs.push(paramErr(type, `typeError: ${type} is either not a valid typerpc type or is not defined in this file`))
       } else {
         errs.push(paramErr(type, 'param has not type. All params must have a valid type'))
@@ -208,15 +198,20 @@ const validateReturnType = (method: MethodSignature): Error[] => {
   const returnType = method.getReturnTypeNode()
   const returnTypeErr = (typeName: string) => new Error(`typerc error in file: ${method.getSourceFile().getBaseName()} at: ${method.getStartLineNumber()}. All typerpc interface methods must contain a valid return type. Invalid return type: ${typeName}`)
   return typeof returnType === 'undefined' ? [returnTypeErr('undefined')] :
-    !isValidDataType(returnType.getText()) && !isValidTypeAlias(returnType.getText().trim(), returnType.getSourceFile()) ? [returnTypeErr(returnType.getText().trim())] : []
+    !isValidDataType(returnType.getText()) && !isValidTypeAlias(returnType) ? [returnTypeErr(returnType.getText().trim())] : []
 }
+
+const validateMethodNotGeneric = (method: MethodSignature): Error[] => method.getTypeParameters().length ? [genericErr(method)] : []
 
 // Validates method params and return types.
 const validateMethods = (sourceFile: SourceFile): Error[] => {
   const methods = getMethodsForFile(sourceFile)
   const errs: Error[] = []
   for (const method of methods) {
-    errs.push(...validateParams(method), ...validateReturnType(method))
+    errs.push(...validateParams(method),
+      ...validateReturnType(method),
+      ...validateMethodNotGeneric(method)
+    )
   }
   return errs
 }
