@@ -1,1 +1,2 @@
-export type Schema = {}
+import {Schema} from './schema'
+export {Schema}

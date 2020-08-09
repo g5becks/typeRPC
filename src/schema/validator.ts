@@ -1,4 +1,4 @@
-import {InterfaceDeclaration, MethodSignature, SourceFile, TypeAliasDeclaration, TypeNode, Node} from 'ts-morph'
+import {InterfaceDeclaration, MethodSignature, Node, SourceFile, TypeAliasDeclaration, TypeNode} from 'ts-morph'
 import {containersList, primitivesMap} from './types'
 import {getMethodsForFile} from '../parser'
 

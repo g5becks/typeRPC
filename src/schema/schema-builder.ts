@@ -1,9 +1,17 @@
-import {Node, SourceFile, TypeNode} from 'ts-morph'
+import {
+  InterfaceDeclaration,
+  MethodSignature,
+  Node,
+  ParameterDeclaration,
+  SourceFile,
+  TypeAliasDeclaration,
+  TypeNode,
+} from 'ts-morph'
 import {rpc, t} from '@typerpc/types'
 import {DataType, make, primitives, primitivesMap} from './types'
 import {isContainer, isPrimitive, validateSchemas} from './validator'
 import {Schema} from '.'
-import {HTTPVerb, Property, TypeDef} from './schema'
+import {HTTPVerb, Interface, Method, Param, Property, TypeDef} from './schema'
 
 const isType = (type: TypeNode | Node, typeText: string): boolean => type.getText().trim().startsWith(typeText)
 
@@ -55,19 +63,28 @@ const makeDataType = (type: TypeNode | Node): DataType => {
   return primitives.dyn
 }
 
-const makeDataTypeFromText = (typeText: string): DataType => {
-  if ()
+const isHttpVerb = (method: string): method is HTTPVerb => {
+  return ['POST', 'PUT', 'GET', 'HEAD', 'DELETE', 'OPTIONS', 'PATCH'].includes(method)
 }
 
-const stripQuestionMark = (text: string): string => text.replace('?', '')
-const isOptional = (text: string): boolean => text.trim().endsWith('?')
+const buildHttpVerb = (method: MethodSignature): HTTPVerb => {
+  const docs = method.getJsDocs()
+  const rMethod = docs[0]?.getDescription().trim()
+  return rMethod && isHttpVerb(rMethod) ? rMethod.toUpperCase() as HTTPVerb : 'POST'
+}
+const isOptional = (text: string): boolean => text.endsWith('?')
 
-const buildType = (properties: Node[]): TypeDef => {
+const stripQuestionMark = (text: string): string =>  isOptional(text) ? text.replace('?', '') : text
+
+const isCbor = (type: TypeAliasDeclaration): boolean => type.getJsDocs()[0]?.getDescription().trim().toLocaleLowerCase().includes('cbor')
+
+const buildProps = (properties: Node[]): Property[] => {
   const props: Property[] = []
   for (const prop of properties) {
-    const [name, type] = prop.getText().split(':')
-    properties.push({isOptional: isOptional(name), type: })
+    const name = prop.getChildAtIndex(0).getText().trim()
+    props.push({isOptional: isOptional(name), type: makeDataType(prop.getChildAtIndex(2)), name: stripQuestionMark(name)})
   }
+  return props
 }
 
 const buildTypes = (sourceFile: SourceFile): TypeDef[] => {
@@ -78,9 +95,45 @@ const buildTypes = (sourceFile: SourceFile): TypeDef[] => {
 
   return typeAliases.map(typeDef => {
     {
-      const properties = typeDef.getTypeNode()!.forEachChildAsArray()
+      return {
+        useCbor: isCbor(typeDef),
+        properties: new Set(buildProps(typeDef.getTypeNode()!.forEachChildAsArray())) as ReadonlySet<Property>}
     }
   })
+}
+
+const buildParams = (params: ParameterDeclaration[]): Param[] => {
+  return params.map(param => {
+    return {
+      name: param.getName().trim(),
+      isOptional: param.isOptional(),
+      type: makeDataType(param.getTypeNode()!),
+    }
+  })
+}
+
+const buildMethod = (method: MethodSignature): Method => {
+  return {
+    httpVerb: buildHttpVerb(method),
+    params: new Set(buildParams(method.getParameters())),
+    returnType: makeDataType(method.getReturnTypeNode()!),
+  }
+}
+
+const buildMethods = (methods: MethodSignature[]): ReadonlySet<Method> => new Set(methods.map(method => buildMethod(method)))
+
+const buildInterface = (interfc: InterfaceDeclaration): Interface => {
+  return {
+    name: interfc.getName().trim(),
+    methods: buildMethods(interfc.getMethods()),
+  }
+}
+
+const buildInterfaces = (sourceFile: SourceFile): Interface[] => {
+  const interfaces = sourceFile.getInterfaces()
+  if (!interfaces.length) {
+    return []
+  }
 }
 
 // TODO finish schema builder
@@ -89,7 +142,12 @@ export const buildSchemas = (sourceFiles: SourceFile[]): Schema[] | Error[] => {
   if (errs) {
     return errs
   }
-}
-const isRequestMethod = (method: string): method is HTTPVerb => {
-  return ['POST', 'PUT', 'GET', 'HEAD', 'DELETE', 'OPTIONS', 'PATCH'].includes(method)
+  const schemas: Schema[] = []
+  for (const file of sourceFiles) {
+    schemas.push({
+      fileName: file.getBaseName(),
+      types: new Set(buildTypes(file)) as ReadonlySet<TypeDef>,
+
+    })
+  }
 }

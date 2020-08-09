@@ -10,7 +10,7 @@ export type Param = {
 
 export type Method = {
   readonly httpVerb: HTTPVerb;
-  readonly params:  Param[];
+  readonly params:  ReadonlySet<Param>;
   readonly returnType: DataType;
 }
 
@@ -21,14 +21,15 @@ export type Property = {
 }
 
 export type Interface = {
-  readonly methods: Set<Method>;
+  readonly name: string;
+  readonly methods: ReadonlySet<Method>;
 }
 
 // TypeAlias from schema file
 export type TypeDef = {
   readonly properties: ReadonlySet<Property>;
   // If this type should be serialized/deserialized using cbor instead of json
-  readonly isBinary: boolean;
+  readonly useCbor: boolean;
 }
 
 export type Schema = {
