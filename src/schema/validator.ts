@@ -137,6 +137,7 @@ const validateTypeAliases = (sourceFile: SourceFile): Error[] => {
   if (!aliases.length) {
     return []
   }
+
   const errs: Error[] = []
   for (const alias of aliases) {
     if (alias.getTypeParameters.length) {
@@ -153,13 +154,7 @@ const validateInterfaces = (sourceFile: SourceFile): Error[] => {
   if (!interfaces.length) {
     return [new  Error(`error in file => ${sourceFile.getBaseName()}. All typerpc schema files must contain at least one interface (service) definition`)]
   }
-  const errs: Error[] = []
-  for (const intrfc of interfaces) {
-    if (intrfc.getTypeParameters().length) {
-      errs.push(genericErr(intrfc))
-    }
-  }
-  return errs
+  return interfaces.flatMap(interfc => interfc.getTypeParameters.length ? [genericErr(interfc)] : [])
 }
 
 export const isPrimitive = (typeText: string): boolean => primitivesMap.has(typeText.trim())
@@ -223,10 +218,6 @@ const validateSchema = (sourceFile: SourceFile): Error[] => {
   ]
 }
 
-export const validateSchemas = (schemas: SourceFile[]): Error[] => {
-  const errs: Error[] = []
-  for (const schema of schemas) {
-    errs.push(...validateSchema(schema))
-  }
-  return errs
-}
+export const validateSchemas = (schemas: SourceFile[]): Error[] =>
+  schemas.flatMap(schema => [...validateSchema(schema)])
+
