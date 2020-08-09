@@ -10,6 +10,7 @@ export type Param = {
 
 export type Method = {
   readonly httpVerb: HTTPVerb;
+  readonly name: string;
   readonly params:  ReadonlySet<Param>;
   readonly returnType: DataType;
   hasParams: () => boolean;

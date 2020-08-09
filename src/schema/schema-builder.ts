@@ -112,9 +112,12 @@ const buildParams = (params: ParameterDeclaration[]): Param[] => {
   })
 }
 
+const getMethodName = (method: MethodSignature): string => method.getNameNode().getText().trim()
+
 const buildMethod = (method: MethodSignature): Method => {
   return {
     httpVerb: buildHttpVerb(method),
+    name: getMethodName(method),
     params: new Set(buildParams(method.getParameters())),
     returnType: makeDataType(method.getReturnTypeNode()!),
     hasParams: function (): boolean {
@@ -125,9 +128,11 @@ const buildMethod = (method: MethodSignature): Method => {
 
 const buildMethods = (methods: MethodSignature[]): ReadonlySet<Method> => new Set(methods.map(method => buildMethod(method)))
 
+export const getInterfaceName = (interfc: InterfaceDeclaration): string => interfc.getNameNode().getText().trim()
+
 const buildInterface = (interfc: InterfaceDeclaration): Interface => {
   return {
-    name: interfc.getName().trim(),
+    name: getInterfaceName(interfc),
     methods: buildMethods(interfc.getMethods()),
   }
 }
