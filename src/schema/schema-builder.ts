@@ -87,19 +87,19 @@ const buildProps = (properties: Node[]): Property[] => {
   return props
 }
 
-const buildTypes = (sourceFile: SourceFile): TypeDef[] => {
+const buildTypes = (sourceFile: SourceFile): ReadonlySet<TypeDef> => {
   const typeAliases = sourceFile.getTypeAliases()
   if (!typeAliases.length) {
-    return []
+    return new Set()
   }
 
-  return typeAliases.map(typeDef => {
+  return new Set(typeAliases.map(typeDef => {
     {
       return {
         useCbor: isCbor(typeDef),
         properties: new Set(buildProps(typeDef.getTypeNode()!.forEachChildAsArray())) as ReadonlySet<Property>}
     }
-  })
+  }))
 }
 
 const buildParams = (params: ParameterDeclaration[]): Param[] => {
@@ -129,25 +129,23 @@ const buildInterface = (interfc: InterfaceDeclaration): Interface => {
   }
 }
 
-const buildInterfaces = (sourceFile: SourceFile): Interface[] => {
+const buildInterfaces = (sourceFile: SourceFile): ReadonlySet<Interface> => {
   const interfaces = sourceFile.getInterfaces()
   if (!interfaces.length) {
-    return []
+    return new Set()
+  }
+  return new Set(interfaces.map(interfc => buildInterface(interfc)))
+}
+
+const buildSchema = (file: SourceFile): Schema => {
+  return {
+    fileName: file.getBaseName(),
+    types: buildTypes(file),
+    interfaces: buildInterfaces(file),
   }
 }
 
-// TODO finish schema builder
-export const buildSchemas = (sourceFiles: SourceFile[]): Schema[] | Error[] => {
+export const buildSchemas = (sourceFiles: SourceFile[]): ReadonlySet<Schema> | Error[] => {
   const errs = validateSchemas(sourceFiles)
-  if (errs) {
-    return errs
-  }
-  const schemas: Schema[] = []
-  for (const file of sourceFiles) {
-    schemas.push({
-      fileName: file.getBaseName(),
-      types: new Set(buildTypes(file)) as ReadonlySet<TypeDef>,
-
-    })
-  }
+  return errs ? errs : new Set(sourceFiles.map(file => buildSchema(file)))
 }
