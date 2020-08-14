@@ -16,11 +16,12 @@ test('validateSchemas() returns error when schema contains functions', () => {
   }
 
   interface Test {
+    getNames(name: t.str): t.bool
   }
   `
   project.createSourceFile('function.ts', func)
   const res = validateSchemas([project.getSourceFile('function.ts')!])
   // eslint-disable-next-line no-console
   res.forEach(err => console.log(err.message))
-  expect(res.length).toBe(2)
+  expect(res.length).toBe(1)
 })

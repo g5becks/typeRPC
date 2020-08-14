@@ -17,19 +17,19 @@ const err = (numInvalids: number, type: string, violators: string[], sourceFile:
 // Ensure zero function declarations
 const validateFunctions = (sourceFile: SourceFile): Error[] => {
   const functions = sourceFile.getFunctions()
-  return functions.length > 0 ? [err(functions.length, 'function', functions.map(func => func.getName() + `line number: ${func.getStartLineNumber()}\n` ?? ''), sourceFile)] : []
+  return functions.length > 0 ? [err(functions.length, 'function', functions.map(func => func.getName() + ` on line number: ${func.getStartLineNumber()}\n` ?? ''), sourceFile)] : []
 }
 
 // Ensure zero variable declarations
 const validateVariables = (sourceFile: SourceFile): Error[] => {
   const variables = sourceFile.getVariableDeclarations()
-  return variables.length > 0 ? [err(variables.length, 'variable', variables.map(vari => vari.getName() + `line number: ${vari.getStartLineNumber()}\n` ?? ''), sourceFile)] : []
+  return variables.length > 0 ? [err(variables.length, 'variable', variables.map(vari => vari.getName() + ` on line number: ${vari.getStartLineNumber()}\n` ?? ''), sourceFile)] : []
 }
 
 // Ensure zero class declarations
 const validateClasses = (sourceFile: SourceFile): Error[] => {
   const classes = sourceFile.getClasses()
-  return classes.length > 0 ? [err(classes.length, 'class', classes.map(cls => cls.getName() + `line number: ${cls.getStartLineNumber()}\n` ?? ''), sourceFile)] : []
+  return classes.length > 0 ? [err(classes.length, 'class', classes.map(cls => cls.getName() + ` on line number: ${cls.getStartLineNumber()}\n` ?? ''), sourceFile)] : []
 }
 
 // Ensure only one valid import without aliasing the namespace
@@ -61,7 +61,7 @@ const validateExports = (sourceFile: SourceFile): Error[] => {
     errs.push(err(1, 'default export', [defExp.getName()], sourceFile))
   }
   if (exportDecs.length > 0) {
-    errs.push(err(exportDecs.length, 'export', exportDecs.map(exp => exp.getText() + `line number: ${exp.getStartLineNumber()}\n`), sourceFile))
+    errs.push(err(exportDecs.length, 'export', exportDecs.map(exp => exp.getText() + ` on line number: ${exp.getStartLineNumber()}\n`), sourceFile))
   }
   if (exportSym.length > 0) {
     errs.push(err(exportSym.length, 'export', exportSym.map(exp => exp.getName() + '\n'), sourceFile))
@@ -72,7 +72,7 @@ const validateExports = (sourceFile: SourceFile): Error[] => {
 // Ensure zero namespaces
 const validateNameSpaces = (sourceFile: SourceFile): Error[] => {
   const spaces = sourceFile.getNamespaces()
-  return spaces.length > 0 ? [err(spaces.length, 'namespace', spaces.map(space => space.getName() + `line number: ${space.getStartLineNumber()}\n`), sourceFile)] : []
+  return spaces.length > 0 ? [err(spaces.length, 'namespace', spaces.map(space => space.getName() + ` on line number: ${space.getStartLineNumber()}\n`), sourceFile)] : []
 }
 
 // Ensure zero top level statements
@@ -86,7 +86,7 @@ const validateStatements = (sourceFile: SourceFile): Error[] => {
 // Ensure no enums
 const validateEnums = (sourceFile: SourceFile): Error[] => {
   const enums = sourceFile.getEnums()
-  return enums.length > 0 ? [err(enums.length, 'enum', enums.map(enu => enu.getName() + `line number: ${enu.getStartLineNumber()}\n`), sourceFile)] : []
+  return enums.length > 0 ? [err(enums.length, 'enum', enums.map(enu => enu.getName() + ` on line number: ${enu.getStartLineNumber()}\n`), sourceFile)] : []
 }
 
 // Ensure zero references to other files
@@ -95,17 +95,17 @@ const validateRefs = (sourceFile: SourceFile): Error[] => {
   // should be 1
   const nodeSourceRefs = sourceFile.getNodesReferencingOtherSourceFiles()
   if (nodeSourceRefs.length !== 1) {
-    errs.push(err(nodeSourceRefs.length - 1, 'source reference', nodeSourceRefs.filter(ref => !ref.getText().includes('@typerpc')).map(ref => ref.getText() + `line number ${ref.getStartLineNumber()}\n`), sourceFile))
+    errs.push(err(nodeSourceRefs.length - 1, 'source reference', nodeSourceRefs.filter(ref => !ref.getText().includes('@typerpc')).map(ref => ref.getText() + ` on line number ${ref.getStartLineNumber()}\n`), sourceFile))
   }
   // should be 1
   const literalSourceRefs = sourceFile.getLiteralsReferencingOtherSourceFiles()
   if (literalSourceRefs.length !== 1) {
-    errs.push(err(literalSourceRefs.length - 1, 'literal source reference', literalSourceRefs.filter(ref => !ref.getText().includes('@typerpc')).map(ref => ref.getText() + `line number ${ref.getStartLineNumber()}\n`), sourceFile))
+    errs.push(err(literalSourceRefs.length - 1, 'literal source reference', literalSourceRefs.filter(ref => !ref.getText().includes('@typerpc')).map(ref => ref.getText() + ` on line number ${ref.getStartLineNumber()}\n`), sourceFile))
   }
   // should be 1
   const sourceRefs = sourceFile.getReferencedSourceFiles()
   if (sourceRefs.length !== 1) {
-    errs.push(err(sourceRefs.length - 1, 'source reference', sourceRefs.filter(ref => !ref.getText().includes('@typerpc')).map(ref => ref.getText() + `line number ${ref.getStartLineNumber()}\n`), sourceFile))
+    errs.push(err(sourceRefs.length - 1, 'source reference', sourceRefs.filter(ref => !ref.getText().includes('@typerpc')).map(ref => ref.getText() + ` on line number ${ref.getStartLineNumber()}\n`), sourceFile))
   }
   // should be 0
   const libraryRefs = sourceFile.getLibReferenceDirectives()
@@ -208,17 +208,16 @@ const validateParams = (method: MethodSignature): Error[] => {
   if (!method.getParameters()) {
     return []
   }
-  const paramErr = (type: TypeNode, msg: string) => new Error(`error in file: ${type.getSourceFile().getFilePath().toString()}
-   at line number: ${type.getStartLineNumber()}. ${msg}`)
+  const paramErr = (type: TypeNode | undefined, msg: string) => new Error(`error in file: ${type?.getSourceFile().getFilePath().toString()}
+   at line number: ${type?.getStartLineNumber()}
+   message: ${msg}`)
   const paramTypes = method.getParameters().map(param => param.getTypeNode())
   const errs: Error[] = []
   for (const type of paramTypes) {
-    if (typeof type !== 'undefined') {
-      if (!isValidDataType(type.getText()) && !isValidTypeAlias(type)) {
-        errs.push(paramErr(type, `typeError: ${type} is either not a valid typerpc type or is not defined in this file`))
-      } else {
-        errs.push(paramErr(type, 'param has not type. All params must have a valid type'))
-      }
+    if (typeof type === 'undefined') {
+      errs.push(paramErr(type, `${method.getName()} contains one or more parameters that do not specify a valid type. All method parameter must have a valid type`))
+    } else if (!isValidDataType(type.getText()) && !isValidTypeAlias(type)) {
+      errs.push(paramErr(type, `typeError = ${type} is either not a valid typerpc type or it's type is not defined in this file`))
     }
   }
   return errs
