@@ -28,24 +28,28 @@
   },
   "devDependencies": {
     "@oclif/dev-cli": "^1",
-    "@oclif/test": "^1",
-    "@types/chai": "^4",
     "@types/cli-progress": "^3.7.0",
     "@types/fs-extra": "^9.0.1",
+    "@types/jest": "^26.0.9",
     "@types/listr": "^0.14.2",
-    "@types/mocha": "^5",
     "@types/node": "^14.0.23",
     "@types/pino": "^6.3.0",
-    "chai": "^4",
     "eslint": "^5.13",
     "eslint-config-oclif": "^3.1",
     "eslint-config-oclif-typescript": "^0.1",
     "globby": "^10",
-    "mocha": "^5",
-    "nyc": "^14",
+    "jest": "^26.4.0",
     "pino": "^6.4.1",
+    "ts-jest": "^26.2.0",
     "ts-node": "^8",
     "typescript": "^3.3"
+  },
+  "jest": {
+    "transform": {
+      ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+    },
+    "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js)$",
+    "moduleFileExtensions": ["ts", "tsx", "js"]
   },
   "engines": {
     "node": ">=8.4.0"

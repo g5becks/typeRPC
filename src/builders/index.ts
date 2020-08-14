@@ -1,32 +1,17 @@
-import {AxiosBuilder} from './typescript/axios-builder'
-import {Code, Target} from '../schema/builder'
-import {FastifyBuilder} from './typescript/fastify-builder'
+import {Schema} from '../schema'
 
-export {Code, Target}
-
-export const isTarget = (target: string): target is Target => {
-  return ['client', 'server'].includes(target)
-}
-/**
- * An error that occurs either creating a creating Generator or from the result of a Generator attempting to generate code
- *
- * @export
- * @class GeneratorError
- */
-export class BuilderError extends Error {
-  // eslint-disable-next-line no-useless-constructor
-  constructor(public readonly errorMessage: string) {
-    super(errorMessage)
-  }
+export type Code = {
+  readonly fileName: string;
+  readonly source: string;
 }
 
-export const buildTypes = (target: Target, tsConfigFilePath: string, outputPath: string, jobId: string) => {
-  const generator = target === 'client' ? new AxiosBuilder(target, tsConfigFilePath, outputPath, jobId) : new FastifyBuilder(target, tsConfigFilePath, outputPath, jobId)
-  return generator.buildTypes()
-}
+export type ProgrammingLanguage = 'go' | 'dart' | 'ts' | 'js' | 'ruby' | 'python' | 'C#' | 'F#' | 'vb' | 'java' | 'kotlin' | 'java' | 'scala' | 'groovy' | 'rust' | 'C' | 'C++' | 'reason' | 'ocaml' | 'haskell' | 'php' | 'clojure' | 'elixir' | 'purescript' | 'ada' | 'D' | 'nim' | 'smalltalk' | 'julia' | 'R' | 'lua' | 'tcl' | 'prolog' | 'erlang' | 'object pascal' | 'delphi' | 'self' | 'ceylon' | 'coffeescript' | 'swift' | 'elm' | 'eiffel' | 'hack' | 'haxe' | 'idris' | 'jython' | 'jruby' | 'objective-c' | 'pascal' | 'moonscript'
 
-export const generateCode = (target: Target, tsConfigFilePath: string, outputPath: string, jobId: string): Code => {
-  const generator = target === 'client' ? new AxiosBuilder(target, tsConfigFilePath, outputPath, jobId) : new FastifyBuilder(target, tsConfigFilePath, outputPath, jobId)
-  return generator.buildRpc()
-}
+export type Target = 'client' | 'server'
 
+export type CodeBuilder = {
+  readonly lang: ProgrammingLanguage;
+  readonly target: Target;
+  readonly framework: string;
+  readonly builder: (schemas: ReadonlySet<Schema>) => ReadonlySet<Code>;
+}
