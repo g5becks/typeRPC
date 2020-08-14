@@ -3,7 +3,8 @@ import {InterfaceDeclaration, MethodSignature, Node, SourceFile, TypeAliasDeclar
 import {containersList, primitivesMap} from './types'
 
 const err = (numInvalids: number, type: string, violators: string[], sourceFile: SourceFile): Error =>
-  new Error(`${sourceFile.getBaseName()} contains ${numInvalids} ${type} declarations => ${violators}. typerpc schemas can only contain a single import statement => import {t} from '@typerpc/types', typeAlias => (message), and interface => (service) declarations.`)
+  new Error(`${sourceFile.getBaseName()} contains ${numInvalids} ${type} declarations => ${violators} .
+  typerpc schemas can only contain a single import statement => import {t} from '@typerpc/types', typeAlias => (message), and interface => (service) declarations.`)
 
 // Ensure zero function declarations
 const validateFunctions = (sourceFile: SourceFile): Error[] => {
@@ -66,7 +67,7 @@ const validateNameSpaces = (sourceFile: SourceFile): Error[] => {
 // Ensure zero top level statements
 const validateStatements = (sourceFile: SourceFile): Error[] => {
   const stmnts = sourceFile.getStatements()
-  return stmnts.length > 0 ? [err(stmnts.length, 'top level statement', stmnts.map(stmnt => stmnt.getText()), sourceFile)] : []
+  return stmnts.length > 1 ? [err(stmnts.length, 'top level statement', stmnts.map(stmnt => stmnt.getText()), sourceFile)] : []
 }
 
 // Ensure no enums
