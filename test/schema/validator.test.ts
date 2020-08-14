@@ -25,9 +25,7 @@ ${validInterface}
 
 const runTest = (project: Project, source: string, errLength: number): void => {
   project.createSourceFile('test.ts', source)
-  const res = validateSchemas([project.getSourceFile('test.ts')!])
-  res.forEach(res => console.log(res.message))
-  expect(res.length).toBe(errLength)
+  expect(validateSchemas([project.getSourceFile('test.ts')!]).length).toBe(errLength)
 }
 
 test(testName(1, 'function'), () => {
