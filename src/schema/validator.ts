@@ -1,5 +1,13 @@
 // file deepcode ignore semicolon: conflicts with eslint settings
-import {InterfaceDeclaration, MethodSignature, Node, SourceFile, TypeAliasDeclaration, TypeNode} from 'ts-morph'
+import {
+  InterfaceDeclaration,
+  MethodSignature,
+  Node,
+  SourceFile,
+  SyntaxKind,
+  TypeAliasDeclaration,
+  TypeNode,
+} from 'ts-morph'
 import {containersList, primitivesMap} from './types'
 
 const err = (numInvalids: number, type: string, violators: string[], sourceFile: SourceFile): Error =>
@@ -67,7 +75,9 @@ const validateNameSpaces = (sourceFile: SourceFile): Error[] => {
 // Ensure zero top level statements
 const validateStatements = (sourceFile: SourceFile): Error[] => {
   const stmnts = sourceFile.getStatements()
-  return stmnts.length > 1 ? [err(stmnts.length, 'top level statement', stmnts.map(stmnt => stmnt.getText()), sourceFile)] : []
+  const invalidKinds = [SyntaxKind.AbstractKeyword, SyntaxKind.AwaitExpression, SyntaxKind.ArrayType, SyntaxKind.ArrowFunction, SyntaxKind.VariableStatement, SyntaxKind.TaggedTemplateExpression, SyntaxKind.SpreadAssignment, SyntaxKind.JsxExpression, SyntaxKind.ForStatement, SyntaxKind.ForInStatement, SyntaxKind.ForOfStatement, SyntaxKind.SwitchStatement]
+  const invalids = stmnts.filter(stmnt => invalidKinds.includes(stmnt.getKind()))
+  return invalids.length > 0 ? [err(stmnts.length, 'top level statement', stmnts.map(stmnt => `${stmnt.getText()} at line number: ${stmnt.getStartLineNumber()}`), sourceFile)] : []
 }
 
 // Ensure no enums
