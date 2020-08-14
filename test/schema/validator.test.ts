@@ -13,10 +13,14 @@ test('validateSchemas() returns error when schema contains functions', () => {
   const func = `
   import {t} from '@typerpc/types'
   function name() {
-  }`
+  }
+
+  interface Test {
+  }
+  `
   project.createSourceFile('function.ts', func)
   const res = validateSchemas([project.getSourceFile('function.ts')!])
   // eslint-disable-next-line no-console
   res.forEach(err => console.log(err.message))
-  expect(res.length).toBe(1)
+  expect(res.length).toBe(2)
 })

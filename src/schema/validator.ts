@@ -158,13 +158,31 @@ const validateTypeAliases = (sourceFile: SourceFile): Error[] => {
   return errs
 }
 
+const validateInterface = (interfc: InterfaceDeclaration): Error[] => {
+  const errs: Error[] = []
+  const interErr = (msg: string) => new Error(`error in file ${interfc.getSourceFile().getBaseName()}
+    at line : ${interfc.getStartLineNumber()} .
+    ${msg}`)
+  if (interfc.getMethods().length === 0) {
+    errs.push(interErr('all typerpc interfcaces must declare at least one method'))
+  }
+  if (interfc.getTypeParameters.length > 0) {
+    errs.push(genericErr(interfc))
+  }
+  if (interfc.getExtends.length > 0) {
+    errs.push(interErr('typerpc interface are not allowed to contain extends clauses'))
+  }
+  return errs
+}
+
 // Ensure at least one interface and no interfaces are generic
 const validateInterfaces = (sourceFile: SourceFile): Error[] => {
   const interfaces = sourceFile.getInterfaces()
   if (interfaces.length === 0) {
     return [new  Error(`error in file => ${sourceFile.getBaseName()}. All typerpc schema files must contain at least one interface (service) definition`)]
   }
-  return interfaces.flatMap(interfc => interfc.getTypeParameters.length > 0 ? [genericErr(interfc)] : [])
+
+  return interfaces.flatMap(interfc => validateInterface(interfc))
 }
 
 // Ensure type of method params is either a typerpc type or a type
