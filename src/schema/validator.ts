@@ -247,7 +247,7 @@ const validateParams = (method: MethodSignature): Error[] => {
     if (typeof type === 'undefined') {
       errs.push(paramErr(type, `${method.getName()} contains one or more parameters that do not specify a valid type. All method parameter must have a valid type`))
     } else if (!isValidDataType(type.getText()) && !isValidTypeAlias(type)) {
-      errs.push(paramErr(type, `typeError = ${type} is either not a valid typerpc type or it's type is not defined in this file`))
+      errs.push(paramErr(type, `method parameter type '${type.getText().trim()}', is either not a valid typerpc type or a type alias that is not defined in this file`))
     }
   }
   return errs

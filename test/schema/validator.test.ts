@@ -175,3 +175,12 @@ test(testName(1, 'interface with extends'), () => {
   }`
   runTest(project, sourceWithValidImportAndInterface(source), 1)
 })
+
+test(testName(1, 'method with invalid param type'), () => {
+  const source = `
+  interface Person {
+    getName(num: number): t.str;
+  }`
+
+  runTest(project, sourceWithValidImportAndInterface(source), 1)
+})
