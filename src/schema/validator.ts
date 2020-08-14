@@ -158,7 +158,7 @@ const validateRefs = (sourceFile: SourceFile): Error[] => {
 }
 
 const genericErr = (type: TypeAliasDeclaration | InterfaceDeclaration | MethodSignature): Error => new Error(`typeError at: ${type.getStartLineNumber()}
- message: ${type.getName().trim()} defines a generic type constraint. typerpc types  cannot be generic`)
+ message: ${type.getName().trim()} defines a generic type . typerpc types  cannot be generic`)
 
 export const isPrimitive = (typeText: string): boolean => primitivesMap.has(typeText.trim())
 

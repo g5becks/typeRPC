@@ -112,14 +112,50 @@ test(testName(1, 'enum'), () => {
   runTest(project, sourceWithValidImportAndInterface(source), 1)
 })
 
-test(testName(1, 'invalid type alias'), () => {
+test(testName(1, 'generic type alias'), () => {
   const typeName = 'GenericType<T, S, V>'
   const source = `
 type ${typeName} = {
-  name: T;
   age: t.str;
 }
   `
-  console.log(source)
   runTest(project, sourceWithValidImportAndInterface(source), 1)
 })
+
+test(testName(1, 'type alias with object literal property'), () => {
+  const source = `
+  type MyType = {
+  name: t.str;
+  cars: {
+  model: t.str;
+  }
+  }`
+  runTest(project, sourceWithValidImportAndInterface(source), 1)
+})
+
+test(testName(1, 'type alias with array property'), () => {
+  const source = `
+  type MyType = {
+  names: t.str[];
+  }`
+  runTest(project, sourceWithValidImportAndInterface(source), 1)
+})
+
+test(testName(1, 'type alias with invalid type property'), () => {
+  const source = `
+  type MyType = {
+    name: Name;
+  }
+  `
+  runTest(project, sourceWithValidImportAndInterface(source), 1)
+})
+
+test(testName(1, 'interface with zero methods'), () => {
+  const source = `
+  interface Me {
+    name: t.str;
+  }`
+
+  runTest(project, sourceWithValidImportAndInterface(source), 1)
+})
+
