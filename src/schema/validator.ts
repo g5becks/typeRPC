@@ -98,9 +98,9 @@ const validateNameSpaces = (sourceFile: SourceFile): Error[] => {
 // Ensure zero top level statements
 const validateStatements = (sourceFile: SourceFile): Error[] => {
   const stmnts = sourceFile.getStatements()
-  const invalidKinds = [SyntaxKind.AbstractKeyword, SyntaxKind.AwaitExpression, SyntaxKind.ArrayType, SyntaxKind.ArrowFunction, SyntaxKind.VariableStatement, SyntaxKind.TaggedTemplateExpression, SyntaxKind.SpreadAssignment, SyntaxKind.JsxExpression, SyntaxKind.ForStatement, SyntaxKind.ForInStatement, SyntaxKind.ForOfStatement, SyntaxKind.SwitchStatement]
+  const invalidKinds = [SyntaxKind.AbstractKeyword, SyntaxKind.AwaitExpression, SyntaxKind.ArrayType, SyntaxKind.ArrowFunction,  SyntaxKind.TaggedTemplateExpression, SyntaxKind.SpreadAssignment, SyntaxKind.JsxExpression, SyntaxKind.ForStatement, SyntaxKind.ForInStatement, SyntaxKind.ForOfStatement, SyntaxKind.SwitchStatement]
   const invalids = stmnts.filter(stmnt => invalidKinds.includes(stmnt.getKind()))
-  return invalids.length > 0 ? [err(stmnts.length, 'top level statement', stmnts.map(stmnt => {
+  return invalids.length > 0 ? [err(stmnts.length, 'top level statement', invalids.map(stmnt => {
     return {name: stmnt.getText().trim(), lineNumber: stmnt.getStartLineNumber()}
   }), sourceFile)] : []
 }
