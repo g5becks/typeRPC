@@ -167,3 +167,11 @@ test(testName(1, 'generic interface'), () => {
 `
   runTest(project, sourceWithValidImportAndInterface(source), 1)
 })
+
+test(testName(1, 'interface with extends'), () => {
+  const source = `
+  interface Person extends Object {
+    getName(): t.str;
+  }`
+  runTest(project, sourceWithValidImportAndInterface(source), 1)
+})

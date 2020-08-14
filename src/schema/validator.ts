@@ -210,13 +210,13 @@ const validateInterface = (interfc: InterfaceDeclaration): Error[] => {
     at line number : ${interfc.getStartLineNumber()}
     message: ${msg}`)
   if (interfc.getMethods().length === 0) {
-    errs = errs.concat(interErr('all typerpc interfcaces must declare at least one method'))
+    errs = errs.concat(interErr('all typerpc interfaces must declare at least one method'))
   }
   if (interfc.getTypeParameters().length > 0) {
     errs = errs.concat(genericErr(interfc))
   }
   if (interfc.getExtends().length > 0) {
-    errs = errs.concat(interErr('typerpc interface are not allowed to contain extends clauses'))
+    errs = errs.concat(interErr('typerpc interfaces are not allowed to contain extends clauses'))
   }
   return errs
 }
