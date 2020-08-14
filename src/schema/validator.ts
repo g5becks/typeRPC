@@ -174,7 +174,7 @@ const validateTypeAliasChildren = (type: TypeAliasDeclaration): Error[] => {
   const children = type.getTypeNode()?.forEachChildAsArray()
   const errs: Error[] = []
   if (typeof children === 'undefined') {
-    errs.push(new Error(`type error in file ${type.getSourceFile().getFilePath().toString()}
+    errs.push(new Error(`type error in file ${type.getSourceFile()?.getFilePath().toString()}
     at line number: ${type.getStartLineNumber()}
     message:  Empty type aliases are not supported`))
   } else {
@@ -182,7 +182,8 @@ const validateTypeAliasChildren = (type: TypeAliasDeclaration): Error[] => {
       // get the properties type
       const propType = child.getChildAtIndex(2)
       if (!isValidDataType(propType.getText().trim()) && !isValidTypeAlias(propType)) {
-        errs.push(new Error(`type error in file: ${child.getSourceFile()} at line number ${child.getStartLineNumber()}
+        errs.push(new Error(`type error in file: ${child.getSourceFile().getFilePath().toString()}
+         at line number: ${child.getStartLineNumber()}
          message: Invalid property type, Only types imported from @typerpc/types and other type aliases declared in the same file may be used as property types`))
       }
     }

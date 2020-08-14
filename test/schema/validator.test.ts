@@ -101,3 +101,24 @@ test(testName(1, 'for loop'), () => {
   }`
   runTest(project, sourceWithValidImportAndInterface(source), 1)
 })
+
+test(testName(1, 'enum'), () => {
+  const source = `
+  enum Colors {
+    Red,
+    Blue,
+    Green,
+  }`
+  runTest(project, sourceWithValidImportAndInterface(source), 1)
+})
+
+test(testName(1, 'invalid type alias'), () => {
+  const typeName = 'GenericType<T>'
+  const source = `
+  type ${typeName} = {
+    name: T,
+    age: number
+  }
+  `
+  runTest(project, sourceWithValidImportAndInterface(source), 1)
+})
