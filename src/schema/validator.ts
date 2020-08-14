@@ -11,8 +11,8 @@ import {
 import {containersList, primitivesMap} from './types'
 
 const err = (numInvalids: number, type: string, violators: string[], sourceFile: SourceFile): Error =>
-  new Error(`${sourceFile.getBaseName()} contains ${numInvalids} ${type} declarations => ${violators} .
-  typerpc schemas can only contain a single import statement => import {t} from '@typerpc/types', typeAlias => (message), and interface => (service) declarations.`)
+  new Error(`${sourceFile.getFilePath().toString()} contains ${numInvalids} ${type} declarations: ${violators}
+   typerpc schemas can only contain a single import statement = import {t} from '@typerpc/types', typeAlias = (message), and interface = (service) declarations.`)
 
 // Ensure zero function declarations
 const validateFunctions = (sourceFile: SourceFile): Error[] => {
@@ -39,10 +39,13 @@ const validateImports = (sourceFile: SourceFile): Error[] => {
   const errs: Error[] = []
   if (imports.length !== 1) {
     errs.push(
-      new Error(`error in file ${sourceFile.getBaseName()}. typerpc schema files must contain only one import declaration => import {t} from '@typerpc/types'`)
+      new Error(`error in file ${sourceFile.getFilePath().toString()}
+       message: typerpc schema files must contain only one import declaration => import {t} from '@typerpc/types'`)
     )
   } else if (imports[0].getImportClause()?.getNamedImports()[0].getText().trim() !== 't') {
-    errs.push(new Error(`error in file ${sourceFile.getBaseName()}. Invalid import statement => ${imp}, types namespace can only be imported as {t}`))
+    errs.push(new Error(`error in file ${sourceFile.getFilePath()}
+     at line number: ${imports[0]?.getStartLineNumber()}
+     message: Invalid import statement => ${imp}, @typerpc/types namespace can only be imported as {t}`))
   }
   return errs
 }
@@ -138,14 +141,16 @@ const validateTypeAliasChildren = (type: TypeAliasDeclaration): Error[] => {
   const children = type.getTypeNode()?.forEachChildAsArray()
   const errs: Error[] = []
   if (typeof children === 'undefined') {
-    errs.push(new Error(`type error in file ${type.getSourceFile().getBaseName()}
-    at line number: ${type.getStartLineNumber()}. Empty types not supported`))
+    errs.push(new Error(`type error in file ${type.getSourceFile().getFilePath().toString()}
+    at line number: ${type.getStartLineNumber()}
+    message:  Empty type aliases are not supported`))
   } else {
     for (const child of children) {
       // get the properties type
       const propType = child.getChildAtIndex(2)
       if (!isValidDataType(propType.getText().trim()) && !isValidTypeAlias(propType)) {
-        errs.push(new Error(`type error in file: ${child.getSourceFile()} at line number ${child.getStartLineNumber()}. Invalid property type. Only types imported from @typerpc/types and other type aliases declared in the same file may be used as property types`))
+        errs.push(new Error(`type error in file: ${child.getSourceFile()} at line number ${child.getStartLineNumber()}
+         message: Invalid property type, Only types imported from @typerpc/types and other type aliases declared in the same file may be used as property types`))
       }
     }
   }
@@ -170,9 +175,9 @@ const validateTypeAliases = (sourceFile: SourceFile): Error[] => {
 
 const validateInterface = (interfc: InterfaceDeclaration): Error[] => {
   const errs: Error[] = []
-  const interErr = (msg: string) => new Error(`error in file ${interfc.getSourceFile().getBaseName()}
-    at line : ${interfc.getStartLineNumber()} .
-    ${msg}`)
+  const interErr = (msg: string) => new Error(`error in file ${interfc.getSourceFile().getFilePath().toString()}
+    at line number : ${interfc.getStartLineNumber()}
+    message: ${msg}`)
   if (interfc.getMethods().length === 0) {
     errs.push(interErr('all typerpc interfcaces must declare at least one method'))
   }
@@ -189,7 +194,8 @@ const validateInterface = (interfc: InterfaceDeclaration): Error[] => {
 const validateInterfaces = (sourceFile: SourceFile): Error[] => {
   const interfaces = sourceFile.getInterfaces()
   if (interfaces.length === 0) {
-    return [new  Error(`error in file => ${sourceFile.getBaseName()}. All typerpc schema files must contain at least one interface (service) definition`)]
+    return [new  Error(`error in file ${sourceFile.getFilePath().toString()}
+    message: All typerpc schema files must contain at least one interface (service) definition`)]
   }
 
   return interfaces.flatMap(interfc => validateInterface(interfc))
@@ -201,7 +207,8 @@ const validateParams = (method: MethodSignature): Error[] => {
   if (!method.getParameters()) {
     return []
   }
-  const paramErr = (type: TypeNode, msg: string) => new Error(`error in file: ${type.getSourceFile().getBaseName()} at: ${type.getStartLineNumber()}. ${msg}`)
+  const paramErr = (type: TypeNode, msg: string) => new Error(`error in file: ${type.getSourceFile().getFilePath().toString()}
+   at line number: ${type.getStartLineNumber()}. ${msg}`)
   const paramTypes = method.getParameters().map(param => param.getTypeNode())
   const errs: Error[] = []
   for (const type of paramTypes) {
@@ -220,7 +227,9 @@ const validateParams = (method: MethodSignature): Error[] => {
 // declared in the same file.
 const validateReturnType = (method: MethodSignature): Error[] => {
   const returnType = method.getReturnTypeNode()
-  const returnTypeErr = (typeName: string) => new Error(`typerc error in file: ${method.getSourceFile().getBaseName()} at: ${method.getStartLineNumber()}. All typerpc interface methods must contain a valid return type. Invalid return type: ${typeName}`)
+  const returnTypeErr = (typeName: string) => new Error(`typerc error in file ${method.getSourceFile().getFilePath().toString()}
+   at line number: ${method.getStartLineNumber()}
+   message: All typerpc interface methods must contain a valid return type. Invalid return type: ${typeName}`)
   return typeof returnType === 'undefined' ? [returnTypeErr('undefined')] :
     !isValidDataType(returnType.getText()) && !isValidTypeAlias(returnType) ? [returnTypeErr(returnType.getText().trim())] : []
 }
