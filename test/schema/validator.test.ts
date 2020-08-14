@@ -9,6 +9,8 @@ beforeEach(() => {
   project = new Project()
 })
 
+const testName = (errCount: number, contains: string): string => `validateSchemas() returns ${errCount} Error when schema contains ${contains}`
+
 const validImport = 'import {t} from \'@typerpc/types\''
 const validInterface = `
   interface Test {
@@ -28,7 +30,7 @@ const runTest = (project: Project, source: string, errLength: number): void => {
   expect(res.length).toBe(errLength)
 }
 
-test('validateSchemas() returns 1 Error when schema contains functions', () => {
+test(testName(1, 'function'), () => {
   const source = `
   function name() {
   }
@@ -36,7 +38,7 @@ test('validateSchemas() returns 1 Error when schema contains functions', () => {
   runTest(project, sourceWithValidImportAndInterface(source), 1)
 })
 
-test('validateSchemas() return 1 Error when schema contains 2 functions', () => {
+test(testName(1, 'multiple functions'), () => {
   const source = `
   function name() {
   }
@@ -47,9 +49,55 @@ test('validateSchemas() return 1 Error when schema contains 2 functions', () => 
   runTest(project, sourceWithValidImportAndInterface(source), 1)
 })
 
-test('validateSchemas() returns 1 Error when schema contains variable declaration', () => {
+test(testName(1, 'variable declaration'), () => {
   const source = `
   var names: string = 'gary'
   `
+  runTest(project, sourceWithValidImportAndInterface(source), 1)
+})
+
+test(testName(1, 'class declaration'), () => {
+  const source = `
+  class MyClass {
+  private name: string = ''
+  }`
+  runTest(project, sourceWithValidImportAndInterface(source), 1)
+})
+
+test(testName(1, 'extra imports'), () => {
+  const source = `
+  import * as path from 'path'
+  `
+  runTest(project, sourceWithValidImportAndInterface(source), 1)
+})
+
+test(testName(1, 'aliased @typerpc import'), () => {
+  const source = `
+  import {t as v} from '@typerpc/types'
+  ${validInterface}
+  `
+  runTest(project, source, 1)
+})
+
+test(testName(1, 'export'), () => {
+  const source = `
+  export default interface {
+    name() : t.str;
+  }`
+  runTest(project, sourceWithValidImportAndInterface(source), 1)
+})
+
+test(testName(1, 'namespace'), () => {
+  const source = `
+  namespace Cars {
+    export type Fake = string | boolean
+  }`
+  runTest(project, sourceWithValidImportAndInterface(source), 1)
+})
+
+test(testName(1, 'for loop'), () => {
+  const source = `
+  for (let q of [1,2,3]) {
+  }`
   runTest(project, sourceWithValidImportAndInterface(source), 1)
 })

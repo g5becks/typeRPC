@@ -65,15 +65,11 @@ const validateImports = (sourceFile: SourceFile): Error[] => {
 // Ensure zero exports
 const validateExports = (sourceFile: SourceFile): Error[] => {
   const allExports = sourceFile.getExportAssignments()
-  const defExp = sourceFile.getDefaultExportSymbol()
   const exportDecs = sourceFile.getExportDeclarations()
   const exportSym = sourceFile.getExportSymbols()
   const errs = allExports.length > 0 ? [err(allExports.length, 'export', allExports.map(exp => {
     return {name: exp.getText().trim()}
   }), sourceFile)] : []
-  if (typeof defExp !== 'undefined') {
-    errs.push(err(1, 'default export', [{name: defExp.getName()}], sourceFile))
-  }
   if (exportDecs.length > 0) {
     errs.push(err(exportDecs.length, 'export', exportDecs.map(exp => {
       return {name: exp.getText().trim(), lineNumber: exp.getStartLineNumber()}
