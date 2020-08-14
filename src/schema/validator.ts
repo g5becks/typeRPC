@@ -1,4 +1,5 @@
 // file deepcode ignore semicolon: conflicts with eslint settings
+// file deepcode ignore interface-over-type-literal: improper
 import {
   InterfaceDeclaration,
   MethodSignature,
@@ -10,26 +11,37 @@ import {
 } from 'ts-morph'
 import {containersList, primitivesMap} from './types'
 
-const err = (numInvalids: number, type: string, violators: string[], sourceFile: SourceFile): Error =>
-  new Error(`${sourceFile.getFilePath().toString()} contains ${numInvalids} ${type} declarations: ${violators}
-   typerpc schemas can only contain a single import statement = import {t} from '@typerpc/types', typeAlias (message), and interface (service) declarations.`)
+type Violator = {
+  name?: string;
+  lineNumber?: number;
+}
+const err = (numInvalids: number, type: string, violators: Violator[], sourceFile: SourceFile): Error =>
+  new Error(`${sourceFile.getFilePath().toString()} contains ${numInvalids} ${type} declarations
+   errors: ${violators.map(vio => String(vio?.name) + ', at line number: ' + String(vio?.lineNumber) + '\n')}
+   message: typerpc schemas can only contain a single import statement (import {t} from '@typerpc/types'), typeAlias (message), and interface (service) declarations.`)
 
 // Ensure zero function declarations
 const validateFunctions = (sourceFile: SourceFile): Error[] => {
   const functions = sourceFile.getFunctions()
-  return functions.length > 0 ? [err(functions.length, 'function', functions.map(func => func.getName() + ` on line number: ${func.getStartLineNumber()}\n` ?? ''), sourceFile)] : []
+  return functions.length > 0 ? [err(functions.length, 'function', functions.map(func => {
+    return {name: func.getName(), lineNumber: func.getStartLineNumber()}
+  }), sourceFile)] : []
 }
 
 // Ensure zero variable declarations
 const validateVariables = (sourceFile: SourceFile): Error[] => {
   const variables = sourceFile.getVariableDeclarations()
-  return variables.length > 0 ? [err(variables.length, 'variable', variables.map(vari => vari.getName() + ` on line number: ${vari.getStartLineNumber()}\n` ?? ''), sourceFile)] : []
+  return variables.length > 0 ? [err(variables.length, 'variable', variables.map(vari => {
+    return {name: vari.getName(), lineNumber: vari.getStartLineNumber()}
+  }), sourceFile)] : []
 }
 
 // Ensure zero class declarations
 const validateClasses = (sourceFile: SourceFile): Error[] => {
   const classes = sourceFile.getClasses()
-  return classes.length > 0 ? [err(classes.length, 'class', classes.map(cls => cls.getName() + ` on line number: ${cls.getStartLineNumber()}\n` ?? ''), sourceFile)] : []
+  return classes.length > 0 ? [err(classes.length, 'class', classes.map(cls => {
+    return {name: cls.getName(), lineNumber: cls.getStartLineNumber()}
+  }), sourceFile)] : []
 }
 
 // Ensure only one valid import without aliasing the namespace
@@ -56,15 +68,21 @@ const validateExports = (sourceFile: SourceFile): Error[] => {
   const defExp = sourceFile.getDefaultExportSymbol()
   const exportDecs = sourceFile.getExportDeclarations()
   const exportSym = sourceFile.getExportSymbols()
-  const errs = allExports.length > 0 ? [err(allExports.length, 'export', allExports.map(exp => exp.getText().trim()), sourceFile)] : []
+  const errs = allExports.length > 0 ? [err(allExports.length, 'export', allExports.map(exp => {
+    return {name: exp.getText().trim()}
+  }), sourceFile)] : []
   if (typeof defExp !== 'undefined') {
-    errs.push(err(1, 'default export', [defExp.getName()], sourceFile))
+    errs.push(err(1, 'default export', [{name: defExp.getName()}], sourceFile))
   }
   if (exportDecs.length > 0) {
-    errs.push(err(exportDecs.length, 'export', exportDecs.map(exp => exp.getText() + ` on line number: ${exp.getStartLineNumber()}\n`), sourceFile))
+    errs.push(err(exportDecs.length, 'export', exportDecs.map(exp => {
+      return {name: exp.getText().trim(), lineNumber: exp.getStartLineNumber()}
+    }), sourceFile))
   }
   if (exportSym.length > 0) {
-    errs.push(err(exportSym.length, 'export', exportSym.map(exp => exp.getName() + '\n'), sourceFile))
+    errs.push(err(exportSym.length, 'export', exportSym.map(exp => {
+      return {name: exp.getName()}
+    }), sourceFile))
   }
   return errs
 }
@@ -72,7 +90,9 @@ const validateExports = (sourceFile: SourceFile): Error[] => {
 // Ensure zero namespaces
 const validateNameSpaces = (sourceFile: SourceFile): Error[] => {
   const spaces = sourceFile.getNamespaces()
-  return spaces.length > 0 ? [err(spaces.length, 'namespace', spaces.map(space => space.getName() + ` on line number: ${space.getStartLineNumber()}\n`), sourceFile)] : []
+  return spaces.length > 0 ? [err(spaces.length, 'namespace', spaces.map(space => {
+    return {name: space.getName(), lineNumber: space.getStartLineNumber()}
+  }), sourceFile)] : []
 }
 
 // Ensure zero top level statements
@@ -80,13 +100,17 @@ const validateStatements = (sourceFile: SourceFile): Error[] => {
   const stmnts = sourceFile.getStatements()
   const invalidKinds = [SyntaxKind.AbstractKeyword, SyntaxKind.AwaitExpression, SyntaxKind.ArrayType, SyntaxKind.ArrowFunction, SyntaxKind.VariableStatement, SyntaxKind.TaggedTemplateExpression, SyntaxKind.SpreadAssignment, SyntaxKind.JsxExpression, SyntaxKind.ForStatement, SyntaxKind.ForInStatement, SyntaxKind.ForOfStatement, SyntaxKind.SwitchStatement]
   const invalids = stmnts.filter(stmnt => invalidKinds.includes(stmnt.getKind()))
-  return invalids.length > 0 ? [err(stmnts.length, 'top level statement', stmnts.map(stmnt => `${stmnt.getText()} at line number: ${stmnt.getStartLineNumber()}`), sourceFile)] : []
+  return invalids.length > 0 ? [err(stmnts.length, 'top level statement', stmnts.map(stmnt => {
+    return {name: stmnt.getText().trim(), lineNumber: stmnt.getStartLineNumber()}
+  }), sourceFile)] : []
 }
 
 // Ensure no enums
 const validateEnums = (sourceFile: SourceFile): Error[] => {
   const enums = sourceFile.getEnums()
-  return enums.length > 0 ? [err(enums.length, 'enum', enums.map(enu => enu.getName() + ` on line number: ${enu.getStartLineNumber()}\n`), sourceFile)] : []
+  return enums.length > 0 ? [err(enums.length, 'enum', enums.map(enu => {
+    return {name: enu.getName(), lineNumber: enu.getStartLineNumber()}
+  }), sourceFile)] : []
 }
 
 // Ensure zero references to other files
@@ -95,32 +119,44 @@ const validateRefs = (sourceFile: SourceFile): Error[] => {
   // should be 1
   const nodeSourceRefs = sourceFile.getNodesReferencingOtherSourceFiles()
   if (nodeSourceRefs.length !== 1) {
-    errs.push(err(nodeSourceRefs.length - 1, 'source reference', nodeSourceRefs.filter(ref => !ref.getText().includes('@typerpc')).map(ref => ref.getText() + ` on line number ${ref.getStartLineNumber()}\n`), sourceFile))
+    errs.push(err(nodeSourceRefs.length - 1, 'source reference', nodeSourceRefs.filter(ref => !ref.getText().includes('@typerpc')).map(ref => {
+      return {name: ref.getText().trim(), lineNumber: ref.getStartLineNumber()}
+    }), sourceFile))
   }
   // should be 1
   const literalSourceRefs = sourceFile.getLiteralsReferencingOtherSourceFiles()
   if (literalSourceRefs.length !== 1) {
-    errs.push(err(literalSourceRefs.length - 1, 'literal source reference', literalSourceRefs.filter(ref => !ref.getText().includes('@typerpc')).map(ref => ref.getText() + ` on line number ${ref.getStartLineNumber()}\n`), sourceFile))
+    errs.push(err(literalSourceRefs.length - 1, 'literal source reference', literalSourceRefs.filter(ref => !ref.getText().includes('@typerpc')).map(ref => {
+      return {name: ref.getText().trim(), lineNumber: ref.getStartLineNumber()}
+    }), sourceFile))
   }
   // should be 1
   const sourceRefs = sourceFile.getReferencedSourceFiles()
   if (sourceRefs.length !== 1) {
-    errs.push(err(sourceRefs.length - 1, 'source reference', sourceRefs.filter(ref => !ref.getText().includes('@typerpc')).map(ref => ref.getText() + ` on line number ${ref.getStartLineNumber()}\n`), sourceFile))
+    errs.push(err(sourceRefs.length - 1, 'source reference', sourceRefs.filter(ref => !ref.getText().includes('@typerpc')).map(ref => {
+      return {name: ref.getText().trim(), lineNumber: ref.getStartLineNumber()}
+    }), sourceFile))
   }
   // should be 0
   const libraryRefs = sourceFile.getLibReferenceDirectives()
   if (libraryRefs.length > 0) {
-    errs.push(err(libraryRefs.length, 'library reference', libraryRefs.map(ref => ref.getText()), sourceFile))
+    errs.push(err(libraryRefs.length, 'library reference', libraryRefs.map(ref => {
+      return {name: ref.getText().trim()}
+    }), sourceFile))
   }
   // should be 0
   const pathRefs = sourceFile.getPathReferenceDirectives()
   if (pathRefs.length > 0) {
-    errs.push(err(pathRefs.length, 'path reference', pathRefs.map(ref => ref.getText()), sourceFile))
+    errs.push(err(pathRefs.length, 'path reference', pathRefs.map(ref => {
+      return {name: ref.getText().trim()}
+    }), sourceFile))
   }
   // should be 0
   const typeDirRefs = sourceFile.getTypeReferenceDirectives()
   if (typeDirRefs.length > 0) {
-    errs.push(err(typeDirRefs.length, 'type reference directive', typeDirRefs.map(ref => ref.getText()), sourceFile))
+    errs.push(err(typeDirRefs.length, 'type reference directive', typeDirRefs.map(ref => {
+      return {name: ref.getText().trim()}
+    }), sourceFile))
   }
   return errs
 }
