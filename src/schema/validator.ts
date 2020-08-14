@@ -96,7 +96,7 @@ const validateRefs = (sourceFile: SourceFile): Error[] => {
   }
   // should be 0
   const libraryRefs = sourceFile.getLibReferenceDirectives()
-  if (literalSourceRefs.length > 0) {
+  if (libraryRefs.length > 0) {
     errs.push(err(libraryRefs.length, 'library reference', libraryRefs.map(ref => ref.getText()), sourceFile))
   }
   // should be 0
