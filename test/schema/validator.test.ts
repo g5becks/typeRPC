@@ -216,3 +216,29 @@ test(testName(1, 'non Object type alias'), () => {
   `
   runTest(project, sourceWithValidImportAndInterface(source), 1)
 })
+
+test('validateSchema should return 0 error when given a valid schema file', () => {
+  const people = 't.List<source>'
+  const nested = 't.Dict<t.str, People>'
+  const source = `
+  type Person = {
+    name: t.str;
+    age: t.int8;
+  }
+
+  type PersonList = {
+    list: ${people}
+    }
+
+  type PeopleMap = {
+    map: ${nested}
+    }
+
+  interface PersonService {
+    getPersonByName(name: t.str): Person;
+    getPeopleAboveAge(age: t.int8): PersonList;
+    getPeopleMap(): PeopleMap;
+  }
+  `
+  runTest(project, sourceWithValidImportAndInterface(source), 0)
+})
