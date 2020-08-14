@@ -12,7 +12,7 @@ import {containersList, primitivesMap} from './types'
 
 const err = (numInvalids: number, type: string, violators: string[], sourceFile: SourceFile): Error =>
   new Error(`${sourceFile.getFilePath().toString()} contains ${numInvalids} ${type} declarations: ${violators}
-   typerpc schemas can only contain a single import statement = import {t} from '@typerpc/types', typeAlias = (message), and interface = (service) declarations.`)
+   typerpc schemas can only contain a single import statement = import {t} from '@typerpc/types', typeAlias (message), and interface (service) declarations.`)
 
 // Ensure zero function declarations
 const validateFunctions = (sourceFile: SourceFile): Error[] => {
