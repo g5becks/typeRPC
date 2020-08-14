@@ -259,7 +259,7 @@ const validateReturnType = (method: MethodSignature): Error[] => {
   const returnType = method.getReturnTypeNode()
   const returnTypeErr = (typeName: string) => new Error(`typerc error in file ${method.getSourceFile().getFilePath().toString()}
    at line number: ${method.getStartLineNumber()}
-   message: All typerpc interface methods must contain a valid return type. Invalid return type: ${typeName}`)
+   message: Invalid return type: '${typeName}'. typerpc interface methods must return a valid typerpc type or a type alias defined in the same file as the method. To return nothing, use 't.unit'`)
   return typeof returnType === 'undefined' ? [returnTypeErr('undefined')] :
     !isValidDataType(returnType.getText()) && !isValidTypeAlias(returnType) ? [returnTypeErr(returnType.getText().trim())] : []
 }

@@ -184,3 +184,11 @@ test(testName(1, 'method with invalid param type'), () => {
 
   runTest(project, sourceWithValidImportAndInterface(source), 1)
 })
+
+test(testName(1, 'method with invalid return type'), () => {
+  const source = `
+  interface Person {
+    getName(): string;
+    }`
+  runTest(project, sourceWithValidImportAndInterface(source), 1)
+})
