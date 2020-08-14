@@ -159,3 +159,11 @@ test(testName(1, 'interface with zero methods'), () => {
   runTest(project, sourceWithValidImportAndInterface(source), 1)
 })
 
+test(testName(1, 'generic interface'), () => {
+  const source = `
+  interface Namer<T> {
+    getName(): t.str;
+  }
+`
+  runTest(project, sourceWithValidImportAndInterface(source), 1)
+})

@@ -205,18 +205,18 @@ const validateTypeAliases = (sourceFile: SourceFile): Error[] => {
 }
 
 const validateInterface = (interfc: InterfaceDeclaration): Error[] => {
-  const errs: Error[] = []
+  let errs: Error[] = []
   const interErr = (msg: string) => new Error(`error in file ${interfc.getSourceFile().getFilePath().toString()}
     at line number : ${interfc.getStartLineNumber()}
     message: ${msg}`)
   if (interfc.getMethods().length === 0) {
-    errs.push(interErr('all typerpc interfcaces must declare at least one method'))
+    errs = errs.concat(interErr('all typerpc interfcaces must declare at least one method'))
   }
-  if (interfc.getTypeParameters.length > 0) {
-    errs.push(genericErr(interfc))
+  if (interfc.getTypeParameters().length > 0) {
+    errs = errs.concat(genericErr(interfc))
   }
-  if (interfc.getExtends.length > 0) {
-    errs.push(interErr('typerpc interface are not allowed to contain extends clauses'))
+  if (interfc.getExtends().length > 0) {
+    errs = errs.concat(interErr('typerpc interface are not allowed to contain extends clauses'))
   }
   return errs
 }
