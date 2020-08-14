@@ -17,19 +17,19 @@ const err = (numInvalids: number, type: string, violators: string[], sourceFile:
 // Ensure zero function declarations
 const validateFunctions = (sourceFile: SourceFile): Error[] => {
   const functions = sourceFile.getFunctions()
-  return functions.length > 0 ? [err(functions.length, 'function', functions.map(func => func.getName() ?? ''), sourceFile)] : []
+  return functions.length > 0 ? [err(functions.length, 'function', functions.map(func => func.getName() + `line number: ${func.getStartLineNumber()}\n` ?? ''), sourceFile)] : []
 }
 
 // Ensure zero variable declarations
 const validateVariables = (sourceFile: SourceFile): Error[] => {
   const variables = sourceFile.getVariableDeclarations()
-  return variables.length > 0 ? [err(variables.length, 'variable', variables.map(vari => vari.getName() ?? ''), sourceFile)] : []
+  return variables.length > 0 ? [err(variables.length, 'variable', variables.map(vari => vari.getName() + `line number: ${vari.getStartLineNumber()}\n` ?? ''), sourceFile)] : []
 }
 
 // Ensure zero class declarations
 const validateClasses = (sourceFile: SourceFile): Error[] => {
   const classes = sourceFile.getClasses()
-  return classes.length > 0 ? [err(classes.length, 'class', classes.map(cls => cls.getName() ?? ''), sourceFile)] : []
+  return classes.length > 0 ? [err(classes.length, 'class', classes.map(cls => cls.getName() + `line number: ${cls.getStartLineNumber()}\n` ?? ''), sourceFile)] : []
 }
 
 // Ensure only one valid import without aliasing the namespace
@@ -61,10 +61,10 @@ const validateExports = (sourceFile: SourceFile): Error[] => {
     errs.push(err(1, 'default export', [defExp.getName()], sourceFile))
   }
   if (exportDecs.length > 0) {
-    errs.push(err(exportDecs.length, 'export', exportDecs.map(exp => exp.getText()), sourceFile))
+    errs.push(err(exportDecs.length, 'export', exportDecs.map(exp => exp.getText() + `line number: ${exp.getStartLineNumber()}\n`), sourceFile))
   }
   if (exportSym.length > 0) {
-    errs.push(err(exportSym.length, 'export', exportSym.map(exp => exp.getName()), sourceFile))
+    errs.push(err(exportSym.length, 'export', exportSym.map(exp => exp.getName() + '\n'), sourceFile))
   }
   return errs
 }
@@ -72,7 +72,7 @@ const validateExports = (sourceFile: SourceFile): Error[] => {
 // Ensure zero namespaces
 const validateNameSpaces = (sourceFile: SourceFile): Error[] => {
   const spaces = sourceFile.getNamespaces()
-  return spaces.length > 0 ? [err(spaces.length, 'namespace', spaces.map(space => space.getName()), sourceFile)] : []
+  return spaces.length > 0 ? [err(spaces.length, 'namespace', spaces.map(space => space.getName() + `line number: ${space.getStartLineNumber()}\n`), sourceFile)] : []
 }
 
 // Ensure zero top level statements
@@ -86,7 +86,7 @@ const validateStatements = (sourceFile: SourceFile): Error[] => {
 // Ensure no enums
 const validateEnums = (sourceFile: SourceFile): Error[] => {
   const enums = sourceFile.getEnums()
-  return enums.length > 0 ? [err(enums.length, 'enum', enums.map(enu => enu.getName()), sourceFile)] : []
+  return enums.length > 0 ? [err(enums.length, 'enum', enums.map(enu => enu.getName() + `line number: ${enu.getStartLineNumber()}\n`), sourceFile)] : []
 }
 
 // Ensure zero references to other files
@@ -95,17 +95,17 @@ const validateRefs = (sourceFile: SourceFile): Error[] => {
   // should be 1
   const nodeSourceRefs = sourceFile.getNodesReferencingOtherSourceFiles()
   if (nodeSourceRefs.length !== 1) {
-    errs.push(err(nodeSourceRefs.length - 1, 'source reference', nodeSourceRefs.filter(ref => !ref.getText().includes('@typerpc')).map(ref => ref.getText()), sourceFile))
+    errs.push(err(nodeSourceRefs.length - 1, 'source reference', nodeSourceRefs.filter(ref => !ref.getText().includes('@typerpc')).map(ref => ref.getText() + `line number ${ref.getStartLineNumber()}\n`), sourceFile))
   }
   // should be 1
   const literalSourceRefs = sourceFile.getLiteralsReferencingOtherSourceFiles()
   if (literalSourceRefs.length !== 1) {
-    errs.push(err(literalSourceRefs.length - 1, 'literal source reference', literalSourceRefs.filter(ref => !ref.getText().includes('@typerpc')).map(ref => ref.getText()), sourceFile))
+    errs.push(err(literalSourceRefs.length - 1, 'literal source reference', literalSourceRefs.filter(ref => !ref.getText().includes('@typerpc')).map(ref => ref.getText() + `line number ${ref.getStartLineNumber()}\n`), sourceFile))
   }
   // should be 1
   const sourceRefs = sourceFile.getReferencedSourceFiles()
   if (sourceRefs.length !== 1) {
-    errs.push(err(sourceRefs.length - 1, 'source reference', sourceRefs.filter(ref => !ref.getText().includes('@typerpc')).map(ref => ref.getText()), sourceFile))
+    errs.push(err(sourceRefs.length - 1, 'source reference', sourceRefs.filter(ref => !ref.getText().includes('@typerpc')).map(ref => ref.getText() + `line number ${ref.getStartLineNumber()}\n`), sourceFile))
   }
   // should be 0
   const libraryRefs = sourceFile.getLibReferenceDirectives()
@@ -125,7 +125,8 @@ const validateRefs = (sourceFile: SourceFile): Error[] => {
   return errs
 }
 
-const genericErr = (type: TypeAliasDeclaration | InterfaceDeclaration | MethodSignature): Error => new Error(`typeError at: ${type.getStartLineNumber()}. ${type.getName().trim()} defines a generic type constraint. typerpc types cannot be generic`)
+const genericErr = (type: TypeAliasDeclaration | InterfaceDeclaration | MethodSignature): Error => new Error(`typeError at: ${type.getStartLineNumber()}
+ message: ${type.getName().trim()} defines a generic type constraint. typerpc types  cannot be generic`)
 
 export const isPrimitive = (typeText: string): boolean => primitivesMap.has(typeText.trim())
 
