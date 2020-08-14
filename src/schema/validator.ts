@@ -190,21 +190,18 @@ const validateTypeAliasChildren = (type: TypeAliasDeclaration): Error[] => {
   }
   return errs
 }
-// Ensures no type aliases are generic
+
+const validateTypeAlias = (type: TypeAliasDeclaration): Error[] => {
+  return type.getTypeParameters().length > 0 ? [genericErr(type)] : []
+}
+
+// Ensures no type aliases are generic and all properties are proper types.
 const validateTypeAliases = (sourceFile: SourceFile): Error[] => {
   const aliases = sourceFile.getTypeAliases()
   if (aliases.length === 0) {
     return []
   }
-
-  const errs: Error[] = []
-  for (const alias of aliases) {
-    if (alias.getTypeParameters.length > 0) {
-      errs.push(genericErr(alias))
-    }
-    errs.push(...validateTypeAliasChildren(alias))
-  }
-  return errs
+  return aliases.flatMap(alias => [...validateTypeAlias(alias), ...validateTypeAliasChildren(alias)])
 }
 
 const validateInterface = (interfc: InterfaceDeclaration): Error[] => {

@@ -113,12 +113,13 @@ test(testName(1, 'enum'), () => {
 })
 
 test(testName(1, 'invalid type alias'), () => {
-  const typeName = 'GenericType<T>'
+  const typeName = 'GenericType<T, S, V>'
   const source = `
-  type ${typeName} = {
-    name: T,
-    age: number
-  }
+type ${typeName} = {
+  name: T;
+  age: t.str;
+}
   `
+  console.log(source)
   runTest(project, sourceWithValidImportAndInterface(source), 1)
 })
