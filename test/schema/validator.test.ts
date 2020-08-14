@@ -208,3 +208,11 @@ test(testName(1, 'generic method'), () => {
 }`
   runTest(project, sourceWithValidImportAndInterface(source), 1)
 })
+
+test(testName(1, 'non Object type alias'), () => {
+  const nested = 't.Dict<t.str, People>'
+  const source = `
+  type PeopleMap = ${nested}
+  `
+  runTest(project, sourceWithValidImportAndInterface(source), 1)
+})

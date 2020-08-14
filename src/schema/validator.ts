@@ -172,23 +172,37 @@ const isValidTypeAlias = (type: TypeNode | Node): boolean => type.getSourceFile(
 const validateTypeAliasChildren = (type: TypeAliasDeclaration): Error[] => {
   // grabs the actual type declaration node e.g. everything after the = sign
   // then returns the children, aka properties.
-  const children = type.getTypeNode()?.forEachChildAsArray()
+  const filePath = type.getSourceFile()?.getFilePath().toString()
+  const typeNode = type.getTypeNode()
+  const children = typeNode?.forEachChildAsArray()
   const errs: Error[] = []
-  if (typeof children === 'undefined') {
-    errs.push(new Error(`type error in file ${type.getSourceFile()?.getFilePath().toString()}
-    at line number: ${type.getStartLineNumber()}
-    message:  Empty type aliases are not supported`))
-  } else {
-    for (const child of children) {
-      // get the properties type
-      const propType = child.getChildAtIndex(2)
-      if (!isValidDataType(propType.getText().trim()) && !isValidTypeAlias(propType)) {
-        errs.push(new Error(`type error in file: ${child.getSourceFile().getFilePath().toString()}
-         at line number: ${child.getStartLineNumber()}
-         message: Invalid property type, Only types imported from @typerpc/types and other type aliases declared in the same file may be used as property types`))
-      }
+  if (typeof typeNode !== 'undefined') {
+    if (typeNode.getFirstChild()?.getText().trim() !== '{') {
+      return [new Error(`error in file ${type.getSourceFile()?.getFilePath().toString()}
+      at line number: ${typeNode.getStartLineNumber()}
+      message: All typerpc type aliases must be Object aliases, E.G.
+      type  Mytype = {
+      (properties with valid type rpc data types or other type aliases)
+      },
+      Simple types (number, string[]), intersections, and unions are not supported at this time.
+      `)]
     }
   }
+  if (typeof children === 'undefined') {
+    return [new Error(`type error in file: ${filePath}
+    at line number: ${type.getStartLineNumber()}
+    message:  Empty type aliases are not supported`)]
+  }
+  for (const child of children) {
+    // get the properties type
+    const propType = child.getChildAtIndex(2)
+    if (!isValidDataType(propType.getText().trim()) && !isValidTypeAlias(propType)) {
+      errs.push(new Error(`type error in file: ${filePath}
+         at line number: ${child.getStartLineNumber()}
+         message: Invalid property type, Only types imported from @typerpc/types and other type aliases declared in the same file may be used as property types`))
+    }
+  }
+
   return errs
 }
 
