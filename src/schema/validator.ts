@@ -157,8 +157,9 @@ const validateRefs = (sourceFile: SourceFile): Error[] => {
   return errs
 }
 
-const genericErr = (type: TypeAliasDeclaration | InterfaceDeclaration | MethodSignature): Error => new Error(`typeError at: ${type.getStartLineNumber()}
- message: ${type.getName().trim()} defines a generic type . typerpc types  cannot be generic`)
+const genericErr = (type: TypeAliasDeclaration | InterfaceDeclaration | MethodSignature): Error => new Error(`error in file: ${type.getSourceFile().getFilePath().toString()}
+ at line number: ${type.getStartLineNumber()}
+ message: ${type.getName().trim()} defines a generic type . typerpc types and methods cannot be generic`)
 
 export const isPrimitive = (typeText: string): boolean => primitivesMap.has(typeText.trim())
 
@@ -245,7 +246,7 @@ const validateParams = (method: MethodSignature): Error[] => {
   const errs: Error[] = []
   for (const type of paramTypes) {
     if (typeof type === 'undefined') {
-      errs.push(paramErr(type, `${method.getName()} contains one or more parameters that do not specify a valid type. All method parameter must have a valid type`))
+      errs.push(paramErr(type, `${method.getName()} method contains one or more parameters that do not specify a valid type. All method parameter must have a valid type`))
     } else if (!isValidDataType(type.getText()) && !isValidTypeAlias(type)) {
       errs.push(paramErr(type, `method parameter type '${type.getText().trim()}', is either not a valid typerpc type or a type alias that is not defined in this file`))
     }
@@ -259,7 +260,7 @@ const validateReturnType = (method: MethodSignature): Error[] => {
   const returnType = method.getReturnTypeNode()
   const returnTypeErr = (typeName: string) => new Error(`typerc error in file ${method.getSourceFile().getFilePath().toString()}
    at line number: ${method.getStartLineNumber()}
-   message: Invalid return type: '${typeName}'. typerpc interface methods must return a valid typerpc type or a type alias defined in the same file as the method. To return nothing, use 't.unit'`)
+   message: Invalid return type: '${typeName}'. All typerpc interface methods must return a valid typerpc type or a type alias defined in the same file as the method. To return nothing, use 't.unit'`)
   return typeof returnType === 'undefined' ? [returnTypeErr('undefined')] :
     !isValidDataType(returnType.getText()) && !isValidTypeAlias(returnType) ? [returnTypeErr(returnType.getText().trim())] : []
 }

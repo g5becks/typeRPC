@@ -192,3 +192,19 @@ test(testName(1, 'method with invalid return type'), () => {
     }`
   runTest(project, sourceWithValidImportAndInterface(source), 1)
 })
+
+test(testName(1, 'method with typeless param'), () => {
+  const source = `
+  interface Person {
+    getName(num): t.unit;
+  }`
+  runTest(project, sourceWithValidImportAndInterface(source), 1)
+})
+
+test(testName(1, 'generic method'), () => {
+  const source = `
+  interface PersonService {
+  getPeople<T>(person: t.str): t.str;
+}`
+  runTest(project, sourceWithValidImportAndInterface(source), 1)
+})
