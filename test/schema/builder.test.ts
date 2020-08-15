@@ -27,16 +27,8 @@ beforeEach(() => {
   project = new Project()
 })
 
-beforeAll(() => {
-  for (const type of primitivesMap.keys()) {
-    primitiveVars = primitiveVars.concat(`var ${type.replace('t.', '')}: ${type}\n`)
-  }
-})
-const types = [...primitivesMap.keys(), ...containersList]
-let primitiveVars = ''
-
 function randomNumber(min: number, max: number) {
-  return Math.random() * (max - min) + min
+  return Math.floor(Math.random() * (max - min) + min)
 }
 
 const makePrimitiveType = () => {
@@ -75,12 +67,31 @@ const makeTuple4 = () => `t.Tuple4<${randomKeyable()}, ${randomKeyable()}, ${ran
 
 const makeTuple5 = () => `t.Tuple5<${randomKeyable()},${randomKeyable()}, ${randomKeyable()}, ${randomKeyable()}, ${randomKeyable()}>`
 
+const makeRandomDataType = (): string => {
+  const makers = [randomStructName, makeDict, makeList, makeTuple2, makeTuple3, makeTuple4, makeTuple5, randomComparable, () => 't.unit', () => 't.nil']
+  return makers[randomNumber(0, makers.length - 1)]()
+}
+
+const makeRandomType = (propCount: number): string => {
+  let props = ''
+  for (let i = 0; i < propCount; i++) {
+    props = props.concat(`prop${propCount}: ${makeRandomDataType()};\n`)
+  }
+  return `type TestType = {
+    ${props}
+  }`
+}
+
 const getSourceFile = (source: string, project: Project): SourceFile => {
   project.createSourceFile('test.ts', source)
   return project.getSourceFile('test.ts')!
 }
 test('isType() should return true when given the proper type', () => {
-  let vars = primitiveVars
+  let vars = ''
+  const types = [...primitivesMap.keys(), ...containersList]
+  for (const type of primitivesMap.keys()) {
+    vars = vars.concat(`var ${type.replace('t.', '')}: ${type}\n`)
+  }
   for (const type of containersList) {
     vars = vars.concat(`var ${type.replace('t.', '')}: ${type}\n`)
   }
@@ -89,5 +100,7 @@ test('isType() should return true when given the proper type', () => {
 })
 
 test('makeDataType() should return correct DataType', () => {
-
+  const type = makeRandomType(30)
+  console.log(type)
+  expect(type).toBeTruthy()
 })
