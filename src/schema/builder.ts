@@ -120,7 +120,7 @@ const buildMethod = (method: MethodSignature): Method => {
     name: getMethodName(method),
     params: new Set(buildParams(method.getParameters())),
     returnType: makeDataType(method.getReturnTypeNode()!),
-    hasParams: function (): boolean {
+    hasParams(): boolean {
       return Boolean(this.params.keys.length)
     },
   }
