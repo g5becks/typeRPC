@@ -80,9 +80,11 @@ const stripQuestionMark = (text: string): string =>  isOptional(text) ? text.rep
 
 const isCbor = (type: TypeAliasDeclaration): boolean => type.getJsDocs()[0]?.getDescription().trim().toLocaleLowerCase().includes('cbor')
 
+// builds all properties of a type alias
 const buildProps = (properties: Node[]): Property[] => {
   const props: Property[] = []
   for (const prop of properties) {
+    // get property name
     const name = prop.getChildAtIndex(0).getText().trim()
     props.push({isOptional: isOptional(name), type: makeDataType(prop.getChildAtIndex(2)), name: stripQuestionMark(name)})
   }
@@ -156,4 +158,30 @@ const buildSchema = (file: SourceFile): Schema => {
 export const buildSchemas = (sourceFiles: SourceFile[]): ReadonlySet<Schema> | Error[] => {
   const errs = validateSchemas(sourceFiles)
   return errs ? errs : new Set(sourceFiles.map(file => buildSchema(file)))
+}
+
+export const internalTesting = {
+  makeList,
+  makeDict,
+  isType,
+  isCbor,
+  isContainer,
+  buildSchema,
+  buildInterface,
+  buildInterfaces,
+  buildMethod,
+  buildMethods,
+  getMethodName,
+  getInterfaceName,
+  buildParams,
+  buildProps,
+  buildTypes,
+  buildHttpVerb,
+  isOptional,
+  makeDataType,
+  makeTuple2,
+  makeTuple3,
+  makeTuple4,
+  makeTuple5,
+  stripQuestionMark,
 }

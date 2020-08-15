@@ -2,6 +2,8 @@
 // file deepcode ignore semicolon: conflict with eslint
 import {Project} from 'ts-morph'
 import {validateSchemas} from '../../src/schema/validator'
+// @ts-ignore
+import {sourceWithValidImportAndInterface, validInterface} from './util'
 
 let project: Project
 
@@ -10,18 +12,6 @@ beforeEach(() => {
 })
 
 const testName = (errCount: number, contains: string): string => `validateSchemas() returns ${errCount} Error when schema contains ${contains}`
-
-const validImport = 'import {t} from \'@typerpc/types\''
-const validInterface = `
-  interface Test {
-    getNames(name: t.str): t.bool
-  }
-  `
-const sourceWithValidImportAndInterface = (source: string) => `
-${validImport}
-${source}
-${validInterface}
-`
 
 const runTest = (project: Project, source: string, errLength: number): void => {
   project.createSourceFile('test.ts', source)
