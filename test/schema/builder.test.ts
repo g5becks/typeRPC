@@ -99,8 +99,11 @@ test('isType() should return true when given the proper type', () => {
     expect(isType(variable.getTypeNode()!, types[i])).toBeTruthy())
 })
 
-test('makeDataType() should return correct DataType', () => {
-  const type = makeRandomType(30)
-  console.log(type)
-  expect(type).toBeTruthy()
+test('makeRandomType() should return type with correct number of props', () => {
+  const propsLen = randomNumber(0, 100)
+  const type = makeRandomType(propsLen)
+  const file = getSourceFile(type, project)
+  const alias = file.getTypeAliases()[0]
+  const propsLength = alias.getTypeNode()!.forEachChildAsArray().length
+  expect(propsLength).toEqual(propsLen)
 })
