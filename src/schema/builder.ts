@@ -1,3 +1,5 @@
+/* eslint-disable new-cap,  @typescript-eslint/no-use-before-define */
+// file deepcode ignore semicolon: eslint conflict
 import {
   InterfaceDeclaration,
   MethodSignature,
@@ -14,21 +16,6 @@ import {Schema} from '.'
 import {HTTPVerb, Interface, Method, Param, Property, TypeDef} from './schema'
 
 const isType = (type: TypeNode | Node, typeText: string): boolean => type.getText().trim().startsWith(typeText)
-
-const makeList = (type: TypeNode | Node): t.List => make
-.List(makeDataType(type.getChildAtIndex(2)))
-
-const makeDict = (type: TypeNode | Node): t.Dict => make.Dict(primitivesMap.get(type.getChildAtIndex(1).getText().trim()) as rpc.Comparable, makeDataType(type.getChildAtIndex(2)))
-
-// These makeTuple Functions contain lots of duplication, but also feel like they need to be
-// defined strictly. Explore alternatives in the future.
-const makeTuple2 = (type: TypeNode | Node): t.Tuple2 => make.Tuple2(makeDataType(type.getChildAtIndex(1)), makeDataType(type.getChildAtIndex(2)))
-
-const makeTuple3 = (type: TypeNode | Node): t.Tuple3 => make.Tuple3(makeDataType(type.getChildAtIndex(1)), makeDataType(type.getChildAtIndex(2)), makeDataType(type.getChildAtIndex(3)))
-
-const makeTuple4 = (type: TypeNode | Node): t.Tuple4 => make.Tuple4(makeDataType(type.getChildAtIndex(1)), makeDataType(type.getChildAtIndex(2)), makeDataType(type.getChildAtIndex(3)), makeDataType(type.getChildAtIndex(4)))
-
-const makeTuple5 = (type: TypeNode | Node): t.Tuple5 => make.Tuple5(makeDataType(type.getChildAtIndex(1)), makeDataType(type.getChildAtIndex(2)), makeDataType(type.getChildAtIndex(3)), makeDataType(type.getChildAtIndex(4)), makeDataType(type.getChildAtIndex(5)))
 
 const makeDataType = (type: TypeNode | Node): DataType => {
   const typeText = type.getText().trim()
@@ -63,6 +50,21 @@ const makeDataType = (type: TypeNode | Node): DataType => {
   return primitives.dyn
 }
 
+const makeList = (type: TypeNode | Node): t.List => make
+.List(makeDataType(type.getChildAtIndex(2)))
+
+const makeDict = (type: TypeNode | Node): t.Dict => make.Dict(primitivesMap.get(type.getChildAtIndex(1).getText().trim()) as rpc.Comparable, makeDataType(type.getChildAtIndex(2)))
+
+// These makeTuple Functions contain lots of duplication, but also feel like they need to be
+// defined strictly. Explore alternatives in the future.
+const makeTuple2 = (type: TypeNode | Node): t.Tuple2 => make.Tuple2(makeDataType(type.getChildAtIndex(1)), makeDataType(type.getChildAtIndex(2)))
+
+const makeTuple3 = (type: TypeNode | Node): t.Tuple3 => make.Tuple3(makeDataType(type.getChildAtIndex(1)), makeDataType(type.getChildAtIndex(2)), makeDataType(type.getChildAtIndex(3)))
+
+const makeTuple4 = (type: TypeNode | Node): t.Tuple4 => make.Tuple4(makeDataType(type.getChildAtIndex(1)), makeDataType(type.getChildAtIndex(2)), makeDataType(type.getChildAtIndex(3)), makeDataType(type.getChildAtIndex(4)))
+
+const makeTuple5 = (type: TypeNode | Node): t.Tuple5 => make.Tuple5(makeDataType(type.getChildAtIndex(1)), makeDataType(type.getChildAtIndex(2)), makeDataType(type.getChildAtIndex(3)), makeDataType(type.getChildAtIndex(4)), makeDataType(type.getChildAtIndex(5)))
+
 const isHttpVerb = (method: string): method is HTTPVerb => {
   return ['POST', 'PUT', 'GET', 'HEAD', 'DELETE', 'OPTIONS', 'PATCH'].includes(method)
 }
@@ -89,16 +91,14 @@ const buildProps = (properties: Node[]): Property[] => {
 
 const buildTypes = (sourceFile: SourceFile): ReadonlySet<TypeDef> => {
   const typeAliases = sourceFile.getTypeAliases()
-  if (!typeAliases.length) {
+  if (typeAliases.length === 0) {
     return new Set()
   }
 
   return new Set(typeAliases.map(typeDef => {
-    {
-      return {
-        useCbor: isCbor(typeDef),
-        properties: new Set(buildProps(typeDef.getTypeNode()!.forEachChildAsArray())) as ReadonlySet<Property>}
-    }
+    return {
+      useCbor: isCbor(typeDef),
+      properties: new Set(buildProps(typeDef.getTypeNode()!.forEachChildAsArray())) as ReadonlySet<Property>}
   }))
 }
 
@@ -139,7 +139,7 @@ const buildInterface = (interfc: InterfaceDeclaration): Interface => {
 
 const buildInterfaces = (sourceFile: SourceFile): ReadonlySet<Interface> => {
   const interfaces = sourceFile.getInterfaces()
-  if (!interfaces.length) {
+  if (interfaces.length === 0) {
     return new Set()
   }
   return new Set(interfaces.map(interfc => buildInterface(interfc)))
