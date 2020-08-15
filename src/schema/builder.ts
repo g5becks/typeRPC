@@ -44,10 +44,10 @@ const makeDataType = (type: TypeNode | Node): DataType => {
 // returns the type parameters portion of the type as an array
 const getTypeParams = (type: Node | TypeNode): Node[] => type.getChildren()[2].getChildren().filter(child => child.getText().trim() !== ',')
 
-const makeList = (type: TypeNode | Node): t.List => make
+const makeList = (type: TypeNode | Node): t.List<rpc.Keyable> => make
 .List(makeDataType(getTypeParams(type)[0]))
 
-const makeDict = (type: TypeNode | Node): t.Dict => {
+const makeDict = (type: TypeNode | Node): t.Dict<rpc.Comparable, rpc.Keyable> => {
   const params = getTypeParams(type)
   return make.Dict(primitivesMap.get(params[0].getText().trim()) as rpc.Comparable, makeDataType(params[1]))
 }

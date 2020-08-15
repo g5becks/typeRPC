@@ -9,36 +9,36 @@ export const make = {
     }} as Struct
   },
 
-  Dict: (keyType: rpc.Comparable, valType: DataType): t.Dict => {
+  Dict: (keyType: rpc.Comparable, valType: rpc.Keyable): t.Dict<rpc.Comparable, rpc.Keyable> => {
     return {keyType, valType, toString() {
       return `t.Dict<${keyType.toString()}, ${valType.toString()}>`
-    }} as t.Dict
+    }} as t.Dict<rpc.Comparable, rpc.Keyable>
   },
-  Tuple2: (item1: DataType, item2: DataType): t.Tuple2 => {
+  Tuple2: (item1: DataType, item2: DataType): t.Tuple2<rpc.Keyable, rpc.Keyable> => {
     return {item1, item2, toString() {
       return `t.Tuple2<${item1.toString()}, ${item2.toString()}>`
-    }} as t.Tuple2
+    }} as t.Tuple2<rpc.Keyable, rpc.Keyable>
   },
-  Tuple3: (item1: DataType, item2: DataType, item3: DataType): t.Tuple3 => {
+  Tuple3: (item1: DataType, item2: DataType, item3: DataType): t.Tuple3<rpc.Keyable, rpc.Keyable, rpc.Keyable> => {
     return {item1, item2, item3, toString() {
       return `t.Tuple3<${item1.toString()}, ${item2.toString()}, ${item3.toString()}>`
-    }} as t.Tuple3
+    }} as t.Tuple3<rpc.Keyable, rpc.Keyable, rpc.Keyable>
   },
 
-  Tuple4: (item1: DataType, item2: DataType, item3: DataType, item4: DataType): t.Tuple4 => {
+  Tuple4: (item1: DataType, item2: DataType, item3: DataType, item4: DataType): t.Tuple4<rpc.Keyable, rpc.Keyable, rpc.Keyable, rpc.Keyable> => {
     return {item1, item2, item3, item4, toString() {
       return `t.Tuple4<${item1.toString()}, ${item2.toString()}, ${item3.toString()}, ${item4.toString()}>`
-    }} as t.Tuple4
+    }} as t.Tuple4<rpc.Keyable, rpc.Keyable, rpc.Keyable, rpc.Keyable>
   },
-  Tuple5: (item1: DataType, item2: DataType, item3: DataType, item4: DataType, item5: DataType): t.Tuple5 => {
+  Tuple5: (item1: DataType, item2: DataType, item3: DataType, item4: DataType, item5: DataType): t.Tuple5<rpc.Keyable, rpc.Keyable, rpc.Keyable, rpc.Keyable, rpc.Keyable> => {
     return {item1, item2, item3, item4, item5, toString() {
       return `t.Tuple5<${item1.toString()}, ${item2.toString()}, ${item3.toString()}, ${item4.toString()}, ${item5.toString()}>`
-    }} as t.Tuple5
+    }} as t.Tuple5<rpc.Keyable, rpc.Keyable, rpc.Keyable, rpc.Keyable, rpc.Keyable>
   },
-  List: (dataType: DataType): t.List => {
+  List: (dataType: DataType): t.List<rpc.Keyable> => {
     return {dataType, toString() {
       return `t.List<${dataType.toString()}>`
-    }} as t.List
+    }} as t.List<rpc.Keyable>
   },
   blob: () => {
     return {data: '', toString() {
@@ -81,12 +81,12 @@ const validateTuple = (type: DataType, numItems: number): boolean => validateTyp
 
 // functions to validate the type of a variable
 export const is = {
-  Dict: (type: DataType): type is t.Dict => validateType(type, 'keyType', 'valType'),
-  Tuple2: (type: DataType): type is t.Tuple2 => validateTuple(type, 2),
-  Tuple3: (type: DataType): type is t.Tuple3 => validateTuple(type, 3),
-  Tuple4: (type: DataType): type is t.Tuple4 => validateTuple(type, 4),
-  Tuple5: (type: DataType): type is t.Tuple5 => validateTuple(type, 5),
-  List: (type: DataType): type is t.List => validateType(type, 'elemType'),
+  Dict: (type: DataType): boolean => validateType(type, 'keyType', 'valType'),
+  Tuple2: (type: DataType): boolean => validateTuple(type, 2),
+  Tuple3: (type: DataType): boolean => validateTuple(type, 3),
+  Tuple4: (type: DataType): boolean => validateTuple(type, 4),
+  Tuple5: (type: DataType): boolean => validateTuple(type, 5),
+  List: (type: DataType): boolean => validateType(type, 'elemType'),
   Struct: (type: DataType): type is Struct => validateType(type, 'name'),
   blob: (type: DataType): type is t.blob => validateType(type, 'data'),
   Container: (type: DataType): type is Container => [is.Struct, is.List, is.Dict, is.Tuple2, is.Tuple3, is.Tuple4, is.Tuple3, is.Tuple5].some(func => func(type)),
