@@ -112,4 +112,10 @@ test('makeDataType() should return correct DataType for type prop', () => {
   const type = makeRandomType(randomNumber(140, 300))
   const file = getSourceFile(type, project)
   const types = file.getTypeAliases()[0].getTypeNode()!.forEachChildAsArray()
+  for (const type of types) {
+    const propType = type.getChildAtIndex(2)
+    const dataType = makeDataType(propType)
+    console.log(dataType.toString(), propType.getText().trim())
+    expect(dataType.toString()).toEqual(propType.getText().trim())
+  }
 })

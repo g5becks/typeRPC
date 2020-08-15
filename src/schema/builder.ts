@@ -31,17 +31,8 @@ const makeDataType = (type: TypeNode | Node): DataType => {
   if (isType(type, 't.Dict')) {
     return makeDict(type)
   }
-  if (isType(type, 't.Tuple2')) {
-    return makeTuple2(type)
-  }
-  if (isType(type, 't.Tuple3')) {
-    return makeTuple3(type)
-  }
-  if (isType(type, 't.Tuple4')) {
-    return makeTuple4(type)
-  }
-  if (isType(type, 't.Tuple5')) {
-    return makeTuple5(type)
+  if (isType(type, 't.Tuple')) {
+    return makeTuple(type)
   }
   if (isType(type, 't.blob')) {
     return make.blob()
@@ -50,20 +41,33 @@ const makeDataType = (type: TypeNode | Node): DataType => {
   return primitives.dyn
 }
 
+// returns the type parameters portion of the type as an array
+const getTypeParams = (type: Node | TypeNode): Node[] => type.getChildren()[2].getChildren().filter(child => child.getText().trim() !== ',')
+
 const makeList = (type: TypeNode | Node): t.List => make
-.List(makeDataType(type.getChildAtIndex(2)))
+.List(makeDataType(getTypeParams(type)[0]))
 
-const makeDict = (type: TypeNode | Node): t.Dict => make.Dict(primitivesMap.get(type.getChildAtIndex(1).getText().trim()) as rpc.Comparable, makeDataType(type.getChildAtIndex(2)))
+const makeDict = (type: TypeNode | Node): t.Dict => {
+  const params = getTypeParams(type)
+  return make.Dict(primitivesMap.get(params[0].getText().trim()) as rpc.Comparable, makeDataType(params[1]))
+}
 
-// These makeTuple Functions contain lots of duplication, but also feel like they need to be
-// defined strictly. Explore alternatives in the future.
-const makeTuple2 = (type: TypeNode | Node): t.Tuple2 => make.Tuple2(makeDataType(type.getChildAtIndex(1)), makeDataType(type.getChildAtIndex(2)))
+const makeTuple = (type: TypeNode | Node): DataType => {
+  const params = getTypeParams(type)
+  switch (params.length) {
+  case 2:
+    return make.Tuple2(makeDataType(params[0]), makeDataType(params[1]))
 
-const makeTuple3 = (type: TypeNode | Node): t.Tuple3 => make.Tuple3(makeDataType(type.getChildAtIndex(1)), makeDataType(type.getChildAtIndex(2)), makeDataType(type.getChildAtIndex(3)))
-
-const makeTuple4 = (type: TypeNode | Node): t.Tuple4 => make.Tuple4(makeDataType(type.getChildAtIndex(1)), makeDataType(type.getChildAtIndex(2)), makeDataType(type.getChildAtIndex(3)), makeDataType(type.getChildAtIndex(4)))
-
-const makeTuple5 = (type: TypeNode | Node): t.Tuple5 => make.Tuple5(makeDataType(type.getChildAtIndex(1)), makeDataType(type.getChildAtIndex(2)), makeDataType(type.getChildAtIndex(3)), makeDataType(type.getChildAtIndex(4)), makeDataType(type.getChildAtIndex(5)))
+  case 3:
+    return make.Tuple3(makeDataType(params[0]), makeDataType(params[1]), makeDataType(params[2]))
+  case 4:
+    return make.Tuple4(makeDataType(params[0]), makeDataType(params[1]), makeDataType(params[2]), makeDataType(params[3]))
+  case 5:
+    return make.Tuple5(makeDataType(params[0]), makeDataType(params[1]), makeDataType(params[2]), makeDataType(params[3]), makeDataType(params[4]))
+  default:
+    return make.Tuple2(primitives.dyn, primitives.dyn)
+  }
+}
 
 const isHttpVerb = (method: string): method is HTTPVerb => {
   return ['POST', 'PUT', 'GET', 'HEAD', 'DELETE', 'OPTIONS', 'PATCH'].includes(method)
