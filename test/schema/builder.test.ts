@@ -107,3 +107,9 @@ test('makeRandomType() should return type with correct number of props', () => {
   const propsLength = alias.getTypeNode()!.forEachChildAsArray().length
   expect(propsLength).toEqual(propsLen)
 })
+
+test('makeDataType() should return correct DataType for type prop', () => {
+  const type = makeRandomType(randomNumber(140, 300))
+  const file = getSourceFile(type, project)
+  const types = file.getTypeAliases()[0].getTypeNode()!.forEachChildAsArray()
+})

@@ -1,33 +1,49 @@
 import {t, rpc} from '@typerpc/types'
 
-export type Struct = {name: string} | {readonly brand: unique symbol}
+export type Struct = {name: string} & {readonly brand: unique symbol}
 
 export const make = {
   Struct: (name: string): Struct => {
-    return {name} as Struct
+    return {name, toString() {
+      return this.name
+    }} as Struct
   },
 
   Dict: (keyType: rpc.Comparable, valType: DataType): t.Dict => {
-    return {keyType, valType} as t.Dict
+    return {keyType, valType, toString() {
+      return `t.Dict<${keyType.toString()}, ${valType.toString()}>`
+    }} as t.Dict
   },
   Tuple2: (item1: DataType, item2: DataType): t.Tuple2 => {
-    return {item1, item2} as t.Tuple2
+    return {item1, item2, toString() {
+      return `t.Tuple2<${item1.toString()}, ${item2.toString()}>`
+    }} as t.Tuple2
   },
   Tuple3: (item1: DataType, item2: DataType, item3: DataType): t.Tuple3 => {
-    return {item1, item2, item3} as t.Tuple3
+    return {item1, item2, item3, toString() {
+      return `t.Tuple3<${item1.toString()}, ${item2.toString()}, ${item3.toString()}>`
+    }} as t.Tuple3
   },
 
   Tuple4: (item1: DataType, item2: DataType, item3: DataType, item4: DataType): t.Tuple4 => {
-    return {item1, item2, item3, item4} as t.Tuple4
+    return {item1, item2, item3, item4, toString() {
+      return `t.Tuple4<${item1.toString()}, ${item2.toString()}, ${item3.toString()}, ${item4.toString()}>`
+    }} as t.Tuple4
   },
   Tuple5: (item1: DataType, item2: DataType, item3: DataType, item4: DataType, item5: DataType): t.Tuple5 => {
-    return {item1, item2, item3, item4, item5} as t.Tuple5
+    return {item1, item2, item3, item4, item5, toString() {
+      return `t.Tuple5<${item1.toString()}, ${item2.toString()}, ${item3.toString()}, ${item4.toString()}, ${item5.toString()}>`
+    }} as t.Tuple5
   },
   List: (dataType: DataType): t.List => {
-    return {dataType} as t.List
+    return {dataType, toString() {
+      return `t.List<${dataType.toString()}>`
+    }} as t.List
   },
   blob: () => {
-    return {data: ''} as unknown as t.blob
+    return {data: '', toString() {
+      return `t.blob`
+    }} as unknown as t.blob
   },
 }
 
@@ -54,7 +70,6 @@ export const primitives: {[key: string]: rpc.Primitive} = {
 type Container = rpc.Container | Struct
 
 export type DataType = rpc.RpcType | Struct
-
 
 const validateType = (type: DataType, ...propNames: string[]): boolean => {
   const props = Object.getOwnPropertyNames(type)
