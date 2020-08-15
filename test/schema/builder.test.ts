@@ -65,7 +65,7 @@ const makeTuple3 = () => `t.Tuple3<${randomKeyable()}, ${randomKeyable()}, ${ran
 
 const makeTuple4 = () => `t.Tuple4<${randomKeyable()}, ${randomKeyable()}, ${randomKeyable()}, ${randomKeyable()}>`
 
-const makeTuple5 = () => `t.Tuple5<${randomKeyable()},${randomKeyable()}, ${randomKeyable()}, ${randomKeyable()}, ${randomKeyable()}>`
+const makeTuple5 = () => `t.Tuple5<${randomKeyable()}, ${randomKeyable()}, ${randomKeyable()}, ${randomKeyable()}, ${randomKeyable()}>`
 
 const makeRandomDataType = (): string => {
   const makers = [randomStructName, makeDict, makeList, makeTuple2, makeTuple3, makeTuple4, makeTuple5, randomComparable, () => 't.unit', () => 't.nil']
@@ -115,7 +115,7 @@ test('makeDataType() should return correct DataType for type prop', () => {
   for (const type of types) {
     const propType = type.getChildAtIndex(2)
     const dataType = makeDataType(propType)
-    console.log(dataType.toString(), propType.getText().trim())
+    console.log('created: ' + dataType.toString() + ' actual: ' + propType.getText().trim())
     expect(dataType.toString()).toEqual(propType.getText().trim())
   }
 })
