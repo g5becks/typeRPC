@@ -29,6 +29,7 @@
   "devDependencies": {
     "@oclif/dev-cli": "^1",
     "@types/cli-progress": "^3.7.0",
+    "@types/faker": "^4.1.12",
     "@types/fs-extra": "^9.0.1",
     "@types/jest": "^26.0.9",
     "@types/listr": "^0.14.2",
@@ -37,6 +38,7 @@
     "eslint": "^5.13",
     "eslint-config-oclif": "^3.1",
     "eslint-config-oclif-typescript": "^0.1",
+    "faker": "^4.1.0",
     "globby": "^10",
     "jest": "^26.4.0",
     "pino": "^6.4.1",
@@ -49,7 +51,11 @@
       ".(ts|tsx)": "ts-jest"
     },
     "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js)$",
-    "moduleFileExtensions": ["ts", "tsx", "js"]
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js"
+    ]
   },
   "engines": {
     "node": ">=8.4.0"

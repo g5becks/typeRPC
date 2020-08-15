@@ -161,8 +161,6 @@ export const buildSchemas = (sourceFiles: SourceFile[]): ReadonlySet<Schema> | E
 }
 
 export const internalTesting = {
-  makeList,
-  makeDict,
   isType,
   isCbor,
   isContainer,
@@ -179,9 +177,5 @@ export const internalTesting = {
   buildHttpVerb,
   isOptional,
   makeDataType,
-  makeTuple2,
-  makeTuple3,
-  makeTuple4,
-  makeTuple5,
   stripQuestionMark,
 }
