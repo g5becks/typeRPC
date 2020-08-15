@@ -82,7 +82,7 @@ const isOptional = (text: string): boolean => text.endsWith('?')
 
 const stripQuestionMark = (text: string): string =>  isOptional(text) ? text.replace('?', '') : text
 
-const isCbor = (type: TypeAliasDeclaration): boolean => type.getJsDocs()[0]?.getDescription().trim().toLocaleLowerCase().includes('cbor')
+const isCbor = (type: TypeAliasDeclaration): boolean => type.getJsDocs()[0]?.getDescription()?.trim()?.toLocaleLowerCase()?.includes('cbor')
 
 // builds all properties of a type alias
 const buildProps = (properties: Node[]): Property[] => {
