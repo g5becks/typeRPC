@@ -128,6 +128,12 @@ test('buildParams() should return correct Params', () => {
   for (const method of methods) {
     const params = method.getParameters()
     const builtParams = buildParams(params)
-    expect(params.length).toEqual(builtParams.length)
+    const builtParamsArray = [...builtParams]
+    expect(params.length).toEqual(builtParams.size)
+    for (let i = 0; i < params.length; i++) {
+      expect(params[i].isOptional()).toEqual(builtParamsArray[i].isOptional)
+      expect(params[i].getNameNode().getText().trim()).toEqual(builtParamsArray[i].name)
+      expect(params[i].getTypeNode()!.getText().trim()).toEqual(builtParamsArray[i].type.toString())
+    }
   }
 })
