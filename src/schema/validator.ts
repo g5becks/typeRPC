@@ -10,6 +10,7 @@ import {
   TypeNode,
 } from 'ts-morph'
 import {containersList, primitivesMap} from './types'
+import {getTypeNode, isOptional} from './builder'
 
 type Violator = {
   name?: string;
@@ -195,7 +196,7 @@ const validateTypeAliasChildren = (type: TypeAliasDeclaration): Error[] => {
   }
   for (const child of children) {
     // get the properties type
-    const propType = child.getChildAtIndex(2)
+    const propType = getTypeNode(child)
     if (!isValidDataType(propType.getText().trim()) && !isValidTypeAlias(propType)) {
       errs.push(new Error(`type error in file: ${filePath}
          at line number: ${child.getStartLineNumber()}

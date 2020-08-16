@@ -78,9 +78,9 @@ const buildHttpVerb = (method: MethodSignature): HTTPVerb => {
   const rMethod = docs[0]?.getDescription().trim()
   return rMethod && isHttpVerb(rMethod) ? rMethod.toUpperCase() as HTTPVerb : 'POST'
 }
-const isOptional = (node: Node): boolean => node.getChildAtIndex(1).getText() === '?'
+export const isOptional = (node: Node): boolean => node.getChildAtIndex(1).getText() === '?'
 
-const stripQuestionMark = (text: string): string =>  ''
+export const getTypeNode = (node: Node) => isOptional(node) ? node.getChildAtIndex(3) : node.getChildAtIndex(2)
 
 const isCbor = (type: TypeAliasDeclaration): boolean => type.getJsDocs()[0]?.getDescription()?.trim()?.toLocaleLowerCase()?.includes('cbor')
 
@@ -90,7 +90,7 @@ const buildProps = (properties: Node[]): Property[] => {
   for (const prop of properties) {
     // get property name
     const name = prop.getChildAtIndex(0).getText().trim()
-    props.push({isOptional: isOptional(prop), type: makeDataType(prop.getChildAtIndex(2)), name: stripQuestionMark(name)})
+    props.push({isOptional: isOptional(prop), type: makeDataType(prop.getChildAtIndex(2)), name})
   }
   return props
 }
@@ -178,7 +178,5 @@ export const internalTesting = {
   buildProps,
   buildTypes,
   buildHttpVerb,
-  isOptional,
   makeDataType,
-  stripQuestionMark,
 }

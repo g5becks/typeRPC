@@ -1,9 +1,8 @@
-import {internalTesting} from '../../src/schema/builder'
+import {internalTesting, isOptional} from '../../src/schema/builder'
 import {Project} from 'ts-morph'
 import {containersList, primitivesMap} from '../../src/schema/types'
 // @ts-ignore
 import {getSourceFile, makeRandomType, randomNumber} from './util'
-import exp = require('constants')
 
 const {
   isType,
@@ -19,9 +18,7 @@ const {
   buildProps,
   buildTypes,
   buildHttpVerb,
-  isOptional,
   makeDataType,
-  stripQuestionMark,
 } = internalTesting
 
 let project: Project
