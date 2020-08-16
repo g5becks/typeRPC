@@ -1,4 +1,4 @@
-import {internalTesting, isOptional} from '../../src/schema/builder'
+import {getTypeNode, internalTesting, isOptional} from '../../src/schema/builder'
 import {Project} from 'ts-morph'
 import {containersList, primitivesMap} from '../../src/schema/types'
 // @ts-ignore
@@ -51,9 +51,9 @@ test('makeDataType() should return correct DataType for type prop', () => {
   const file = getSourceFile(type, project)
   const types = file.getTypeAliases()[0].getTypeNode()!.forEachChildAsArray()
   for (const type of types) {
-    const propType = type.getChildAtIndex(2)
+    const propType = getTypeNode(type)
     const dataType = makeDataType(propType)
-    console.log(type.getText())
+    console.log('dataType created = ' + dataType.toString() + ' source property type = ' + propType.getText().trim())
     expect(dataType.toString()).toEqual(propType.getText().trim())
   }
 })

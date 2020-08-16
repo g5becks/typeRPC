@@ -18,6 +18,10 @@ const isType = (type: TypeNode | Node, typeText: string): boolean => type.getTex
 
 const makeDataType = (type: TypeNode | Node): DataType => {
   const typeText = type.getText().trim()
+  const invalids = ['', ':', '?', '}', '{', ';']
+  if (invalids.includes(typeText)) {
+    return primitives.dyn
+  }
   if (isPrimitive(typeText)) {
     return primitivesMap.get(typeText) as DataType
   }

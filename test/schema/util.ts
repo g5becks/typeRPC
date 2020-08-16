@@ -88,7 +88,6 @@ export const makeRandomType = (propCount: number): string => {
   let props = ''
   for (let i = 0; i < propCount; i++) {
     const isOptional = randomNumber(0, 2)
-    console.log(isOptional)
     const optional = isOptional === 0 ? '' : '?'
     props = props.concat(`prop${i}${optional}: ${makeRandomDataType()};\n`)
   }
