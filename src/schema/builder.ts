@@ -9,7 +9,6 @@ import {
   TypeAliasDeclaration,
   TypeNode,
 } from 'ts-morph'
-import {rpc, t} from '@typerpc/types'
 import {DataType, make, primitives, primitivesMap} from './types'
 import {isContainer, isPrimitive, validateSchemas} from './validator'
 import {Schema} from '.'
@@ -85,15 +84,10 @@ export const getTypeNode = (node: Node) => isOptional(node) ? node.getChildAtInd
 const isCbor = (type: TypeAliasDeclaration): boolean => type.getJsDocs()[0]?.getDescription()?.trim()?.toLocaleLowerCase()?.includes('cbor')
 
 // builds all properties of a type alias
-const buildProps = (properties: Node[]): Property[] => {
-  const props: Property[] = []
-  for (const prop of properties) {
-    // get property name
-    const name = prop.getChildAtIndex(0).getText().trim()
-    props.push({isOptional: isOptional(prop), type: makeDataType(getTypeNode(prop)), name})
-  }
-  return props
-}
+const buildProps = (properties: Node[]): Property[] =>
+  properties.map(prop => {
+    return {isOptional: isOptional(prop), type: makeDataType(getTypeNode(prop)), name: prop.getChildAtIndex(0).getText().trim()}
+  })
 
 const buildTypes = (sourceFile: SourceFile): ReadonlySet<TypeDef> => {
   const typeAliases = sourceFile.getTypeAliases()
