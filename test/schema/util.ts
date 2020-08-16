@@ -99,3 +99,8 @@ export const makeRandomType = (propCount: number): string => {
 export const getSourceFile = (source: string, project: Project): SourceFile =>
   project.createSourceFile('test.ts', source)
 
+export type testProp = {
+    isOptional: boolean;
+    name: string;
+    type: string;
+  }

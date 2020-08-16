@@ -2,7 +2,9 @@ import {getTypeNode, internalTesting, isOptional} from '../../src/schema/builder
 import {Project} from 'ts-morph'
 import {containersList, primitivesMap} from '../../src/schema/types'
 // @ts-ignore
-import {getSourceFile, makeRandomType, randomNumber, testController} from './util'
+import {getSourceFile, makeRandomType, randomNumber, testController, testProp} from './util'
+import {Property} from '../../src/schema/schema'
+import exp = require('constants')
 
 const {
   isType,
@@ -88,3 +90,18 @@ test('buildHttpVerb() should return correct httpVerb', () => {
   }
 })
 
+test('buildProps() should return correct type alias properties', () => {
+  const propsLen = randomNumber(200, 400)
+  const sourceType = makeRandomType(propsLen)
+  const type = getSourceFile(sourceType, project).getTypeAliases()[0]
+  const props = type.getTypeNode()!.forEachChildAsArray()
+  const builtProps = buildProps(props)
+  const testProps: testProp[] = props.map(prop => {
+    return {isOptional: prop.getText().includes('?'), name: prop.getChildAtIndex(0).getText().trim(), type: getTypeNode(prop).getText().trim()}
+  })
+  for (let i = 0; i < builtProps.length; i++) {
+    expect(builtProps[i].name).toEqual(testProps[i].name)
+    expect(builtProps[i].isOptional).toEqual(testProps[i].isOptional)
+    expect(builtProps[i].type.toString()).toEqual(testProps[i].type)
+  }
+})
