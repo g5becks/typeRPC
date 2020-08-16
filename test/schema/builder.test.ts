@@ -2,18 +2,21 @@ import {getTypeNode, internalTesting, isOptional} from '../../src/schema/builder
 import {Project} from 'ts-morph'
 import {containersList, primitivesMap} from '../../src/schema/types'
 // @ts-ignore
-import {getSourceFile, makeRandomInterface, makeRandomType, randomNumber, testController, testProp} from './util'
-import {Property} from '../../src/schema/schema'
-import exp = require('constants')
+import {
+  getSourceFile,
+  makeRandomType,
+  makeTestMethods,
+  makeTestSchemasFiles,
+  randomNumber,
+  testController,
+  testProp,
+} from './util'
 
 const {
   isType,
   isCbor,
   buildSchema,
-  buildInterface,
-  buildInterfaces,
   buildMethod,
-  buildMethods,
   buildParams,
   buildProps,
   buildTypes,
@@ -123,8 +126,7 @@ test('buildTypes() should return correct Set of types', () => {
 })
 
 test('buildParams() should return correct Params', () => {
-  const source = makeRandomInterface()
-  const methods = getSourceFile(source, project).getInterfaces()[0].getMethods()
+  const methods = makeTestMethods(project)
   for (const method of methods) {
     const params = method.getParameters()
     const builtParams = buildParams(params)
@@ -139,12 +141,21 @@ test('buildParams() should return correct Params', () => {
 })
 
 test('buildMethod() should return method with correct params and return type', () => {
-  const source = makeRandomInterface()
-  const methods = getSourceFile(source, project).getInterfaces()[0].getMethods()
+  const methods = makeTestMethods(project)
   for (const method of methods) {
     const builtMethod = buildMethod(method)
     expect(method.getReturnTypeNode()!.getText().trim()).toEqual(builtMethod.returnType.toString())
     expect(method.getNameNode().getText().trim()).toEqual(builtMethod.name)
     expect(method.getParameters().length).toEqual(builtMethod.params.size)
+  }
+})
+
+test('buildSchema() should have correct name, num types, and num interfaces', () => {
+  for (const source of makeTestSchemasFiles(project)) {
+    console.log(source.getFullText())
+    const schema = buildSchema(source)
+    expect(schema.fileName).toEqual(source.getBaseName())
+    expect(schema.interfaces.size).toEqual(source.getInterfaces().length)
+    expect(schema.types.size).toEqual(source.getTypeAliases().length)
   }
 })

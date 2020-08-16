@@ -1,4 +1,4 @@
-import {Project, SourceFile} from 'ts-morph'
+import {MethodSignature, Project, SourceFile} from 'ts-morph'
 import * as faker from 'faker'
 
 export const validImport = 'import {t} from \'@typerpc/types\''
@@ -101,7 +101,8 @@ const buildRandomMethod = (): string => {
   const paramsCount = randomNumber(0, 6)
   let params = ''
   for (let i = 0; i <  paramsCount; i++) {
-    params = params.concat(`${buildRandomParam()},`)
+    const useComma = i !== paramsCount - 1 ? ',' : ''
+    params = params.concat(`${buildRandomParam()}${useComma}`)
   }
   return `${randomStructName().toLowerCase()}(${params}): ${makeRandomDataType()};`
 }
@@ -118,8 +119,33 @@ export const makeRandomInterface = (): string => {
   }`
 }
 
+export const makeTestMethods = (project: Project): MethodSignature[] => getSourceFile(makeRandomInterface(), project).getInterfaces()[0].getMethods()
+
 export const getSourceFile = (source: string, project: Project): SourceFile =>
   project.createSourceFile('test.ts', source)
+
+const makeTestSchemaFile = (fileName: string, project: Project): SourceFile => {
+  const numTypes = randomNumber(10, 30)
+  const numInterfaces = randomNumber(10, 30)
+  let source = ''
+  for (let i = 0; i < numTypes; i++) {
+    source = source.concat(makeRandomType(randomNumber(10, 20)) + '\n')
+  }
+  for (let i = 0; i < numInterfaces; i++) {
+    source = source.concat(makeRandomInterface() + '\n')
+  }
+  return project.createSourceFile(fileName, source)
+}
+
+export const makeTestSchemasFiles = (project: Project): SourceFile[] => {
+  const fileCount = randomNumber(20, 50)
+  let files: SourceFile[] =  []
+  for (let i = 0; i < fileCount; i++) {
+    const fileName = randomStructName().toLowerCase() + i.toString() + '.ts'
+    files = files.concat(makeTestSchemaFile(fileName, project))
+  }
+  return files
+}
 
 export type testProp = {
     isOptional: boolean;

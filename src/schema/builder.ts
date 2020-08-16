@@ -17,8 +17,8 @@ import {HTTPVerb, Interface, Method, Param, Property, TypeDef} from './schema'
 const isType = (type: TypeNode | Node, typeText: string): boolean => type.getText().trim().startsWith(typeText)
 
 const makeDataType = (type: TypeNode | Node): DataType => {
-  const typeText = type.getText().trim()
-  const invalids = ['', ':', '?', '}', '{', ';']
+  const typeText = type.getText()?.trim()
+  const invalids = ['', ':', '?', '}', '{', ';', 'undefined']
   if (invalids.includes(typeText)) {
     return primitives.dyn
   }
@@ -159,17 +159,14 @@ const buildSchema = (file: SourceFile): Schema => {
 
 export const buildSchemas = (sourceFiles: SourceFile[]): ReadonlySet<Schema> | Error[] => {
   const errs = validateSchemas(sourceFiles)
-  return errs ? errs : new Set(sourceFiles.map(file => buildSchema(file)))
+  return errs ? errs : new Set<Schema>(sourceFiles.map(file => buildSchema(file)))
 }
 
 export const internalTesting = {
   isType,
   isCbor,
   buildSchema,
-  buildInterface,
-  buildInterfaces,
   buildMethod,
-  buildMethods,
   buildParams,
   buildProps,
   buildTypes,
