@@ -85,7 +85,7 @@ export const isOptional = (node: Node): boolean => node.getChildAtIndex(1).getTe
 
 export const getTypeNode = (node: Node) => isOptional(node) ? node.getChildAtIndex(3) : node.getChildAtIndex(2)
 
-const isCbor = (type: TypeAliasDeclaration): boolean => type.getJsDocs()[0]?.getDescription()?.trim()?.toLocaleLowerCase()?.includes('cbor')
+const isCbor = (type: TypeAliasDeclaration): boolean => Boolean(type.getJsDocs()[0]?.getDescription()?.trim()?.toLocaleLowerCase()?.includes('cbor'))
 
 // builds all properties of a type alias
 const buildProps = (properties: Node[]): Property[] =>

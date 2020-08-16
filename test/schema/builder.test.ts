@@ -105,3 +105,15 @@ test('buildProps() should return correct type alias properties', () => {
     expect(builtProps[i].type.toString()).toEqual(testProps[i].type)
   }
 })
+
+test('buildTypes() should return correct Set of types', () => {
+  const numTypes = randomNumber(50, 75)
+  let types = ''
+  for (let i = 0; i < numTypes; i++) {
+    types += (`${makeRandomType(randomNumber(20, 40))}\n`)
+  }
+  const file = getSourceFile(types, project)
+  const builtTypes = buildTypes(file)
+  console.log(builtTypes)
+  expect(builtTypes.size).toEqual(numTypes)
+})
