@@ -53,7 +53,7 @@ test('makeDataType() should return correct DataType for type prop', () => {
   for (const type of types) {
     const propType = type.getChildAtIndex(2)
     const dataType = makeDataType(propType)
-    console.log('created: ' + dataType.toString() + ' actual: ' + propType.getText().trim())
+    console.log(type.getText())
     expect(dataType.toString()).toEqual(propType.getText().trim())
   }
 })
@@ -88,13 +88,3 @@ test('buildHttpVerb() should return correct httpVerb', () => {
   }
 })
 
-test('buildProps() should return correct type alias properties', () => {
-  const propsLen = randomNumber(200, 400)
-  const sourceType = makeRandomType(propsLen)
-  const type = getSourceFile(sourceType, project).getTypeAliases()[0]
-  const props = type.getTypeNode()!.forEachChildAsArray()
-  const builtProps = buildProps(props)
-  for (const prop of props) {
-    const isOptional = prop.getText().includes('?')
-  }
-})
