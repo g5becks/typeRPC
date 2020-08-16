@@ -1,7 +1,7 @@
 import {getTypeNode, internalTesting, isOptional} from '../../src/schema/builder'
 import {Project} from 'ts-morph'
 import {containersList, primitivesMap} from '../../src/schema/types'
-// @ts-ignore
+
 import {
   getSourceFile,
   makeRandomType,

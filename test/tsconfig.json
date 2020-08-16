@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "importHelpers": true,
+    "module": "commonjs",
+    "strict": true,
+    "target": "es2017",
+    "esModuleInterop": true,
+    "lib": ["esNext"],
+    "noEmit": true,
+    "rootDir": "."
+  },
+    "references": [
+    {"path": "../"}
+  ],
+    "include": [
+    "./**/*"
+  ]
+}
