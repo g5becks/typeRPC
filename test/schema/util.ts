@@ -62,7 +62,16 @@ const containers = [`t.Dict<${randomComparable()}, ${randomComparable()}>`, `t.L
 
 const randomContainer = (): string => containers[randomNumber(0, containers.length - 1)]
 
-const randomStructName =  (): string => faker.name.firstName().toUpperCase()
+const randomStructName =  (): string => {
+  let name = faker.name.firstName().toUpperCase() + randomNumber(0, 200)
+  if (name.includes('`')) {
+    name = name.replace('`', '')
+  }
+  if (name.includes('\'')) {
+    name = name.replace('\'', '')
+  }
+  return name
+}
 
 const keyables = [randomComparable(), randomContainer(), randomStructName()]
 
@@ -101,7 +110,7 @@ const buildRandomMethod = (): string => {
   const paramsCount = randomNumber(0, 6)
   let params = ''
   for (let i = 0; i <  paramsCount; i++) {
-    const useComma = i !== paramsCount - 1 ? ',' : ''
+    const useComma = i !== paramsCount - 1 ? ', ' : ''
     params = params.concat(`${buildRandomParam()}${useComma}`)
   }
   return `${randomStructName().toLowerCase()}(${params}): ${makeRandomDataType()};`
@@ -111,7 +120,7 @@ export const makeRandomInterface = (): string => {
   const methodCount = randomNumber(5, 26)
   let methods = ''
   for (let i = 0; i < methodCount; i++) {
-    methods = methods.concat(buildRandomMethod() + '\n')
+    methods = methods.concat(buildRandomMethod() + '\n\n')
   }
   return `
   interface ${randomStructName().toLowerCase()} {
