@@ -58,7 +58,6 @@ test('makeDataType() should return correct DataType for type prop', () => {
   for (const type of types) {
     const propType = getTypeNode(type)
     const dataType = makeDataType(propType)
-    console.log('dataType created = ' + dataType.toString() + ' source property type = ' + propType.getText().trim())
     expect(dataType.toString()).toEqual(propType.getText().trim())
   }
 })
@@ -152,7 +151,6 @@ test('buildMethod() should return method with correct params and return type', (
 
 test('buildSchema() should have correct name, num types, and num interfaces', () => {
   for (const source of makeTestSchemasFiles(project)) {
-    console.log(source.getText())
     const schema = buildSchema(source)
     expect(schema.fileName).toEqual(source.getBaseName())
     expect(schema.interfaces.size).toEqual(source.getInterfaces().length)

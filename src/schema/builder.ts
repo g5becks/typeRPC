@@ -18,8 +18,8 @@ const isType = (type: TypeNode | Node, typeText: string): boolean => type.getTex
 
 const makeDataType = (type: TypeNode | Node): DataType => {
   const typeText = type.getText()?.trim()
-  const invalids = ['', ':', '?', '}', '{', ';', 'undefined']
-  if (invalids.includes(typeText)) {
+  const invalids = ['', ':', '?', '}', '{', ';']
+  if (invalids.includes(typeText) || typeof type === 'undefined') {
     return primitives.dyn
   }
   if (isPrimitive(typeText)) {
@@ -119,9 +119,6 @@ const buildParams = (params: ParameterDeclaration[]): ReadonlySet<Param> => {
 const getMethodName = (method: MethodSignature): string => method.getNameNode().getText().trim()
 
 const buildMethod = (method: MethodSignature): Method => {
-  if (typeof method.getReturnTypeNode() === 'undefined') {
-    console.log(method.getName() + 'undefined return type!')
-  }
   return {
     httpVerb: buildHttpVerb(method),
     name: getMethodName(method),
