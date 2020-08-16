@@ -90,7 +90,7 @@ const buildProps = (properties: Node[]): Property[] => {
   for (const prop of properties) {
     // get property name
     const name = prop.getChildAtIndex(0).getText().trim()
-    props.push({isOptional: isOptional(prop), type: makeDataType(prop.getChildAtIndex(2)), name})
+    props.push({isOptional: isOptional(prop), type: makeDataType(getTypeNode(prop)), name})
   }
   return props
 }
