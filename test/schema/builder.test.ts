@@ -113,7 +113,11 @@ test('buildTypes() should return correct Set of types', () => {
     types += (`${makeRandomType(randomNumber(20, 40))}\n`)
   }
   const file = getSourceFile(types, project)
+  const aliases = file.getTypeAliases()
   const builtTypes = buildTypes(file)
-  console.log(builtTypes)
   expect(builtTypes.size).toEqual(numTypes)
+  const builtArray = [...builtTypes]
+  for (let i = 0; i < builtTypes.size; i++) {
+    expect(builtArray[i].properties.size).toEqual(aliases[i].getTypeNode()!.forEachChildAsArray().length)
+  }
 })
