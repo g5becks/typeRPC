@@ -85,9 +85,10 @@ const makers = [randomStructName, makeDict, makeList, makeTuple2, makeTuple3, ma
 const makeRandomDataType = (): string => makers[randomNumber(0, makers.length - 1)]()
 
 export const makeRandomType = (propCount: number): string => {
+  const optional = ['?', '']
   let props = ''
   for (let i = 0; i < propCount; i++) {
-    props = props.concat(`prop${propCount}: ${makeRandomDataType()};\n`)
+    props = props.concat(`prop${propCount}${optional[randomNumber(0, 1)]}: ${makeRandomDataType()};\n`)
   }
   return `type TestType = {
     ${props}

@@ -87,3 +87,14 @@ test('buildHttpVerb() should return correct httpVerb', () => {
     expect(buildHttpVerb(method)).toEqual(verb)
   }
 })
+
+test('buildProps() should return correct type alias properties', () => {
+  const propsLen = randomNumber(200, 400)
+  const sourceType = makeRandomType(propsLen)
+  const type = getSourceFile(sourceType, project).getTypeAliases()[0]
+  const props = type.getTypeNode()!.forEachChildAsArray()
+  const builtProps = buildProps(props)
+  for (const prop of props) {
+    const isOptional = prop.getText().includes('?')
+  }
+})
