@@ -166,8 +166,6 @@ export const internalTesting = {
   buildInterfaces,
   buildMethod,
   buildMethods,
-  getMethodName,
-  getInterfaceName,
   buildParams,
   buildProps,
   buildTypes,

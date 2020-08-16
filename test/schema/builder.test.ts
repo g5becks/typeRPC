@@ -2,7 +2,7 @@ import {internalTesting, isOptional} from '../../src/schema/builder'
 import {Project} from 'ts-morph'
 import {containersList, primitivesMap} from '../../src/schema/types'
 // @ts-ignore
-import {getSourceFile, makeRandomType, randomNumber} from './util'
+import {getSourceFile, makeRandomType, randomNumber, testController} from './util'
 
 const {
   isType,
@@ -12,8 +12,6 @@ const {
   buildInterfaces,
   buildMethod,
   buildMethods,
-  getMethodName,
-  getInterfaceName,
   buildParams,
   buildProps,
   buildTypes,
@@ -72,7 +70,7 @@ type BinaryType = {
   expect(isCbor(getSourceFile(source, project).getTypeAliases()[0])).toBeTruthy()
 })
 
-test('isOptional should return true when given optional prop', () => {
+test('isOptional() should return true when given optional prop', () => {
   const source = `
  type TypeWithOptional = {
     name?: string;
@@ -80,4 +78,12 @@ test('isOptional should return true when given optional prop', () => {
   const alias = getSourceFile(source, project).getTypeAliases()[0]
   const prop = alias.getTypeNode()!.forEachChildAsArray()[0]
   expect(isOptional(prop)).toBeTruthy()
+})
+
+test('buildHttpVerb() should return correct httpVerb', () => {
+  const methods = getSourceFile(testController, project).getInterfaces()[0].getMethods()
+  for (const method of methods) {
+    const verb = method.getJsDocs()[0].getDescription().trim()
+    expect(buildHttpVerb(method)).toEqual(verb)
+  }
 })
