@@ -106,14 +106,14 @@ const buildTypes = (sourceFile: SourceFile): ReadonlySet<TypeDef> => {
   }))
 }
 
-const buildParams = (params: ParameterDeclaration[]): Param[] => {
-  return params.map(param => {
+const buildParams = (params: ParameterDeclaration[]): ReadonlySet<Param> => {
+  return new Set<Param>(params.map(param => {
     return {
       name: param.getName().trim(),
       isOptional: param.isOptional(),
       type: makeDataType(param.getTypeNode()!),
     }
-  })
+  }))
 }
 
 const getMethodName = (method: MethodSignature): string => method.getNameNode().getText().trim()
@@ -122,7 +122,7 @@ const buildMethod = (method: MethodSignature): Method => {
   return {
     httpVerb: buildHttpVerb(method),
     name: getMethodName(method),
-    params: new Set(buildParams(method.getParameters())),
+    params: buildParams(method.getParameters()),
     returnType: makeDataType(method.getReturnTypeNode()!),
     hasParams(): boolean {
       return Boolean(this.params.keys.length)

@@ -84,15 +84,37 @@ const makers = [randomStructName, makeDict, makeList, makeTuple2, makeTuple3, ma
 
 const makeRandomDataType = (): string => makers[randomNumber(0, makers.length - 1)]()
 
+const optional = () => randomNumber(0, 2) === 0 ? '' : '?'
+
 export const makeRandomType = (propCount: number): string => {
   let props = ''
   for (let i = 0; i < propCount; i++) {
-    const isOptional = randomNumber(0, 2)
-    const optional = isOptional === 0 ? '' : '?'
-    props = props.concat(`prop${i}${optional}: ${makeRandomDataType()};\n`)
+    props = props.concat(`prop${i}${optional()}: ${makeRandomDataType()};\n`)
   }
   return `type TestType = {
     ${props}
+  }`
+}
+const buildRandomParam = () => `${randomStructName().toLowerCase()}${optional()}: ${makeRandomDataType()}`
+
+const buildRandomMethod = (): string => {
+  const paramsCount = randomNumber(0, 6)
+  let params = ''
+  for (let i = 0; i <  paramsCount; i++) {
+    params = params.concat(`${buildRandomParam()},`)
+  }
+  return `${randomStructName().toLowerCase()}(${params}): ${makeRandomDataType()};`
+}
+
+export const makeRandomInterface = (): string => {
+  const methodCount = randomNumber(5, 26)
+  let methods = ''
+  for (let i = 0; i < methodCount; i++) {
+    methods = methods.concat(buildRandomMethod() + '\n')
+  }
+  return `
+  interface ${randomStructName().toLowerCase()} {
+    ${methods}
   }`
 }
 

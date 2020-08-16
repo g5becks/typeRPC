@@ -2,7 +2,7 @@ import {getTypeNode, internalTesting, isOptional} from '../../src/schema/builder
 import {Project} from 'ts-morph'
 import {containersList, primitivesMap} from '../../src/schema/types'
 // @ts-ignore
-import {getSourceFile, makeRandomType, randomNumber, testController, testProp} from './util'
+import {getSourceFile, makeRandomInterface, makeRandomType, randomNumber, testController, testProp} from './util'
 import {Property} from '../../src/schema/schema'
 import exp = require('constants')
 
@@ -119,5 +119,15 @@ test('buildTypes() should return correct Set of types', () => {
   const builtArray = [...builtTypes]
   for (let i = 0; i < builtTypes.size; i++) {
     expect(builtArray[i].properties.size).toEqual(aliases[i].getTypeNode()!.forEachChildAsArray().length)
+  }
+})
+
+test('buildParams() should return correct Params', () => {
+  const source = makeRandomInterface()
+  const methods = getSourceFile(source, project).getInterfaces()[0].getMethods()
+  for (const method of methods) {
+    const params = method.getParameters()
+    const builtParams = buildParams(params)
+    expect(params.length).toEqual(builtParams.length)
   }
 })
