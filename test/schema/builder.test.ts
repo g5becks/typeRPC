@@ -137,3 +137,14 @@ test('buildParams() should return correct Params', () => {
     }
   }
 })
+
+test('buildMethod() should return method with correct params and return type', () => {
+  const source = makeRandomInterface()
+  const methods = getSourceFile(source, project).getInterfaces()[0].getMethods()
+  for (const method of methods) {
+    const builtMethod = buildMethod(method)
+    expect(method.getReturnTypeNode()!.getText().trim()).toEqual(builtMethod.returnType.toString())
+    expect(method.getNameNode().getText().trim()).toEqual(builtMethod.name)
+    expect(method.getParameters().length).toEqual(builtMethod.params.size)
+  }
+})
