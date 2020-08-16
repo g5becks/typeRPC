@@ -8,7 +8,6 @@ import exp = require('constants')
 const {
   isType,
   isCbor,
-  isContainer,
   buildSchema,
   buildInterface,
   buildInterfaces,
@@ -74,4 +73,14 @@ type BinaryType = {
 }
 `
   expect(isCbor(getSourceFile(source, project).getTypeAliases()[0])).toBeTruthy()
+})
+
+test('isOptional should return true when given optional prop', () => {
+  const source = `
+ type TypeWithOptional = {
+    name?: string;
+ }`
+  const alias = getSourceFile(source, project).getTypeAliases()[0]
+  const prop = alias.getTypeNode()!.forEachChildAsArray()[0]
+  expect(isOptional(prop)).toBeTruthy()
 })
