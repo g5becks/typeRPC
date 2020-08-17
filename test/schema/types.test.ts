@@ -36,3 +36,24 @@ test('is.List() should return correct value', () => {
   expect(is.List(make.Tuple2(primitives.dyn, primitives.dyn))).toBeFalsy()
   expect(is.List(make.List(primitives.bool))).toBeTruthy()
 })
+
+test('is.blob() should return correct value', () => {
+  expect(is.blob('')).toBeFalsy()
+  expect(is.blob([])).toBeFalsy()
+  expect(is.blob({})).toBeFalsy()
+  expect(is.blob(make.blob())).toBeTruthy()
+})
+
+test('is.Container() should return false when passed non container value', () => {
+  const vals = [primitives.dyn, primitives.int8, primitives.int16, primitives.unit]
+  for (const val of vals) {
+    expect(is.Container(val)).toBeFalsy()
+  }
+})
+
+test('is.Container() should return true when passed a container', () => {
+  const vals = [make.Struct('me'), make.List(primitives.bool), make.Dict(primitives.int8, primitives.bool), make.Tuple2(primitives.bool, primitives.bool), make.Tuple3(primitives.bool, primitives.bool, primitives.bool), make.Tuple4(primitives.bool, primitives.bool, primitives.bool, primitives.bool), make.Tuple5(primitives.bool, primitives.bool, primitives.bool, primitives.bool, primitives.bool)]
+  for (const val of vals) {
+    expect(is.Container(val)).toBeTruthy()
+  }
+})
