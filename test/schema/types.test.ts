@@ -1,3 +1,4 @@
+/* eslint-disable */
 import {is, make, primitives} from '../../src/schema/types'
 
 test('is.Struct() should return correct value', () => {
@@ -37,12 +38,6 @@ test('is.List() should return correct value', () => {
   expect(is.List(make.List(primitives.bool))).toBeTruthy()
 })
 
-test('is.blob() should return correct value', () => {
-  expect(is.blob('')).toBeFalsy()
-  expect(is.blob([])).toBeFalsy()
-  expect(is.blob({})).toBeFalsy()
-  expect(is.blob(make.blob())).toBeTruthy()
-})
 
 test('is.Container() should return false when passed non container value', () => {
   const vals = [primitives.dyn, primitives.int8, primitives.int16, primitives.unit]

@@ -12,6 +12,6 @@ export type Target = 'client' | 'server'
 export type CodeBuilder = {
   readonly lang: ProgrammingLanguage;
   readonly target: Target;
-  readonly framework: string;
+  readonly framework?: string;
   readonly builder: (schemas: ReadonlySet<Schema>) => ReadonlySet<Code>;
 }

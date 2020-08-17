@@ -43,11 +43,6 @@ export const make = {
       return `t.List<${dataType.toString()}>`
     }} as DataType
   },
-  blob: (): DataType => {
-    return {data: '', toString() {
-      return `t.blob`
-    }} as DataType
-  },
 }
 
 export const primitives: {[key: string]: rpc.Primitive} = {
@@ -68,6 +63,7 @@ export const primitives: {[key: string]: rpc.Primitive} = {
   dyn: {_type_: 'dyn', toString: () => 't.dyn'} as unknown as t.dyn,
   timestamp: {_type_: 'timestamp', toString: () => 't.timestamp'} as unknown as t.timestamp,
   unit: {_type_: 'unit', toString: () => 't.unit'} as unknown as t.unit,
+  blob: {_type_: 'blob', toString: () => 't.blob'} as unknown as t.blob,
 }
 
 type Container = rpc.Container | Struct
@@ -96,7 +92,6 @@ export const is = {
   Tuple5: (type: unknown): type is t.Tuple5<rpc.Keyable, rpc.Keyable, rpc.Keyable, rpc.Keyable, rpc.Keyable> => validateTuple(type, 5),
   List: (type: unknown): type is t.List<rpc.Keyable> => validateType(type, 'dataType'),
   Struct: (type: unknown): type is Struct => validateType(type, 'name'),
-  blob: (type: unknown): type is t.blob => validateType(type, 'data'),
   Container: (type: DataType): type is Container => [is.Struct, is.List, is.Dict, is.Tuple2, is.Tuple3, is.Tuple4, is.Tuple3, is.Tuple5].some(func => func(type)),
 }
 

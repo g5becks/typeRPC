@@ -37,9 +37,6 @@ const makeDataType = (type: TypeNode | Node): DataType => {
   if (isType(type, 't.Tuple')) {
     return makeTuple(type)
   }
-  if (isType(type, 't.blob')) {
-    return make.blob()
-  }
 
   return primitives.dyn
 }
