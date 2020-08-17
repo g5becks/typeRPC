@@ -94,7 +94,7 @@ export const is = {
   Tuple3: (type: unknown): type is t.Tuple3<rpc.Keyable, rpc.Keyable, rpc.Keyable> => validateTuple(type, 3),
   Tuple4: (type: unknown): type is t.Tuple4<rpc.Keyable, rpc.Keyable, rpc.Keyable, rpc.Keyable> => validateTuple(type, 4),
   Tuple5: (type: unknown): type is t.Tuple5<rpc.Keyable, rpc.Keyable, rpc.Keyable, rpc.Keyable, rpc.Keyable> => validateTuple(type, 5),
-  List: (type: unknown): type is t.List<rpc.Keyable> => validateType(type, 'elemType'),
+  List: (type: unknown): type is t.List<rpc.Keyable> => validateType(type, 'dataType'),
   Struct: (type: unknown): type is Struct => validateType(type, 'name'),
   blob: (type: unknown): type is t.blob => validateType(type, 'data'),
   Container: (type: DataType): type is Container => [is.Struct, is.List, is.Dict, is.Tuple2, is.Tuple3, is.Tuple4, is.Tuple3, is.Tuple5].some(func => func(type)),
