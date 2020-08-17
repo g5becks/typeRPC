@@ -30,11 +30,14 @@ export const make = {
       return `t.Tuple4<${item1.toString()}, ${item2.toString()}, ${item3.toString()}, ${item4.toString()}>`
     }} as DataType
   },
+
+  /* eslint-disable max-params */
   Tuple5: (item1: DataType, item2: DataType, item3: DataType, item4: DataType, item5: DataType): DataType => {
     return {item1, item2, item3, item4, item5, toString() {
       return `t.Tuple5<${item1.toString()}, ${item2.toString()}, ${item3.toString()}, ${item4.toString()}, ${item5.toString()}>`
     }} as DataType
   },
+  /* eslint-enable max-params */
   List: (dataType: DataType): DataType => {
     return {dataType, toString() {
       return `t.List<${dataType.toString()}>`
@@ -72,12 +75,17 @@ type Container = rpc.Container | Struct
 export type DataType = rpc.RpcType | Struct
 
 const validateType = (type: unknown, ...propNames: string[]): boolean => {
-  const props = Object.getOwnPropertyNames(type)
-  return propNames.every(name => props.includes(name))
+  const props = Object.getOwnPropertyNames(type).filter(prop => !prop.includes('toString'))
+  return propNames.every(name => props.includes(name)) && props.length === propNames.length
 }
-
 // validate every TupleN type by ensuring it has itemN property names.
-const validateTuple = (type: unknown, numItems: number): boolean => validateType(type, ...new Array(numItems).map(num => `item${num + 1}`))
+const validateTuple = (type: unknown, numItems: number): boolean => {
+  const props: string[] = []
+  for (let i = 0; i < numItems; i++) {
+    props.push(`item${i + 1}`)
+  }
+  return validateType(type, ...props)
+}
 
 // functions to validate the type of a variable
 export const is = {
