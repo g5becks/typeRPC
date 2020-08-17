@@ -1,6 +1,7 @@
 /* eslint-disable new-cap */
 import {DataType, is, primitives} from '../../schema/types'
 
+// Maps typerpc types to typescript data-types
 export const typesMap: Map<DataType, string> = new Map<DataType, string>(
   [
     [primitives.bool, 'boolean'],
@@ -20,10 +21,12 @@ export const typesMap: Map<DataType, string> = new Map<DataType, string>(
     [primitives.dyn, 'any'],
     [primitives.timestamp, 'Date'],
     [primitives.unit, 'void'],
+    [primitives.blob, 'Uint8Array'],
 
   ]
 )
 
+// Converts the input DataType into a typescript representation
 export const dataType = (type: DataType): string => {
   if (!is.Container(type) && !typesMap.has(type)) {
     return 'any'
@@ -45,7 +48,21 @@ export const dataType = (type: DataType): string => {
     return type.name
   }
 
-  if (is.blob(type))
+  if (is.Tuple2(type)) {
+    return `[${dataType(type)}, ${dataType(type)}]`
+  }
 
-    return 'any'
+  if (is.Tuple3(type)) {
+    return `[${dataType(type)}, ${dataType(type)}, ${dataType(type)}]`
+  }
+
+  if (is.Tuple4(type)) {
+    return `[${dataType(type)}, ${dataType(type)}, ${dataType(type)}, ${dataType(type)}]`
+  }
+
+  if (is.Tuple5(type)) {
+    return `[${dataType(type)}, ${dataType(type)}, ${dataType(type)}, ${dataType(type)}, ${dataType(type)}]`
+  }
+
+  return 'any'
 }
