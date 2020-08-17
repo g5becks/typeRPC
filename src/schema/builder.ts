@@ -148,7 +148,7 @@ const buildInterfaces = (sourceFile: SourceFile): ReadonlySet<Interface> => {
 
 const buildSchema = (file: SourceFile): Schema => {
   return {
-    fileName: file.getBaseName(),
+    fileName: file.getBaseNameWithoutExtension(),
     types: buildTypes(file),
     interfaces: buildInterfaces(file),
   }
