@@ -82,6 +82,7 @@ const isHttpVerb = (method: string): method is HTTPVerb => {
   return ['POST', 'PUT', 'GET', 'HEAD', 'DELETE', 'OPTIONS', 'PATCH'].includes(method)
 }
 
+// builds the httpVerb for a method using the parsed JsDoc
 const buildHttpVerb = (method: MethodSignature): HTTPVerb => {
   const docs = method.getJsDocs()
   const rMethod = docs[0]?.getDescription().trim()
@@ -89,6 +90,7 @@ const buildHttpVerb = (method: MethodSignature): HTTPVerb => {
 }
 export const isOptional = (node: Node): boolean => node.getChildAtIndex(1).getText() === '?'
 
+// gets the type node E.G. (name: type node) of a type alias property
 export const getTypeNode = (node: Node) => isOptional(node) ? node.getChildAtIndex(3) : node.getChildAtIndex(2)
 
 const isCbor = (type: TypeAliasDeclaration): boolean => Boolean(type.getJsDocs()[0]?.getDescription()?.trim()?.toLocaleLowerCase()?.includes('cbor'))
@@ -99,6 +101,7 @@ const buildProps = (properties: Node[]): Property[] =>
     return {isOptional: isOptional(prop), type: makeDataType(getTypeNode(prop)), name: prop.getChildAtIndex(0).getText().trim()}
   })
 
+// Converts all type aliases found in schema files into TypeDefs
 const buildTypes = (sourceFile: SourceFile): ReadonlySet<TypeDef> => {
   const typeAliases = sourceFile.getTypeAliases()
   if (typeAliases.length === 0) {

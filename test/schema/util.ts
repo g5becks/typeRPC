@@ -186,7 +186,7 @@ const makeTypeNames = (): Set<string> => {
   }
   return new Set<string>(names)
 }
-export const makeTestFile = (fileName: string, project: Project): SourceFile => {
+export const makeTestFile = (project: Project, fileName = 'test.ts'): SourceFile => {
   const typeNames: string[] = [...makeTypeNames()]
   const randomStruct = () => typeNames[randomNumber(0, typeNames.length)]
   const makers = [makeDict, makeList, makeTuple2, makeTuple3, makeTuple4, makeTuple5, randomComparable, () => 't.unit', () => 't.nil']
@@ -201,10 +201,39 @@ export const makeTestFiles = (project: Project): SourceFile[] => {
   let files: SourceFile[] =  []
   for (let i = 0; i < fileCount; i++) {
     const fileName = randomStructName().toLowerCase() + i.toString() + '.ts'
-    files = files.concat(makeTestFile(fileName, project))
+    files = files.concat(makeTestFile(project, fileName))
   }
   return files
 }
+
+export const makeStructTestSource = `
+  /**
+ * cbor
+ */
+type CborType = {}
+
+/**
+ * cbor
+ */
+
+type AnotherCbor = {}
+type TestType1 = {
+  prop1: CborType;
+  prop2: AnotherCbor;
+}
+
+/**
+*
+*/
+type NoCbor = {}
+
+type MoreNoCbor = {}
+
+type TestType2 = {
+  prop1: NoCbor;
+  prop2: MoreNoCbor;
+}
+`
 
 export type testProp = {
     isOptional: boolean;

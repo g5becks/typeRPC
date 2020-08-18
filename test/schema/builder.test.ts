@@ -1,8 +1,9 @@
+/* eslint-disable new-cap */
 import {getTypeNode, internalTesting, isOptional} from '../../src/schema/builder'
 import {Project} from 'ts-morph'
-import {containersList, primitivesMap} from '../../src/schema/types'
+import {containersList, is, primitivesMap} from '../../src/schema/types'
 
-import {getSourceFile, makeTestFile, makeTestFiles, testController, testProp} from './util'
+import {getSourceFile, makeStructTestSource, makeTestFile, makeTestFiles, testController, testProp} from './util'
 
 const {
   isType,
@@ -35,7 +36,7 @@ test('isType() should return true when given the proper type', () => {
 })
 
 test('makeDataType() should return correct DataType for type prop', () => {
-  const file = makeTestFile('test.ts', project)
+  const file = makeTestFile(project)
   const types = file.getTypeAliases()
   for (const type of types) {
     for (const node of type.getTypeNode()!.forEachChildAsArray()) {
@@ -77,7 +78,7 @@ test('buildHttpVerb() should return correct httpVerb', () => {
 })
 
 test('buildProps() should return correct type alias properties', () => {
-  const file = makeTestFile('test.ts', project)
+  const file = makeTestFile(project)
   const types = file.getTypeAliases()
   for (const type of types) {
     const props = type.getTypeNode()!.forEachChildAsArray()
@@ -94,7 +95,7 @@ test('buildProps() should return correct type alias properties', () => {
 })
 
 test('buildTypes() should return correct Set of types', () => {
-  const file = makeTestFile('test.ts', project)
+  const file = makeTestFile(project)
   const aliases = file.getTypeAliases()
   const builtTypes = buildTypes(file)
   expect(builtTypes.size).toEqual(aliases.length)
@@ -105,7 +106,7 @@ test('buildTypes() should return correct Set of types', () => {
 })
 
 test('buildParams() should return correct Params', () => {
-  const interfaces = makeTestFile('test.ts', project).getInterfaces()
+  const interfaces = makeTestFile(project).getInterfaces()
   const methods = interfaces.flatMap(interfc => interfc.getMethods())
   for (const method of methods) {
     const params = method.getParameters()
@@ -121,7 +122,7 @@ test('buildParams() should return correct Params', () => {
 })
 
 test('buildMethod() should return method with correct params and return type', () => {
-  const interfaces = makeTestFile('test.ts', project).getInterfaces()
+  const interfaces = makeTestFile(project).getInterfaces()
   const methods = interfaces.flatMap(interfc => interfc.getMethods())
   for (const method of methods) {
     const builtMethod = buildMethod(method)
@@ -137,5 +138,25 @@ test('buildSchema() should have correct name, num types, and num interfaces', ()
     expect(schema.fileName).toEqual(source.getBaseNameWithoutExtension())
     expect(schema.interfaces.size).toEqual(source.getInterfaces().length)
     expect(schema.types.size).toEqual(source.getTypeAliases().length)
+  }
+})
+
+test('makeStruct() should return a struct with correct useCbor param set', () => {
+  const file = getSourceFile(makeStructTestSource, project)
+  const hasCbor = file.getTypeAlias('TestType1')!.getTypeNode()!.forEachChildAsArray()
+  const noCbor = file.getTypeAlias('TestType2')!.getTypeNode()!.forEachChildAsArray()
+  for (const node of hasCbor) {
+    const type = makeDataType(getTypeNode(node))
+    expect(is.Struct(type)).toBeTruthy()
+    if (is.Struct(type)) {
+      expect(type.useCbor).toBeTruthy()
+    }
+  }
+  for (const node of noCbor) {
+    const type = makeDataType(getTypeNode(node))
+    expect(is.Struct(type)).toBeTruthy()
+    if (is.Struct(type)) {
+      expect(type.useCbor).toBeFalsy()
+    }
   }
 })
