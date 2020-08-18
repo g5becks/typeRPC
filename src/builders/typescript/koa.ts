@@ -1,6 +1,6 @@
 import {Code, CodeBuilder} from '..'
 import {Method, Schema} from '../../schema'
-import {capitalize, fileHeader} from '../utils'
+import {capitalize, fileHeader, lowerCase} from '../utils'
 import {Interface, TypeDef} from '../../schema'
 import {dataType} from './helpers'
 
@@ -27,20 +27,49 @@ const buildTypes = (schema: Schema): string => {
   return types
 }
 
-const buildMethod = (method: Method): string => {
-
+const buildParams = (method: Method): string => {
+  let params = ''
+  const optionals = [...method.params].filter(param => param.isOptional)
+  const sorted = [...method.params].filter(param => !param.isOptional).concat(optionals)
+  for (let i = 0; i < sorted.length; i++) {
+    const useComma = i === sorted.length - 1 ? '' : ','
+    params = params.concat(`${sorted[i].name}: ${dataType(sorted[i].type)}${useComma}`)
+  }
+  return params
 }
+
+const buildMethod = (method: Method): string => {
+  return `async ${lowerCase(method.name)}(${buildParams(method)}): Promise<${dataType(method.returnType)}>;\n`
+}
+
+const buildMethods = (interfc: Interface): string => {
+  let methods = ''
+  for (const method of interfc.methods) {
+    methods = methods.concat(buildMethod(method))
+  }
+  return methods
+}
+
 const buildInterface = (interfc: Interface): string => {
   return `
 interface ${capitalize(interfc.name)} {
-
+  ${buildMethods(interfc)}
 }\n`
+}
+
+const buildInterfaces = (schema: Schema): string => {
+  let interfaces = ''
+  for (const interfc of schema.interfaces) {
+    interfaces = interfaces.concat(buildInterface(interfc))
+  }
+  return interfaces
 }
 const buildServer = (schema: Schema): Code => {
   const source = `
 import Router from '@koa/router'
 ${fileHeader()}
 ${buildTypes(schema)}
+${buildInterfaces(schema)}
 `
   return {fileName: schema.fileName + '.ts', source}
 }
