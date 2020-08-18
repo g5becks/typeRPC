@@ -13,6 +13,10 @@ export type Method = {
   readonly name: string;
   readonly params:  ReadonlySet<Param>;
   readonly returnType: DataType;
+  // serialize|deserialize params using cbor
+  readonly cborParams: () => boolean;
+  // serialize|deserialize return type using cbor
+  readonly cborReturn: () => boolean;
   hasParams: () => boolean;
 }
 
@@ -31,8 +35,6 @@ export type Interface = {
 export type TypeDef = {
   readonly name: string;
   readonly properties: ReadonlySet<Property>;
-  // If this type should be serialized/deserialized using cbor instead of json
-  readonly useCbor: boolean;
 }
 
 export type Schema = {

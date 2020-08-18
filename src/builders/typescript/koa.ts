@@ -14,7 +14,7 @@ const buildProps = (type: TypeDef): string => {
 }
 const buildType = (type: TypeDef): string => {
   return `
-type ${capitalize(type.name)} = {
+export type ${capitalize(type.name)} = {
   ${buildProps(type)}
 }\n`
 }
@@ -52,7 +52,7 @@ const buildMethods = (interfc: Interface): string => {
 
 const buildInterface = (interfc: Interface): string => {
   return `
-interface ${capitalize(interfc.name)} {
+export interface ${capitalize(interfc.name)} {
   ${buildMethods(interfc)}
 }\n`
 }
@@ -64,7 +64,36 @@ const buildInterfaces = (schema: Schema): string => {
   }
   return interfaces
 }
-const buildServer = (schema: Schema): Code => {
+
+const methodCall = (method: Method): string => {
+  let invoke = ''
+  if (method.hasParams()) {
+    invoke = 'ctx.request.body'
+  }
+}
+
+const buildHandler = (interfaceName: string, method: Method): string =>  {
+  return `
+router.${method.httpVerb.toLowerCase()}('${interfaceName}/${method.name}', /${method.name}, async ctx => {
+
+	} )
+`
+}
+
+const buildRoutes = (interfc: Interface): string => {
+  return `
+export const ${lowerCase(interfc.name)}Routes = (${lowerCase(interfc.name)}: ${capitalize(interfc.name)}): Middleware<Koa.ParameterizedContext<any, Router.RouterParamContext>> => {
+	const router = new Router<any, {}>({
+		prefix: '/${interfc.name}/',
+		sensitive: true
+	})
+
+	return router.routes()
+}\n
+`
+}
+
+const buildFile = (schema: Schema): Code => {
   const source = `
 import Router from '@koa/router'
 ${fileHeader()}
@@ -74,7 +103,7 @@ ${buildInterfaces(schema)}
   return {fileName: schema.fileName + '.ts', source}
 }
 
-const builder = (schemas: ReadonlySet<Schema>): ReadonlySet<Code> => new Set<Code>([...schemas].map(schema => buildServer(schema)))
+const builder = (schemas: ReadonlySet<Schema>): ReadonlySet<Code> => new Set<Code>([...schemas].map(schema => buildFile(schema)))
 
 export const KoaBuilder:  CodeBuilder = {
   lang: 'ts',

@@ -4,7 +4,7 @@ import {containersList, primitivesMap} from '../../src/schema/types'
 
 import {
   getSourceFile,
-  makeRandomType,
+  makeTypeAlias,
   makeTestMethods,
   makeTestSchemasFiles,
   randomNumber,
@@ -42,9 +42,9 @@ test('isType() should return true when given the proper type', () => {
     expect(isType(variable.getTypeNode()!, types[i])).toBeTruthy())
 })
 
-test('makeRandomType() should return type with correct number of props', () => {
+test('makeTypeAlias() should return type with correct number of props', () => {
   const propsLen = randomNumber(0, 100)
-  const type = makeRandomType(propsLen)
+  const type = makeTypeAlias(propsLen)
   const file = getSourceFile(type, project)
   const alias = file.getTypeAliases()[0]
   const propsLength = alias.getTypeNode()!.forEachChildAsArray().length
@@ -52,7 +52,7 @@ test('makeRandomType() should return type with correct number of props', () => {
 })
 
 test('makeDataType() should return correct DataType for type prop', () => {
-  const type = makeRandomType(randomNumber(200, 400))
+  const type = makeTypeAlias(randomNumber(200, 400))
   const file = getSourceFile(type, project)
   const types = file.getTypeAliases()[0].getTypeNode()!.forEachChildAsArray()
   for (const type of types) {
@@ -94,7 +94,7 @@ test('buildHttpVerb() should return correct httpVerb', () => {
 
 test('buildProps() should return correct type alias properties', () => {
   const propsLen = randomNumber(200, 400)
-  const sourceType = makeRandomType(propsLen)
+  const sourceType = makeTypeAlias(propsLen)
   const type = getSourceFile(sourceType, project).getTypeAliases()[0]
   const props = type.getTypeNode()!.forEachChildAsArray()
   const builtProps = buildProps(props)
@@ -112,7 +112,7 @@ test('buildTypes() should return correct Set of types', () => {
   const numTypes = randomNumber(50, 75)
   let types = ''
   for (let i = 0; i < numTypes; i++) {
-    types += (`${makeRandomType(randomNumber(20, 40))}\n`)
+    types += (`${makeTypeAlias(randomNumber(20, 40))}\n`)
   }
   const file = getSourceFile(types, project)
   const aliases = file.getTypeAliases()

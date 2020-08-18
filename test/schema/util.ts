@@ -55,13 +55,20 @@ export function randomNumber(min: number, max: number) {
   return Math.floor(Math.random() * (max - min) + min)
 }
 
+// list of type strings that adhere to @typerpc/types => rpc.Comparable type
 const comparables = ['t.bool', 't.int8', 't.uint8', 't.uint16', 't.int16', 't.int32', 't.uint32', 't.int64', 't.uint64', 't.float32', 't.float64', 't.str', 't.timestamp', 't.err', 't.dyn']
 
+// creates a random @typerpc/types => rpc.Comparable
 const randomComparable = () => comparables[randomNumber(0, comparables.length - 1)]
+
+// a list of @typerpc/type => rpc.Container strings with rpc.Comparables
+// as key type
 const containers = [`t.Dict<${randomComparable()}, ${randomComparable()}>`, `t.List<${randomComparable()}>`, `t.Tuple2<${randomComparable()}, ${randomComparable()}>`, `t.Tuple3<${randomComparable()}, ${randomComparable()}, ${randomComparable()}>`, `t.Tuple4<${randomComparable()}, ${randomComparable()}, ${randomComparable()}, ${randomComparable()}>`, `t.Tuple5<${randomComparable()},${randomComparable()}, ${randomComparable()}, ${randomComparable()}, ${randomComparable()}>`]
 
+// returns a random @typerpc/types => rpc.Container string
 const randomContainer = (): string => containers[randomNumber(0, containers.length - 1)]
 
+// creates a random name for a struct
 const randomStructName =  (): string => {
   let name = faker.name.firstName().toUpperCase() + randomNumber(0, 200)
   if (name.includes('`')) {
@@ -73,7 +80,7 @@ const randomStructName =  (): string => {
   return name
 }
 
-const keyables = [randomComparable(), randomContainer(), randomStructName()]
+const keyables = [randomComparable(), randomContainer()]
 
 const randomKeyable = () => keyables[randomNumber(0, keyables.length - 1)]
 
@@ -88,23 +95,6 @@ const makeTuple3 = () => `t.Tuple3<${randomKeyable()}, ${randomKeyable()}, ${ran
 const makeTuple4 = () => `t.Tuple4<${randomKeyable()}, ${randomKeyable()}, ${randomKeyable()}, ${randomKeyable()}>`
 
 const makeTuple5 = () => `t.Tuple5<${randomKeyable()}, ${randomKeyable()}, ${randomKeyable()}, ${randomKeyable()}, ${randomKeyable()}>`
-
-const makers = [randomStructName, makeDict, makeList, makeTuple2, makeTuple3, makeTuple4, makeTuple5, randomComparable, () => 't.unit', () => 't.nil']
-
-const makeRandomDataType = (): string => makers[randomNumber(0, makers.length - 1)]()
-
-const optional = () => randomNumber(0, 2) === 0 ? '' : '?'
-
-export const makeRandomType = (propCount: number): string => {
-  let props = ''
-  for (let i = 0; i < propCount; i++) {
-    props = props.concat(`prop${i}${optional()}: ${makeRandomDataType()};\n`)
-  }
-  return `type TestType = {
-    ${props}
-  }`
-}
-const buildRandomParam = () => `${randomStructName().toLowerCase()}${optional()}: ${makeRandomDataType()}`
 
 const buildRandomMethod = (): string => {
   const paramsCount = randomNumber(0, 6)
@@ -128,21 +118,59 @@ export const makeRandomInterface = (): string => {
   }`
 }
 
-export const makeTestMethods = (project: Project): MethodSignature[] => getSourceFile(makeRandomInterface(), project).getInterfaces()[0].getMethods()
+const optional = () => randomNumber(0, 2) === 0 ? '' : '?'
+
+const useCbor = () => {
+  const cbor = `
+  /**
+ * cbor
+ */\n`
+  const choices = ['', '', cbor]
+  return choices[randomNumber(0, 3)]
+}
+
+const makeTypeAlias = (name: string, typeMaker: () => string): string => {
+  let props = ''
+  const propCount = randomNumber(5, 22)
+  for (let i = 0; i < propCount; i++) {
+    props = props.concat(`prop${i}${optional()}: ${typeMaker()};\n`)
+  }
+  return `
+  ${useCbor()}
+  type ${name} = {
+    ${props}
+  }\n`
+}
+
+const makeTypeAliases = (names: string[], typeMaker: () => string): string => {
+  let types = ''
+  for (const name of names) {
+    types = types.concat(makeTypeAlias(name, typeMaker))
+  }
+  return types
+}
+
+export const makeTestMethods = (project: Project): MethodSignature[] => getSourceFile(makeRandomInterface(), project).getInterfaces().flatMap(inter => inter.getMethods())
 
 export const getSourceFile = (source: string, project: Project): SourceFile =>
   project.createSourceFile('test.ts', source)
 
-const makeTestSchemaFile = (fileName: string, project: Project): SourceFile => {
-  const numTypes = randomNumber(10, 30)
-  const numInterfaces = randomNumber(10, 30)
-  let source = ''
-  for (let i = 0; i < numTypes; i++) {
-    source = source.concat(makeRandomType(randomNumber(10, 20)) + '\n')
+const buildRandomParam = (typeMaker: () => string) => `${randomStructName().toLowerCase()}${optional()}: ${typeMaker()}`
+
+const makeTypeNames = (): Set<string> => {
+  const num = randomNumber(30, 50)
+  let names: string[] = []
+  for (let i = 0; i < num; i++) {
+    names = names.concat(randomStructName())
   }
-  for (let i = 0; i < numInterfaces; i++) {
-    source = source.concat(makeRandomInterface() + '\n')
-  }
+  return new Set<string>(...names)
+}
+const makeTestSchema = (fileName: string, project: Project): SourceFile => {
+  const typeNames: string[] = [...makeTypeNames()]
+  const randomStruct = () => typeNames[randomNumber(0, typeNames.length - 1)]
+  const makers = [makeDict, makeList, makeTuple2, makeTuple3, makeTuple4, makeTuple5, randomComparable, () => 't.unit', () => 't.nil', randomStruct]
+  const typeMaker = () => makers[randomNumber(0, makers.length - 1)]()
+  const types = makeTypeAliases(typeNames, typeMaker)
   return project.createSourceFile(fileName, source)
 }
 

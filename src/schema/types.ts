@@ -1,10 +1,10 @@
 import {rpc, t} from '@typerpc/types'
 
-export type Struct = {name: string} & {readonly brand: unique symbol}
+export type Struct = {name: string; useCbor: boolean} & {readonly brand: unique symbol}
 
 export const make = {
-  Struct: (name: string): Struct => {
-    return {name, toString() {
+  Struct: (name: string, useCbor: boolean): Struct => {
+    return {name, useCbor, toString() {
       return this.name
     }} as Struct
   },
@@ -91,7 +91,7 @@ export const is = {
   Tuple4: (type: unknown): type is t.Tuple4<rpc.Keyable, rpc.Keyable, rpc.Keyable, rpc.Keyable> => validateTuple(type, 4),
   Tuple5: (type: unknown): type is t.Tuple5<rpc.Keyable, rpc.Keyable, rpc.Keyable, rpc.Keyable, rpc.Keyable> => validateTuple(type, 5),
   List: (type: unknown): type is t.List<rpc.Keyable> => validateType(type, 'dataType'),
-  Struct: (type: unknown): type is Struct => validateType(type, 'name'),
+  Struct: (type: unknown): type is Struct => validateType(type, 'name', 'useCbor'),
   Container: (type: DataType): type is Container => [is.Struct, is.List, is.Dict, is.Tuple2, is.Tuple3, is.Tuple4, is.Tuple3, is.Tuple5].some(func => func(type)),
 }
 

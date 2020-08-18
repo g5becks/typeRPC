@@ -9,7 +9,7 @@ import {
   TypeAliasDeclaration,
   TypeNode,
 } from 'ts-morph'
-import {DataType, make, primitives, primitivesMap} from './types'
+import {DataType, is, make, primitives, primitivesMap} from './types'
 import {isContainer, isPrimitive, validateSchemas} from './validator'
 import {Schema} from '.'
 import {HTTPVerb, Interface, Method, Param, Property, TypeDef} from './schema'
@@ -26,7 +26,7 @@ const makeDataType = (type: TypeNode | Node): DataType => {
     return primitivesMap.get(typeText) as DataType
   }
   if (!isContainer(typeText)) {
-    return make.Struct(typeText)
+    return makeStruct(type)
   }
   if (isType(type, 't.List')) {
     return makeList(type)
@@ -43,6 +43,16 @@ const makeDataType = (type: TypeNode | Node): DataType => {
 
 // returns the type parameters portion of the type as an array
 const getTypeParams = (type: Node | TypeNode): Node[] => type.getChildren()[2].getChildren().filter(child => child.getText().trim() !== ',')
+
+const makeStruct = (type: Node | TypeNode): DataType => {
+  const name = type.getText()?.trim()
+  console.log(name)
+  const alias = type.getSourceFile().getTypeAlias(type.getText()?.trim())
+  if (typeof alias === 'undefined') {
+    return make.Struct('any', false)
+  }
+  return make.Struct(name, isCbor(alias))
+}
 
 const makeList = (type: TypeNode | Node): DataType => make
 .List(makeDataType(getTypeParams(type)[0]))
@@ -99,7 +109,6 @@ const buildTypes = (sourceFile: SourceFile): ReadonlySet<TypeDef> => {
   return new Set(typeAliases.map(typeDef => {
     return {
       name: typeDef.getNameNode().getText().trim(),
-      useCbor: isCbor(typeDef),
       properties: new Set(buildProps(typeDef.getTypeNode()!.forEachChildAsArray())) as ReadonlySet<Property>}
   }))
 }
@@ -122,6 +131,12 @@ const buildMethod = (method: MethodSignature): Method => {
     name: getMethodName(method),
     params: buildParams(method.getParameters()),
     returnType: makeDataType(method.getReturnTypeNode()!),
+    cborParams(): boolean {
+      return [...this.params].some(param => is.Struct(param.type) && param.type.useCbor)
+    },
+    cborReturn(): boolean {
+      return is.Struct(this.returnType) && this.returnType.useCbor
+    },
     hasParams(): boolean {
       return Boolean(this.params.keys.length)
     },
