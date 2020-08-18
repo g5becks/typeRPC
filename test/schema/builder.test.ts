@@ -152,7 +152,7 @@ test('buildMethod() should return method with correct params and return type', (
 test('buildSchema() should have correct name, num types, and num interfaces', () => {
   for (const source of makeTestSchemasFiles(project)) {
     const schema = buildSchema(source)
-    expect(schema.fileName).toEqual(source.getBaseName())
+    expect(schema.fileName).toEqual(source.getBaseNameWithoutExtension())
     expect(schema.interfaces.size).toEqual(source.getInterfaces().length)
     expect(schema.types.size).toEqual(source.getTypeAliases().length)
   }
