@@ -234,6 +234,14 @@ type TestType2 = {
   prop2: MoreNoCbor;
 }
 `
+export const methodSchemaTestSource = makeStructTestSource.concat(`
+\n
+interface MethodsTest {
+  method1(cborParam: CborType, param2: NoBor): NoCbor;
+  method2(): AnotherCbor
+  method3(param: TestType2)
+}
+`)
 
 export type testProp = {
     isOptional: boolean;

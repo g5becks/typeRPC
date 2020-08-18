@@ -14,10 +14,10 @@ export type Method = {
   readonly params:  ReadonlySet<Param>;
   readonly returnType: DataType;
   // serialize|deserialize params using cbor
-  readonly cborParams: () => boolean;
+  readonly cborParams:  boolean;
   // serialize|deserialize return type using cbor
-  readonly cborReturn: () => boolean;
-  hasParams: () => boolean;
+  readonly cborReturn:  boolean;
+  hasParams:  boolean;
 }
 
 export type Property = {

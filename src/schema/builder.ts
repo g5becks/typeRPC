@@ -133,13 +133,13 @@ const buildMethod = (method: MethodSignature): Method => {
     name: getMethodName(method),
     params: buildParams(method.getParameters()),
     returnType: makeDataType(method.getReturnTypeNode()!),
-    cborParams(): boolean {
+    get cborParams(): boolean {
       return [...this.params].some(param => is.Struct(param.type) && param.type.useCbor)
     },
-    cborReturn(): boolean {
+    get cborReturn(): boolean {
       return is.Struct(this.returnType) && this.returnType.useCbor
     },
-    hasParams(): boolean {
+    get hasParams(): boolean {
       return Boolean(this.params.keys.length)
     },
   }
