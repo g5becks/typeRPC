@@ -239,7 +239,7 @@ export const methodSchemaTestSource = makeStructTestSource.concat(`
 interface MethodsTest {
   method1(cborParam: CborType, param2: NoBor): NoCbor;
   method2(): AnotherCbor
-  method3(param: TestType2)
+  method3(param: TestType2): NoCbor;
 }
 `)
 

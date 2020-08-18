@@ -140,7 +140,7 @@ const buildMethod = (method: MethodSignature): Method => {
       return is.Struct(this.returnType) && this.returnType.useCbor
     },
     get hasParams(): boolean {
-      return Boolean(this.params.keys.length)
+      return this.params.size > 0
     },
   }
 }
