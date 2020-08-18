@@ -98,6 +98,7 @@ const buildTypes = (sourceFile: SourceFile): ReadonlySet<TypeDef> => {
 
   return new Set(typeAliases.map(typeDef => {
     return {
+      name: typeDef.getNameNode().getText().trim(),
       useCbor: isCbor(typeDef),
       properties: new Set(buildProps(typeDef.getTypeNode()!.forEachChildAsArray())) as ReadonlySet<Property>}
   }))

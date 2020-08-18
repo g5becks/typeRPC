@@ -29,6 +29,7 @@ export type Interface = {
 
 // TypeAlias from schema file
 export type TypeDef = {
+  readonly name: string;
   readonly properties: ReadonlySet<Property>;
   // If this type should be serialized/deserialized using cbor instead of json
   readonly useCbor: boolean;
