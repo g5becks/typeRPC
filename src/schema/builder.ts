@@ -46,7 +46,6 @@ const getTypeParams = (type: Node | TypeNode): Node[] => type.getChildren()[2].g
 
 const makeStruct = (type: Node | TypeNode): DataType => {
   const name = type.getText()?.trim()
-  console.log(name)
   const alias = type.getSourceFile().getTypeAlias(type.getText()?.trim())
   if (typeof alias === 'undefined') {
     return make.Struct('any', false)

@@ -2,15 +2,7 @@ import {getTypeNode, internalTesting, isOptional} from '../../src/schema/builder
 import {Project} from 'ts-morph'
 import {containersList, primitivesMap} from '../../src/schema/types'
 
-import {
-  getSourceFile,
-  makeTypeAlias,
-  makeTestMethods,
-  makeTestSchemasFiles,
-  randomNumber,
-  testController,
-  testProp,
-} from './util'
+import {getSourceFile, makeTestFile, makeTestFiles, testController, testProp} from './util'
 
 const {
   isType,
@@ -42,23 +34,15 @@ test('isType() should return true when given the proper type', () => {
     expect(isType(variable.getTypeNode()!, types[i])).toBeTruthy())
 })
 
-test('makeTypeAlias() should return type with correct number of props', () => {
-  const propsLen = randomNumber(0, 100)
-  const type = makeTypeAlias(propsLen)
-  const file = getSourceFile(type, project)
-  const alias = file.getTypeAliases()[0]
-  const propsLength = alias.getTypeNode()!.forEachChildAsArray().length
-  expect(propsLength).toEqual(propsLen)
-})
-
 test('makeDataType() should return correct DataType for type prop', () => {
-  const type = makeTypeAlias(randomNumber(200, 400))
-  const file = getSourceFile(type, project)
-  const types = file.getTypeAliases()[0].getTypeNode()!.forEachChildAsArray()
+  const file = makeTestFile('test.ts', project)
+  const types = file.getTypeAliases()
   for (const type of types) {
-    const propType = getTypeNode(type)
-    const dataType = makeDataType(propType)
-    expect(dataType.toString()).toEqual(propType.getText().trim())
+    for (const node of type.getTypeNode()!.forEachChildAsArray()) {
+      const propType = getTypeNode(node)
+      const dataType = makeDataType(propType)
+      expect(dataType.toString()).toEqual(propType.getText().trim())
+    }
   }
 })
 
@@ -93,31 +77,27 @@ test('buildHttpVerb() should return correct httpVerb', () => {
 })
 
 test('buildProps() should return correct type alias properties', () => {
-  const propsLen = randomNumber(200, 400)
-  const sourceType = makeTypeAlias(propsLen)
-  const type = getSourceFile(sourceType, project).getTypeAliases()[0]
-  const props = type.getTypeNode()!.forEachChildAsArray()
-  const builtProps = buildProps(props)
-  const testProps: testProp[] = props.map(prop => {
-    return {isOptional: prop.getText().includes('?'), name: prop.getChildAtIndex(0).getText().trim(), type: getTypeNode(prop).getText().trim()}
-  })
-  for (let i = 0; i < builtProps.length; i++) {
-    expect(builtProps[i].name).toEqual(testProps[i].name)
-    expect(builtProps[i].isOptional).toEqual(testProps[i].isOptional)
-    expect(builtProps[i].type.toString()).toEqual(testProps[i].type)
+  const file = makeTestFile('test.ts', project)
+  const types = file.getTypeAliases()
+  for (const type of types) {
+    const props = type.getTypeNode()!.forEachChildAsArray()
+    const builtProps = buildProps(props)
+    const testProps: testProp[] = props.map(prop => {
+      return {isOptional: prop.getText().includes('?'), name: prop.getChildAtIndex(0).getText().trim(), type: getTypeNode(prop).getText().trim()}
+    })
+    for (let i = 0; i < builtProps.length; i++) {
+      expect(builtProps[i].name).toEqual(testProps[i].name)
+      expect(builtProps[i].isOptional).toEqual(testProps[i].isOptional)
+      expect(builtProps[i].type.toString()).toEqual(testProps[i].type)
+    }
   }
 })
 
 test('buildTypes() should return correct Set of types', () => {
-  const numTypes = randomNumber(50, 75)
-  let types = ''
-  for (let i = 0; i < numTypes; i++) {
-    types += (`${makeTypeAlias(randomNumber(20, 40))}\n`)
-  }
-  const file = getSourceFile(types, project)
+  const file = makeTestFile('test.ts', project)
   const aliases = file.getTypeAliases()
   const builtTypes = buildTypes(file)
-  expect(builtTypes.size).toEqual(numTypes)
+  expect(builtTypes.size).toEqual(aliases.length)
   const builtArray = [...builtTypes]
   for (let i = 0; i < builtTypes.size; i++) {
     expect(builtArray[i].properties.size).toEqual(aliases[i].getTypeNode()!.forEachChildAsArray().length)
@@ -125,7 +105,8 @@ test('buildTypes() should return correct Set of types', () => {
 })
 
 test('buildParams() should return correct Params', () => {
-  const methods = makeTestMethods(project)
+  const interfaces = makeTestFile('test.ts', project).getInterfaces()
+  const methods = interfaces.flatMap(interfc => interfc.getMethods())
   for (const method of methods) {
     const params = method.getParameters()
     const builtParams = buildParams(params)
@@ -140,7 +121,8 @@ test('buildParams() should return correct Params', () => {
 })
 
 test('buildMethod() should return method with correct params and return type', () => {
-  const methods = makeTestMethods(project)
+  const interfaces = makeTestFile('test.ts', project).getInterfaces()
+  const methods = interfaces.flatMap(interfc => interfc.getMethods())
   for (const method of methods) {
     const builtMethod = buildMethod(method)
     expect(method.getReturnTypeNode()!.getText().trim()).toEqual(builtMethod.returnType.toString())
@@ -150,7 +132,7 @@ test('buildMethod() should return method with correct params and return type', (
 })
 
 test('buildSchema() should have correct name, num types, and num interfaces', () => {
-  for (const source of makeTestSchemasFiles(project)) {
+  for (const source of makeTestFiles(project)) {
     const schema = buildSchema(source)
     expect(schema.fileName).toEqual(source.getBaseNameWithoutExtension())
     expect(schema.interfaces.size).toEqual(source.getInterfaces().length)

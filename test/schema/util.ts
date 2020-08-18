@@ -1,4 +1,4 @@
-import {MethodSignature, Project, SourceFile} from 'ts-morph'
+import {Project, SourceFile} from 'ts-morph'
 import * as faker from 'faker'
 
 export const validImport = 'import {t} from \'@typerpc/types\''
@@ -80,42 +80,66 @@ const randomStructName =  (): string => {
   return name
 }
 
-const keyables = [randomComparable(), randomContainer()]
+// list of types that can be used as a container dataType
+const keyables = [randomComparable, randomContainer]
 
-const randomKeyable = () => keyables[randomNumber(0, keyables.length - 1)]
+// returns a random dataType for a container
+const randomKeyable = (makeStruct: () => string) => {
+  const funcs = [...keyables, makeStruct]
+  return funcs[randomNumber(0, funcs.length)]()
+}
 
-const makeDict = () => `t.Dict<${randomComparable()}, ${randomKeyable()}>`
+const makeDict = (makeStruct: () => string) => `t.Dict<${randomComparable()}, ${randomKeyable(makeStruct)}>`
 
-const makeList = () => `t.List<${randomKeyable()}>`
+const makeList = (makeStruct: () => string) => `t.List<${randomKeyable(makeStruct)}>`
 
-const makeTuple2 = () => `t.Tuple2<${randomKeyable()}, ${randomKeyable()}>`
+const makeTuple2 = (makeStruct: () => string) => `t.Tuple2<${randomKeyable(makeStruct)}, ${randomKeyable(makeStruct)}>`
 
-const makeTuple3 = () => `t.Tuple3<${randomKeyable()}, ${randomKeyable()}, ${randomKeyable()}>`
+const makeTuple3 = (makeStruct: () => string) => `t.Tuple3<${randomKeyable(makeStruct)}, ${randomKeyable(makeStruct)}, ${randomKeyable(makeStruct)}>`
 
-const makeTuple4 = () => `t.Tuple4<${randomKeyable()}, ${randomKeyable()}, ${randomKeyable()}, ${randomKeyable()}>`
+const makeTuple4 = (makeStruct: () => string) => `t.Tuple4<${randomKeyable(makeStruct)}, ${randomKeyable(makeStruct)}, ${randomKeyable(makeStruct)}, ${randomKeyable(makeStruct)}>`
 
-const makeTuple5 = () => `t.Tuple5<${randomKeyable()}, ${randomKeyable()}, ${randomKeyable()}, ${randomKeyable()}, ${randomKeyable()}>`
+const makeTuple5 = (makeStruct: () => string) => `t.Tuple5<${randomKeyable(makeStruct)}, ${randomKeyable(makeStruct)}, ${randomKeyable(makeStruct)}, ${randomKeyable(makeStruct)}, ${randomKeyable(makeStruct)}>`
 
-const buildRandomMethod = (): string => {
+// make a method param
+const makeParam = (typeMaker: () => string): string => `${randomStructName().toLowerCase()}: ${typeMaker()}`
+// make optional method param
+const makeOptionalParam = (typeMaker: () => string): string => `${randomStructName().toLowerCase()}?: ${typeMaker()}`
+
+// make a method for interface
+const makeMethod = (typeMaker: () => string): string => {
   const paramsCount = randomNumber(0, 6)
   let params = ''
   for (let i = 0; i <  paramsCount; i++) {
-    const useComma = i !== paramsCount - 1 ? ', ' : ''
-    params = params.concat(`${buildRandomParam()}${useComma}`)
+    if (i < 3) {
+      params = params.concat(`${makeParam(typeMaker)},`)
+    } else {
+      const useComma = i !== paramsCount - 1 ? ', ' : ''
+      params = params.concat(`${makeOptionalParam(typeMaker)}${useComma}`)
+    }
   }
-  return `${randomStructName().toLowerCase()}(${params}): ${makeRandomDataType()};`
+  return `${randomStructName().toLowerCase()}(${params}): ${typeMaker()};`
 }
 
-export const makeRandomInterface = (): string => {
-  const methodCount = randomNumber(5, 26)
+const makeInterface = (typeMaker: () => string): string => {
+  const methodCount = randomNumber(5, 12)
   let methods = ''
   for (let i = 0; i < methodCount; i++) {
-    methods = methods.concat(buildRandomMethod() + '\n\n')
+    methods = methods.concat(makeMethod(typeMaker) + '\n\n')
   }
   return `
   interface ${randomStructName().toLowerCase()} {
     ${methods}
-  }`
+  }\n`
+}
+
+const makeInterfaces = (typeMaker: () => string): string => {
+  const num = randomNumber(5, 12)
+  let interfaces = ''
+  for (let i = 0; i < num; i++) {
+    interfaces = interfaces.concat(makeInterface(typeMaker))
+  }
+  return interfaces
 }
 
 const optional = () => randomNumber(0, 2) === 0 ? '' : '?'
@@ -124,7 +148,8 @@ const useCbor = () => {
   const cbor = `
   /**
  * cbor
- */\n`
+ */
+ `
   const choices = ['', '', cbor]
   return choices[randomNumber(0, 3)]
 }
@@ -150,12 +175,8 @@ const makeTypeAliases = (names: string[], typeMaker: () => string): string => {
   return types
 }
 
-export const makeTestMethods = (project: Project): MethodSignature[] => getSourceFile(makeRandomInterface(), project).getInterfaces().flatMap(inter => inter.getMethods())
-
 export const getSourceFile = (source: string, project: Project): SourceFile =>
   project.createSourceFile('test.ts', source)
-
-const buildRandomParam = (typeMaker: () => string) => `${randomStructName().toLowerCase()}${optional()}: ${typeMaker()}`
 
 const makeTypeNames = (): Set<string> => {
   const num = randomNumber(30, 50)
@@ -163,23 +184,24 @@ const makeTypeNames = (): Set<string> => {
   for (let i = 0; i < num; i++) {
     names = names.concat(randomStructName())
   }
-  return new Set<string>(...names)
+  return new Set<string>(names)
 }
-const makeTestSchema = (fileName: string, project: Project): SourceFile => {
+export const makeTestFile = (fileName: string, project: Project): SourceFile => {
   const typeNames: string[] = [...makeTypeNames()]
-  const randomStruct = () => typeNames[randomNumber(0, typeNames.length - 1)]
-  const makers = [makeDict, makeList, makeTuple2, makeTuple3, makeTuple4, makeTuple5, randomComparable, () => 't.unit', () => 't.nil', randomStruct]
-  const typeMaker = () => makers[randomNumber(0, makers.length - 1)]()
+  const randomStruct = () => typeNames[randomNumber(0, typeNames.length)]
+  const makers = [makeDict, makeList, makeTuple2, makeTuple3, makeTuple4, makeTuple5, randomComparable, () => 't.unit', () => 't.nil']
+  const typeMaker = () => makers[randomNumber(0, makers.length)](randomStruct)
   const types = makeTypeAliases(typeNames, typeMaker)
-  return project.createSourceFile(fileName, source)
+  const interfaces = makeInterfaces(typeMaker)
+  return project.createSourceFile(fileName, types.concat(interfaces))
 }
 
-export const makeTestSchemasFiles = (project: Project): SourceFile[] => {
-  const fileCount = randomNumber(20, 50)
+export const makeTestFiles = (project: Project): SourceFile[] => {
+  const fileCount = randomNumber(12, 35)
   let files: SourceFile[] =  []
   for (let i = 0; i < fileCount; i++) {
     const fileName = randomStructName().toLowerCase() + i.toString() + '.ts'
-    files = files.concat(makeTestSchemaFile(fileName, project))
+    files = files.concat(makeTestFile(fileName, project))
   }
   return files
 }
