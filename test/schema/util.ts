@@ -243,6 +243,21 @@ interface MethodsTest {
 }
 `)
 
+export const schemaWithoutCbor = makeStructTestSource.concat(`
+\n
+interface NoCborInterface {
+  method1(): NoCbor;
+  method2(n: NoCbor): string;
+}`)
+
+export const schemaWithCbor = makeStructTestSource.concat(`
+\n
+interface CborInterface {
+  method1(): CborType;
+  method2(n: NoCbor): string;
+  method3(y: AnotherCbor): TestType2;
+  }`)
+
 export type testProp = {
     isOptional: boolean;
     name: string;

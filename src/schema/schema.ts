@@ -1,4 +1,5 @@
 import {DataType} from './types'
+import {internalTesting} from './builder'
 
 export type HTTPVerb = 'POST' | 'PUT' | 'GET' | 'HEAD' | 'DELETE' | 'OPTIONS' | 'PATCH'
 

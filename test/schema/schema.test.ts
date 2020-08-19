@@ -1,8 +1,9 @@
 import {Project} from 'ts-morph'
-import {getSourceFile, methodSchemaTestSource} from './util'
+import {getSourceFile, methodSchemaTestSource, schemaWithCbor, schemaWithoutCbor} from './util'
 import {internalTesting} from '../../src/schema/builder'
 import {Method} from '../../src/schema'
 
+const {buildSchema} = internalTesting
 let method1: Method
 let method2: Method
 let method3: Method
@@ -32,3 +33,14 @@ test('hasParams() method should return correct boolean value', () => {
   expect(method2.hasParams).toBeFalsy()
 })
 
+test('hasCbor should return false when schema has not methods with cbor', () => {
+  const file = getSourceFile(schemaWithoutCbor, new Project())
+  const schema = buildSchema(file)
+  expect(schema.hasCbor).toBeFalsy()
+})
+
+test('hasCbor should return true when schema has methods with cbor', () => {
+  const file = getSourceFile(schemaWithCbor, new Project())
+  const schema = buildSchema(file)
+  expect(schema.hasCbor).toBeTruthy()
+})
