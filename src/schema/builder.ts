@@ -1,7 +1,7 @@
 /* eslint-disable new-cap,  @typescript-eslint/no-use-before-define */
 // file deepcode ignore semicolon: eslint conflict
 import {
-  InterfaceDeclaration,
+  InterfaceDeclaration, JSDocTag,
   MethodSignature,
   Node,
   ParameterDeclaration,
@@ -12,7 +12,7 @@ import {
 import {DataType, is, make, primitives, primitivesMap} from './types'
 import {isContainer, isPrimitive, validateSchemas} from './validator'
 import {Schema} from '.'
-import {HTTPVerb, Interface, Method, Param, Property, TypeDef} from './schema'
+import {HTTPVerb, Interface, Method, Param, Property, ResponseCode, TypeDef} from './schema'
 
 const isType = (type: TypeNode | Node, typeText: string): boolean => type.getText().trim().startsWith(typeText)
 
@@ -78,24 +78,19 @@ const makeTuple = (type: TypeNode | Node): DataType => {
   }
 }
 
-const isHttpVerb = (method: string): method is HTTPVerb => {
-  return ['POST', 'PUT', 'GET', 'HEAD', 'DELETE', 'OPTIONS', 'PATCH'].includes(method)
+const getJsDocComment = (method: MethodSignature, tagName: string): string | undefined => {
+  const tags = method.getJsDocs()[0]?.getTags()
+  return tags?.filter(tag => tag.getTagName() === tagName)[0].getComment()
 }
 
+const isHttpVerb = (method: string): method is HTTPVerb =>
+  ['POST', 'PUT', 'GET', 'HEAD', 'DELETE', 'OPTIONS', 'PATCH'].includes(method)
+
 // builds the httpVerb for a method using the parsed JsDoc
-const buildHttpVerb = (method: MethodSignature): HTTPVerb => {
-  const docs = method.getJsDocs()
-  const tags = docs[0]?.getTags()
-  let rMethod: HTTPVerb = 'POST'
-  tags?.forEach(tag => {
-    // only use JsDoc comments using the @access tag
-    const comment = tag.getTagName() === 'access' ? tag.getComment()?.toUpperCase() ?? '' : ''
-    if (isHttpVerb(comment)) {
-      rMethod = comment as HTTPVerb
-    }
-  })
-  return rMethod
-}
+const buildHttpVerb = (method: MethodSignature): HTTPVerb => getJsDocComment(method, 'access') as HTTPVerb ?? 'POST'
+
+const isResponseCode = (code: number): code is ResponseCode => [200, 201, 202, 203, 204, 205, 206, 300, 301, 302, 303, 304, 305, 306, 307, 308].includes(code)
+
 export const isOptional = (node: Node): boolean => node.getChildAtIndex(1).getText() === '?'
 
 // gets the type node E.G. (name: type node) of a type alias property
