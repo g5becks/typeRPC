@@ -95,9 +95,16 @@ export const ${lowerCase(interfc.name)}Routes = (${lowerCase(interfc.name)}: ${c
 `
 }
 
+const buildImports = (schema: Schema): string => {
+  const cbor = schema.hasCbor ?
+  return `
+
+import Router, {Middleware} from '@koa/router'
+  `
+}
 const buildFile = (schema: Schema): Code => {
   const source = `
-import Router from '@koa/router'
+
 ${fileHeader()}
 ${buildTypes(schema)}
 ${buildInterfaces(schema)}

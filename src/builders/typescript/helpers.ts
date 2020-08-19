@@ -19,7 +19,7 @@ export const typesMap: Map<DataType, string> = new Map<DataType, string>(
     [primitives.str, 'string'],
     [primitives.err, 'Error'],
     [primitives.dyn, 'any'],
-    [primitives.timestamp, 'Date'],
+    [primitives.timestamp, 'number'],
     [primitives.unit, 'void'],
     [primitives.blob, 'Uint8Array'],
 
