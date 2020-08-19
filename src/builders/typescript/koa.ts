@@ -75,26 +75,81 @@ const buildInterfaces = (schema: Schema): string => {
   return interfaces
 }
 
+const buildPath = (method: Method): string => {
+  if (method.isGet || !method.hasParams) {
+    return `/${method.name}`
+  }
+  let params = ''
+  for (const param of method.params) {
+    params = params.concat(`:${param.name}`)
+  }
+  return `/${method.name}/${params}`
+}
+
+const questionMark =  (isOptional: boolean) => isOptional ? '?' : ''
+const parseParams = (method: Method): string => {
+  let paramsType = ''
+  let paramNames = ''
+  const params = [...method.params]
+  for (let i = 0; i < params.length; i++) {
+    const useComma = i === params.length - 1 ? '' : ', '
+    paramsType = paramsType.concat(`${params[i].name}${questionMark(params[i].isOptional)}: ${dataType(params[i].type)}${useComma}`)
+    paramNames = paramNames.concat(`${params[i].name}${useComma}`)
+  }
+
+  return `
+  const {${paramNames}: {${paramsType}} = ctx.params`
+}
+
+const methodCallNoParams = (interfaceName: string, method: Method): string => {
+  const invoke = `const response =  await ${interfaceName}.${method.name}()\n`
+  if (method.cborReturn) {
+    return invoke.concat(`
+    ctx.body = await encodeAsync({data: response})
+  `)
+  }
+  return invoke.concat('ctx.body = {data: response} ')
+}
+
+const methodCallNoReturn = (interfaceName: string, method: Method): string => {
+
+}
+
+const methodCallNoParamsNoReturn = (interfaceName: string, method: Method): string => {
+
+}
+
+const methodCallWithParamsAndReturn = (interfaceName: string, method: Method): string => {
+
+}
 const methodCall = (interfaceName: string, method: Method): string => {
   const invoke = ''
   if (!method.hasParams) {
-    if (method.cborReturn) {
-      return `
-        const data = await encodeAsync(${interfaceName}.${method.name}())
 
-      `
-    }
+  }
+  if (method.isGet) {
+
   }
 }
 
+const setContentType = (method: Method): string => method.cborReturn ? 'ctx.type = application/cbor' : ''
+
 const buildHandler = (interfaceName: string, method: Method): string =>  {
   return `
-router.${method.httpVerb.toLowerCase()}('${interfaceName}/${method.name}', /${method.name}, async ctx => {
+router.${method.httpVerb.toLowerCase()}('${interfaceName}/${method.name}', /${buildPath(method)}, async ctx => {
+    try {
+      ${setContentType(method)}
+      ctx.status = ${method.responseCode}
 
+      ${methodCall(interfaceName, method)}
+    } catch (e) {
+      logger.error(e)
+      ctx.throw(${method.errorCode}, e.message)
+    }
 	} )
 `
 }
-// TODO make cbor types use @kind JsDoc tag
+
 const buildRoutes = (interfc: Interface): string => {
   return `
 export const ${lowerCase(interfc.name)}Routes = (${lowerCase(interfc.name)}: ${capitalize(interfc.name)}, logger: ErrLogger = defaultLogger): Middleware<Koa.ParameterizedContext<any, Router.RouterParamContext>> => {

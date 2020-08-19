@@ -22,6 +22,8 @@ export type Method = {
   readonly cborReturn:  boolean;
   // method has parameters ?
   readonly hasParams:  boolean;
+  // does method Htt Verb === 'GET'
+  readonly isGet: boolean;
   // Type Of Http Verb this method uses. E.G. GET, POST, ...
   readonly httpVerb: HTTPVerb;
   // HTTP Response Status code for successful requests

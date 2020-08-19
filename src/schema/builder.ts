@@ -157,6 +157,9 @@ const buildMethod = (method: MethodSignature): Method => {
     returnType: makeDataType(method.getReturnTypeNode()!),
     responseCode: buildResponseCode(method),
     errorCode: buildErrCode(method),
+    get isGet(): boolean {
+      return this.httpVerb.toUpperCase() === 'GET'
+    },
     get cborParams(): boolean {
       return [...this.params].some(param => is.Struct(param.type) && param.type.useCbor)
     },
