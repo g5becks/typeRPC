@@ -11,37 +11,37 @@ export const validInterface = `
 export const testController = `
   interface TestController {
   /**
-   * GET
+   * @access GET
    */
   getSomethingById(id: number): string;
 
   /**
-   * POST
+   * @access POST
    */
   addSomething(something: any): any;
 
   /**
-   * PUT
+   * @access PUT
    */
   addSomethingElse(something: any): any;
 
   /**
-   * DELETE
+   * @access DELETE
    */
   deleteSomething(something: any): any;
 
   /**
-   * HEAD
+   * @access HEAD
    */
   preRequest(): boolean;
 
   /**
-   * OPTIONS
+   * @access OPTIONS
    */
   getOpts(): string[];
 
   /**
-   * PATCH
+   * @access PATCH
    */
   updateSomething(something: any): string;
 }`

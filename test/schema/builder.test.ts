@@ -72,7 +72,7 @@ test('isOptional() should return true when given optional prop', () => {
 test('buildHttpVerb() should return correct httpVerb', () => {
   const methods = getSourceFile(testController, project).getInterfaces()[0].getMethods()
   for (const method of methods) {
-    const verb = method.getJsDocs()[0].getDescription().trim()
+    const verb = method.getJsDocs()[0].getTags()[0].getComment()!
     expect(buildHttpVerb(method)).toEqual(verb)
   }
 })

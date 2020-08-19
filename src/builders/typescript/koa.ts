@@ -65,11 +65,14 @@ const buildInterfaces = (schema: Schema): string => {
   return interfaces
 }
 
-const methodCall = (method: Method): string => {
+const methodCall = (interfaceName: string, method: Method): string => {
   const invoke = ''
   if (!method.hasParams) {
     if (method.cborReturn) {
+      return `
+        const data = await encodeAsync(${interfaceName}.${method.name}())
 
+      `
     }
   }
 }
@@ -96,15 +99,20 @@ export const ${lowerCase(interfc.name)}Routes = (${lowerCase(interfc.name)}: ${c
 }
 
 const buildImports = (schema: Schema): string => {
-  const cbor = schema.hasCbor ?
+  const cbor = `
+import {
+	decodeFirst,
+	encodeAsync,
+} from 'cbor'`
+  const useCbor = schema.hasCbor ? cbor : ''
   return `
-
 import Router, {Middleware} from '@koa/router'
+${useCbor}
   `
 }
 const buildFile = (schema: Schema): Code => {
   const source = `
-
+${buildImports(schema)}
 ${fileHeader()}
 ${buildTypes(schema)}
 ${buildInterfaces(schema)}

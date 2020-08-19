@@ -85,8 +85,16 @@ const isHttpVerb = (method: string): method is HTTPVerb => {
 // builds the httpVerb for a method using the parsed JsDoc
 const buildHttpVerb = (method: MethodSignature): HTTPVerb => {
   const docs = method.getJsDocs()
-  const rMethod = docs[0]?.getDescription().trim()
-  return rMethod && isHttpVerb(rMethod) ? rMethod.toUpperCase() as HTTPVerb : 'POST'
+  const tags = docs[0]?.getTags()
+  let rMethod: HTTPVerb = 'POST'
+  tags?.forEach(tag => {
+    // only use JsDoc comments using the @access tag
+    const comment = tag.getTagName() === 'access' ? tag.getComment()?.toUpperCase() ?? '' : ''
+    if (isHttpVerb(comment)) {
+      rMethod = comment as HTTPVerb
+    }
+  })
+  return rMethod
 }
 export const isOptional = (node: Node): boolean => node.getChildAtIndex(1).getText() === '?'
 
