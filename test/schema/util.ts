@@ -12,26 +12,36 @@ export const testController = `
   interface TestController {
   /**
    * @access GET
+   * @throws 404
+   * @returns 200
    */
   getSomethingById(id: number): string;
 
   /**
    * @access POST
+   * @throws 500
+   * @returns 202
    */
   addSomething(something: any): any;
 
   /**
    * @access PUT
+   * @throws 401
+   * @returns 201
    */
   addSomethingElse(something: any): any;
 
   /**
    * @access DELETE
+   * @throws 400
+   * @returns 204
    */
   deleteSomething(something: any): any;
 
   /**
    * @access HEAD
+   * @throws 403
+   * @returns 301
    */
   preRequest(): boolean;
 

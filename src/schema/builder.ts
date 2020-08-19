@@ -12,7 +12,7 @@ import {
 import {DataType, is, make, primitives, primitivesMap} from './types'
 import {isContainer, isPrimitive, validateSchemas} from './validator'
 import {Schema} from '.'
-import {HTTPVerb, Interface, Method, Param, Property, ResponseCode, TypeDef} from './schema'
+import {HTTPVerb, Interface, Method, Param, Property, HttpResponseCode, TypeDef, HttpErrCode} from './schema'
 
 const isType = (type: TypeNode | Node, typeText: string): boolean => type.getText().trim().startsWith(typeText)
 
@@ -89,7 +89,21 @@ const isHttpVerb = (method: string): method is HTTPVerb =>
 // builds the httpVerb for a method using the parsed JsDoc
 const buildHttpVerb = (method: MethodSignature): HTTPVerb => getJsDocComment(method, 'access') as HTTPVerb ?? 'POST'
 
-const isResponseCode = (code: number): code is ResponseCode => [200, 201, 202, 203, 204, 205, 206, 300, 301, 302, 303, 304, 305, 306, 307, 308].includes(code)
+const isResponseCode = (code: number): code is HttpResponseCode => [200, 201, 202, 203, 204, 205, 206, 300, 301, 302, 303, 304, 305, 306, 307, 308].includes(code)
+
+const buildResponseCode = (method: MethodSignature): HttpResponseCode => {
+  const comment = getJsDocComment(method, 'returns')  ?? '200'
+  const response = parseInt(comment)
+  return isResponseCode(response) ? response as HttpResponseCode : 200
+}
+
+const isErrCode = (code: number): code is HttpErrCode => [400, 401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417, 418, 422, 425, 426, 428, 429, 431, 451, 500, 501, 502, 503, 504, 505, 506, 507, 508, 510, 511].includes(code)
+
+const buildErrCode = (method: MethodSignature): HttpErrCode => {
+  const comment = getJsDocComment(method, 'throws') ?? '500'
+  const response = parseInt(comment)
+  return isErrCode(response) ? response as HttpErrCode : 500
+}
 
 export const isOptional = (node: Node): boolean => node.getChildAtIndex(1).getText() === '?'
 
@@ -136,6 +150,8 @@ const buildMethod = (method: MethodSignature): Method => {
     name: getMethodName(method),
     params: buildParams(method.getParameters()),
     returnType: makeDataType(method.getReturnTypeNode()!),
+    responseCode: buildResponseCode(method),
+    errorCode: buildErrCode(method),
     get cborParams(): boolean {
       return [...this.params].some(param => is.Struct(param.type) && param.type.useCbor)
     },
@@ -192,5 +208,7 @@ export const internalTesting = {
   buildProps,
   buildTypes,
   buildHttpVerb,
+  buildErrCode,
+  buildResponseCode,
   makeDataType,
 }

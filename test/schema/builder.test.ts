@@ -14,6 +14,8 @@ const {
   buildProps,
   buildTypes,
   buildHttpVerb,
+  buildErrCode,
+  buildResponseCode,
   makeDataType,
 } = internalTesting
 
@@ -69,11 +71,41 @@ test('isOptional() should return true when given optional prop', () => {
   expect(isOptional(prop)).toBeTruthy()
 })
 
-test('buildHttpVerb() should return correct httpVerb', () => {
+test('buildHttpVerb() should return correct HttpVerb', () => {
   const methods = getSourceFile(testController, project).getInterfaces()[0].getMethods()
-  for (const method of methods) {
-    const verb = method.getJsDocs()[0].getTags()[0].getComment()!
-    expect(buildHttpVerb(method)).toEqual(verb)
+  for (let i = 0; i < methods.length; i++) {
+    const verb = buildHttpVerb(methods[i])
+    switch (i) {
+    case 0:
+      expect(verb).toEqual('GET')
+      break
+    case 1:
+      expect(verb).toEqual('POST')
+      break
+    case 2:
+      expect(verb).toEqual('PUT')
+      break
+    case 3:
+      expect(verb).toEqual('DELETE')
+      break
+    case 4:
+      expect(verb).toEqual('HEAD')
+      break
+    case 5:
+      expect(verb).toEqual('OPTIONS')
+      break
+    case 6:
+      expect(verb).toEqual('PATCH')
+      break
+    }
+  }
+})
+
+test('buildErrCode() should return correct HttpErrorCode', () => {
+  const methods = getSourceFile(testController, project).getInterfaces()[0].getMethods()
+
+  for (let i = 0; i < methods.length; i++) {
+    const errCode =
   }
 })
 
