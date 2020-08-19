@@ -80,7 +80,7 @@ const makeTuple = (type: TypeNode | Node): DataType => {
 
 const getJsDocComment = (method: MethodSignature, tagName: string): string | undefined => {
   const tags = method.getJsDocs()[0]?.getTags()
-  return tags?.filter(tag => tag.getTagName() === tagName)[0].getComment()
+  return tags?.filter(tag => tag.getTagName() === tagName)[0]?.getComment()
 }
 
 const isHttpVerb = (method: string): method is HTTPVerb =>
