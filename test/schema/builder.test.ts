@@ -7,7 +7,7 @@ import {getSourceFile, makeStructTestSource, makeTestFile, makeTestFiles, testCo
 
 const {
   isType,
-  isCbor,
+  useCbor,
   buildSchema,
   buildMethod,
   buildParams,
@@ -49,16 +49,14 @@ test('makeDataType() should return correct DataType for type prop', () => {
   }
 })
 
-test('isCbor() should return true when jsDoc contains cbor string', () => {
+test('useCbor() should return true when jsDoc contains cbor string', () => {
   const source = `
-/**
-* cbor
-*/
+/** @kind cbor */
 type BinaryType = {
   data: t.blob
 }
 `
-  expect(isCbor(getSourceFile(source, project).getTypeAliases()[0])).toBeTruthy()
+  expect(useCbor(getSourceFile(source, project).getTypeAliases()[0])).toBeTruthy()
 })
 
 test('isOptional() should return true when given optional prop', () => {

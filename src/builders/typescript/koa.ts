@@ -94,7 +94,7 @@ router.${method.httpVerb.toLowerCase()}('${interfaceName}/${method.name}', /${me
 	} )
 `
 }
-
+// TODO make cbor types use @kind JsDoc tag
 const buildRoutes = (interfc: Interface): string => {
   return `
 export const ${lowerCase(interfc.name)}Routes = (${lowerCase(interfc.name)}: ${capitalize(interfc.name)}, logger: ErrLogger = defaultLogger): Middleware<Koa.ParameterizedContext<any, Router.RouterParamContext>> => {
