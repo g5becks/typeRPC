@@ -128,6 +128,32 @@ test('buildErrCode() should return correct HttpErrorCode', () => {
   }
 })
 
+test('buildResponseCode() should return correct HttpResponse', () => {
+  const methods = getSourceFile(testController, project).getInterfaces()[0].getMethods()
+  for (let i = 0; i < methods.length; i++) {
+    const responseCode = buildResponseCode(methods[i])
+    switch (i) {
+    case 0:
+      expect(responseCode).toEqual(200)
+      break
+    case 1:
+      expect(responseCode).toEqual(202)
+      break
+    case 2:
+      expect(responseCode).toEqual(201)
+      break
+    case 3:
+      expect(responseCode).toEqual(204)
+      break
+    case 4:
+      expect(responseCode).toEqual(301)
+      break
+    default:
+      expect(responseCode).toEqual(200)
+    }
+  }
+})
+
 test('buildProps() should return correct type alias properties', () => {
   const file = makeTestFile(project)
   const types = file.getTypeAliases()
