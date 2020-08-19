@@ -169,6 +169,9 @@ const buildSchema = (file: SourceFile): Schema => {
     fileName: file.getBaseNameWithoutExtension(),
     types: buildTypes(file),
     interfaces: buildInterfaces(file),
+    get hasCbor(): boolean {
+      return [...this.interfaces].flatMap(interfc => [...interfc.methods]).some(method => method.cborParams || method.cborReturn)
+    },
   }
 }
 

@@ -66,9 +66,11 @@ const buildInterfaces = (schema: Schema): string => {
 }
 
 const methodCall = (method: Method): string => {
-  let invoke = ''
-  if (method.hasParams()) {
-    invoke = 'ctx.request.body'
+  const invoke = ''
+  if (!method.hasParams) {
+    if (method.cborReturn) {
+
+    }
   }
 }
 

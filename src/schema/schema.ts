@@ -43,4 +43,5 @@ export type Schema = {
   readonly fileName: string;
   readonly types: ReadonlySet<TypeDef>;
   readonly interfaces: ReadonlySet<Interface>;
+  readonly hasCbor: boolean;
 }
