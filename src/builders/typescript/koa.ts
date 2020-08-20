@@ -104,9 +104,14 @@ const paramsType = (params: Param[]): string => {
   }
   return paramsTypeString
 }
-const parseParams = (params: Param[]): string => `
-  const {${paramNames(params)}: {${paramsType(params)}} = ctx.params
+
+const makeParamsVar = (params: Param[]): string => `const {${paramNames(params)}}: {${paramsType(params)}}`
+
+const getMethodParams = (params: Param[]): string => `
+  ${makeParamsVar(params)} = ctx.params\n
   `
+
+const postMethodParams = (method: Method): string => `${makeParamsVar(method.params)} = ctx.request.body`
 
 const methodCallNoParams = (interfaceName: string, method: Method): string => {
   const invoke = `const response =  await ${interfaceName}.${method.name}()\n`
@@ -119,15 +124,16 @@ const methodCallNoParams = (interfaceName: string, method: Method): string => {
 }
 
 const methodCallNoReturn = (interfaceName: string, method: Method): string => {
-  if (method.isGet) {
-    return `${parseParams(method.params)}`
-  }
-  if (metho)
+  const invoke = `await ${interfaceName}.${method.name}(${paramNames(method.params)})`
+  return method.isGet ?
+    `${getMethodParams(method.params)}
+     ${invoke}` :
+    `${postMethodParams(method)}
+     ${invoke}
+    `
 }
 
-const methodCallNoParamsNoReturn = (interfaceName: string, method: Method): string => {
-
-}
+const methodCallNoParamsNoReturn = (interfaceName: string, method: Method): string => `await ${interfaceName}.${method.name}()`
 
 const methodCallWithParamsAndReturn = (interfaceName: string, method: Method): string => {
 

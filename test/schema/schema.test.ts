@@ -3,18 +3,18 @@ import {getSourceFile, methodSchemaTestSource, schemaWithCbor, schemaWithoutCbor
 import {internalTesting} from '../../src/schema/builder'
 import {Method} from '../../src/schema'
 
-const {buildSchema} = internalTesting
+const {buildSchema, buildMethod} = internalTesting
 let method1: Method
 let method2: Method
 let method3: Method
+let method4: Method
 beforeAll(() => {
   const interfc = getSourceFile(methodSchemaTestSource, new Project()).getInterfaces()[0]
   method1 = buildMethod(interfc.getMethod('method1')!)
   method2 = buildMethod(interfc.getMethod('method2')!)
   method3 = buildMethod(interfc.getMethod('method3')!)
+  method4 = buildMethod(interfc.getMethod('method4')!)
 })
-
-const {buildMethod} = internalTesting
 
 test('hasCborParams() method should return correct boolean', () => {
   expect(method1.hasCborParams).toBeTruthy()
@@ -43,4 +43,9 @@ test('hasCbor should return true when schema has methods with cbor', () => {
   const file = getSourceFile(schemaWithCbor, new Project())
   const schema = buildSchema(file)
   expect(schema.hasCbor).toBeTruthy()
+})
+
+test('isVoidReturn should return correct boolean value', () => {
+  expect(method4.isVoidReturn).toBeTruthy()
+  expect(method3.isVoidReturn).toBeFalsy()
 })

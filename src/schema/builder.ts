@@ -160,6 +160,10 @@ const buildMethod = (method: MethodSignature): Method => {
     returnType: makeDataType(method.getReturnTypeNode()!),
     responseCode: buildResponseCode(method),
     errorCode: buildErrCode(method),
+    get isVoidReturn(): boolean {
+      // noinspection JSDeepBugsBinOperand
+      return this.returnType === primitives.unit
+    },
     get isGet(): boolean {
       return this.httpVerb.toUpperCase() === 'GET'
     },
