@@ -17,9 +17,9 @@ export type Method = {
   readonly params:  Param[];
   readonly returnType: DataType;
   // serialize|deserialize params using cbor ?
-  readonly cborParams:  boolean;
+  readonly hasCborParams:  boolean;
   // serialize|deserialize return type using cbor ?
-  readonly cborReturn:  boolean;
+  readonly hasCborReturn:  boolean;
   // method has parameters ?
   readonly hasParams:  boolean;
   // does method Htt Verb === 'GET'

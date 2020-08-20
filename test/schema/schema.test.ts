@@ -16,15 +16,15 @@ beforeAll(() => {
 
 const {buildMethod} = internalTesting
 
-test('cborParams() method should return correct boolean', () => {
-  expect(method1.cborParams).toBeTruthy()
-  expect(method3.cborParams).toBeFalsy()
+test('hasCborParams() method should return correct boolean', () => {
+  expect(method1.hasCborParams).toBeTruthy()
+  expect(method3.hasCborParams).toBeFalsy()
 }
 )
 
-test('cborReturn() method should return correct boolean value', () => {
-  expect(method2.cborReturn).toBeTruthy()
-  expect(method1.cborReturn).toBeFalsy()
+test('hasCborReturn() method should return correct boolean value', () => {
+  expect(method2.hasCborReturn).toBeTruthy()
+  expect(method1.hasCborReturn).toBeFalsy()
 }
 )
 

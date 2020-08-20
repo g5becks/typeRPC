@@ -163,10 +163,10 @@ const buildMethod = (method: MethodSignature): Method => {
     get isGet(): boolean {
       return this.httpVerb.toUpperCase() === 'GET'
     },
-    get cborParams(): boolean {
+    get hasCborParams(): boolean {
       return [...this.params].some(param => is.Struct(param.type) && param.type.useCbor)
     },
-    get cborReturn(): boolean {
+    get hasCborReturn(): boolean {
       return is.Struct(this.returnType) && this.returnType.useCbor
     },
     get hasParams(): boolean {
@@ -200,7 +200,7 @@ const buildSchema = (file: SourceFile): Schema => {
     types: buildTypes(file),
     interfaces: buildInterfaces(file),
     get hasCbor(): boolean {
-      return this.interfaces.flatMap(interfc => [...interfc.methods]).some(method => method.cborParams || method.cborReturn)
+      return this.interfaces.flatMap(interfc => [...interfc.methods]).some(method => method.hasCborParams || method.hasCborReturn)
     },
   }
 }
