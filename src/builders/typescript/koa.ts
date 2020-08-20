@@ -87,6 +87,16 @@ const buildPath = (method: Method): string => {
 }
 
 const questionMark =  (isOptional: boolean) => isOptional ? '?' : ''
+
+const paramNames = (method: Method) => {
+  let names = ''
+  const params = [...method.params]
+  for (let i = 0; i < params.length; i++) {
+    const useComma = i === params.length - 1 ? '' : ', '
+    names = names.concat(`${params[i].name}${useComma}`)
+  }
+  return names
+}
 const parseParams = (method: Method): string => {
   let paramsType = ''
   let paramNames = ''
@@ -112,7 +122,9 @@ const methodCallNoParams = (interfaceName: string, method: Method): string => {
 }
 
 const methodCallNoReturn = (interfaceName: string, method: Method): string => {
-
+  if (method.isGet) {
+    return `${parseParams(method)}`
+  }
 }
 
 const methodCallNoParamsNoReturn = (interfaceName: string, method: Method): string => {

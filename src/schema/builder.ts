@@ -1,7 +1,7 @@
 /* eslint-disable new-cap,  @typescript-eslint/no-use-before-define */
 // file deepcode ignore semicolon: eslint conflict
 import {
-  InterfaceDeclaration, JSDocTag,
+  InterfaceDeclaration,
   MethodSignature,
   Node,
   ParameterDeclaration,
@@ -12,7 +12,7 @@ import {
 import {DataType, is, make, primitives, primitivesMap} from './types'
 import {isContainer, isPrimitive, validateSchemas} from './validator'
 import {Schema} from '.'
-import {HTTPVerb, Interface, Method, Param, Property, HttpResponseCode, TypeDef, HttpErrCode} from './schema'
+import {HttpErrCode, HttpResponseCode, HTTPVerb, Interface, Method, Param, Property, TypeDef} from './schema'
 
 const isType = (type: TypeNode | Node, typeText: string): boolean => type.getText().trim().startsWith(typeText)
 
@@ -87,7 +87,10 @@ const isHttpVerb = (method: string): method is HTTPVerb =>
   ['POST', 'PUT', 'GET', 'HEAD', 'DELETE', 'OPTIONS', 'PATCH'].includes(method)
 
 // builds the httpVerb for a method using the parsed JsDoc
-const buildHttpVerb = (method: MethodSignature): HTTPVerb => getJsDocComment(method, 'access') as HTTPVerb ?? 'POST'
+const buildHttpVerb = (method: MethodSignature): HTTPVerb => {
+  const comment = getJsDocComment(method, 'access') as HTTPVerb ?? 'POST'
+  return isHttpVerb(comment) ? comment : 'POST'
+}
 
 const isResponseCode = (code: number): code is HttpResponseCode => [200, 201, 202, 203, 204, 205, 206, 300, 301, 302, 303, 304, 305, 306, 307, 308].includes(code)
 
@@ -124,27 +127,27 @@ const buildProps = (properties: Node[]): Property[] =>
   })
 
 // Converts all type aliases found in schema files into TypeDefs
-const buildTypes = (sourceFile: SourceFile): ReadonlySet<TypeDef> => {
+const buildTypes = (sourceFile: SourceFile): TypeDef[] => {
   const typeAliases = sourceFile.getTypeAliases()
   if (typeAliases.length === 0) {
-    return new Set()
+    return []
   }
 
-  return new Set(typeAliases.map(typeDef => {
+  return [...new Set(typeAliases.map(typeDef => {
     return {
       name: typeDef.getNameNode().getText().trim(),
-      properties: new Set(buildProps(typeDef.getTypeNode()!.forEachChildAsArray())) as ReadonlySet<Property>}
-  }))
+      properties: [...new Set(buildProps(typeDef.getTypeNode()!.forEachChildAsArray())) as ReadonlySet<Property>]}
+  }))]
 }
 
-const buildParams = (params: ParameterDeclaration[]): ReadonlySet<Param> => {
-  return new Set<Param>(params.map(param => {
+const buildParams = (params: ParameterDeclaration[]): Param[] => {
+  return [...new Set<Param>(params.map(param => {
     return {
       name: param.getName().trim(),
       isOptional: param.isOptional(),
       type: makeDataType(param.getTypeNode()!),
     }
-  }))
+  }))]
 }
 
 const getMethodName = (method: MethodSignature): string => method.getNameNode().getText().trim()
@@ -167,12 +170,12 @@ const buildMethod = (method: MethodSignature): Method => {
       return is.Struct(this.returnType) && this.returnType.useCbor
     },
     get hasParams(): boolean {
-      return this.params.size > 0
+      return this.params.length > 0
     },
   }
 }
 
-const buildMethods = (methods: MethodSignature[]): ReadonlySet<Method> => new Set(methods.map(method => buildMethod(method)))
+const buildMethods = (methods: MethodSignature[]): Method[] => [...new Set(methods.map(method => buildMethod(method)))]
 
 export const getInterfaceName = (interfc: InterfaceDeclaration): string => interfc.getNameNode().getText().trim()
 
@@ -183,12 +186,12 @@ const buildInterface = (interfc: InterfaceDeclaration): Interface => {
   }
 }
 
-const buildInterfaces = (sourceFile: SourceFile): ReadonlySet<Interface> => {
+const buildInterfaces = (sourceFile: SourceFile): Interface[] => {
   const interfaces = sourceFile.getInterfaces()
   if (interfaces.length === 0) {
-    return new Set()
+    return []
   }
-  return new Set(interfaces.map(interfc => buildInterface(interfc)))
+  return [...new Set(interfaces.map(interfc => buildInterface(interfc)))]
 }
 
 const buildSchema = (file: SourceFile): Schema => {
@@ -197,14 +200,14 @@ const buildSchema = (file: SourceFile): Schema => {
     types: buildTypes(file),
     interfaces: buildInterfaces(file),
     get hasCbor(): boolean {
-      return [...this.interfaces].flatMap(interfc => [...interfc.methods]).some(method => method.cborParams || method.cborReturn)
+      return this.interfaces.flatMap(interfc => [...interfc.methods]).some(method => method.cborParams || method.cborReturn)
     },
   }
 }
 
-export const buildSchemas = (sourceFiles: SourceFile[]): ReadonlySet<Schema> | Error[] => {
+export const buildSchemas = (sourceFiles: SourceFile[]): Schema[] | Error[] => {
   const errs = validateSchemas(sourceFiles)
-  return errs ? errs : new Set<Schema>(sourceFiles.map(file => buildSchema(file)))
+  return errs ? errs : [...new Set<Schema>(sourceFiles.map(file => buildSchema(file)))]
 }
 
 export const internalTesting = {

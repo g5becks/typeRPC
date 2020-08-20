@@ -217,14 +217,10 @@ export const makeTestFiles = (project: Project): SourceFile[] => {
 }
 
 export const makeStructTestSource = `
-  /**
- * cbor
- */
+  /** @kind cbor */
 type CborType = {}
 
-/**
- * cbor
- */
+/** @kind cbor */
 
 type AnotherCbor = {}
 type TestType1 = {

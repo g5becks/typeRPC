@@ -14,7 +14,7 @@ export type Param = {
 
 export type Method = {
   readonly name: string;
-  readonly params:  ReadonlySet<Param>;
+  readonly params:  Param[];
   readonly returnType: DataType;
   // serialize|deserialize params using cbor ?
   readonly cborParams:  boolean;
@@ -41,19 +41,19 @@ export type Property = {
 
 export type Interface = {
   readonly name: string;
-  readonly methods: ReadonlySet<Method>;
+  readonly methods: Method[];
 }
 
 // TypeAlias from schema file
 export type TypeDef = {
   readonly name: string;
-  readonly properties: ReadonlySet<Property>;
+  readonly properties: Property[];
 }
 
 export type Schema = {
   // Name of the file this schema was generated from
   readonly fileName: string;
-  readonly types: ReadonlySet<TypeDef>;
-  readonly interfaces: ReadonlySet<Interface>;
+  readonly types: TypeDef[];
+  readonly interfaces: Interface[];
   readonly hasCbor: boolean;
 }

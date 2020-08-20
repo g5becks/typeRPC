@@ -173,10 +173,9 @@ test('buildTypes() should return correct Set of types', () => {
   const file = makeTestFile(project)
   const aliases = file.getTypeAliases()
   const builtTypes = buildTypes(file)
-  expect(builtTypes.size).toEqual(aliases.length)
-  const builtArray = [...builtTypes]
-  for (let i = 0; i < builtTypes.size; i++) {
-    expect(builtArray[i].properties.size).toEqual(aliases[i].getTypeNode()!.forEachChildAsArray().length)
+  expect(builtTypes.length).toEqual(aliases.length)
+  for (let i = 0; i < builtTypes.length; i++) {
+    expect(builtTypes[i].properties.length).toEqual(aliases[i].getTypeNode()!.forEachChildAsArray().length)
   }
 })
 
@@ -186,12 +185,11 @@ test('buildParams() should return correct Params', () => {
   for (const method of methods) {
     const params = method.getParameters()
     const builtParams = buildParams(params)
-    const builtParamsArray = [...builtParams]
-    expect(params.length).toEqual(builtParams.size)
+    expect(params.length).toEqual(builtParams.length)
     for (let i = 0; i < params.length; i++) {
-      expect(params[i].isOptional()).toEqual(builtParamsArray[i].isOptional)
-      expect(params[i].getNameNode().getText().trim()).toEqual(builtParamsArray[i].name)
-      expect(params[i].getTypeNode()!.getText().trim()).toEqual(builtParamsArray[i].type.toString())
+      expect(params[i].isOptional()).toEqual(builtParams[i].isOptional)
+      expect(params[i].getNameNode().getText().trim()).toEqual(builtParams[i].name)
+      expect(params[i].getTypeNode()!.getText().trim()).toEqual(builtParams[i].type.toString())
     }
   }
 })
@@ -203,7 +201,7 @@ test('buildMethod() should return method with correct params and return type', (
     const builtMethod = buildMethod(method)
     expect(method.getReturnTypeNode()!.getText().trim()).toEqual(builtMethod.returnType.toString())
     expect(method.getNameNode().getText().trim()).toEqual(builtMethod.name)
-    expect(method.getParameters().length).toEqual(builtMethod.params.size)
+    expect(method.getParameters().length).toEqual(builtMethod.params.length)
   }
 })
 
@@ -211,8 +209,8 @@ test('buildSchema() should have correct name, num types, and num interfaces', ()
   for (const source of makeTestFiles(project)) {
     const schema = buildSchema(source)
     expect(schema.fileName).toEqual(source.getBaseNameWithoutExtension())
-    expect(schema.interfaces.size).toEqual(source.getInterfaces().length)
-    expect(schema.types.size).toEqual(source.getTypeAliases().length)
+    expect(schema.interfaces.length).toEqual(source.getInterfaces().length)
+    expect(schema.types.length).toEqual(source.getTypeAliases().length)
   }
 })
 
