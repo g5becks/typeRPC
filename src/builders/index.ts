@@ -1,4 +1,5 @@
 import {Schema} from '../schema'
+import {KoaBuilder} from './typescript/koa'
 
 export type Code = {
   readonly fileName: string;
@@ -12,6 +13,10 @@ export type Target = 'client' | 'server'
 export type CodeBuilder = {
   readonly lang: ProgrammingLanguage;
   readonly target: Target;
-  readonly framework?: string;
+  readonly framework: string;
   readonly builder: (schemas: Schema[]) => Code[];
 }
+
+export const builders: CodeBuilder[] = [
+  KoaBuilder,
+]
