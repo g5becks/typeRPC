@@ -90,10 +90,9 @@ const questionMark =  (isOptional: boolean) => isOptional ? '?' : ''
 
 const paramNames = (method: Method) => {
   let names = ''
-  const params = [...method.params]
-  for (let i = 0; i < params.length; i++) {
-    const useComma = i === params.length - 1 ? '' : ', '
-    names = names.concat(`${params[i].name}${useComma}`)
+  for (let i = 0; i < method.params.length; i++) {
+    const useComma = i === method.params.length - 1 ? '' : ', '
+    names = names.concat(`${method.params[i].name}${useComma}`)
   }
   return names
 }
@@ -198,7 +197,7 @@ ${buildInterfaces(schema)}
   return {fileName: schema.fileName + '.ts', source}
 }
 
-const builder = (schemas: ReadonlySet<Schema>): ReadonlySet<Code> => new Set<Code>([...schemas].map(schema => buildFile(schema)))
+const builder = (schemas: Schema[]): Code[] => schemas.map(schema => buildFile(schema))
 
 export const KoaBuilder:  CodeBuilder = {
   lang: 'ts',
