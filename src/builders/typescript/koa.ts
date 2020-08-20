@@ -88,6 +88,9 @@ const buildPath = (method: Method): string => {
 const questionMark =  (isOptional: boolean) => isOptional ? '?' : ''
 
 const paramNames = (params: Param[]) => {
+  if (params.length === 0) {
+    return ''
+  }
   let names = ''
   for (let i = 0; i < params.length; i++) {
     const useComma = i === params.length - 1 ? '' : ', '
@@ -97,6 +100,9 @@ const paramNames = (params: Param[]) => {
 }
 
 const paramsType = (params: Param[]): string => {
+  if (params.length === 0) {
+    return ''
+  }
   let paramsTypeString = ''
   for (let i = 0; i < params.length; i++) {
     const useComma = i === params.length - 1 ? '' : ', '
@@ -107,45 +113,16 @@ const paramsType = (params: Param[]): string => {
 
 const makeParamsVar = (params: Param[]): string => `const {${paramNames(params)}}: {${paramsType(params)}}`
 
-const getMethodParams = (params: Param[]): string => `
-  ${makeParamsVar(params)} = ctx.params\n
+const destructuredParams = (method: Method): string => method.params.length === 0 ? '' : `
+  ${makeParamsVar(method.params)} = ctx.${method.isGet ? 'params' : 'body'}\n
   `
 
-const postMethodParams = (method: Method): string => `${makeParamsVar(method.params)} = ctx.request.body`
-
-const methodCallNoParams = (interfaceName: string, method: Method): string => {
-  const invoke = `const response =  await ${interfaceName}.${method.name}()\n`
-  if (method.hasCborReturn) {
-    return invoke.concat(`
-    ctx.body = await encodeAsync({data: response})
-  `)
-  }
-  return invoke.concat('ctx.body = {data: response} ')
-}
-
-const methodCallNoReturn = (interfaceName: string, method: Method): string => {
-  const invoke = `await ${interfaceName}.${method.name}(${paramNames(method.params)})`
-  return method.isGet ?
-    `${getMethodParams(method.params)}
-     ${invoke}` :
-    `${postMethodParams(method)}
-     ${invoke}
-    `
-}
-
-const methodCallNoParamsNoReturn = (interfaceName: string, method: Method): string => `await ${interfaceName}.${method.name}()`
-
-const methodCallWithParamsAndReturn = (interfaceName: string, method: Method): string => {
-
-}
 const methodCall = (interfaceName: string, method: Method): string => {
-  const invoke = ''
-  if (!method.hasParams) {
-
-  }
-  if (method.isGet) {
-
-  }
+  const getParams = destructuredParams(method)
+  const useBraces = (args: string) => method.hasParams ? `{${args}}` : ''
+  const invokeMethod = method.isVoidReturn ? '' : `const res: ${dataType(method.returnType)} = await ${interfaceName}.${method.name}(${useBraces(paramNames(method.params))})`
+  const sendResponse = method.isVoidReturn ? '' : 'ctx.body = {data: res}'
+  return `${getParams}\n${invokeMethod}\n${sendResponse}`
 }
 
 const setContentType = (method: Method): string => method.hasCborReturn ? 'ctx.type = application/cbor' : ''
@@ -156,14 +133,21 @@ router.${method.httpVerb.toLowerCase()}('${interfaceName}/${method.name}', /${bu
     try {
       ${setContentType(method)}
       ctx.status = ${method.responseCode}
-
       ${methodCall(interfaceName, method)}
     } catch (e) {
       logger.error(e)
       ctx.throw(${method.errorCode}, e.message)
     }
-	} )
+	} )\n
 `
+}
+
+const buildHandlers = (interfc: Interface): string => {
+  let handlers = ''
+  for (const method of interfc.methods) {
+    handlers = handlers.concat(buildHandler(interfc.name, method))
+  }
+  return handlers
 }
 
 const buildRoutes = (interfc: Interface): string => {
@@ -173,7 +157,7 @@ export const ${lowerCase(interfc.name)}Routes = (${lowerCase(interfc.name)}: ${c
 		prefix: '/${interfc.name}/',
 		sensitive: true
 	})
-
+  ${buildHandlers(interfc)}
 	return router.routes()
 }\n
 `
