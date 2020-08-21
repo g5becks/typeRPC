@@ -10,7 +10,7 @@ import {
   TypeNode,
 } from 'ts-morph'
 import {DataType, is, make, primitives, primitivesMap} from './types'
-import {isContainer, isPrimitive, validateSchemas} from './validator'
+import {isContainer, isErrCode, isHttpVerb, isPrimitive, isResponseCode, validateSchemas} from './validator'
 import {Schema} from '.'
 import {HttpErrCode, HttpResponseCode, HTTPVerb, Interface, Method, Param, Property, TypeDef} from './schema'
 
@@ -83,24 +83,17 @@ const getJsDocComment = (method: MethodSignature | TypeAliasDeclaration, tagName
   return tags?.filter(tag => tag.getTagName() === tagName)[0]?.getComment()
 }
 
-const isHttpVerb = (method: string): method is HTTPVerb =>
-  ['POST', 'GET'].includes(method)
-
 // builds the httpVerb for a method using the parsed JsDoc
 const buildHttpVerb = (method: MethodSignature): HTTPVerb => {
   const comment = getJsDocComment(method, 'access') as HTTPVerb ?? 'POST'
   return isHttpVerb(comment) ? comment : 'POST'
 }
 
-const isResponseCode = (code: number): code is HttpResponseCode => [200, 201, 202, 203, 204, 205, 206, 300, 301, 302, 303, 304, 305, 306, 307, 308].includes(code)
-
 const buildResponseCode = (method: MethodSignature): HttpResponseCode => {
   const comment = getJsDocComment(method, 'returns')  ?? '200'
   const response = parseInt(comment)
   return isResponseCode(response) ? response as HttpResponseCode : 200
 }
-
-const isErrCode = (code: number): code is HttpErrCode => [400, 401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417, 418, 422, 425, 426, 428, 429, 431, 451, 500, 501, 502, 503, 504, 505, 506, 507, 508, 510, 511].includes(code)
 
 // Determines if the generated type should use cbor for serialization/deserialization
 // based on the JsDoc @kind tag

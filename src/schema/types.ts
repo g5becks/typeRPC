@@ -127,6 +127,12 @@ export const prim = {
 
 type Container = rpc.Container | Struct
 
+// valid types to be used in client side get requests as query params
+export type QueryParamable = t.bool | t.timestamp | t.int8 | t.uint8 | t.int16 | t.uint16 | t.int32 | t.uint32 | t.int64 | t.uint64 | t.float32 | t.float64 | t.str | t.err
+
+// valid container types to be used in client side get requests as query params
+export type QueryParamableContainer = t.List<QueryParamable> | t.Tuple2<QueryParamable, QueryParamable> | t.Tuple3<QueryParamable, QueryParamable, QueryParamable> | t.Tuple4<QueryParamable, QueryParamable, QueryParamable, QueryParamable> | t.Tuple5<QueryParamable, QueryParamable, QueryParamable, QueryParamable, QueryParamable>
+
 export type DataType = rpc.RpcType | Struct
 
 const validateType = (type: unknown, ...propNames: string[]): boolean => {

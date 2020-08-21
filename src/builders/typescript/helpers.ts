@@ -1,5 +1,5 @@
 /* eslint-disable new-cap */
-import {DataType, is, primitives} from '../../schema/types'
+import {DataType, is, prim, primitives} from '../../schema/types'
 import {Interface, Method, Param, Property, Schema, TypeDef} from '../../schema'
 import {capitalize, lowerCase} from '../utils'
 
@@ -68,6 +68,33 @@ export const dataType = (type: DataType): string => {
 
   return 'any'
 }
+
+const primFromString = (text: string, type: DataType): string => {
+  switch (type) {
+  case prim.int8:
+  case prim.uint8:
+  case prim.int16:
+  case prim.uint16:
+  case prim.int32:
+  case prim.uint32:
+  case prim.int64:
+  case prim.uint64:
+    return `parseInt(${text})`
+  case prim.float32:
+  case prim.float64:
+    return `parseFloat(${text})`
+  case prim.bool:
+    return `Boolean(${text})`
+  case prim.str:
+    return text
+  case prim.timestamp:
+    return `parseInt(${text})`
+  }
+  return text
+}
+
+const fromQueryString  = (text: string | string[], type: DataType): string => typesMap.has(type) ? primFromString(text as string, type) :
+  `${text}.map(val => ${primFromString(text as string, type)})`
 
 // add question mark to optional type alias property or method param if needed
 export const handleOptional = (isOptional: boolean): string => isOptional ? '?' : ''
