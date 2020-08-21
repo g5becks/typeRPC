@@ -141,7 +141,9 @@ export const queryParamableContainers = ['t.Tuple2', 't.Tuple3', 't.Tuple4', 't.
 export const queryParamables = [...queryParamablePrims, ...queryParamableContainers]
 
 // determines if the type text is a valid QueryParamable Type
-export const isQueryParamable = (type: string): boolean => queryParamables.some(paramable => paramable.startsWith(type))
+export const isQueryParamableString = (type: string): boolean => queryParamables.some(paramable => paramable.startsWith(type))
+
+export const isQueryParamable = (type: DataType): type is QueryParamable => isQueryParamableString(type.toString())
 
 export type DataType = rpc.RpcType | Struct
 

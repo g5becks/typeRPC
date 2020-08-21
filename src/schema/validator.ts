@@ -11,7 +11,7 @@ import {
   TypeAliasDeclaration,
   TypeNode,
 } from 'ts-morph'
-import {containersList, isQueryParamable, primitivesMap, queryParamableContainers, queryParamablePrims} from './types'
+import {containersList, isQueryParamableString, primitivesMap, queryParamableContainers, queryParamablePrims} from './types'
 import {getJsDocComment, getTypeNode} from './builder'
 import {HttpErrCode, HttpResponseCode, HTTPVerb} from './schema'
 
@@ -318,7 +318,7 @@ const validateMethodJsDoc = (method: MethodSignature): Error[] => {
 }
 
 const validateGetMethodParam = (param: ParameterDeclaration): Error[] => {
-  return !isQueryParamable(param.getTypeNode()!.getText().trim()) ?
+  return !isQueryParamableString(param.getTypeNode()!.getText().trim()) ?
     [singleErr(param, `${param.getName()} has an invalid type. Methods annotated with @access GET are only allowed to use the following types for parameters: primitive types => ${queryParamablePrims} | container types => ${queryParamableContainers}. Also note, that container types can only use one of the mentioned primitive types as type parameters`)] : []
 }
 const validateGetRequestMethodParams = (method: MethodSignature): Error[] => {

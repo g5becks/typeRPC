@@ -70,7 +70,7 @@ export const dataType = (type: DataType): string => {
 }
 
 // convert parsed querystring primitive to correct type
-const primFromString = (text: string, type: QueryParamablePrim): string => {
+const primFromQueryParam = (paramName: string, type: QueryParamablePrim): string => {
   switch (type.toString()) {
   case prim.int8.toString():
   case prim.uint8.toString():
@@ -80,31 +80,31 @@ const primFromString = (text: string, type: QueryParamablePrim): string => {
   case prim.uint32.toString():
   case prim.int64.toString():
   case prim.uint64.toString():
-    return `parseInt(${text})`
+    return `parseInt(${paramName})`
   case prim.float32.toString():
   case prim.float64.toString():
-    return `parseFloat(${text})`
+    return `parseFloat(${paramName})`
   case prim.bool.toString():
-    return `Boolean(${text})`
+    return `Boolean(${paramName})`
   case prim.str.toString():
-    return text
+    return paramName
   case prim.timestamp.toString():
-    return `parseInt(${text})`
+    return `parseInt(${paramName})`
   }
-  return text
+  return paramName
 }
 
 // convert parsed querystring param to correct type
-const fromQueryString  = (text: string, type: QueryParamable): string => {
+export const fromQueryString  = (paramName: string, type: QueryParamable): string => {
   if (typesMap.has(type)) {
-    return primFromString(text as string, type as QueryParamablePrim)
+    return primFromQueryParam(paramName as string, type as QueryParamablePrim)
   }
   if (is.List(type)) {
     if (type.dataType.toString() === 't.str') {
-      return text
+      return paramName
     }
   }
-  return  `${text}.map(val => ${primFromString(text as string, type as QueryParamablePrim)})`
+  return  `${paramName}.map(val => ${primFromQueryParam(paramName as string, type as QueryParamablePrim)})`
 }
 
 // add question mark to optional type alias property or method param if needed
