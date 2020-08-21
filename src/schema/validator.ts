@@ -280,8 +280,12 @@ const validateReturnType = (method: MethodSignature): Error[] => {
 
 const validateMethodNotGeneric = (method: MethodSignature): Error[] => method.getTypeParameters().length > 0 ? [singleErr(method, genericsErrMsg(method))] : []
 
+// TODO test this function
 const validateMethodJsDoc = (method: MethodSignature): Error[] => {
   const tags = method.getJsDocs()[0]?.getTags()
+  if (typeof tags === 'undefined' || tags.length === 0) {
+    return []
+  }
   const validTags = ['throws', 'access', 'returns']
   const errs: Error[] = []
   for (const tag of tags) {
@@ -321,6 +325,8 @@ const validateGetMethodParam = (param: ParameterDeclaration): Error[] => {
   return !isQueryParamableString(param.getTypeNode()!.getText().trim()) ?
     [singleErr(param, `${param.getName()} has an invalid type. Methods annotated with @access GET are only allowed to use the following types for parameters: primitive types => ${queryParamablePrims} | container types => ${queryParamableContainers}. Also note, that container types can only use one of the mentioned primitive types as type parameters`)] : []
 }
+
+// TODO test this function
 const validateGetRequestMethodParams = (method: MethodSignature): Error[] => {
   const params = method.getParameters()
   if (getJsDocComment(method, 'access')?.toUpperCase() !== 'GET' || params.length === 0) {

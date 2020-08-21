@@ -140,6 +140,7 @@ export const queryParamablePrims = ['t.bool', 't.timestamp', 't.int8', 't.uint8'
 export const queryParamableContainers = ['t.Tuple2', 't.Tuple3', 't.Tuple4', 't.Tuple5']
 export const queryParamables = [...queryParamablePrims, ...queryParamableContainers]
 
+// TODO test this function
 // determines if the type text is a valid QueryParamable Type
 export const isQueryParamableString = (type: string): boolean => queryParamables.some(paramable => paramable.startsWith(type))
 

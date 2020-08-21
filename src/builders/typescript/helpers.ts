@@ -69,6 +69,7 @@ export const dataType = (type: DataType): string => {
   return 'any'
 }
 
+// TODO test this function
 // convert parsed querystring primitive to correct type
 const primFromQueryParam = (paramName: string, type: QueryParamablePrim): string => {
   switch (type.toString()) {
@@ -94,6 +95,7 @@ const primFromQueryParam = (paramName: string, type: QueryParamablePrim): string
   return paramName
 }
 
+// TODO test this function
 // convert parsed querystring param to correct type
 export const fromQueryString  = (paramName: string, type: QueryParamable): string => {
   if (typesMap.has(type)) {

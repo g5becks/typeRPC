@@ -26,18 +26,18 @@ const buildPath = (method: Method): string => {
   return `/${method.name}/${params}`
 }
 
-// destructures the query params and then converts them to the
+// destructures the query params by converting them to the
 // correct types using the fromQueryString function
-const buildDestructuredQueryParams = (method: Method): string => {
-  method.params.map((param, i) => {
+const buildDestructuredQueryParams = (method: Method): string =>
+  `{${method.params.map((param, i) => {
     if (isQueryParamable(param.type)) {
       const useComma = i === method.params.length - 1 ? '' : ','
-      return `${fromQueryString(`ctx.query.${param.name}`, param.type)}${useComma}`
+      return `${param.name}: ${fromQueryString(`ctx.query.${param.name}`, param.type)}${useComma}`
     }
-  })
-}
+  })}}`
+
 const destructuredParams = (method: Method): string => method.params.length === 0 ? '' : `
-  ${makeParamsVar(method.params)} = ctx.${method.isGet ? 'query' : 'body'}\n
+  ${makeParamsVar(method.params)} = ${method.isGet ? buildDestructuredQueryParams(method) : 'ctx.body'}\n
   `
 
 const methodCall = (interfaceName: string, method: Method): string => {
