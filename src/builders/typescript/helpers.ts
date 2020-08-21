@@ -1,5 +1,7 @@
 /* eslint-disable new-cap */
 import {DataType, is, primitives} from '../../schema/types'
+import {Interface, Method, Param, Property, Schema, TypeDef} from '../../schema'
+import {capitalize, lowerCase} from '../utils'
 
 // Maps typerpc types to typescript data-types
 export const typesMap: Map<DataType, string> = new Map<DataType, string>(
@@ -66,3 +68,104 @@ export const dataType = (type: DataType): string => {
 
   return 'any'
 }
+
+// add question mark to optional type alias property or method param if needed
+export const handleOptional = (isOptional: boolean): string => isOptional ? '?' : ''
+
+// builds all the properties of a type alias
+const buildProps = (props: Property[]): string => {
+  let propsString = ''
+  for (const prop of props) {
+    propsString = propsString.concat(`${prop.name}${handleOptional(prop.isOptional)}: ${dataType(prop.type)}\n`)
+  }
+  return propsString
+}
+
+// builds a single type alias declaration
+const buildType = (type: TypeDef): string => {
+  return `
+export type ${capitalize(type.name)} = {
+  ${buildProps(type.properties)}
+}\n`
+}
+
+// builds all type aliases for a schema file
+export const buildTypes = (schema: Schema): string => {
+  let types =  ''
+  for (const type of schema.types) {
+    types = types.concat(buildType(type))
+  }
+  return types
+}
+
+// builds all of the parameters of a method
+const buildParams = (params: Param[]): string => {
+  let paramsString = ''
+  for (let i = 0; i < params.length; i++) {
+    const useComma = i === params.length - 1 ? '' : ','
+    paramsString = paramsString.concat(`${params[i].name}${handleOptional(params[i].isOptional)}: ${dataType(params[i].type)}${useComma}`)
+  }
+  return paramsString
+}
+
+// builds a single method of an interface
+const buildMethod = (method: Method): string => {
+  return `async ${lowerCase(method.name)}(${buildParams(method.params)}): Promise<${dataType(method.returnType)}>;\n`
+}
+
+// builds all methods of an interface
+const buildMethods = (methods: Method[]): string => {
+  let methodsString = ''
+  for (const method of methods) {
+    methodsString = methodsString.concat(buildMethod(method))
+  }
+  return methodsString
+}
+
+// builds a single interface
+const buildInterface = (interfc: Interface): string => {
+  return `
+export interface ${capitalize(interfc.name)} {
+  ${buildMethods(interfc.methods)}
+}\n`
+}
+
+// builds all interfaces of a Schema file
+export const buildInterfaces = (interfaces: Interface[]): string => {
+  let interfacesString = ''
+  for (const interfc of interfaces) {
+    interfacesString = interfacesString.concat(buildInterface(interfc))
+  }
+  return interfacesString
+}
+
+// builds the names of the parameters of a method E.G.
+// name, age, gender
+export const paramNames = (params: Param[]) => {
+  if (params.length === 0) {
+    return ''
+  }
+  let names = ''
+  for (let i = 0; i < params.length; i++) {
+    const useComma = i === params.length - 1 ? '' : ', '
+    names = names.concat(`${params[i].name}${useComma}`)
+  }
+  return names
+}
+
+// builds the type for destructured parameters
+export const paramsType = (params: Param[]): string => {
+  if (params.length === 0) {
+    return ''
+  }
+  let paramsTypeString = ''
+  for (let i = 0; i < params.length; i++) {
+    const useComma = i === params.length - 1 ? '' : ', '
+    paramsTypeString = paramsTypeString.concat(`${params[i].name}${handleOptional(params[i].isOptional)}: ${dataType(params[i].type)}${useComma}`)
+  }
+  return paramsTypeString
+}
+
+// makes a destructured parameters variable. E.G.
+// const {name, age}: {name: string, age: number }
+export const makeParamsVar = (params: Param[]): string => `const {${paramNames(params)}}: {${paramsType(params)}}`

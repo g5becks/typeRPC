@@ -1,3 +1,5 @@
+import {Method} from '../schema'
+
 export const capitalize = (text: string): string => text.replace(/^\w/, c => c.toUpperCase())
 
 export const lowerCase = (text: string): string => text.replace(/^\w/, c => c.toLowerCase())
@@ -16,3 +18,9 @@ export const fileHeader = () => `
 // ISSUES, VISIT https://github.com/g5becks/typeRPC/issues
 // ****************************************************
 \n`
+
+// returns the correct content-type for a server response
+export const serverResponseContentType = (method: Method) => method.hasCborReturn ? 'application/cbor' : 'application/json'
+
+// returns the correct content-type for a client request
+export const clientRequestContentType = (method: Method) => method.hasCborParams ? 'application/cbor' : 'application/json'
