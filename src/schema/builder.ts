@@ -78,9 +78,10 @@ const makeTuple = (type: TypeNode | Node): DataType => {
   }
 }
 
-const getJsDocComment = (method: MethodSignature | TypeAliasDeclaration, tagName: string): string | undefined => {
+// gets the comment portion of a JsDoc comment base on the tagName
+export const getJsDocComment = (method: MethodSignature | TypeAliasDeclaration, tagName: string): string | undefined => {
   const tags = method.getJsDocs()[0]?.getTags()
-  return tags?.filter(tag => tag.getTagName() === tagName)[0]?.getComment()
+  return tags?.filter(tag => tag.getTagName() === tagName)[0]?.getComment()?.trim()
 }
 
 // builds the httpVerb for a method using the parsed JsDoc

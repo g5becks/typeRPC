@@ -1,16 +1,18 @@
+/* eslint-disable radix */
 // file deepcode ignore semicolon: conflicts with eslint settings
 // file deepcode ignore interface-over-type-literal: improper
 import {
   InterfaceDeclaration,
   MethodSignature,
   Node,
+  ParameterDeclaration,
   SourceFile,
   SyntaxKind,
   TypeAliasDeclaration,
   TypeNode,
 } from 'ts-morph'
-import {containersList, primitivesMap} from './types'
-import {getTypeNode} from './builder'
+import {containersList, isQueryParamable, primitivesMap, queryParamableContainers, queryParamablePrims} from './types'
+import {getJsDocComment, getTypeNode} from './builder'
 import {HttpErrCode, HttpResponseCode, HTTPVerb} from './schema'
 
 export const isHttpVerb = (method: string | undefined): method is HTTPVerb =>
@@ -315,10 +317,22 @@ const validateMethodJsDoc = (method: MethodSignature): Error[] => {
   return errs
 }
 
+const validateGetMethodParam = (param: ParameterDeclaration): Error[] => {
+  return !isQueryParamable(param.getTypeNode()!.getText().trim()) ?
+    [singleErr(param, `${param.getName()} has an invalid type. Methods annotated with @access GET are only allowed to use the following types for parameters: primitive types => ${queryParamablePrims} | container types => ${queryParamableContainers}. Also note, that container types can only use one of the mentioned primitive types as type parameters`)] : []
+}
+const validateGetRequestMethodParams = (method: MethodSignature): Error[] => {
+  const params = method.getParameters()
+  if (getJsDocComment(method, 'access')?.toUpperCase() !== 'GET' || params.length === 0) {
+    return []
+  }
+  return params.flatMap(param => validateGetMethodParam(param))
+}
+
 const getMethodsForFile = (file: SourceFile): MethodSignature[] => file.getInterfaces().flatMap(interfc => interfc.getMethods())
 
 // Validates method params and return types.
-const validateMethods = (sourceFile: SourceFile): Error[] => getMethodsForFile(sourceFile).flatMap(method => [...validateParams(method), ...validateReturnType(method), ...validateMethodNotGeneric(method), ...validateMethodJsDoc(method)])
+const validateMethods = (sourceFile: SourceFile): Error[] => getMethodsForFile(sourceFile).flatMap(method => [...validateParams(method), ...validateReturnType(method), ...validateMethodNotGeneric(method), ...validateMethodJsDoc(method), ...validateGetRequestMethodParams(method)])
 
 const validateSchema = (sourceFile: SourceFile): Error[] => {
   return [

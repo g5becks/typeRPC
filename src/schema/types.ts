@@ -135,7 +135,10 @@ export type QueryParamableContainer = t.List<QueryParamablePrim> | t.Tuple2<Quer
 
 export type QueryParamable = QueryParamableContainer | QueryParamablePrim
 
-export const queryParamables = ['t.bool', 't.timestamp', 't.int8', 't.uint8', 't.int16', 't.uint16', 't.int32', 't.uint32', 't.uint64', 't.int64', 't.float32', 't.float64', 't.str', 't.List', 't.Tuple']
+export const queryParamablePrims = ['t.bool', 't.timestamp', 't.int8', 't.uint8', 't.int16', 't.uint16', 't.int32', 't.uint32', 't.uint64', 't.int64', 't.float32', 't.float64', 't.str']
+
+export const queryParamableContainers = ['t.Tuple2', 't.Tuple3', 't.Tuple4', 't.Tuple5']
+export const queryParamables = [...queryParamablePrims, ...queryParamableContainers]
 
 // determines if the type text is a valid QueryParamable Type
 export const isQueryParamable = (type: string): boolean => queryParamables.some(paramable => paramable.startsWith(type))
