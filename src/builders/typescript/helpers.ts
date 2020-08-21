@@ -1,5 +1,5 @@
 /* eslint-disable new-cap */
-import {DataType, is, prim, primitives} from '../../schema/types'
+import {DataType, is, prim, primitives, QueryParamable, QueryParamablePrim} from '../../schema/types'
 import {Interface, Method, Param, Property, Schema, TypeDef} from '../../schema'
 import {capitalize, lowerCase} from '../utils'
 
@@ -69,32 +69,34 @@ export const dataType = (type: DataType): string => {
   return 'any'
 }
 
-const primFromString = (text: string, type: DataType): string => {
-  switch (type) {
-  case prim.int8:
-  case prim.uint8:
-  case prim.int16:
-  case prim.uint16:
-  case prim.int32:
-  case prim.uint32:
-  case prim.int64:
-  case prim.uint64:
+const primFromString = (text: string, type: QueryParamablePrim): string => {
+  switch (type.toString()) {
+  case prim.int8.toString():
+  case prim.uint8.toString():
+  case prim.int16.toString():
+  case prim.uint16.toString():
+  case prim.int32.toString():
+  case prim.uint32.toString():
+  case prim.int64.toString():
+  case prim.uint64.toString():
     return `parseInt(${text})`
-  case prim.float32:
-  case prim.float64:
+  case prim.float32.toString():
+  case prim.float64.toString():
     return `parseFloat(${text})`
-  case prim.bool:
+  case prim.bool.toString():
     return `Boolean(${text})`
-  case prim.str:
+  case prim.str.toString():
     return text
-  case prim.timestamp:
+  case prim.timestamp.toString():
     return `parseInt(${text})`
   }
   return text
 }
 
-const fromQueryString  = (text: string | string[], type: DataType): string => typesMap.has(type) ? primFromString(text as string, type) :
-  `${text}.map(val => ${primFromString(text as string, type)})`
+const fromQueryString  = (text: string | string[], type: QueryParamable): string => {
+  return typesMap.has(type) ? primFromString(text as string, type) :
+    `${text}.map(val => ${primFromString(text as string, type)})`
+}
 
 // add question mark to optional type alias property or method param if needed
 export const handleOptional = (isOptional: boolean): string => isOptional ? '?' : ''
