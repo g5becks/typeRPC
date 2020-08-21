@@ -66,6 +66,65 @@ export const primitives: {[key: string]: rpc.Primitive} = {
   blob: {_type_: 'blob', toString: () => 't.blob'} as unknown as t.blob,
 }
 
+// ide autocomplete isn't very helpful using the primitives object
+// this object is meant to be used as an alternative
+export const prim = {
+  get bool(): rpc.Primitive {
+    return primitives.bool
+  },
+  get int8(): rpc.Primitive {
+    return primitives.int8
+  },
+  get uint8(): rpc.Primitive {
+    return primitives.uint8
+  },
+  get int16(): rpc.Primitive {
+    return primitives.int16
+  },
+  get uint16(): rpc.Primitive {
+    return primitives.unint16
+  },
+  get int32(): rpc.Primitive {
+    return primitives.int32
+  },
+  get uint32(): rpc.Primitive {
+    return primitives.uint32
+  },
+  get int64(): rpc.Primitive {
+    return primitives.int64
+  },
+  get uint64(): rpc.Primitive {
+    return primitives.uint64
+  },
+  get float32(): rpc.Primitive {
+    return primitives.float32
+  },
+  get float64(): rpc.Primitive {
+    return primitives.float64
+  },
+  get nil(): rpc.Primitive {
+    return primitives.nil
+  },
+  get str(): rpc.Primitive {
+    return primitives.str
+  },
+  get err(): rpc.Primitive {
+    return primitives.err
+  },
+  get dyn(): rpc.Primitive {
+    return primitives.dyn
+  },
+  get timestamp(): rpc.Primitive {
+    return primitives.timestamp
+  },
+  get unit(): rpc.Primitive {
+    return primitives.unit
+  },
+  get blob(): rpc.Primitive {
+    return primitives.blob
+  },
+}
+
 type Container = rpc.Container | Struct
 
 export type DataType = rpc.RpcType | Struct
