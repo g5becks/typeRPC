@@ -93,9 +93,16 @@ const primFromString = (text: string, type: QueryParamablePrim): string => {
   return text
 }
 
-const fromQueryString  = (text: string | string[], type: QueryParamable): string => {
-  return typesMap.has(type) ? primFromString(text as string, type) :
-    `${text}.map(val => ${primFromString(text as string, type)})`
+const fromQueryString  = (text: string, type: QueryParamable): string => {
+  if (typesMap.has(type)) {
+    return primFromString(text as string, type as QueryParamablePrim)
+  }
+  if (is.List(type)) {
+    if (type.dataType.toString() === 't.str') {
+      return text
+    }
+  }
+  return  `${text}.map(val => ${primFromString(text as string, type as QueryParamablePrim)})`
 }
 
 // add question mark to optional type alias property or method param if needed
