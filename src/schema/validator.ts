@@ -314,6 +314,7 @@ const validateMethodJsDoc = (method: MethodSignature): Error[] => {
   }
   return errs
 }
+
 const getMethodsForFile = (file: SourceFile): MethodSignature[] => file.getInterfaces().flatMap(interfc => interfc.getMethods())
 
 // Validates method params and return types.
