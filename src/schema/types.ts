@@ -82,7 +82,7 @@ export const prim = {
     return primitives.int16
   },
   get uint16(): rpc.Primitive {
-    return primitives.unint16
+    return primitives.uint16
   },
   get int32(): rpc.Primitive {
     return primitives.int32
@@ -135,9 +135,11 @@ const validateType = (type: unknown, ...propNames: string[]): boolean => {
 }
 // validate every TupleN type by ensuring it has itemN property names.
 const validateTuple = (type: unknown, numItems: number): boolean => {
-  const props: string[] = []
-  for (let i = 0; i < numItems; i++) {
-    props.push(`item${i + 1}`)
+  let props: string[] = []
+  let i = 0
+  while (i < numItems) {
+    props = props.concat(`item${i + 1}`)
+    i++
   }
   return validateType(type, ...props)
 }

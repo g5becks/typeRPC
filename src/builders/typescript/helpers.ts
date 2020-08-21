@@ -49,19 +49,19 @@ export const dataType = (type: DataType): string => {
   }
 
   if (is.Tuple2(type)) {
-    return `[${dataType(type)}, ${dataType(type)}]`
+    return `[${dataType(type.item1)}, ${dataType(type.item2)}]`
   }
 
   if (is.Tuple3(type)) {
-    return `[${dataType(type)}, ${dataType(type)}, ${dataType(type)}]`
+    return `[${dataType(type.item1)}, ${dataType(type.item2)}, ${dataType(type.item3)}]`
   }
 
   if (is.Tuple4(type)) {
-    return `[${dataType(type)}, ${dataType(type)}, ${dataType(type)}, ${dataType(type)}]`
+    return `[${dataType(type.item1)}, ${dataType(type.item2)}, ${dataType(type.item3)}, ${dataType(type.item4)}]`
   }
 
   if (is.Tuple5(type)) {
-    return `[${dataType(type)}, ${dataType(type)}, ${dataType(type)}, ${dataType(type)}, ${dataType(type)}]`
+    return `[${dataType(type.item1)}, ${dataType(type.item2)}, ${dataType(type.item3)}, ${dataType(type.item4)}, ${dataType(type.item5)}]`
   }
 
   return 'any'
