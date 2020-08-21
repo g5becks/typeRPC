@@ -84,7 +84,7 @@ const getJsDocComment = (method: MethodSignature | TypeAliasDeclaration, tagName
 }
 
 const isHttpVerb = (method: string): method is HTTPVerb =>
-  ['POST', 'PUT', 'GET', 'HEAD', 'DELETE', 'OPTIONS', 'PATCH'].includes(method)
+  ['POST', 'GET'].includes(method)
 
 // builds the httpVerb for a method using the parsed JsDoc
 const buildHttpVerb = (method: MethodSignature): HTTPVerb => {

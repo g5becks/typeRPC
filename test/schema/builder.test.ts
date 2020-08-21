@@ -81,19 +81,19 @@ test('buildHttpVerb() should return correct HttpVerb', () => {
       expect(verb).toEqual('POST')
       break
     case 2:
-      expect(verb).toEqual('PUT')
+      expect(verb).toEqual('POST')
       break
     case 3:
-      expect(verb).toEqual('DELETE')
+      expect(verb).toEqual('POST')
       break
     case 4:
-      expect(verb).toEqual('HEAD')
+      expect(verb).toEqual('POST')
       break
     case 5:
-      expect(verb).toEqual('OPTIONS')
+      expect(verb).toEqual('POST')
       break
     case 6:
-      expect(verb).toEqual('PATCH')
+      expect(verb).toEqual('POST')
       break
     }
   }
