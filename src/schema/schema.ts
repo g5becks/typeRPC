@@ -6,55 +6,54 @@ export type HttpErrCode = 400 | 401 | 402 | 403 | 404 | 405 | 406 | 407 | 408 | 
 
 export type HttpResponseCode = 200 | 201 | 202 | 203 | 204 | 205 | 206 |300 | 301 | 302 | 303 | 304 | 305 | 306 | 307 | 308
 
-export type Param = {
-  readonly name: string;
-  readonly type: DataType;
-  readonly isOptional: boolean;
-}
+export type Param = Readonly<{
+  name: string;
+  type: DataType;
+  isOptional: boolean;
+}>
 
-export type Method = {
-  readonly name: string;
-  readonly params:  Param[];
-  readonly returnType: DataType;
+export type Method = Readonly<{
+  name: string;
+  params:  ReadonlyArray<Param>;
+  returnType: DataType;
   // serialize|deserialize params using cbor ?
-  readonly hasCborParams:  boolean;
+  hasCborParams:  boolean;
   // serialize|deserialize return type using cbor ?
-  readonly hasCborReturn:  boolean;
+  hasCborReturn:  boolean;
   // method has parameters ?
-  readonly hasParams:  boolean;
+  hasParams:  boolean;
   // does method Htt Verb === 'GET'
-  readonly isGet: boolean;
-  readonly isVoidReturn: boolean;
+  isGet: boolean;
+  isVoidReturn: boolean;
   // Type Of Http Verb this method uses. E.G. GET, POST, ...
-  readonly httpVerb: HTTPVerb;
+  httpVerb: HTTPVerb;
   // HTTP Response Status code for successful requests
-  readonly responseCode: HttpResponseCode;
+  responseCode: HttpResponseCode;
   // HTTP Response Status code for failed requests
-  readonly errorCode: HttpErrCode;
+  errorCode: HttpErrCode;
+}>
 
-}
+export type Property = Readonly<{
+  name: string;
+  type: DataType;
+  isOptional: boolean;
+}>
 
-export type Property = {
-  readonly name: string;
-  readonly type: DataType;
-  readonly isOptional: boolean;
-}
-
-export type Interface = {
-  readonly name: string;
-  readonly methods: Method[];
-}
+export type Interface = Readonly<{
+  name: string;
+  methods: ReadonlyArray<Method>;
+}>
 
 // TypeAlias from schema file
-export type TypeDef = {
-  readonly name: string;
-  readonly properties: Property[];
-}
+export type TypeDef = Readonly<{
+  name: string;
+  properties: ReadonlyArray<Property>;
+}>
 
-export type Schema = {
+export type Schema = Readonly<{
   // Name of the file this schema was generated from
-  readonly fileName: string;
-  readonly types: TypeDef[];
-  readonly interfaces: Interface[];
-  readonly hasCbor: boolean;
-}
+  fileName: string;
+  types: ReadonlyArray<TypeDef>;
+  interfaces: ReadonlyArray<Interface>;
+  hasCbor: boolean;
+}>

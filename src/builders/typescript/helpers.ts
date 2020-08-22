@@ -111,7 +111,7 @@ export const fromQueryString  = (paramName: string, type: QueryParamable): strin
 export const handleOptional = (isOptional: boolean): string => isOptional ? '?' : ''
 
 // builds all the properties of a type alias
-const buildProps = (props: Property[]): string => {
+const buildProps = (props: ReadonlyArray<Property>): string => {
   let propsString = ''
   for (const prop of props) {
     propsString = propsString.concat(`${prop.name}${handleOptional(prop.isOptional)}: ${dataType(prop.type)}\n`)
@@ -137,7 +137,7 @@ export const buildTypes = (schema: Schema): string => {
 }
 
 // builds all of the parameters of a method
-const buildParams = (params: Param[]): string => {
+const buildParams = (params: ReadonlyArray<Param>): string => {
   let paramsString = ''
   for (let i = 0; i < params.length; i++) {
     const useComma = i === params.length - 1 ? '' : ','
@@ -152,7 +152,7 @@ const buildMethod = (method: Method): string => {
 }
 
 // builds all methods of an interface
-const buildMethods = (methods: Method[]): string => {
+const buildMethods = (methods: ReadonlyArray<Method>): string => {
   let methodsString = ''
   for (const method of methods) {
     methodsString = methodsString.concat(buildMethod(method))
@@ -169,7 +169,7 @@ export interface ${capitalize(interfc.name)} {
 }
 
 // builds all interfaces of a Schema file
-export const buildInterfaces = (interfaces: Interface[]): string => {
+export const buildInterfaces = (interfaces: ReadonlyArray<Interface>): string => {
   let interfacesString = ''
   for (const interfc of interfaces) {
     interfacesString = interfacesString.concat(buildInterface(interfc))
@@ -179,7 +179,7 @@ export const buildInterfaces = (interfaces: Interface[]): string => {
 
 // builds the names of the parameters of a method E.G.
 // name, age, gender
-export const paramNames = (params: Param[]) => {
+export const paramNames = (params: ReadonlyArray<Param>) => {
   if (params.length === 0) {
     return ''
   }
@@ -192,7 +192,7 @@ export const paramNames = (params: Param[]) => {
 }
 
 // builds the type for destructured parameters
-export const paramsType = (params: Param[]): string => {
+export const paramsType = (params: ReadonlyArray<Param>): string => {
   if (params.length === 0) {
     return ''
   }
@@ -206,4 +206,4 @@ export const paramsType = (params: Param[]): string => {
 
 // makes a destructured parameters variable. E.G.
 // const {name, age}: {name: string, age: number }
-export const makeParamsVar = (params: Param[]): string => `const {${paramNames(params)}}: {${paramsType(params)}}`
+export const makeParamsVar = (params: ReadonlyArray<Param>): string => `const {${paramNames(params)}}: {${paramsType(params)}}`

@@ -86,7 +86,7 @@ export const ${lowerCase(interfc.name)}Routes = (${lowerCase(interfc.name)}: ${c
 `
 }
 
-const buildAllRoutes = (interfaces: Interface[]): string => {
+const buildAllRoutes = (interfaces: ReadonlyArray<Interface>): string => {
   let routes = ''
   for (const interfc of interfaces) {
     routes = routes.concat(buildRoutes(interfc))
