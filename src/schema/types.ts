@@ -131,18 +131,18 @@ type Container = rpc.Container | Struct
 export type QueryParamablePrim = t.bool | t.timestamp | t.int8 | t.uint8 | t.int16 | t.uint16 | t.int32 | t.uint32 | t.int64 | t.uint64 | t.float32 | t.float64 | t.str
 
 // valid container types to be used in client side get requests as query params
-export type QueryParamableContainer = t.List<QueryParamablePrim> | t.Tuple2<QueryParamablePrim, QueryParamablePrim> | t.Tuple3<QueryParamablePrim, QueryParamablePrim, QueryParamablePrim> | t.Tuple4<QueryParamablePrim, QueryParamablePrim, QueryParamablePrim, QueryParamablePrim> | t.Tuple5<QueryParamablePrim, QueryParamablePrim, QueryParamablePrim, QueryParamablePrim, QueryParamablePrim>
+export type QueryParamableContainer = t.List<QueryParamablePrim>
 
 export type QueryParamable = QueryParamableContainer | QueryParamablePrim
 
 export const queryParamablePrims = ['t.bool', 't.timestamp', 't.int8', 't.uint8', 't.int16', 't.uint16', 't.int32', 't.uint32', 't.uint64', 't.int64', 't.float32', 't.float64', 't.str']
 
-export const queryParamableContainers = ['t.Tuple2', 't.Tuple3', 't.Tuple4', 't.Tuple5']
+export const queryParamableContainers = ['t.List']
 export const queryParamables = [...queryParamablePrims, ...queryParamableContainers]
 
 // TODO test this function
 // determines if the type text is a valid QueryParamable Type
-export const isQueryParamableString = (type: string): boolean => queryParamables.some(paramable => paramable.startsWith(type))
+export const isQueryParamableString = (type: string): boolean => queryParamables.some(paramable => type.toString().startsWith(paramable))
 
 export const isQueryParamable = (type: DataType): type is QueryParamable => isQueryParamableString(type.toString())
 
