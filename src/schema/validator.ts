@@ -2,8 +2,6 @@
 // file deepcode ignore semicolon: conflicts with eslint settings
 // file deepcode ignore interface-over-type-literal: improper
 import {
-  ExportAssignment,
-  ExportDeclaration,
   MethodSignature,
   Node,
   ParameterDeclaration,
@@ -33,33 +31,42 @@ const errCodes = [400, 401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 41
 
 export const isErrCode = (code: number | undefined): code is HttpErrCode => errCodes.includes(code ?? 0)
 
+// A ts-morph declaration found in a schema file that has a getName() method
+// E.G. FunctionDeclaration, VariableDeclaration
 interface GetNameViolator {
   getName(): string | undefined;
   getStartLineNumber(includeJsDocComments?: boolean): number;
   getKindName(): string;
   getSourceFile(): SourceFile;
 }
+
 const canGetName = (type: Violator): type is GetNameViolator => 'getName' in type
+// A ts-morph declaration found in a schema that does not have a getName() method
+// but does have a getText() method
 interface GetTextViolator {
   getText(includeJsDocComments?: boolean): string;
   getStartLineNumber(includeJsDocComments?: boolean): number;
   getKindName(): string;
   getSourceFile(): SourceFile;
 }
+// Anything that is not a type alias is a violator
 type Violator = GetNameViolator | GetTextViolator
-const multiSchemaErr = (violators: Violator[]): Error =>
+
+// Returns a detailed error message about number of schema violations
+const multiValidationErr = (violators: Violator[]): Error =>
   new Error(`${violators[0].getSourceFile().getFilePath()?.toString()} contains ${violators.length} ${violators[0].getKindName()} declarations
    errors: ${violators.map(vio =>  canGetName(vio) ?  vio.getName()?.trim() : vio.getText().trim() + ', at line number: ' + String(vio?.getStartLineNumber()) + '\n')}
    message: typerpc schemas can only contain a single import statement (import {t} from '@typerpc/types'), typeAlias (message), and interface (service) declarations.`)
 
-const singleErr = (node: Node | undefined, msg: string): Error => {
+// Returns an error about a single schema violation
+const singleValidationErr = (node: Node | undefined, msg: string): Error => {
   return new Error(
     `error in file: ${node?.getSourceFile()?.getFilePath()}
      at line number: ${node?.getStartLineNumber()}
      message: ${msg}`)
 }
 
-const validateDeclarations = (declarations: Violator[]): Error[] => declarations.length > 0 ? [multiSchemaErr(declarations)] : []
+const validateDeclarations = (declarations: Violator[]): Error[] => declarations.length > 0 ? [multiValidationErr(declarations)] : []
 
 // Ensure zero function declarations
 const validateFunctions = (sourceFile: SourceFile): Error[] => validateDeclarations(sourceFile.getFunctions())
@@ -73,15 +80,15 @@ const validateInterfaces = (sourceFile: SourceFile): Error[] => validateDeclarat
 // Ensure zero class declarations
 const validateClasses = (sourceFile: SourceFile): Error[] => validateDeclarations(sourceFile.getClasses())
 
-// Ensure only one valid import without aliasing the namespace
+// Ensure only one valid import without aliasing namespaces
 const validateImports = (sourceFile: SourceFile): Error[] => {
   const imports = sourceFile.getImportDeclarations()
   const imp = imports[0]?.getImportClause()?.getNamedImports()[0].getText().trim()
   const errs: Error[] = []
   if (imports.length !== 1) {
-    errs.push(singleErr(sourceFile, "typerpc schema files must contain only one import declaration => import {t} from '@typerpc/types"))
+    errs.push(singleValidationErr(sourceFile, "typerpc schema files must contain only one import declaration => import {t} from '@typerpc/types"))
   } else if (imports[0].getImportClause()?.getNamedImports()[0].getText().trim() !== 't') {
-    errs.push(singleErr(sourceFile, `Invalid import statement => ${imp}, @typerpc/types namespace can only be imported as {t}`))
+    errs.push(singleValidationErr(sourceFile, `Invalid import statement => ${imp}, @typerpc/types namespace can only be imported as {t}`))
   }
   return errs
 }
@@ -99,10 +106,10 @@ const validateStatements = (sourceFile: SourceFile): Error[] => {
   const stmnts = sourceFile.getStatements()
   const invalidKinds = [SyntaxKind.AbstractKeyword, SyntaxKind.AwaitExpression, SyntaxKind.ArrayType, SyntaxKind.ArrowFunction,  SyntaxKind.TaggedTemplateExpression, SyntaxKind.SpreadAssignment, SyntaxKind.JsxExpression, SyntaxKind.ForStatement, SyntaxKind.ForInStatement, SyntaxKind.ForOfStatement, SyntaxKind.SwitchStatement, SyntaxKind.LessThanLessThanEqualsToken]
   const invalids = stmnts.filter(stmnt => invalidKinds.includes(stmnt.getKind()))
-  return invalids.length > 0 ? [multiSchemaErr(invalids)] : []
+  return invalids.length > 0 ? [multiValidationErr(invalids)] : []
 }
 
-// Ensure no enums
+// Ensure zero enums
 const validateEnums = (sourceFile: SourceFile): Error[] => validateDeclarations(sourceFile.getEnums())
 
 // Ensure zero references to other files
@@ -111,17 +118,17 @@ const validateRefs = (sourceFile: SourceFile): Error[] => {
   // should be 1
   const nodeSourceRefs = sourceFile.getNodesReferencingOtherSourceFiles()
   if (nodeSourceRefs.length !== 1) {
-    errs.push(multiSchemaErr(nodeSourceRefs))
+    errs.push(multiValidationErr(nodeSourceRefs))
   }
   // should be 1
   const literalSourceRefs = sourceFile.getLiteralsReferencingOtherSourceFiles()
   if (literalSourceRefs.length !== 1) {
-    errs.push(multiSchemaErr(literalSourceRefs))
+    errs.push(multiValidationErr(literalSourceRefs))
   }
   // should be 1
   const sourceRefs = sourceFile.getReferencedSourceFiles()
   if (sourceRefs.length !== 1) {
-    errs.push(multiSchemaErr(sourceRefs))
+    errs.push(multiValidationErr(sourceRefs))
   }
   const otherErr = (msg: string) => new Error(`error in file: ${sourceFile.getFilePath().toString()
   }
@@ -144,10 +151,13 @@ const validateRefs = (sourceFile: SourceFile): Error[] => {
   return errs
 }
 
+// is the type found is a typerpc primitive type?
 export const isPrimitive = (typeText: string): boolean => primitivesMap.has(typeText.trim())
 
+// is the type found a typerpc container type?
 export const isContainer = (typeText: string): boolean => containersList.some(container => typeText.trim().startsWith(container))
 
+// is the type found a valid typerpc type?
 const isValidDataType = (typeText: string): boolean => isPrimitive(typeText) || isContainer(typeText)
 
 const isValidTypeAlias = (type: TypeNode | Node): boolean => type.getSourceFile().getTypeAliases().map(alias => alias.getNameNode().getText().trim()).includes(type.getText().trim())
@@ -159,7 +169,7 @@ const validateTypeAliasChildren = (type: TypeAliasDeclaration): Error[] => {
   const errs: Error[] = []
   if (typeof typeNode !== 'undefined') {
     if (typeNode.getFirstChild()?.getText().trim() !== '{') {
-      return [singleErr(type,
+      return [singleValidationErr(type,
         `All typerpc type aliases must be Object aliases, E.G.
       type  Mytype = {
       (properties with valid type rpc data types or other type aliases)
@@ -168,13 +178,13 @@ const validateTypeAliasChildren = (type: TypeAliasDeclaration): Error[] => {
     }
   }
   if (typeof children === 'undefined') {
-    return [singleErr(type, 'Empty type aliases are not supported')]
+    return [singleValidationErr(type, 'Empty type aliases are not supported')]
   }
   for (const child of children) {
     // get the properties type
     const propType = getTypeNode(child)
     if (!isValidDataType(propType.getText().trim()) && !isValidTypeAlias(propType)) {
-      errs.push(singleErr(child, 'Invalid property type, Only types imported from @typerpc/types and other type aliases declared in the same file may be used as property types'))
+      errs.push(singleValidationErr(child, 'Invalid property type, Only types imported from @typerpc/types and other type aliases declared in the same file may be used as property types'))
     }
   }
 
@@ -184,7 +194,7 @@ const validateTypeAliasChildren = (type: TypeAliasDeclaration): Error[] => {
 const genericsErrMsg = (type: TypeAliasDeclaration| MethodSignature) => `${type.getName().trim()} defines a generic type . typerpc types and methods cannot be generic`
 
 const validateTypeAlias = (type: TypeAliasDeclaration): Error[] => {
-  return type.getTypeParameters().length > 0 ? [singleErr(type, genericsErrMsg(type))] : []
+  return type.getTypeParameters().length > 0 ? [singleValidationErr(type, genericsErrMsg(type))] : []
 }
 
 // Ensures no type aliases are generic and all properties are proper types.
@@ -206,9 +216,9 @@ const validateParams = (method: MethodSignature): Error[] => {
   const errs: Error[] = []
   for (const type of paramTypes) {
     if (typeof type === 'undefined') {
-      errs.push(singleErr(type, `${method.getName()} method contains one or more parameters that do not specify a valid type. All method parameter must have a valid type`))
+      errs.push(singleValidationErr(type, `${method.getName()} method contains one or more parameters that do not specify a valid type. All method parameter must have a valid type`))
     } else if (!isValidDataType(type.getText()) && !isValidTypeAlias(type)) {
-      errs.push(singleErr(type, `method parameter type '${type.getText().trim()}', is either not a valid typerpc type or a type alias that is not defined in this file`))
+      errs.push(singleValidationErr(type, `method parameter type '${type.getText().trim()}', is either not a valid typerpc type or a type alias that is not defined in this file`))
     }
   }
   return errs
@@ -218,13 +228,13 @@ const validateParams = (method: MethodSignature): Error[] => {
 // declared in the same file.
 const validateReturnType = (method: MethodSignature): Error[] => {
   const returnType = method.getReturnTypeNode()
-  const returnTypeErr = (typeName: string) => singleErr(method,
+  const returnTypeErr = (typeName: string) => singleValidationErr(method,
     `Invalid return type: '${typeName}'. All typerpc interface methods must return a valid typerpc type or a type alias defined in the same file as the method. To return nothing, use 't.unit'`)
   return typeof returnType === 'undefined' ? [returnTypeErr('undefined')] :
     !isValidDataType(returnType.getText()) && !isValidTypeAlias(returnType) ? [returnTypeErr(returnType.getText().trim())] : []
 }
 
-const validateMethodNotGeneric = (method: MethodSignature): Error[] => method.getTypeParameters().length > 0 ? [singleErr(method, genericsErrMsg(method))] : []
+const validateMethodNotGeneric = (method: MethodSignature): Error[] => method.getTypeParameters().length > 0 ? [singleValidationErr(method, genericsErrMsg(method))] : []
 
 // TODO test this function
 const validateMethodJsDoc = (method: MethodSignature): Error[] => {
@@ -238,13 +248,13 @@ const validateMethodJsDoc = (method: MethodSignature): Error[] => {
     const tagName = tag.getTagName()
     const comment = tag?.getComment()?.trim() ?? ''
     if (!validTags.includes(tag.getTagName())) {
-      errs.push(singleErr(tag, `${tag.getTagName()} is not a valid typerpc JsDoc tag. Valid tags are :${validTags}`))
+      errs.push(singleValidationErr(tag, `${tag.getTagName()} is not a valid typerpc JsDoc tag. Valid tags are :${validTags}`))
     }
     if (tagName === 'access' && !isHttpVerb(comment)) {
-      errs.push(singleErr(tag, `${tag.getComment()} HTTP method is not supported by typerpc. Valids methods are 'POST' | 'GET'`))
+      errs.push(singleValidationErr(tag, `${tag.getComment()} HTTP method is not supported by typerpc. Valids methods are 'POST' | 'GET'`))
     }
     if (tagName === 'throws') {
-      const err = singleErr(tag, `${comment} is not a valid HTTP error response code. Valid error response codes are : ${errCodes}`)
+      const err = singleValidationErr(tag, `${comment} is not a valid HTTP error response code. Valid error response codes are : ${errCodes}`)
       try {
         if (!isErrCode(parseInt((comment)))) {
           errs.push(err)
@@ -254,7 +264,7 @@ const validateMethodJsDoc = (method: MethodSignature): Error[] => {
       }
     }
     if (tagName === 'returns') {
-      const err = singleErr(tag, `${tag.getComment()} is not a valid HTTP success response code. Valid success response codes are : ${responseCodes}`)
+      const err = singleValidationErr(tag, `${tag.getComment()} is not a valid HTTP success response code. Valid success response codes are : ${responseCodes}`)
       try {
         if (!isResponseCode(parseInt(comment))) {
           errs.push(err)
@@ -271,7 +281,7 @@ const validateMethodJsDoc = (method: MethodSignature): Error[] => {
 
 const validateGetMethodParam = (param: ParameterDeclaration): Error[] => {
   return !isQueryParamableString(param.getTypeNode()!.getText().trim()) ?
-    [singleErr(param, `${param.getName()} has an invalid type. Methods annotated with @access GET are only allowed to use the following types for parameters: primitive types => ${queryParamablePrims} | container types => ${queryParamableContainers}. Also note, that container types can only use one of the mentioned primitive types as type parameters`)] : []
+    [singleValidationErr(param, `${param.getName()} has an invalid type. Methods annotated with @access GET are only allowed to use the following types for parameters: primitive types => ${queryParamablePrims} | container types => ${queryParamableContainers}. Also note, that container types can only use one of the mentioned primitive types as type parameters`)] : []
 }
 
 // TODO test this function
