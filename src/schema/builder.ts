@@ -10,7 +10,7 @@ import {
   TypeNode,
 } from 'ts-morph'
 import {DataType, is, make, primitives, primitivesMap} from './types'
-import {isContainer, isErrCode, isHttpVerb, isPrimitive, isResponseCode, validateSchemas} from './validator'
+import {isContainer, isErrCode, isHttpVerb, isPrimitive, isResponseCode, validateSchemas} from './parser'
 import {Schema} from '.'
 import {HTTPErrCode, HTTPResponseCode, HTTPVerb, Interface, Method, Param, Property, TypeDef} from './schema'
 

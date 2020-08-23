@@ -35,6 +35,12 @@ export const isContainer = (typeText: string): boolean => containersList.some(co
 // is the type found a valid typerpc type?
 const isValidDataType = (typeText: string): boolean => isPrimitive(typeText) || isContainer(typeText)
 
+// is the type alias an rpc.Msg?
+const isMsg = (type: TypeAliasDeclaration): boolean => Boolean(type.getTypeNode()?.getText().startsWith('rpc.Msg<{'))
+
+// is the type alias an rpc.Service?
+const isService = (type: TypeAliasDeclaration): boolean => Boolean(type.getTypeNode()?.getText().startsWith('rpc.Service<{'))
+
 // is the type alias used as a property or parameter a type alias defined in this
 // schema file?
 const isValidTypeAlias = (type: TypeNode | Node): boolean => type.getSourceFile().getTypeAliases().map(alias => alias.getNameNode().getText().trim()).includes(type.getText().trim())
@@ -48,6 +54,9 @@ export const isResponseCode = (code: number| undefined): code is HTTPResponseCod
 
 // is the number used in the JsDoc @throws tag a valid typerpc HTTPErrCode?
 export const isErrCode = (code: number | undefined): code is HTTPErrCode => errCodes.includes(code ?? 0)
+
+const getServices = (file: SourceFile): TypeAliasDeclaration[] =>
+  file.getTypeAliases().filter(alias => isService(alias))
 
 // A ts-morph declaration found in a schema file that has a getName() method
 // E.G. FunctionDeclaration, VariableDeclaration

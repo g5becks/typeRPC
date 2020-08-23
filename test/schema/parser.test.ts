@@ -1,7 +1,7 @@
 // file deepcode ignore no-unused-expression: test file
 // file deepcode ignore semicolon: conflict with eslint
 import {Project} from 'ts-morph'
-import {validateSchemas} from '../../src/schema/validator'
+import {validateSchemas} from '../../src/schema/parser'
 import {sourceWithValidImportAndInterface, validInterface} from './util'
 
 let project: Project
