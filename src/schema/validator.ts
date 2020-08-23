@@ -2,7 +2,8 @@
 // file deepcode ignore semicolon: conflicts with eslint settings
 // file deepcode ignore interface-over-type-literal: improper
 import {
-  InterfaceDeclaration,
+  ExportAssignment,
+  ExportDeclaration,
   MethodSignature,
   Node,
   ParameterDeclaration,
@@ -11,7 +12,13 @@ import {
   TypeAliasDeclaration,
   TypeNode,
 } from 'ts-morph'
-import {containersList, isQueryParamableString, primitivesMap, queryParamableContainers, queryParamablePrims} from './types'
+import {
+  containersList,
+  isQueryParamableString,
+  primitivesMap,
+  queryParamableContainers,
+  queryParamablePrims,
+} from './types'
 import {getJsDocComment, getTypeNode} from './builder'
 import {HttpErrCode, HttpResponseCode, HTTPVerb} from './schema'
 
@@ -26,13 +33,23 @@ const errCodes = [400, 401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 41
 
 export const isErrCode = (code: number | undefined): code is HttpErrCode => errCodes.includes(code ?? 0)
 
-type Violator = {
-  name?: string;
-  lineNumber?: number;
+interface GetNameViolator {
+  getName(): string | undefined;
+  getStartLineNumber(includeJsDocComments?: boolean): number;
+  getKindName(): string;
+  getSourceFile(): SourceFile;
 }
-const multiSchemaErr = (numInvalids: number, type: string, violators: Violator[], sourceFile: SourceFile): Error =>
-  new Error(`${sourceFile.getFilePath()?.toString()} contains ${numInvalids} ${type} declarations
-   errors: ${violators.map(vio => String(vio?.name) + ', at line number: ' + String(vio?.lineNumber) + '\n')}
+const canGetName = (type: Violator): type is GetNameViolator => 'getName' in type
+interface GetTextViolator {
+  getText(includeJsDocComments?: boolean): string;
+  getStartLineNumber(includeJsDocComments?: boolean): number;
+  getKindName(): string;
+  getSourceFile(): SourceFile;
+}
+type Violator = GetNameViolator | GetTextViolator
+const multiSchemaErr = (violators: Violator[]): Error =>
+  new Error(`${violators[0].getSourceFile().getFilePath()?.toString()} contains ${violators.length} ${violators[0].getKindName()} declarations
+   errors: ${violators.map(vio =>  canGetName(vio) ?  vio.getName()?.trim() : vio.getText().trim() + ', at line number: ' + String(vio?.getStartLineNumber()) + '\n')}
    message: typerpc schemas can only contain a single import statement (import {t} from '@typerpc/types'), typeAlias (message), and interface (service) declarations.`)
 
 const singleErr = (node: Node | undefined, msg: string): Error => {
@@ -42,29 +59,19 @@ const singleErr = (node: Node | undefined, msg: string): Error => {
      message: ${msg}`)
 }
 
+const validateDeclarations = (declarations: Violator[]): Error[] => declarations.length > 0 ? [multiSchemaErr(declarations)] : []
+
 // Ensure zero function declarations
-const validateFunctions = (sourceFile: SourceFile): Error[] => {
-  const functions = sourceFile.getFunctions()
-  return functions.length > 0 ? [multiSchemaErr(functions.length, 'function', functions.map(func => {
-    return {name: func.getName(), lineNumber: func.getStartLineNumber()}
-  }), sourceFile)] : []
-}
+const validateFunctions = (sourceFile: SourceFile): Error[] => validateDeclarations(sourceFile.getFunctions())
 
 // Ensure zero variable declarations
-const validateVariables = (sourceFile: SourceFile): Error[] => {
-  const variables = sourceFile.getVariableDeclarations()
-  return variables.length > 0 ? [multiSchemaErr(variables.length, 'variable', variables.map(vari => {
-    return {name: vari.getName(), lineNumber: vari.getStartLineNumber()}
-  }), sourceFile)] : []
-}
+const validateVariables = (sourceFile: SourceFile): Error[] => validateDeclarations(sourceFile.getVariableDeclarations())
+
+// Ensure Zero Interfaces
+const validateInterfaces = (sourceFile: SourceFile): Error[] => validateDeclarations(sourceFile.getInterfaces())
 
 // Ensure zero class declarations
-const validateClasses = (sourceFile: SourceFile): Error[] => {
-  const classes = sourceFile.getClasses()
-  return classes.length > 0 ? [multiSchemaErr(classes.length, 'class', classes.map(cls => {
-    return {name: cls.getName(), lineNumber: cls.getStartLineNumber()}
-  }), sourceFile)] : []
-}
+const validateClasses = (sourceFile: SourceFile): Error[] => validateDeclarations(sourceFile.getClasses())
 
 // Ensure only one valid import without aliasing the namespace
 const validateImports = (sourceFile: SourceFile): Error[] => {
@@ -81,50 +88,22 @@ const validateImports = (sourceFile: SourceFile): Error[] => {
 
 // Ensure zero exports
 const validateExports = (sourceFile: SourceFile): Error[] => {
-  const allExports = sourceFile.getExportAssignments()
-  const exportDecs = sourceFile.getExportDeclarations()
-  const exportSym = sourceFile.getExportSymbols()
-  const errs = allExports.length > 0 ? [multiSchemaErr(allExports.length, 'export', allExports.map(exp => {
-    return {name: exp.getText().trim()}
-  }), sourceFile)] : []
-  if (exportDecs.length > 0) {
-    errs.push(multiSchemaErr(exportDecs.length, 'export', exportDecs.map(exp => {
-      return {name: exp.getText().trim(), lineNumber: exp.getStartLineNumber()}
-    }), sourceFile))
-  }
-  if (exportSym.length > 0) {
-    errs.push(multiSchemaErr(exportSym.length, 'export', exportSym.map(exp => {
-      return {name: exp.getName()}
-    }), sourceFile))
-  }
-  return errs
+  return [...validateDeclarations(sourceFile.getExportAssignments()), ...validateDeclarations(sourceFile.getExportDeclarations())]
 }
 
 // Ensure zero namespaces
-const validateNameSpaces = (sourceFile: SourceFile): Error[] => {
-  const spaces = sourceFile.getNamespaces()
-  return spaces.length > 0 ? [multiSchemaErr(spaces.length, 'namespace', spaces.map(space => {
-    return {name: space.getName(), lineNumber: space.getStartLineNumber()}
-  }), sourceFile)] : []
-}
+const validateNameSpaces = (sourceFile: SourceFile): Error[] => validateDeclarations(sourceFile.getNamespaces())
 
 // Ensure zero top level statements
 const validateStatements = (sourceFile: SourceFile): Error[] => {
   const stmnts = sourceFile.getStatements()
-  const invalidKinds = [SyntaxKind.AbstractKeyword, SyntaxKind.AwaitExpression, SyntaxKind.ArrayType, SyntaxKind.ArrowFunction,  SyntaxKind.TaggedTemplateExpression, SyntaxKind.SpreadAssignment, SyntaxKind.JsxExpression, SyntaxKind.ForStatement, SyntaxKind.ForInStatement, SyntaxKind.ForOfStatement, SyntaxKind.SwitchStatement]
+  const invalidKinds = [SyntaxKind.AbstractKeyword, SyntaxKind.AwaitExpression, SyntaxKind.ArrayType, SyntaxKind.ArrowFunction,  SyntaxKind.TaggedTemplateExpression, SyntaxKind.SpreadAssignment, SyntaxKind.JsxExpression, SyntaxKind.ForStatement, SyntaxKind.ForInStatement, SyntaxKind.ForOfStatement, SyntaxKind.SwitchStatement, SyntaxKind.LessThanLessThanEqualsToken]
   const invalids = stmnts.filter(stmnt => invalidKinds.includes(stmnt.getKind()))
-  return invalids.length > 0 ? [multiSchemaErr(stmnts.length, 'top level statement', invalids.map(stmnt => {
-    return {name: stmnt.getText().trim(), lineNumber: stmnt.getStartLineNumber()}
-  }), sourceFile)] : []
+  return invalids.length > 0 ? [multiSchemaErr(invalids)] : []
 }
 
 // Ensure no enums
-const validateEnums = (sourceFile: SourceFile): Error[] => {
-  const enums = sourceFile.getEnums()
-  return enums.length > 0 ? [multiSchemaErr(enums.length, 'enum', enums.map(enu => {
-    return {name: enu.getName(), lineNumber: enu.getStartLineNumber()}
-  }), sourceFile)] : []
-}
+const validateEnums = (sourceFile: SourceFile): Error[] => validateDeclarations(sourceFile.getEnums())
 
 // Ensure zero references to other files
 const validateRefs = (sourceFile: SourceFile): Error[] => {
@@ -132,44 +111,35 @@ const validateRefs = (sourceFile: SourceFile): Error[] => {
   // should be 1
   const nodeSourceRefs = sourceFile.getNodesReferencingOtherSourceFiles()
   if (nodeSourceRefs.length !== 1) {
-    errs.push(multiSchemaErr(nodeSourceRefs.length - 1, 'source reference', nodeSourceRefs.filter(ref => !ref.getText().includes('@typerpc')).map(ref => {
-      return {name: ref.getText().trim(), lineNumber: ref.getStartLineNumber()}
-    }), sourceFile))
+    errs.push(multiSchemaErr(nodeSourceRefs))
   }
   // should be 1
   const literalSourceRefs = sourceFile.getLiteralsReferencingOtherSourceFiles()
   if (literalSourceRefs.length !== 1) {
-    errs.push(multiSchemaErr(literalSourceRefs.length - 1, 'literal source reference', literalSourceRefs.filter(ref => !ref.getText().includes('@typerpc')).map(ref => {
-      return {name: ref.getText().trim(), lineNumber: ref.getStartLineNumber()}
-    }), sourceFile))
+    errs.push(multiSchemaErr(literalSourceRefs))
   }
   // should be 1
   const sourceRefs = sourceFile.getReferencedSourceFiles()
   if (sourceRefs.length !== 1) {
-    errs.push(multiSchemaErr(sourceRefs.length - 1, 'source reference', sourceRefs.filter(ref => !ref.getText().includes('@typerpc')).map(ref => {
-      return {name: ref.getText().trim(), lineNumber: ref.getStartLineNumber()}
-    }), sourceFile))
+    errs.push(multiSchemaErr(sourceRefs))
   }
+  const otherErr = (msg: string) => new Error(`error in file: ${sourceFile.getFilePath().toString()
+  }
+  message: ${msg}`)
   // should be 0
   const libraryRefs = sourceFile.getLibReferenceDirectives()
   if (libraryRefs.length > 0) {
-    errs.push(multiSchemaErr(libraryRefs.length, 'library reference', libraryRefs.map(ref => {
-      return {name: ref.getText().trim()}
-    }), sourceFile))
+    errs.push(otherErr('library reference found'))
   }
   // should be 0
   const pathRefs = sourceFile.getPathReferenceDirectives()
   if (pathRefs.length > 0) {
-    errs.push(multiSchemaErr(pathRefs.length, 'path reference', pathRefs.map(ref => {
-      return {name: ref.getText().trim()}
-    }), sourceFile))
+    errs.push(otherErr('path reference found'))
   }
   // should be 0
   const typeDirRefs = sourceFile.getTypeReferenceDirectives()
   if (typeDirRefs.length > 0) {
-    errs.push(multiSchemaErr(typeDirRefs.length, 'type reference directive', typeDirRefs.map(ref => {
-      return {name: ref.getText().trim()}
-    }), sourceFile))
+    errs.push(otherErr('type directive reference found'))
   }
   return errs
 }
@@ -182,6 +152,7 @@ const isValidDataType = (typeText: string): boolean => isPrimitive(typeText) || 
 
 const isValidTypeAlias = (type: TypeNode | Node): boolean => type.getSourceFile().getTypeAliases().map(alias => alias.getNameNode().getText().trim()).includes(type.getText().trim())
 
+// TODO fix this function to match latest changes
 const validateTypeAliasChildren = (type: TypeAliasDeclaration): Error[] => {
   const typeNode = type.getTypeNode()
   const children = typeNode?.forEachChildAsArray()
@@ -210,7 +181,7 @@ const validateTypeAliasChildren = (type: TypeAliasDeclaration): Error[] => {
   return errs
 }
 
-const genericsErrMsg = (type: TypeAliasDeclaration| InterfaceDeclaration| MethodSignature) => `${type.getName().trim()} defines a generic type . typerpc types and methods cannot be generic`
+const genericsErrMsg = (type: TypeAliasDeclaration| MethodSignature) => `${type.getName().trim()} defines a generic type . typerpc types and methods cannot be generic`
 
 const validateTypeAlias = (type: TypeAliasDeclaration): Error[] => {
   return type.getTypeParameters().length > 0 ? [singleErr(type, genericsErrMsg(type))] : []
@@ -223,31 +194,6 @@ const validateTypeAliases = (sourceFile: SourceFile): Error[] => {
     return []
   }
   return aliases.flatMap(alias => [...validateTypeAlias(alias), ...validateTypeAliasChildren(alias)])
-}
-
-const validateInterface = (interfc: InterfaceDeclaration): Error[] => {
-  let errs: Error[] = []
-  if (interfc.getMethods().length === 0) {
-    errs = errs.concat(singleErr(interfc, 'all typerpc interfaces must declare at least one method'))
-  }
-  if (interfc.getTypeParameters().length > 0) {
-    errs = errs.concat(singleErr(interfc, genericsErrMsg(interfc)))
-  }
-  if (interfc.getExtends().length > 0) {
-    errs = errs.concat(singleErr(interfc, 'typerpc interfaces are not allowed to contain extends clauses'))
-  }
-  return errs
-}
-
-// Ensure at least one interface and no interfaces are generic
-const validateInterfaces = (sourceFile: SourceFile): Error[] => {
-  const interfaces = sourceFile.getInterfaces()
-  if (interfaces.length === 0) {
-    return [new  Error(`error in file ${sourceFile.getFilePath().toString()}
-    message: All typerpc schema files must contain at least one interface (service) definition`)]
-  }
-
-  return interfaces.flatMap(interfc => validateInterface(interfc))
 }
 
 // Ensure type of method params is either a typerpc type or a type
@@ -320,6 +266,8 @@ const validateMethodJsDoc = (method: MethodSignature): Error[] => {
   }
   return errs
 }
+
+// TODO add a validation to check for any|unknown|never|{}
 
 const validateGetMethodParam = (param: ParameterDeclaration): Error[] => {
   return !isQueryParamableString(param.getTypeNode()!.getText().trim()) ?

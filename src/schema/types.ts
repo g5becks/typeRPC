@@ -1,5 +1,6 @@
 import {rpc, t} from '@typerpc/types'
 
+// A struct represents a Type Alias defined in a schema file
 export type Struct = {name: string; useCbor: boolean} & {readonly brand: unique symbol}
 
 export const make = {
