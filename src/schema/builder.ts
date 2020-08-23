@@ -12,7 +12,7 @@ import {
 import {DataType, is, make, primitives, primitivesMap} from './types'
 import {isContainer, isErrCode, isHttpVerb, isPrimitive, isResponseCode, validateSchemas} from './validator'
 import {Schema} from '.'
-import {HttpErrCode, HttpResponseCode, HTTPVerb, Interface, Method, Param, Property, TypeDef} from './schema'
+import {HTTPErrCode, HTTPResponseCode, HTTPVerb, Interface, Method, Param, Property, TypeDef} from './schema'
 
 const isType = (type: TypeNode | Node, typeText: string): boolean => type.getText().trim().startsWith(typeText)
 
@@ -90,10 +90,10 @@ const buildHttpVerb = (method: MethodSignature): HTTPVerb => {
   return isHttpVerb(comment) ? comment : 'POST'
 }
 
-const buildResponseCode = (method: MethodSignature): HttpResponseCode => {
+const buildResponseCode = (method: MethodSignature): HTTPResponseCode => {
   const comment = getJsDocComment(method, 'returns')  ?? '200'
   const response = parseInt(comment)
-  return isResponseCode(response) ? response as HttpResponseCode : 200
+  return isResponseCode(response) ? response as HTTPResponseCode : 200
 }
 
 // Determines if the generated type should use cbor for serialization/deserialization
@@ -103,10 +103,10 @@ const useCbor = (type: TypeAliasDeclaration): boolean => {
   return comment.includes('cbor')
 }
 
-const buildErrCode = (method: MethodSignature): HttpErrCode => {
+const buildErrCode = (method: MethodSignature): HTTPErrCode => {
   const comment = getJsDocComment(method, 'throws') ?? '500'
   const response = parseInt(comment)
-  return isErrCode(response) ? response as HttpErrCode : 500
+  return isErrCode(response) ? response as HTTPErrCode : 500
 }
 
 export const isOptional = (node: Node): boolean => node.getChildAtIndex(1).getText() === '?'

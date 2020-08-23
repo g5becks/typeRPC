@@ -18,18 +18,36 @@ import {
   queryParamablePrims,
 } from './types'
 import {getJsDocComment, getTypeNode} from './builder'
-import {HttpErrCode, HttpResponseCode, HTTPVerb} from './schema'
+import {HTTPErrCode, HTTPResponseCode, HTTPVerb} from './schema'
 
+// Valid HTTP Error status codes
+const errCodes = [400, 401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417, 418, 422, 425, 426, 428, 429, 431, 451, 500, 501, 502, 503, 504, 505, 506, 507, 508, 510, 511]
+
+// Valid HTTP success status codes
+const responseCodes = [200, 201, 202, 203, 204, 205, 206, 300, 301, 302, 303, 304, 305, 306, 307, 308]
+
+// is the type found is a typerpc primitive type?
+export const isPrimitive = (typeText: string): boolean => primitivesMap.has(typeText.trim())
+
+// is the type found a typerpc container type?
+export const isContainer = (typeText: string): boolean => containersList.some(container => typeText.trim().startsWith(container))
+
+// is the type found a valid typerpc type?
+const isValidDataType = (typeText: string): boolean => isPrimitive(typeText) || isContainer(typeText)
+
+// is the type alias used as a property or parameter a type alias defined in this
+// schema file?
+const isValidTypeAlias = (type: TypeNode | Node): boolean => type.getSourceFile().getTypeAliases().map(alias => alias.getNameNode().getText().trim()).includes(type.getText().trim())
+
+// is the http verb used in the JsDoc @access tag a valid typerpc HTTPVerb?
 export const isHttpVerb = (method: string | undefined): method is HTTPVerb =>
   ['POST', 'GET'].includes(method ?? '')
 
-const responseCodes = [200, 201, 202, 203, 204, 205, 206, 300, 301, 302, 303, 304, 305, 306, 307, 308]
+// is the number used in the JsDoc @returns tag a valid typerpc HTTPResponseCode?
+export const isResponseCode = (code: number| undefined): code is HTTPResponseCode => responseCodes.includes(code ?? 0)
 
-export const isResponseCode = (code: number| undefined): code is HttpResponseCode => responseCodes.includes(code ?? 0)
-
-const errCodes = [400, 401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417, 418, 422, 425, 426, 428, 429, 431, 451, 500, 501, 502, 503, 504, 505, 506, 507, 508, 510, 511]
-
-export const isErrCode = (code: number | undefined): code is HttpErrCode => errCodes.includes(code ?? 0)
+// is the number used in the JsDoc @throws tag a valid typerpc HTTPErrCode?
+export const isErrCode = (code: number | undefined): code is HTTPErrCode => errCodes.includes(code ?? 0)
 
 // A ts-morph declaration found in a schema file that has a getName() method
 // E.G. FunctionDeclaration, VariableDeclaration
@@ -150,17 +168,6 @@ const validateRefs = (sourceFile: SourceFile): Error[] => {
   }
   return errs
 }
-
-// is the type found is a typerpc primitive type?
-export const isPrimitive = (typeText: string): boolean => primitivesMap.has(typeText.trim())
-
-// is the type found a typerpc container type?
-export const isContainer = (typeText: string): boolean => containersList.some(container => typeText.trim().startsWith(container))
-
-// is the type found a valid typerpc type?
-const isValidDataType = (typeText: string): boolean => isPrimitive(typeText) || isContainer(typeText)
-
-const isValidTypeAlias = (type: TypeNode | Node): boolean => type.getSourceFile().getTypeAliases().map(alias => alias.getNameNode().getText().trim()).includes(type.getText().trim())
 
 // TODO fix this function to match latest changes
 const validateTypeAliasChildren = (type: TypeAliasDeclaration): Error[] => {
