@@ -4,7 +4,7 @@
 import {
   MethodSignature,
   Node,
-  ParameterDeclaration,
+  ParameterDeclaration, PropertySignature,
   SourceFile,
   SyntaxKind,
   TypeAliasDeclaration,
@@ -55,8 +55,19 @@ export const isResponseCode = (code: number| undefined): code is HTTPResponseCod
 // is the number used in the JsDoc @throws tag a valid typerpc HTTPErrCode?
 export const isErrCode = (code: number | undefined): code is HTTPErrCode => errCodes.includes(code ?? 0)
 
-const getServices = (file: SourceFile): TypeAliasDeclaration[] =>
+// parses all service declarations from a schema file
+const parseServices = (file: SourceFile): TypeAliasDeclaration[] =>
   file.getTypeAliases().filter(alias => isService(alias))
+
+// parses all message declarations from a schema file
+const parseMessages = (file: SourceFile): TypeAliasDeclaration[] => file.getTypeAliases().filter(alias => isMsg(alias))
+
+// parse all of the properties from an rpc.Msg type alias
+const parseMsgProps = (type: TypeAliasDeclaration): PropertySignature[] =>
+	type.getTypeNode()!.getChildrenOfKind(SyntaxKind.TypeLiteral)[0].getChildrenOfKind(SyntaxKind.PropertySignature)
+
+// parse all of the methods from an rpc.Service type alias
+const parseServiceMethods = (type: TypeAliasDeclaration): MethodSignature[] => type.getTypeNode()!.getChildrenOfKind(SyntaxKind.TypeLiteral)[0].getChildrenOfKind(SyntaxKind.MethodSignature)
 
 // A ts-morph declaration found in a schema file that has a getName() method
 // E.G. FunctionDeclaration, VariableDeclaration
@@ -177,6 +188,40 @@ const validateRefs = (sourceFile: SourceFile): Error[] => {
   }
   return errs
 }
+
+// Runs a pre-validation step on all type aliases found in a schema file
+// to ensure they are eligible to move forward into the next validation stage.
+// This check ensures the type is either an rpc.Service or rpc.Msg,
+// that the type has a typeNode, and that the typeNode is a TypeLiteral
+const preValidateType = (type: TypeAliasDeclaration): Error[] => {
+  if (typeof type.getTypeNode() === 'undefined') {
+    return [new Error()]
+  }
+  if (type.getTypeNode()!.getChildrenOfKind(SyntaxKind.TypeLiteral).length !== 1) {
+    return [new Error()]
+  }
+  if (!isMsg(type) || isService(type)) {
+	  return [new Error()]
+  }
+  return []
+}
+
+const validateService = (type: TypeAliasDeclaration): Error[] => {
+  let errs = preValidateType(type)
+  if (errs.length !== 0) {
+    return errs
+  }
+  if (parseMsgProps(type).length !== 0) {
+    errs = errs.concat(new Error())
+  }
+  if (parseServiceMethods(type).length === 0) {
+    errs = errs.concat(new Error())
+  }
+
+  return errs
+}
+
+const validateServices = (types: TypeAliasDeclaration[]): Error[] => types.flatMap(type => validateService(type))
 
 // TODO fix this function to match latest changes
 const validateTypeAliasChildren = (type: TypeAliasDeclaration): Error[] => {
