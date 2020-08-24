@@ -23,16 +23,6 @@ const parseServices = (file: SourceFile): TypeAliasDeclaration[] =>
 // parse all of the methods from an rpc.Service type alias
 export const parseServiceMethods = (type: TypeAliasDeclaration): MethodSignature[] => type.getTypeNode()!.getChildrenOfKind(SyntaxKind.TypeLiteral)[0].getChildrenOfKind(SyntaxKind.MethodSignature)
 
-// Ensures return type of a method is either a valid typerpc type or a type
-// declared in the same file.
-const validateReturnType = (method: MethodSignature): Error[] => {
-  const returnType = method.getReturnTypeNode()
-  const returnTypeErr = (typeName: string) => singleValidationErr(method,
-    `Invalid return type: '${typeName}'. All rpc.Service methods must return a valid typerpc type or an rpc.Msg defined in the same file. To return nothing, use 't.unit'`)
-  return typeof returnType === 'undefined' ? [returnTypeErr('undefined')] :
-    !isValidDataType(returnType) && !isValidMsg(returnType) ? [returnTypeErr(returnType.getText().trim())] : []
-}
-
 // TODO test this function
 const validateMethodJsDoc = (method: MethodSignature): Error[] => {
   const tags = method.getJsDocs()[0]?.getTags()
@@ -87,6 +77,11 @@ const validateGetRequestMethodParams = (method: MethodSignature): Error[] => {
   }
   return params.flatMap(param => validateGetMethodParam(param))
 }
+
+// Ensures return type of a method is either a valid typerpc type or a type
+// declared in the same file.
+const validateReturnType = (method: MethodSignature): Error[] =>  isValidDataType(method.getReturnTypeNode()) ? [] : [singleValidationErr(method,
+  `${method.getName()} has an invalid return type. All rpc.Service methods must return a valid typerpc type, an rpc.Msg literal, or an rpc.Msg defined in the same file. To return nothing, use 't.unit'`)]
 
 // Ensure type of method params is either a typerpc type or a type
 // declared in the same source file.
