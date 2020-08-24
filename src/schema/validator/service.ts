@@ -4,27 +4,32 @@ import {
   isHttpVerb,
   isService,
   isValidDataType,
-  isValidTypeAlias,
-  preValidateType,
+  isValidMsg,
   singleValidationErr,
   validateNotGeneric,
 } from './utils'
 import {isQueryParamableString, queryParamables} from '../types'
 import {getJsDocComment} from '../builder'
-import {parseMsgProps} from './message'
 
+// Valid HTTP error codes
 export const errCodes = [400, 401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417, 418, 422, 425, 426, 428, 429, 431, 451, 500, 501, 502, 503, 504, 505, 506, 507, 508, 510, 511]
+
 // Valid HTTP success status codes
 export const responseCodes = [200, 201, 202, 203, 204, 205, 206, 300, 301, 302, 303, 304, 305, 306, 307, 308]
+
 // is the number used in the JsDoc @returns tag a valid typerpc HTTPResponseCode?
 export const isResponseCode = (code: number | undefined): code is HTTPResponseCode => responseCodes.includes(code ?? 0)
+
 // is the number used in the JsDoc @throws tag a valid typerpc HTTPErrCode?
 export const isErrCode = (code: number | undefined): code is HTTPErrCode => errCodes.includes(code ?? 0)
+
 // parses all service declarations from a schema file
 const parseServices = (file: SourceFile): TypeAliasDeclaration[] =>
   file.getTypeAliases().filter(alias => isService(alias))
+
 // parse all of the methods from an rpc.Service type alias
 export const parseServiceMethods = (type: TypeAliasDeclaration): MethodSignature[] => type.getTypeNode()!.getChildrenOfKind(SyntaxKind.TypeLiteral)[0].getChildrenOfKind(SyntaxKind.MethodSignature)
+
 // Ensure type of method params is either a typerpc type or a type
 // declared in the same source file.
 const validateParams = (method: MethodSignature): Error[] => {
@@ -36,7 +41,7 @@ const validateParams = (method: MethodSignature): Error[] => {
   for (const type of paramTypes) {
     if (typeof type === 'undefined') {
       errs.push(singleValidationErr(type, `${method.getName()} method contains one or more parameters that do not specify a valid type. All method parameter must have a valid type`))
-    } else if (!isValidDataType(type.getText()) && !isValidTypeAlias(type)) {
+    } else if (!isValidDataType(type.getText()) && !isValidMsg(type)) {
       errs.push(singleValidationErr(type, `method parameter type '${type.getText().trim()}', is either not a valid typerpc type or a type alias that is not defined in this file`))
     }
   }
@@ -50,7 +55,7 @@ const validateReturnType = (method: MethodSignature): Error[] => {
   const returnTypeErr = (typeName: string) => singleValidationErr(method,
     `Invalid return type: '${typeName}'. All rpc.Service methods must return a valid typerpc type or an rpc.Msg defined in the same file. To return nothing, use 't.unit'`)
   return typeof returnType === 'undefined' ? [returnTypeErr('undefined')] :
-    !isValidDataType(returnType) && !isValidTypeAlias(returnType) ? [returnTypeErr(returnType.getText().trim())] : []
+    !isValidDataType(returnType) && !isValidMsg(returnType) ? [returnTypeErr(returnType.getText().trim())] : []
 }
 
 // TODO test this function
@@ -93,10 +98,12 @@ const validateMethodJsDoc = (method: MethodSignature): Error[] => {
   }
   return errs
 }
+
 const validateGetMethodParam = (param: ParameterDeclaration): Error[] => {
   return !isQueryParamableString(param.getTypeNode()!.getText().trim()) ?
     [singleValidationErr(param, `${param.getName()} has an invalid type. Methods annotated with @access GET are only allowed to use the following types for parameters: ${queryParamables}. Also note, that a t.List can only use one of the mentioned primitive types as a type parameter`)] : []
 }
+
 // TODO test this function
 const validateGetRequestMethodParams = (method: MethodSignature): Error[] => {
   const params = method.getParameters()
@@ -107,16 +114,9 @@ const validateGetRequestMethodParams = (method: MethodSignature): Error[] => {
 }
 // Validates all methods of an rpc.Service
 export const validateMethods = (service: TypeAliasDeclaration): Error[] => parseServiceMethods(service).flatMap(method => [...validateParams(method), ...validateReturnType(method), ...validateNotGeneric(method), ...validateMethodJsDoc(method), ...validateGetRequestMethodParams(method)])
+
 const validateService = (service: TypeAliasDeclaration): Error[] => {
-  let errs = preValidateType(service)
-  errs = errs.concat(...validateNotGeneric(service))
-  if (parseMsgProps(service).length !== 0) {
-    errs = errs.concat(singleValidationErr(service, 'an rpc.Service declaration can only contain methods, E.G. myMethod(param: t.TyperpcType): t.TypeRpcReturnType, Properties, E.G. propName: PropType, (including properties containing function signatures) are not supported.'))
-  }
-  if (parseServiceMethods(service).length === 0) {
-    errs = errs.concat(singleValidationErr(service, 'an rpc.Service must contain at least one method signature.'))
-  }
-  errs = errs.concat(validateMethods(service))
-  return errs
+
 }
-const validateServices = (types: TypeAliasDeclaration[]): Error[] => types.flatMap(type => validateService(type))
+
+export const validateServices = (file: SourceFile): Error[] => parseServices(file).flatMap(type => validateService(type))

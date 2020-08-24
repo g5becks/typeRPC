@@ -87,6 +87,17 @@ const validateRefs = (sourceFile: SourceFile): Error[] => {
   return errs
 }
 
+const validateJsDoc = (type: TypeAliasDeclaration): Error[] => {
+  if (type.getJsDocs().length === 0) {
+    return []
+  }
+  const tags = type.getJsDocs()[0].getTags().filter(tag => tag.getTagName() === 'kind')
+  if (tags.length > 0 && tags.length !== 1) {
+    return [singleValidationErr(tags[0], 'A message or service can only have a single @kind tag')]
+  }
+  return tags[0].getComment() !== 'cbor' ? [singleValidationErr(tags[0], `there is only one valid comment for the @kind tag (cbor), found ${tags[0].getComment()}`)] : []
+}
+
 // Runs a pre-validation step on all type aliases found in a schema file
 // to ensure they are eligible to move forward into the next validation stage.
 // This check ensures the type is either an rpc.Service or rpc.Msg,
@@ -110,7 +121,7 @@ const preValidateType = (type: TypeAliasDeclaration): Error[] => {
 	  aliases that are not either rpc.Msg, or rpc.Service definitions.`))
   }
 
-  errs = errs.concat(validateNotGeneric(type))
+  errs = [...errs, ...validateNotGeneric(type), ...(validateJsDoc(type))]
 
   return errs
 }
