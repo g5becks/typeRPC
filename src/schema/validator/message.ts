@@ -1,9 +1,9 @@
 import {PropertySignature, SourceFile, SyntaxKind, TypeAliasDeclaration, TypeNode} from 'ts-morph'
-import {isContainer, isMsg, isPrimitive, isValidDataType, isValidMsg, singleValidationErr} from './utils'
-
-const isMsgLiteral = (type: TypeNode): boolean => type.getText().trim().startsWith('rpc.Msg<{')
+import {isContainer, isMsg, isMsgLiteral, isPrimitive, isValidMsg, singleValidationErr} from './utils'
 
 const isTypeAlias = (type: any): type is TypeAliasDeclaration => 'getName' in type
+
+const isTypeNode = (type: any): type is TypeNode => !('getName' in type)
 
 // parse all of the properties from an rpc.Msg Type alias for rpc.Msg literal
 const parseMsgProps = (type: TypeAliasDeclaration | TypeNode): PropertySignature[] => {
@@ -11,7 +11,7 @@ const parseMsgProps = (type: TypeAliasDeclaration | TypeNode): PropertySignature
   if (isTypeAlias(type)) {
     kids = type.getTypeNode()!.getChildrenOfKind(SyntaxKind.TypeLiteral)[0].getChildrenOfKind(SyntaxKind.PropertySignature)
   }
-  if (type.getText().trim().startsWith('rpc.Msg<{')) {
+  if (isTypeNode(type) && isMsgLiteral(type)) {
     kids = type.getChildrenOfKind(SyntaxKind.TypeLiteral)[0].getChildrenOfKind(SyntaxKind.PropertySignature)
   }
   return kids

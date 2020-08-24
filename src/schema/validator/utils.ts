@@ -5,7 +5,6 @@ import {
   ParameterDeclaration,
   PropertySignature,
   SourceFile,
-  SyntaxKind,
   TypeAliasDeclaration,
   TypeNode,
 } from 'ts-morph'
@@ -15,10 +14,6 @@ import {HTTPVerb} from '../schema'
 export const isPrimitive = (type: TypeNode | Node): boolean => primitivesMap.has(type.getText().trim())
 // is the type found a typerpc container type?
 export const isContainer = (typeText: string): boolean => containersList.some(container => typeText.trim().startsWith(container))
-
-// is the type found a valid typerpc type?
-export const isValidDataType = (type: TypeAliasDeclaration | PropertySignature | ParameterDeclaration): boolean =>
-  isPrimitive(type) || isMsg(type) || isContainer(type.getTypeNode()!.getText().trim())
 
 // is the type alias or node an rpc.Msg?
 export const isMsg = (type: TypeAliasDeclaration | PropertySignature | ParameterDeclaration): boolean =>
@@ -83,3 +78,7 @@ const genericsErrMsg = (type: TypeAliasDeclaration | MethodSignature) => `${type
 export const validateNotGeneric = (type: TypeAliasDeclaration | MethodSignature): Error[] => {
   return type.getTypeParameters().length > 0 ? [singleValidationErr(type, genericsErrMsg(type))] : []
 }
+
+export const isMsgLiteral = (type: TypeNode): boolean => type.getText().trim().startsWith('rpc.Msg<{')
+
+export const isValidDataType = (type: TypeNode): boolean => isPrimitive(type) || isContainer(type.getText().trim()) || isValidMsg(type) || isMsgLiteral(type)
