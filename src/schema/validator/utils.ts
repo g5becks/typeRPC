@@ -12,6 +12,7 @@ import {HTTPVerb} from '../schema'
 
 // is the type found is a typerpc primitive type?
 export const isPrimitive = (type: TypeNode | Node): boolean => primitivesMap.has(type.getText().trim())
+
 // is the type found a typerpc container type?
 export const isContainer = (typeText: string): boolean => containersList.some(container => typeText.trim().startsWith(container))
 
@@ -22,8 +23,7 @@ export const isMsg = (type: TypeAliasDeclaration | PropertySignature | Parameter
 // is the type alias an rpc.Service?
 export const isService = (type: TypeAliasDeclaration): boolean => Boolean(type.getTypeNode()?.getText().startsWith('rpc.Service<{'))
 
-// is the type alias used as a property or parameter an rpc.Msg defined in this
-// schema file?
+// is the type alias an rpc.Msg defined in this schema file?
 export const isValidMsg = (type: TypeNode | Node): boolean => type.getSourceFile().getTypeAliases().map(alias => isMsg(alias) && alias.getNameNode().getText().trim()).includes(type.getText().trim())
 
 // is the http verb used in the JsDoc @access tag a valid typerpc HTTPVerb?
@@ -59,13 +59,13 @@ interface GetTextViolator {
 // Anything that is not a type alias is a violator
 export type Violator = GetNameViolator | GetTextViolator
 
-// Returns a detailed error message about number of schema violations
+// Returns an error about number of schema violation
 export const multiValidationErr = (violators: Violator[]): Error =>
   new Error(`${violators[0].getSourceFile().getFilePath()?.toString()} contains ${violators.length} ${violators[0].getKindName()} declarations
    errors: ${violators.map(vio => canGetName(vio) ? vio.getName()?.trim() : vio.getText().trim() + ', at line number: ' + String(vio?.getStartLineNumber()) + '\n')}
    message: typerpc schemas can only contain a single import statement (import {t} from '@typerpc/types'), typeAlias (message), and interface (service) declarations.`)
 
-// Returns an error about a single schema violation
+// Returns a single schema violation error
 export const singleValidationErr = (node: Node | undefined, msg: string): Error => {
   return new Error(
     `error in file: ${node?.getSourceFile()?.getFilePath()}
@@ -73,14 +73,18 @@ export const singleValidationErr = (node: Node | undefined, msg: string): Error 
      message: ${msg}`)
 }
 
+// error message for generic types
 const genericsErrMsg = (type: TypeAliasDeclaration | MethodSignature) => `${type.getName().trim()} defines a generic type . typerpc types and methods cannot be generic`
 
+// validates that a type alias or method is not generic
 export const validateNotGeneric = (type: TypeAliasDeclaration | MethodSignature): Error[] => {
   return type.getTypeParameters().length > 0 ? [singleValidationErr(type, genericsErrMsg(type))] : []
 }
 
+// is the node an rpc.Msg literal?
 export const isMsgLiteral = (type: TypeNode): boolean => type.getText().trim().startsWith('rpc.Msg<{')
 
+// is the node a valid typerpc data type?
 export const isValidDataType = (type: TypeNode| undefined): boolean => {
   if (typeof type === 'undefined') {
     return false

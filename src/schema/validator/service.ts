@@ -1,6 +1,6 @@
 import {HTTPErrCode, HTTPResponseCode} from '../schema'
 import {MethodSignature, ParameterDeclaration, SourceFile, SyntaxKind, TypeAliasDeclaration} from 'ts-morph'
-import {isHttpVerb, isService, isValidDataType, isValidMsg, singleValidationErr, validateNotGeneric} from './utils'
+import {isHttpVerb, isService, isValidDataType, singleValidationErr, validateNotGeneric} from './utils'
 import {isQueryParamableString, queryParamables} from '../types'
 import {getJsDocComment} from '../builder'
 
@@ -90,6 +90,6 @@ const validateParams = (method: MethodSignature): Error[] =>
     method.getParameters().map(param => param.getTypeNode()).flatMap(type => isValidDataType(type) ? [] : singleValidationErr(type, `method parameter type '${type?.getText().trim()}', is either not a valid typerpc type or a type alias that is not defined in this file`))
 
 // Validates all methods of an rpc.Service
-export const validateService = (service: TypeAliasDeclaration): Error[] => parseServiceMethods(service).flatMap(method => [...validateParams(method), ...validateReturnType(method), ...validateNotGeneric(method), ...validateMethodJsDoc(method), ...validateGetRequestMethodParams(method)])
+const validateService = (service: TypeAliasDeclaration): Error[] => parseServiceMethods(service).flatMap(method => [...validateParams(method), ...validateReturnType(method), ...validateNotGeneric(method), ...validateMethodJsDoc(method), ...validateGetRequestMethodParams(method)])
 
 export const validateServices = (file: SourceFile): Error[] => parseServices(file).flatMap(type => validateService(type))
