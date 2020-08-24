@@ -14,16 +14,18 @@ const validateInterfaces = (sourceFile: SourceFile): Error[] => validate(sourceF
 // Ensure zero class declarations
 const validateClasses = (sourceFile: SourceFile): Error[] => validate(sourceFile.getClasses())
 
-// TODO fix this function to match new import
 // Ensure only one valid import without aliasing namespaces
 const validateImports = (sourceFile: SourceFile): Error[] => {
   const imports = sourceFile.getImportDeclarations()
-  const imp = imports[0]?.getImportClause()?.getNamedImports()[0].getText().trim()
-  const errs: Error[] = []
+  if (typeof imports[0].getImportClause() === 'undefined') {
+    return [singleValidationErr(sourceFile, `no import statement found. Please add import {rpc, t} from '@typerpc/types to ${sourceFile.getFilePath().toString()}'`)]
+  }
+  const importNames = imports[0].getImportClause()?.getNamedImports().map(imp => imp.getName())
+  let errs: Error[] = []
   if (imports.length !== 1) {
-    errs.push(singleValidationErr(sourceFile, 'typerpc schema files must contain only one import declaration => import {t} from \'@typerpc/types'))
-  } else if (imports[0].getImportClause()?.getNamedImports()[0].getText().trim() !== 't') {
-    errs.push(singleValidationErr(sourceFile, `Invalid import statement => ${imp}, @typerpc/types namespace can only be imported as {t}`))
+    errs = errs.concat(singleValidationErr(sourceFile, 'typerpc schema files must contain only one import declaration, import {rpc, t} from \'@typerpc/types\''))
+  } else if (importNames?.length !== 2 && importNames![0] !== 'rpc' && importNames![1] !== 't') {
+    errs.push(singleValidationErr(sourceFile, `Invalid import statement => ${importNames}, @typerpc/types  can only be imported as import {rpc, t} from '@typerpc/types', aliasing is not allowed`))
   }
   return errs
 }
