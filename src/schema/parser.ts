@@ -43,7 +43,7 @@ const isService = (type: TypeAliasDeclaration): boolean => Boolean(type.getTypeN
 
 // is the type alias used as a property or parameter a type alias defined in this
 // schema file?
-const isValidTypeAlias = (type: TypeNode | Node): boolean => type.getSourceFile().getTypeAliases().map(alias => alias.getNameNode().getText().trim()).includes(type.getText().trim())
+const isValidTypeAlias = (type: TypeNode | Node): boolean => type.getSourceFile().getTypeAliases().map(alias =>  isMsg(alias) && alias.getNameNode().getText().trim()).includes(type.getText().trim())
 
 // is the http verb used in the JsDoc @access tag a valid typerpc HTTPVerb?
 export const isHttpVerb = (method: string | undefined): method is HTTPVerb =>
