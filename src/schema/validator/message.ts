@@ -1,5 +1,5 @@
 // TODO test this
-import {PropertySignature, SourceFile, SyntaxKind, TypeAliasDeclaration} from 'ts-morph'
+import {PropertySignature, SourceFile, SyntaxKind, TypeAliasDeclaration, TypeNode} from 'ts-morph'
 import {isMsg, isValidDataType, isValidTypeAlias, singleValidationErr} from './utils'
 
 const validateMsgProps = (props: PropertySignature[]): Error[] => {
@@ -16,8 +16,27 @@ const validateMsgProps = (props: PropertySignature[]): Error[] => {
 
   return errs
 }
+
 // parses all message declarations from a schema file
 const parseMessages = (file: SourceFile): TypeAliasDeclaration[] => file.getTypeAliases().filter(alias => isMsg(alias))
-// parse all of the properties from an rpc.Msg type alias
-export const parseMsgProps = (type: TypeAliasDeclaration): PropertySignature[] =>
-  type.getTypeNode()!.getChildrenOfKind(SyntaxKind.TypeLiteral)[0].getChildrenOfKind(SyntaxKind.PropertySignature)
+
+const isTypeAlias = (type: any): type is TypeAliasDeclaration => 'getName' in type
+
+// parse all of the properties from an rpc.Msg Type alias for rpc.Msg literal
+const parseMsgProps = (type: TypeAliasDeclaration | TypeNode): PropertySignature[] => {
+  let kids: PropertySignature[] = []
+  if (isTypeAlias(type)) {
+    kids = type.getTypeNode()!.getChildrenOfKind(SyntaxKind.TypeLiteral)[0].getChildrenOfKind(SyntaxKind.PropertySignature)
+  }
+  if (type.getText().trim().startsWith('rpc.Msg<{')) {
+    kids = type.getChildrenOfKind(SyntaxKind.TypeLiteral)[0].getChildrenOfKind(SyntaxKind.PropertySignature)
+  }
+  return kids
+}
+
+export const validateMessage = (msg: TypeAliasDeclaration| TypeNode): Error[] => {
+
+}
+
+export const validateMessages = (file: SourceFile): Error[] =>
+  parseMessages(file).flatMap(msg => validateMessage(msg))

@@ -70,28 +70,7 @@ export const singleValidationErr = (node: Node | undefined, msg: string): Error 
      message: ${msg}`)
 }
 const genericsErrMsg = (type: TypeAliasDeclaration | MethodSignature) => `${type.getName().trim()} defines a generic type . typerpc types and methods cannot be generic`
+
 export const validateNotGeneric = (type: TypeAliasDeclaration | MethodSignature): Error[] => {
   return type.getTypeParameters().length > 0 ? [singleValidationErr(type, genericsErrMsg(type))] : []
-}
-// Runs a pre-validation step on all type aliases found in a schema file
-// to ensure they are eligible to move forward into the next validation stage.
-// This check ensures the type is either an rpc.Service or rpc.Msg,
-// that the type has a typeNode, and that the typeNode is a TypeLiteral
-export const preValidateType = (type: TypeAliasDeclaration): Error[] => {
-  if (typeof type.getTypeNode() === 'undefined') {
-    return [new Error()]
-  }
-  if (type.getTypeNode()!.getChildrenOfKind(SyntaxKind.TypeLiteral).length !== 1) {
-    return [singleValidationErr(type,
-      `All typerpc messages and services must be Type Literals, E.G.
-      type  Mytype = {
-      (properties with valid type rpc data types or other rpc.Msg types)
-      },
-      Typescript types (number, string[]), intersections, and unions are not supported.`)]
-  }
-  if (!isMsg(type) || isService(type)) {
-    return [singleValidationErr(type, `typerpc schema files cannot contain type
-	  aliases that are not either rpc.Msg, or rpc.Service definitions.`)]
-  }
-  return []
 }

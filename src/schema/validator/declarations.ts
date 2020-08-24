@@ -1,5 +1,5 @@
-import {SourceFile, SyntaxKind} from 'ts-morph'
-import {multiValidationErr, singleValidationErr, Violator} from './utils'
+import {SourceFile, SyntaxKind, TypeAliasDeclaration} from 'ts-morph'
+import {isMsg, isService, multiValidationErr, singleValidationErr, validateNotGeneric, Violator} from './utils'
 
 const validate = (declarations: Violator[]): Error[] => declarations.length > 0 ? [multiValidationErr(declarations)] : []
 // Ensure zero function declarations
@@ -87,6 +87,37 @@ const validateRefs = (sourceFile: SourceFile): Error[] => {
   return errs
 }
 
+// Runs a pre-validation step on all type aliases found in a schema file
+// to ensure they are eligible to move forward into the next validation stage.
+// This check ensures the type is either an rpc.Service or rpc.Msg,
+// that the type has a typeNode, that the typeNode is a TypeLiteral
+// and that the type is not generic
+const preValidateType = (type: TypeAliasDeclaration): Error[] => {
+  let errs: Error[] = []
+  if (typeof type.getTypeNode() === 'undefined') {
+    return [singleValidationErr(type, `${type.getName()} has no type node`)]
+  }
+  if (type.getTypeNode()!.getChildrenOfKind(SyntaxKind.TypeLiteral).length !== 1) {
+    return [singleValidationErr(type,
+      `All typerpc messages and services must be Type Literals, E.G.
+      type  Mytype = {
+      (properties with valid type rpc data types or other rpc.Msg types)
+      },
+      Typescript types (number, string[]), intersections, and unions are not supported.`)]
+  }
+  if (!isMsg(type) || isService(type)) {
+    errs = errs.concat(singleValidationErr(type, `typerpc schema files cannot contain type
+	  aliases that are not either rpc.Msg, or rpc.Service definitions.`))
+  }
+
+  errs = errs.concat(validateNotGeneric(type))
+
+  return errs
+}
+
+const validateTypes = (sourceFile: SourceFile): Error[] =>
+  sourceFile.getTypeAliases().flatMap(alias => preValidateType(alias))
+
 export const validateDeclarations = (file: SourceFile): Error[] => {
   return [...validateFunctions(file),
     ...validateVariables(file),
@@ -97,5 +128,6 @@ export const validateDeclarations = (file: SourceFile): Error[] => {
     ...validateNameSpaces(file),
     ...validateStatements(file),
     ...validateEnums(file),
-    ...validateRefs(file)]
+    ...validateRefs(file),
+    ...validateTypes(file)]
 }
