@@ -1,5 +1,5 @@
 import {PropertySignature, SourceFile, SyntaxKind, TypeAliasDeclaration, TypeNode} from 'ts-morph'
-import {isContainer, isMsg, isMsgLiteral, isPrimitive, isValidMsg, singleValidationErr} from './utils'
+import {isContainer, isMsg, isMsgLiteral, isPrimitive, isValidDataType, isValidMsg, singleValidationErr} from './utils'
 
 const isTypeAlias = (type: any): type is TypeAliasDeclaration => 'getName' in type
 
@@ -17,13 +17,8 @@ const parseMsgProps = (type: TypeAliasDeclaration | TypeNode): PropertySignature
   return kids
 }
 
-const validateProp = (prop: PropertySignature): Error[] => {
-  const node = prop.getTypeNode()
-  if (typeof node === 'undefined') {
-    return [singleValidationErr(prop, 'all properties must have a valid data type')]
-  }
-  return isMsgLiteral(node) || isValidMsg(node) || isPrimitive(node) || isContainer(node.getText().trim()) ? [] : [singleValidationErr(prop, 'Invalid property type, Only types imported from @typerpc/types, rpc.Msg types, and other rpc.Msg types declared in the same file may be used as property types')]
-}
+const validateProp = (prop: PropertySignature): Error[] =>
+  isValidDataType(prop.getTypeNode()) ? [] : [singleValidationErr(prop, 'Invalid property type, Only types imported from @typerpc/types, rpc.Msg types, and other rpc.Msg types declared in the same file may be used as property types')]
 
 // TODO test this
 const validateMsgProps = (props: PropertySignature[]): Error[] => {
