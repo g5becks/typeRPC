@@ -136,10 +136,7 @@ export type QueryParamableContainer = t.List<QueryParamablePrim>
 
 export type QueryParamable = QueryParamableContainer | QueryParamablePrim
 
-export const queryParamablePrims = ['t.bool', 't.timestamp', 't.int8', 't.uint8', 't.int16', 't.uint16', 't.int32', 't.uint32', 't.uint64', 't.int64', 't.float32', 't.float64', 't.str']
-
-export const queryParamableContainers = ['t.List']
-export const queryParamables = [...queryParamablePrims, ...queryParamableContainers]
+export const queryParamables = ['t.bool', 't.timestamp', 't.int8', 't.uint8', 't.int16', 't.uint16', 't.int32', 't.uint32', 't.uint64', 't.int64', 't.float32', 't.float64', 't.str', 't.List']
 
 // TODO test this function
 // determines if the type text is a valid QueryParamable Type

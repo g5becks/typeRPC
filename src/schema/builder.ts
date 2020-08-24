@@ -10,9 +10,11 @@ import {
   TypeNode,
 } from 'ts-morph'
 import {DataType, is, make, primitives, primitivesMap} from './types'
-import {isContainer, isErrCode, isHttpVerb, isPrimitive, isResponseCode, validateSchemas} from './parser'
 import {Schema} from '.'
 import {HTTPErrCode, HTTPResponseCode, HTTPVerb, Interface, Method, Param, Property, TypeDef} from './schema'
+import {isContainer, isHttpVerb, isPrimitive} from './validator/utils'
+import {isErrCode, isResponseCode} from './validator/service'
+import {validateSchemas} from './validator'
 
 const isType = (type: TypeNode | Node, typeText: string): boolean => type.getText().trim().startsWith(typeText)
 
