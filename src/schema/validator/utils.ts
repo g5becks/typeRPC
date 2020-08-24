@@ -81,4 +81,9 @@ export const validateNotGeneric = (type: TypeAliasDeclaration | MethodSignature)
 
 export const isMsgLiteral = (type: TypeNode): boolean => type.getText().trim().startsWith('rpc.Msg<{')
 
-export const isValidDataType = (type: TypeNode): boolean => isPrimitive(type) || isContainer(type.getText().trim()) || isValidMsg(type) || isMsgLiteral(type)
+export const isValidDataType = (type: TypeNode| undefined): boolean => {
+  if (typeof type === 'undefined') {
+    return false
+  }
+  return isPrimitive(type) || isContainer(type.getText().trim()) || isValidMsg(type) || isMsgLiteral(type)
+}
