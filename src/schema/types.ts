@@ -1,4 +1,4 @@
-import {internal as x,  $} from '@typerpc/types'
+import {$, internal as x} from '@typerpc/types'
 
 // A struct represents a Type Alias defined in a schema file
 export type Struct = Readonly<{
@@ -13,12 +13,13 @@ export type StructLiteralProp = Readonly<{
   toString(): string;
 }>
 
+// Since all languages dont support object/class/struct literals,
+// When generating code for said language,
+// It is suggested to create a class/struct/object using the
+// name of the owning rpc.Message + property name if used inside of an rpc.Message.
+// If used as a method param, use the Service name + Method name + param name.
+// If used as a method return, use the Service name + Method name + 'Result'
 export type StructLiteral = Readonly<{
-  // name to use for constructing an object in languages that dont support literals
-  // defaults to owning object name + property name if used inside of an rpc.Message.
-  // If used as a method param, defaults to Service name + Method name + param name.
-  // If used as a method return, defaults to Service name + Method name + 'Result'
-  pseudoName: string;
   properties: ReadonlyArray<StructLiteralProp>;
   toString(): string;
 }>
@@ -39,8 +40,8 @@ export const make = {
       }`
     }}
   },
-  StructLiteral: (pseudoName: string, properties: ReadonlyArray<StructLiteralProp>): DataType => {
-    return {pseudoName, properties, toString(): string {
+  StructLiteral: (properties: ReadonlyArray<StructLiteralProp>): DataType => {
+    return {properties, toString(): string {
       return `{${properties.map(prop => prop.toString())}}`
     }}
   },
@@ -78,64 +79,70 @@ export const make = {
       return `$.List<${dataType.toString()}>`
     }} as unknown as DataType
   },
+  get bool(): DataType {
+    return {toString: () => '$.bool'} as DataType
+  },
+  get int8(): DataType {
+    return {toString: () => '$.int8'} as DataType
+  },
+  get uint8(): DataType {
+    return  {toString: () => '$.uint8'} as DataType
+  },
+  get int16(): DataType {
+    return {toString: () => '$.int16'} as DataType
+  },
+  get uint16(): DataType {
+    return {toString: () => '$.uint16'} as DataType
+  },
+  get int32(): DataType {
+    return {toString: () => '$.int32'} as DataType
+  },
+  get uint32(): DataType {
+    return {toString: () => '$.uint32'} as DataType
+  },
+  get int64(): DataType {
+    return {toString: () => '$.int64'} as DataType
+  },
+  get uint64(): DataType {
+    return {toString: () => '$.uint64'} as DataType
+  },
+  get float32(): DataType {
+    return {toString: () => '$.float32'} as DataType
+  },
+  get float64(): DataType {
+    return {toString: () => '$.float64'} as DataType
+  },
+  get nil(): DataType {
+    return {toString: () => '$.nil'} as DataType
+  },
+  get str(): DataType {
+    return {toString: () => '$.str'} as DataType
+  },
+  get err(): DataType {
+    return {toString: () => '$.err'} as DataType
+  },
+  get dyn(): DataType {
+    return {toString: () => '$.dyn'} as DataType
+  },
+  get timestamp(): DataType {
+    return {toString: () => '$.timestamp'} as DataType
+  },
+  get unit(): DataType {
+    return {toString: () => '$.unit'} as DataType
+  },
+  get blob(): DataType {
+    return {toString: () => '$.blob'} as DataType
+  },
+  primitive: (type: string): DataType|undefined => primsMap.get(type),
 }
 
-export const fetch = {
-  get bool(): x.Primitive {
-    return {toString: () => '$.bool'} as unknown as $.bool
-  },
-  get int8(): x.Primitive {
-    return {toString: () => '$.int8'} as unknown as $.int8
-  },
-  get uint8(): x.Primitive {
-    return  {toString: () => '$.uint8'} as unknown as $.uint8
-  },
-  get int16(): x.Primitive {
-    return {toString: () => '$.int16'} as unknown as $.int16
-  },
-  get uint16(): x.Primitive {
-    return {toString: () => '$.uint16'} as unknown as $.uint16
-  },
-  get int32(): x.Primitive {
-    return {toString: () => '$.int32'} as unknown as $.int32
-  },
-  get uint32(): x.Primitive {
-    return {toString: () => '$.uint32'} as unknown as $.uint32
-  },
-  get int64(): x.Primitive {
-    return {toString: () => '$.int64'} as unknown as $.int64
-  },
-  get uint64(): x.Primitive {
-    return {toString: () => '$.uint64'} as unknown as $.uint64
-  },
-  get float32(): x.Primitive {
-    return {toString: () => '$.float32'} as unknown as $.float32
-  },
-  get float64(): x.Primitive {
-    return {toString: () => '$.float64'} as unknown as $.float64
-  },
-  get nil(): x.Primitive {
-    return {toString: () => '$.nil'} as unknown as $.nil
-  },
-  get str(): x.Primitive {
-    return {toString: () => '$.str'} as unknown as $.str
-  },
-  get err(): x.Primitive {
-    return {toString: () => '$.err'} as unknown as $.err
-  },
-  get dyn(): x.Primitive {
-    return {toString: () => '$.dyn'} as unknown as $.dyn
-  },
-  get timestamp(): x.Primitive {
-    return {toString: () => '$.timestamp'} as unknown as $.timestamp
-  },
-  get unit(): x.Primitive {
-    return {toString: () => '$.unit'} as unknown as $.unit
-  },
-  get blob(): x.Primitive {
-    return {toString: () => '$.blob'} as unknown as $.blob
-  },
-}
+const builtPrimitives = [make.blob, make.unit, make.timestamp, make.dyn, make.err, make.str, make.nil, make.float64, make.float32, make.uint64, make.int64, make.uint32, make.int32, make.uint16, make.int16, make.uint8, make.int8, make.bool]
+
+const primitives = ['$.blob', '$.unit', '$.timestamp', '$.dyn', '$.err', '$.str', '$.nil', '$.float64', '$.float32', '$.uint64', '$.int64', '$.uint32', '$.int32', '$.uint16', '$.int16', '$.uint8', '$.int8', '$.bool']
+
+const primsMap = new Map<string, DataType>(primitives.map((prim, i) => [prim, builtPrimitives[i]]))
+
+export const containers = ['$.Dict', '$.Tuple2', '$.Tuple3', '$.Tuple4', '$.Tuple5', '$.List']
 
 // valid x to be used in client side get requests as query params
 export type QueryParamablePrim = $.bool | $.timestamp | $.int8 | $.uint8 | $.int16 | $.uint16 | $.int32 | $.uint32 | $.int64 | $.uint64 | $.float32 | $.float64 | $.str
@@ -179,12 +186,7 @@ export const is = {
   Tuple5: (type: unknown): type is $.Tuple5<x.Paramable, x.Paramable, x.Paramable, x.Paramable, x.Paramable> => validateTuple(type, 5),
   List: (type: unknown): type is $.List<x.Paramable> => validateType(type, 'dataType'),
   Struct: (type: unknown): type is Struct => validateType(type, 'name', 'useCbor'),
-  StructLiteral: (type: unknown): type is StructLiteral => validateType(type, 'pseudoName', 'properties'),
+  StructLiteral: (type: unknown): type is StructLiteral => validateType(type, 'properties'),
   Container: (type: DataType): boolean => [is.Struct, is.List, is.Dict, is.Tuple2, is.Tuple3, is.Tuple4, is.Tuple3, is.Tuple5, is.StructLiteral].some(func => func(type)),
 }
 
-export const prims = new Map<string, x.Primitive>(
-  Object.entries(fetch).map(([_, v]) => [v.toString(), v])
-)
-
-export const containersList = ['$.Dict', '$.Tuple2', '$.Tuple3', '$.Tuple4', '$.Tuple5', '$.List']

@@ -1,4 +1,4 @@
-import {containersList, prims} from '../types'
+import {containers, prims} from '../types'
 import {
   MethodSignature,
   Node,
@@ -14,7 +14,7 @@ import {HTTPVerb} from '../schema'
 export const isPrimitive = (type: TypeNode | Node): boolean => prims.has(type.getText().trim())
 
 // is the type found a typerpc container type?
-export const isContainer = (type: TypeNode | Node): boolean => containersList.some(container => type.getText().trim().startsWith(container))
+export const isContainer = (type: TypeNode | Node): boolean => containers.some(container => type.getText().trim().startsWith(container))
 
 // is the type alias or node an rpc.Msg?
 export const isMsg = (type: TypeAliasDeclaration | PropertySignature | ParameterDeclaration): boolean =>

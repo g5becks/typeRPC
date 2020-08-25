@@ -1,7 +1,7 @@
 /* eslint-disable new-cap */
 import {getTypeNode, internalTesting, isOptional} from '../../src/schema/builder'
 import {Project} from 'ts-morph'
-import {containersList, is, prims} from '../../src/schema/types'
+import {containers, is, prims} from '../../src/schema/types'
 
 import {getSourceFile, makeStructTestSource, makeTestFile, makeTestFiles, testController, testProp} from './util'
 
@@ -26,11 +26,11 @@ beforeEach(() => {
 
 test('isType() should return true when given the proper type', () => {
   let vars = ''
-  const types = [...prims.keys(), ...containersList]
+  const types = [...prims.keys(), ...containers]
   for (const type of prims.keys()) {
     vars = vars.concat(`var ${type.replace('t.', '')}: ${type}\n`)
   }
-  for (const type of containersList) {
+  for (const type of containers) {
     vars = vars.concat(`var ${type.replace('t.', '')}: ${type}\n`)
   }
   getSourceFile(vars, project).getVariableDeclarations().forEach((variable, i) =>

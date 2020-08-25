@@ -4,24 +4,25 @@ import {
   InterfaceDeclaration,
   MethodSignature,
   Node,
-  ParameterDeclaration, QualifiedName,
-  SourceFile, SyntaxKind, SyntaxList,
+  ParameterDeclaration,
+  PropertySignature,
+  SourceFile,
   TypeAliasDeclaration,
-  TypeNode, TypeReferenceNode,
+  TypeNode,
 } from 'ts-morph'
-import {DataType, is, make, fetch, prims} from './types'
+import {DataType, fetch, is, make, prims, StructLiteralProp} from './types'
 import {Schema} from '.'
 import {HTTPErrCode, HTTPResponseCode, HTTPVerb, Interface, Method, Param, Property, TypeDef} from './schema'
 import {isContainer, isHttpVerb, isMsgLiteral, isPrimitive, isValidDataType} from './validator/utils'
 import {isErrCode, isResponseCode} from './validator/service'
 import {validateSchemas} from './validator'
+import {parseTypeParams, parseMsgProps} from './parser'
 
 const isType = (type: TypeNode | Node, typeText: string): boolean => type.getText().trim().startsWith(typeText)
 
-const makePrim = (type: TypeNode | Node): DataType => prims.get(type.getText()!.trim()) as DataType
+const isOptionalProp = (prop: PropertySignature): boolean => typeof prop.getQuestionTokenNode() !== 'undefined'
 
-// returns the type parameters portion of the type as an array
-const getTypeParams = (type: Node | TypeNode): TypeReferenceNode[] => type.getChildrenOfKind(SyntaxKind.TypeReference)
+const makePrim = (type: TypeNode | Node): DataType => prims.get(type.getText()!.trim()) as DataType
 
 const makeStruct = (type: Node | TypeNode): DataType => {
   // get the text of the field
@@ -34,20 +35,23 @@ const makeStruct = (type: Node | TypeNode): DataType => {
   return make.Struct(name, useCbor(alias))
 }
 
-const makeStructLiteral = (type: Node | TypeNode): DataType => {
+const makeStructLiteralProp = (prop: PropertySignature): StructLiteralProp =>
+  make.StructLiteralProp(prop.getName(), makeDataType(prop.getTypeNode()!), isOptionalProp(prop))
 
+const makeStructLiteral = (type: Node | TypeNode): DataType => {
+  const props = parseMsgProps(type)
 }
 
 const makeList = (type: TypeNode | Node): DataType => make
-.List(makeDataType(getTypeParams(type)[0]))
+.List(makeDataType(parseTypeParams(type)[0]))
 
 const makeDict = (type: TypeNode | Node): DataType => {
-  const params = getTypeParams(type)
+  const params = parseTypeParams(type)
   return make.Dict(prims.get(params[0].getText().trim()) as DataType, makeDataType(params[1])) as DataType
 }
 
 const makeTuple = (type: TypeNode | Node): DataType => {
-  const params = getTypeParams(type)
+  const params = parseTypeParams(type)
   switch (params.length) {
   case 2:
     return make.Tuple2(makeDataType(params[0]), makeDataType(params[1]))
@@ -124,15 +128,13 @@ const buildErrCode = (method: MethodSignature): HTTPErrCode => {
   return isErrCode(response) ? response as HTTPErrCode : 500
 }
 
-export const isOptional = (node: Node): boolean => node.getChildAtIndex(1).getText() === '?'
-
 // gets the type node E.G. (name: type node) of a type alias property
 export const getTypeNode = (node: Node) => isOptional(node) ? node.getChildAtIndex(3) : node.getChildAtIndex(2)
 
 // builds all properties of a type alias
-const buildProps = (properties: Node[]): Property[] =>
+const buildProps = (properties: PropertySignature[]): Property[] =>
   properties.map(prop => {
-    return {isOptional: isOptional(prop), type: makeDataType(getTypeNode(prop)), name: prop.getChildAtIndex(0).getText().trim()}
+    return {isOptional: isOptionalProp(prop), type: makeDataType(getTypeNode(prop)), name: prop.getName().trim()}
   })
 
 // Converts all type aliases found in schema files into TypeDefs
