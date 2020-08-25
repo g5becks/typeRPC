@@ -1,8 +1,6 @@
 /* eslint-disable new-cap */
-import {Service, Method, Param, Property, Schema, Message, is} from '../../schema'
+import {is, make, Message, Method, Param, Property, Schema, Service, DataType, StructLiteralProp} from '../../schema'
 import {capitalize, lowerCase} from '../utils'
-import {DataType, QueryParamable, QueryParamablePrim} from '../../schema/types/data-type'
-import {make} from '../../schema/types/make'
 
 // Maps typerpc messages to typescript data-messages
 export const typesMap: Map<DataType, string> = new Map<DataType, string>(
@@ -29,6 +27,18 @@ export const typesMap: Map<DataType, string> = new Map<DataType, string>(
   ]
 )
 
+const typeLiteral = (props: ReadonlyArray<StructLiteralProp>): string => {
+  let properties = ''
+  let i = 0
+  while (i < props.length) {
+    properties = properties.concat(`${props[i].name}${props[i].isOptional ? '?' : ''}: ${dataType(props[i].type)} ${i === props.length - 1 ? ',' : ''}\n`)
+    i++
+  }
+  return `{
+      ${properties}
+  }`
+}
+
 // Converts the input DataType into a typescript representation
 export const dataType = (type: DataType): string => {
   if (!is.Container(type) && !typesMap.has(type)) {
@@ -51,6 +61,10 @@ export const dataType = (type: DataType): string => {
     return type.name
   }
 
+  if (is.StructLiteral(type)) {
+    return typeLiteral(type.properties)
+  }
+
   if (is.Tuple2(type)) {
     return `[${dataType(type.item1)}, ${dataType(type.item2)}]`
   }
@@ -71,7 +85,7 @@ export const dataType = (type: DataType): string => {
 }
 
 // convert parsed querystring primitive to correct type
-const primFromQueryParam = (paramName: string, type: QueryParamablePrim): string => {
+const primFromQueryParam = (paramName: string, type: DataType): string => {
   switch (type.toString()) {
   case make.str.toString():
     return paramName
@@ -96,16 +110,16 @@ const primFromQueryParam = (paramName: string, type: QueryParamablePrim): string
 }
 
 // convert parsed querystring param to correct type
-export const fromQueryString  = (paramName: string, type: QueryParamable): string => {
+export const fromQueryString  = (paramName: string, type: DataType): string => {
   if (typesMap.has(type)) {
-    return primFromQueryParam(paramName as string, type as QueryParamablePrim)
+    return primFromQueryParam(paramName as string, type)
   }
   if (is.List(type)) {
     if (type.dataType.toString() === 't.str') {
       return paramName
     }
   }
-  return  is.List(type) ? `${paramName}.map(val => ${primFromQueryParam('val', type.dataType as QueryParamablePrim)})` : paramName
+  return  is.List(type) ? `${paramName}.map(val => ${primFromQueryParam('val', type.dataType)})` : paramName
 }
 
 // add question mark to optional type alias property or method param if needed
