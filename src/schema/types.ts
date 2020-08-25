@@ -77,7 +77,6 @@ export const make = {
   },
   Tuple: (type: TypeNode| Node, makeDataType: (type: TypeNode| Node) => DataType): DataType => {
     const params = parseTypeParams(type)
-    const tuple: DataType = make.dyn
     const item1 = makeDataType(params[0])
     const item2 = makeDataType(params[1])
     switch (params.length) {

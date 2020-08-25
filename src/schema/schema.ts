@@ -42,6 +42,7 @@ export type Property = Readonly<{
 export type Service = Readonly<{
   name: string;
   methods: ReadonlyArray<Method>;
+  useCbor: boolean;
 }>
 
 // rpc.Msg from schema file
