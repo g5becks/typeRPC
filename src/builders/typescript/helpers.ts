@@ -1,29 +1,29 @@
 /* eslint-disable new-cap */
-import {DataType, is, prim, primitives, QueryParamable, QueryParamablePrim} from '../../schema/types'
+import {DataType, is, fetch,  QueryParamable, QueryParamablePrim} from '../../schema/types'
 import {Interface, Method, Param, Property, Schema, TypeDef} from '../../schema'
 import {capitalize, lowerCase} from '../utils'
 
 // Maps typerpc types to typescript data-types
 export const typesMap: Map<DataType, string> = new Map<DataType, string>(
   [
-    [primitives.bool, 'boolean'],
-    [primitives.int8, 'number'],
-    [primitives.uint8, 'number'],
-    [primitives.int16, 'number'],
-    [primitives.uint16, 'number'],
-    [primitives.int32, 'number'],
-    [primitives.uint32, 'number'],
-    [primitives.int64, 'number'],
-    [primitives.uint64, 'number'],
-    [primitives.float32, 'number'],
-    [primitives.float64, 'number'],
-    [primitives.nil, 'null'],
-    [primitives.str, 'string'],
-    [primitives.err, 'Error'],
-    [primitives.dyn, 'any'],
-    [primitives.timestamp, 'number'],
-    [primitives.unit, 'void'],
-    [primitives.blob, 'Uint8Array'],
+    [fetch.bool, 'boolean'],
+    [fetch.int8, 'number'],
+    [fetch.uint8, 'number'],
+    [fetch.int16, 'number'],
+    [fetch.uint16, 'number'],
+    [fetch.int32, 'number'],
+    [fetch.uint32, 'number'],
+    [fetch.int64, 'number'],
+    [fetch.uint64, 'number'],
+    [fetch.float32, 'number'],
+    [fetch.float64, 'number'],
+    [fetch.nil, 'null'],
+    [fetch.str, 'string'],
+    [fetch.err, 'Error'],
+    [fetch.dyn, 'any'],
+    [fetch.timestamp, 'number'],
+    [fetch.unit, 'void'],
+    [fetch.blob, 'Uint8Array'],
 
   ]
 )
@@ -72,23 +72,23 @@ export const dataType = (type: DataType): string => {
 // convert parsed querystring primitive to correct type
 const primFromQueryParam = (paramName: string, type: QueryParamablePrim): string => {
   switch (type.toString()) {
-  case prim.str.toString():
+  case fetch.str.toString():
     return paramName
-  case prim.float32.toString():
-  case prim.float64.toString():
+  case fetch.float32.toString():
+  case fetch.float64.toString():
     return `parseFloat(${paramName})`
-  case prim.bool.toString():
+  case fetch.bool.toString():
     return `Boolean(${paramName})`
-  case prim.timestamp.toString():
+  case fetch.timestamp.toString():
     return `parseInt(${paramName})`
-  case prim.int8.toString():
-  case prim.uint8.toString():
-  case prim.int16.toString():
-  case prim.uint16.toString():
-  case prim.int32.toString():
-  case prim.uint32.toString():
-  case prim.int64.toString():
-  case prim.uint64.toString():
+  case fetch.int8.toString():
+  case fetch.uint8.toString():
+  case fetch.int16.toString():
+  case fetch.uint16.toString():
+  case fetch.int32.toString():
+  case fetch.uint32.toString():
+  case fetch.int64.toString():
+  case fetch.uint64.toString():
     return `parseInt(${paramName})`
   }
   return paramName

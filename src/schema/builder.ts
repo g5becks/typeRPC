@@ -24,19 +24,19 @@ const makeDataType = (type: TypeNode | Node): DataType => {
   if (invalids.includes(typeText) || typeof type === 'undefined') {
     return primitives.dyn
   }
-  if (isPrimitive(typeText)) {
+  if (isPrimitive(type)) {
     return primitivesMap.get(typeText) as DataType
   }
   if (!isContainer(typeText)) {
     return makeStruct(type)
   }
-  if (isType(type, 't.List')) {
+  if (isType(type, '$.List')) {
     return makeList(type)
   }
-  if (isType(type, 't.Dict')) {
+  if (isType(type, '$.Dict')) {
     return makeDict(type)
   }
-  if (isType(type, 't.Tuple')) {
+  if (isType(type, '$.Tuple')) {
     return makeTuple(type)
   }
 

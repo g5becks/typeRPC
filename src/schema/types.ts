@@ -6,7 +6,22 @@ export type Struct = Readonly<{
   useCbor: boolean;
   toString(): string;}> & {readonly brand: unique symbol}
 
-export type StructLiteral = {}
+export type StructLiteralProp = Readonly<{
+  name: string;
+  type: DataType;
+  isOptional: boolean;
+  toString(): string;
+}>
+
+export type StructLiteral = Readonly<{
+  // name to use for constructing an object in languages that dont support literals
+  // defaults to owning object name + property name if used inside of an rpc.Message.
+  // If used as a method param, defaults to Service name + Method name + param name.
+  // If used as a method return, defaults to Service name + Method name + 'Result'
+  pseudoName: string;
+  properties: ReadonlyArray<StructLiteralProp>;
+  toString(): string;
+}>
 
 export const make = {
   Struct: (name: string, useCbor: boolean): Struct => {
@@ -15,6 +30,20 @@ export const make = {
     }} as Struct
   },
 
+  StructLiteralProp: (name: string, type: DataType, isOptional: boolean): StructLiteralProp => {
+    return {name, type, isOptional, toString(): string {
+      return `property: {
+          name: ${name},
+          isOptional: ${isOptional},
+          type: ${type.toString()}
+      }`
+    }}
+  },
+  StructLiteral: (pseudoName: string, properties: ReadonlyArray<StructLiteralProp>): DataType => {
+    return {pseudoName, properties, toString(): string {
+      return `{${properties.map(prop => prop.toString())}}`
+    }}
+  },
   Dict: (keyType: DataType, valType: DataType): DataType => {
     return {keyType, valType, toString() {
       return `$.Dict<${keyType.toString()}, ${valType.toString()}>`
@@ -51,83 +80,60 @@ export const make = {
   },
 }
 
-export const primitives: {[key: string]: x.Primitive} = {
-  bool: {_type_: 'bool', toString: () => '$.bool'} as unknown as $.bool,
-  int8: {_type_: 'int8', toString: () => '$.int8'} as unknown as $.int8,
-  uint8: {_type_: 'uint8', toString: () => '$.uint8'} as unknown as $.uint8,
-  int16: {_type_: 'int16', toString: () => '$.int16'} as unknown as $.int16,
-  uint16: {_type_: 'uint16', toString: () => '$.uint16'} as unknown as $.uint16,
-  int32: {_type_: 'int32', toString: () => '$.int32'} as unknown as $.int32,
-  uint32: {_type_: 'uint32', toString: () => '$.uint32'} as unknown as $.uint32,
-  int64: {_type_: 'int64', toString: () => '$.int64'} as unknown as $.int64,
-  uint64: {_type_: 'uint64', toString: () => '$.uint64'} as unknown as $.uint64,
-  float32: {_type_: 'float32', toString: () => '$.float32'} as unknown as $.float32,
-  float64: {_type_: 'float64', toString: () => '$.float64'} as unknown as $.float64,
-  nil: {_type_: 'nil', toString: () => '$.nil'} as unknown as $.nil,
-  str: {_type_: 'str', toString: () => '$.str'} as unknown as $.str,
-  err: {_type_: 'err', toString: () => '$.err'} as unknown as $.err,
-  dyn: {_type_: 'dyn', toString: () => '$.dyn'} as unknown as $.dyn,
-  timestamp: {_type_: 'timestamp', toString: () => '$.timestamp'} as unknown as $.timestamp,
-  unit: {_type_: 'unit', toString: () => '$.unit'} as unknown as $.unit,
-  blob: {_type_: 'blob', toString: () => '$.blob'} as unknown as $.blob,
-}
-
-// ide autocomplete isn't very helpful using the primitives object
-// this object is meant to be used as an alternative
-export const prim = {
+export const fetch = {
   get bool(): x.Primitive {
-    return primitives.bool
+    return {toString: () => '$.bool'} as unknown as $.bool
   },
   get int8(): x.Primitive {
-    return primitives.int8
+    return {toString: () => '$.int8'} as unknown as $.int8
   },
   get uint8(): x.Primitive {
-    return primitives.uint8
+    return  {toString: () => '$.uint8'} as unknown as $.uint8
   },
   get int16(): x.Primitive {
-    return primitives.int16
+    return {toString: () => '$.int16'} as unknown as $.int16
   },
   get uint16(): x.Primitive {
-    return primitives.uint16
+    return {toString: () => '$.uint16'} as unknown as $.uint16
   },
   get int32(): x.Primitive {
-    return primitives.int32
+    return {toString: () => '$.int32'} as unknown as $.int32
   },
   get uint32(): x.Primitive {
-    return primitives.uint32
+    return {toString: () => '$.uint32'} as unknown as $.uint32
   },
   get int64(): x.Primitive {
-    return primitives.int64
+    return {toString: () => '$.int64'} as unknown as $.int64
   },
   get uint64(): x.Primitive {
-    return primitives.uint64
+    return {toString: () => '$.uint64'} as unknown as $.uint64
   },
   get float32(): x.Primitive {
-    return primitives.float32
+    return {toString: () => '$.float32'} as unknown as $.float32
   },
   get float64(): x.Primitive {
-    return primitives.float64
+    return {toString: () => '$.float64'} as unknown as $.float64
   },
   get nil(): x.Primitive {
-    return primitives.nil
+    return {toString: () => '$.nil'} as unknown as $.nil
   },
   get str(): x.Primitive {
-    return primitives.str
+    return {toString: () => '$.str'} as unknown as $.str
   },
   get err(): x.Primitive {
-    return primitives.err
+    return {toString: () => '$.err'} as unknown as $.err
   },
   get dyn(): x.Primitive {
-    return primitives.dyn
+    return {toString: () => '$.dyn'} as unknown as $.dyn
   },
   get timestamp(): x.Primitive {
-    return primitives.timestamp
+    return {toString: () => '$.timestamp'} as unknown as $.timestamp
   },
   get unit(): x.Primitive {
-    return primitives.unit
+    return {toString: () => '$.unit'} as unknown as $.unit
   },
   get blob(): x.Primitive {
-    return primitives.blob
+    return {toString: () => '$.blob'} as unknown as $.blob
   },
 }
 
@@ -147,7 +153,7 @@ export const isQueryParamableString = (type: string): boolean => queryParamables
 
 export const isQueryParamable = (type: DataType): type is QueryParamable => isQueryParamableString(type.toString())
 
-export type DataType = x.RpcType | Struct
+export type DataType = x.RpcType | Struct | StructLiteral
 
 const validateType = (type: unknown, ...propNames: string[]): boolean => {
   const props = Object.getOwnPropertyNames(type).filter(prop => !prop.includes('toString'))
@@ -177,7 +183,7 @@ export const is = {
 }
 
 export const primitivesMap = new Map<string, x.Primitive>(
-  Object.entries(primitives).map(([_, v]) => [v.toString(), v])
+  Object.entries(fetch).map(([_, v]) => [v.toString(), v])
 )
 
 export const containersList = ['$.Dict', '$.Tuple2', '$.Tuple3', '$.Tuple4', '$.Tuple5', '$.List']
