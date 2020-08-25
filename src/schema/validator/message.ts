@@ -10,6 +10,8 @@ const validateMsgProps = (props: PropertySignature[]): Error[] => {
   let errs: Error[] = []
   for (const prop of props) {
     const type = prop.getTypeNode()
+    // if the property is a message literal, call validateMsgProps
+    // recursively
     if (typeof type !== 'undefined' && isMsgLiteral(type)) {
       errs =  errs.concat(validateMsgProps(parseMsgProps(type)))
     }
@@ -17,6 +19,7 @@ const validateMsgProps = (props: PropertySignature[]): Error[] => {
   }
   return errs
 }
+
 // parses all message declarations from a schema file
 const parseMessages = (file: SourceFile): TypeAliasDeclaration[] => file.getTypeAliases().filter(alias => isMsg(alias))
 

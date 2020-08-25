@@ -1,4 +1,7 @@
 import {$, internal as x} from '@typerpc/types'
+import {Node, TypeAliasDeclaration, TypeNode} from 'ts-morph'
+import {isValidMsg} from './validator/utils'
+import {parseJsDocComment} from './parser'
 
 // A struct represents a Type Alias defined in a schema file
 export type Struct = Readonly<{
@@ -24,9 +27,26 @@ export type StructLiteral = Readonly<{
   toString(): string;
 }>
 
+const typeError = (type: TypeNode | Node, msg: string) =>  new TypeError(`error in file ${type.getSourceFile().getFilePath()}
+    at line number: ${type.getStartLineNumber()}
+    message: ${msg}`)
+
+// Determines if the generated type should use cbor for serialization/deserialization
+// based on the JsDoc @kind tag
+const useCbor = (type: TypeAliasDeclaration): boolean => {
+  const comment = parseJsDocComment(type,   'kind')?.trim().toLowerCase() ?? ''
+  return comment.includes('cbor')
+}
+
 export const make = {
-  Struct: (name: string, useCbor: boolean): Struct => {
-    return {name, useCbor, toString() {
+  Struct: (type: Node | TypeNode): Struct => {
+    // get the text of the Type field
+    const name = type.getText()?.trim()
+    const alias = type.getSourceFile().getTypeAlias(name)
+    if (typeof alias === 'undefined') {
+      throw typeError(type, `${name} does not exist in schema file`)
+    }
+    return {name: type.getText()?.trim(), useCbor: useCbor(alias), toString() {
       return this.name
     }} as Struct
   },

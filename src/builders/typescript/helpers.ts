@@ -1,29 +1,29 @@
 /* eslint-disable new-cap */
-import {DataType, is, fetch,  QueryParamable, QueryParamablePrim} from '../../schema/types'
+import {DataType, is, make, QueryParamable, QueryParamablePrim} from '../../schema/types'
 import {Interface, Method, Param, Property, Schema, TypeDef} from '../../schema'
 import {capitalize, lowerCase} from '../utils'
 
 // Maps typerpc types to typescript data-types
 export const typesMap: Map<DataType, string> = new Map<DataType, string>(
   [
-    [fetch.bool, 'boolean'],
-    [fetch.int8, 'number'],
-    [fetch.uint8, 'number'],
-    [fetch.int16, 'number'],
-    [fetch.uint16, 'number'],
-    [fetch.int32, 'number'],
-    [fetch.uint32, 'number'],
-    [fetch.int64, 'number'],
-    [fetch.uint64, 'number'],
-    [fetch.float32, 'number'],
-    [fetch.float64, 'number'],
-    [fetch.nil, 'null'],
-    [fetch.str, 'string'],
-    [fetch.err, 'Error'],
-    [fetch.dyn, 'any'],
-    [fetch.timestamp, 'number'],
-    [fetch.unit, 'void'],
-    [fetch.blob, 'Uint8Array'],
+    [make.bool, 'boolean'],
+    [make.int8, 'number'],
+    [make.uint8, 'number'],
+    [make.int16, 'number'],
+    [make.uint16, 'number'],
+    [make.int32, 'number'],
+    [make.uint32, 'number'],
+    [make.int64, 'number'],
+    [make.uint64, 'number'],
+    [make.float32, 'number'],
+    [make.float64, 'number'],
+    [make.nil, 'null'],
+    [make.str, 'string'],
+    [make.err, 'Error'],
+    [make.dyn, 'any'],
+    [make.timestamp, 'number'],
+    [make.unit, 'void'],
+    [make.blob, 'Uint8Array'],
 
   ]
 )
@@ -72,23 +72,23 @@ export const dataType = (type: DataType): string => {
 // convert parsed querystring primitive to correct type
 const primFromQueryParam = (paramName: string, type: QueryParamablePrim): string => {
   switch (type.toString()) {
-  case fetch.str.toString():
+  case make.str.toString():
     return paramName
-  case fetch.float32.toString():
-  case fetch.float64.toString():
+  case make.float32.toString():
+  case make.float64.toString():
     return `parseFloat(${paramName})`
-  case fetch.bool.toString():
+  case make.bool.toString():
     return `Boolean(${paramName})`
-  case fetch.timestamp.toString():
+  case make.timestamp.toString():
     return `parseInt(${paramName})`
-  case fetch.int8.toString():
-  case fetch.uint8.toString():
-  case fetch.int16.toString():
-  case fetch.uint16.toString():
-  case fetch.int32.toString():
-  case fetch.uint32.toString():
-  case fetch.int64.toString():
-  case fetch.uint64.toString():
+  case make.int8.toString():
+  case make.uint8.toString():
+  case make.int16.toString():
+  case make.uint16.toString():
+  case make.int32.toString():
+  case make.uint32.toString():
+  case make.int64.toString():
+  case make.uint64.toString():
     return `parseInt(${paramName})`
   }
   return paramName

@@ -2,7 +2,7 @@ import {HTTPErrCode, HTTPResponseCode} from '../schema'
 import {MethodSignature, ParameterDeclaration, SourceFile, SyntaxKind, TypeAliasDeclaration} from 'ts-morph'
 import {isHttpVerb, isService, isValidDataType, singleValidationErr, validateNotGeneric} from './utils'
 import {isQueryParamableString, queryParamables} from '../types'
-import {getJsDocComment} from '../builder'
+import {parseJsDocComment} from '../parser'
 
 // Valid HTTP error codes
 export const errCodes = [400, 401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417, 418, 422, 425, 426, 428, 429, 431, 451, 500, 501, 502, 503, 504, 505, 506, 507, 508, 510, 511]
@@ -72,7 +72,7 @@ const validateGetMethodParam = (param: ParameterDeclaration): Error[] => {
 // TODO test this function
 const validateGetRequestMethodParams = (method: MethodSignature): Error[] => {
   const params = method.getParameters()
-  if (getJsDocComment(method, 'access')?.toUpperCase() !== 'GET' || params.length === 0) {
+  if (parseJsDocComment(method, 'access')?.toUpperCase() !== 'GET' || params.length === 0) {
     return []
   }
   return params.flatMap(param => validateGetMethodParam(param))

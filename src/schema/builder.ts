@@ -7,7 +7,6 @@ import {
   ParameterDeclaration,
   PropertySignature,
   SourceFile,
-  TypeAliasDeclaration,
   TypeNode,
 } from 'ts-morph'
 import {DataType, fetch, is, make, prims, StructLiteralProp} from './types'
@@ -16,7 +15,7 @@ import {HTTPErrCode, HTTPResponseCode, HTTPVerb, Interface, Method, Param, Prope
 import {isContainer, isHttpVerb, isMsgLiteral, isPrimitive, isValidDataType} from './validator/utils'
 import {isErrCode, isResponseCode} from './validator/service'
 import {validateSchemas} from './validator'
-import {parseTypeParams, parseMsgProps} from './parser'
+import {parseJsDocComment, parseMsgProps, parseTypeParams} from './parser'
 
 const isType = (type: TypeNode | Node, typeText: string): boolean => type.getText().trim().startsWith(typeText)
 
@@ -97,33 +96,20 @@ const makeDataType = (type: TypeNode | Node): DataType => {
   return fetch.dyn
 }
 
-// gets the comment portion of a JsDoc comment base on the tagName
-export const getJsDocComment = (method: MethodSignature | TypeAliasDeclaration, tagName: string): string | undefined => {
-  const tags = method.getJsDocs()[0]?.getTags()
-  return tags?.filter(tag => tag.getTagName() === tagName)[0]?.getComment()?.trim()
-}
-
 // builds the httpVerb for a method using the parsed JsDoc
 const buildHttpVerb = (method: MethodSignature): HTTPVerb => {
-  const comment = getJsDocComment(method, 'access') as HTTPVerb ?? 'POST'
+  const comment = parseJsDocComment(method, 'access') as HTTPVerb ?? 'POST'
   return isHttpVerb(comment) ? comment : 'POST'
 }
 
 const buildResponseCode = (method: MethodSignature): HTTPResponseCode => {
-  const comment = getJsDocComment(method, 'returns')  ?? '200'
+  const comment = parseJsDocComment(method, 'returns')  ?? '200'
   const response = parseInt(comment)
   return isResponseCode(response) ? response as HTTPResponseCode : 200
 }
 
-// Determines if the generated type should use cbor for serialization/deserialization
-// based on the JsDoc @kind tag
-const useCbor = (type: TypeAliasDeclaration): boolean => {
-  const comment = getJsDocComment(type,   'kind')?.trim().toLowerCase() ?? ''
-  return comment.includes('cbor')
-}
-
 const buildErrCode = (method: MethodSignature): HTTPErrCode => {
-  const comment = getJsDocComment(method, 'throws') ?? '500'
+  const comment = parseJsDocComment(method, 'throws') ?? '500'
   const response = parseInt(comment)
   return isErrCode(response) ? response as HTTPErrCode : 500
 }
