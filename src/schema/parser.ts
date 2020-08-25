@@ -2,15 +2,26 @@ import {
   MethodSignature,
   Node,
   PropertySignature,
+  SourceFile,
   SyntaxKind,
   TypeAliasDeclaration,
   TypeNode,
   TypeReferenceNode,
 } from 'ts-morph'
-import {isMsgLiteral} from './validator/utils'
+import {isMsg, isMsgLiteral, isService} from './validator'
 
 const isTypeAlias = (type: any): type is TypeAliasDeclaration => 'getName' in type
 const isTypeNode = (type: any): type is TypeNode => !('getName' in type)
+
+// Determines if the generated type should use cbor for serialization/deserialization
+// based on the JsDoc @kind tag
+export const useCbor = (type: TypeAliasDeclaration): boolean => {
+  const comment = parseJsDocComment(type, 'kind')?.trim().toLowerCase() ?? ''
+  return comment.includes('cbor')
+}
+
+// is the type property optional?
+export const isOptionalProp = (prop: PropertySignature): boolean => typeof prop.getQuestionTokenNode() !== 'undefined'
 
 // parse all of the properties from an rpc.Msg Type alias for rpc.Msg literal
 export const parseMsgProps = (type: TypeAliasDeclaration | TypeNode | Node): PropertySignature[] => {
@@ -32,12 +43,13 @@ export const parseJsDocComment = (method: MethodSignature | TypeAliasDeclaration
   const tags = method.getJsDocs()[0]?.getTags()
   return tags?.filter(tag => tag.getTagName() === tagName)[0]?.getComment()?.trim()
 }
-// Determines if the generated type should use cbor for serialization/deserialization
-// based on the JsDoc @kind tag
-export const useCbor = (type: TypeAliasDeclaration): boolean => {
-  const comment = parseJsDocComment(type, 'kind')?.trim().toLowerCase() ?? ''
-  return comment.includes('cbor')
-}
 
-// is the type property optional?
-export const isOptionalProp = (prop: PropertySignature): boolean => typeof prop.getQuestionTokenNode() !== 'undefined'
+// parses all message declarations from a schema file
+export const parseMessages = (file: SourceFile): TypeAliasDeclaration[] => file.getTypeAliases().filter(alias => isMsg(alias))
+
+// parses all service declarations from a schema file
+export const parseServices = (file: SourceFile): TypeAliasDeclaration[] =>
+  file.getTypeAliases().filter(alias => isService(alias))
+
+// parse all of the methods from an rpc.Service type alias
+export const parseServiceMethods = (type: TypeAliasDeclaration): MethodSignature[] => type.getTypeNode()!.getChildrenOfKind(SyntaxKind.TypeLiteral)[0].getChildrenOfKind(SyntaxKind.MethodSignature)

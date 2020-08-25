@@ -39,13 +39,13 @@ export type Property = Readonly<{
   isOptional: boolean;
 }>
 
-export type Interface = Readonly<{
+export type Service = Readonly<{
   name: string;
   methods: ReadonlyArray<Method>;
 }>
 
-// TypeAlias from schema file
-export type TypeDef = Readonly<{
+// rpc.Msg from schema file
+export type Message = Readonly<{
   name: string;
   properties: ReadonlyArray<Property>;
 }>
@@ -53,7 +53,7 @@ export type TypeDef = Readonly<{
 export type Schema = Readonly<{
   // Name of the file this schema was generated from
   fileName: string;
-  types: ReadonlyArray<TypeDef>;
-  interfaces: ReadonlyArray<Interface>;
+  messages: ReadonlyArray<Message>;
+  services: ReadonlyArray<Service>;
   hasCbor: boolean;
 }>

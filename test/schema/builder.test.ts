@@ -169,7 +169,7 @@ test('buildProps() should return correct type alias properties', () => {
   }
 })
 
-test('buildTypes() should return correct Set of types', () => {
+test('buildTypes() should return correct Set of messages', () => {
   const file = makeTestFile(project)
   const aliases = file.getTypeAliases()
   const builtTypes = buildTypes(file)
@@ -205,12 +205,12 @@ test('buildMethod() should return method with correct params and return type', (
   }
 })
 
-test('buildSchema() should have correct name, num types, and num interfaces', () => {
+test('buildSchema() should have correct name, num messages, and num services', () => {
   for (const source of makeTestFiles(project)) {
     const schema = buildSchema(source)
     expect(schema.fileName).toEqual(source.getBaseNameWithoutExtension())
-    expect(schema.interfaces.length).toEqual(source.getInterfaces().length)
-    expect(schema.types.length).toEqual(source.getTypeAliases().length)
+    expect(schema.services.length).toEqual(source.getInterfaces().length)
+    expect(schema.messages.length).toEqual(source.getTypeAliases().length)
   }
 })
 

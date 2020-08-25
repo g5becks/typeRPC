@@ -1,6 +1,6 @@
-import {HTTPVerb, Interface, Method, Param, Property, Schema, TypeDef} from './schema'
+import {HTTPVerb, Service, Method, Param, Property, Schema, Message} from './schema'
 import {buildSchemas} from './builder'
 import {is} from './types'
 
-export {Schema, buildSchemas, is, HTTPVerb, Interface, TypeDef, Param, Property, Method}
+export {Schema, buildSchemas, is, HTTPVerb, Service, Message, Param, Property, Method}
 

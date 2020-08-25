@@ -73,7 +73,7 @@ export const singleValidationErr = (node: Node | undefined, msg: string): Error 
      message: ${msg}`)
 }
 
-// error message for generic types
+// error message for generic messages
 const genericsErrMsg = (type: TypeAliasDeclaration | MethodSignature) => `${type.getName().trim()} defines a generic type . typerpc types and methods cannot be generic`
 
 // validates that a type alias or method is not generic

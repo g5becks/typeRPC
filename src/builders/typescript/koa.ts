@@ -1,5 +1,5 @@
 import {Code, CodeBuilder} from '..'
-import {Interface, Method, Schema} from '../../schema'
+import {Service, Method, Schema} from '../../schema'
 import {capitalize, fileHeader, lowerCase, serverResponseContentType} from '../utils'
 import {buildInterfaces, buildTypes, dataType, fromQueryString, makeParamsVar, paramNames} from './helpers'
 import {isQueryParamable} from '../../schema/types'
@@ -27,7 +27,7 @@ const buildPath = (method: Method): string => {
 }
 
 // destructures the query params by converting them to the
-// correct types using the fromQueryString function
+// correct messages using the fromQueryString function
 const buildDestructuredQueryParams = (method: Method): string =>
   `{${method.params.map((param, i) => {
     if (isQueryParamable(param.type)) {
@@ -65,7 +65,7 @@ router.${method.httpVerb.toLowerCase()}('${interfaceName}/${method.name}', /${bu
 `
 }
 
-const buildHandlers = (interfc: Interface): string => {
+const buildHandlers = (interfc: Service): string => {
   let handlers = ''
   for (const method of interfc.methods) {
     handlers = handlers.concat(buildHandler(interfc.name, method))
@@ -73,7 +73,7 @@ const buildHandlers = (interfc: Interface): string => {
   return handlers
 }
 
-const buildRoutes = (interfc: Interface): string => {
+const buildRoutes = (interfc: Service): string => {
   return `
 export const ${lowerCase(interfc.name)}Routes = (${lowerCase(interfc.name)}: ${capitalize(interfc.name)}, logger: ErrLogger = defaultLogger): Middleware<Koa.ParameterizedContext<any, Router.RouterParamContext>> => {
 	const router = new Router<any, {}>({
@@ -86,7 +86,7 @@ export const ${lowerCase(interfc.name)}Routes = (${lowerCase(interfc.name)}: ${c
 `
 }
 
-const buildAllRoutes = (interfaces: ReadonlyArray<Interface>): string => {
+const buildAllRoutes = (interfaces: ReadonlyArray<Service>): string => {
   let routes = ''
   for (const interfc of interfaces) {
     routes = routes.concat(buildRoutes(interfc))
@@ -109,8 +109,8 @@ ${buildImports(schema)}
 ${fileHeader()}
 ${logger}
 ${buildTypes(schema)}
-${buildInterfaces(schema.interfaces)}
-${buildAllRoutes(schema.interfaces)}
+${buildInterfaces(schema.services)}
+${buildAllRoutes(schema.services)}
 `
   return {fileName: schema.fileName + '.ts', source}
 }

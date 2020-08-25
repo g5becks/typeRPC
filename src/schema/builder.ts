@@ -11,7 +11,7 @@ import {
 } from 'ts-morph'
 import {DataType, is, make, typeError} from './types'
 import {Schema} from '.'
-import {HTTPErrCode, HTTPResponseCode, HTTPVerb, Interface, Method, Param, Property, TypeDef} from './schema'
+import {HTTPErrCode, HTTPResponseCode, HTTPVerb, Service, Method, Param, Property, Message} from './schema'
 import {isContainer, isHttpVerb, isMsgLiteral, isValidDataType} from './validator/utils'
 import {isErrCode, isResponseCode} from './validator/service'
 import {validateSchemas} from './validator'
@@ -64,9 +64,6 @@ const buildErrCode = (method: MethodSignature): HTTPErrCode => {
   return isErrCode(response) ? response as HTTPErrCode : 500
 }
 
-// gets the type node E.G. (name: type node) of a type alias property
-export const getTypeNode = (node: Node) => isOptional(node) ? node.getChildAtIndex(3) : node.getChildAtIndex(2)
-
 // builds all properties of a type alias
 const buildProps = (properties: PropertySignature[]): Property[] =>
   properties.map(prop => {
@@ -74,7 +71,7 @@ const buildProps = (properties: PropertySignature[]): Property[] =>
   })
 
 // Converts all type aliases found in schema files into TypeDefs
-const buildTypes = (sourceFile: SourceFile): TypeDef[] => {
+const buildTypes = (sourceFile: SourceFile): Message[] => {
   const typeAliases = sourceFile.getTypeAliases()
   if (typeAliases.length === 0) {
     return []
@@ -130,14 +127,14 @@ const buildMethods = (methods: MethodSignature[]): Method[] => [...new Set(metho
 
 export const getInterfaceName = (interfc: InterfaceDeclaration): string => interfc.getNameNode().getText().trim()
 
-const buildInterface = (interfc: InterfaceDeclaration): Interface => {
+const buildInterface = (interfc: InterfaceDeclaration): Service => {
   return {
     name: getInterfaceName(interfc),
     methods: buildMethods(interfc.getMethods()),
   }
 }
 
-const buildInterfaces = (sourceFile: SourceFile): Interface[] => {
+const buildInterfaces = (sourceFile: SourceFile): Service[] => {
   const interfaces = sourceFile.getInterfaces()
   if (interfaces.length === 0) {
     return []
@@ -148,10 +145,10 @@ const buildInterfaces = (sourceFile: SourceFile): Interface[] => {
 const buildSchema = (file: SourceFile): Schema => {
   return {
     fileName: file.getBaseNameWithoutExtension(),
-    types: buildTypes(file),
-    interfaces: buildInterfaces(file),
+    messages: buildTypes(file),
+    services: buildInterfaces(file),
     get hasCbor(): boolean {
-      return this.interfaces.flatMap(interfc => [...interfc.methods]).some(method => method.hasCborParams || method.hasCborReturn)
+      return this.services.flatMap(interfc => [...interfc.methods]).some(method => method.hasCborParams || method.hasCborReturn)
     },
   }
 }

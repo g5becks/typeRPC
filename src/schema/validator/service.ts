@@ -1,8 +1,8 @@
 import {HTTPErrCode, HTTPResponseCode} from '../schema'
-import {MethodSignature, ParameterDeclaration, SourceFile, SyntaxKind, TypeAliasDeclaration} from 'ts-morph'
-import {isHttpVerb, isService, isValidDataType, singleValidationErr, validateNotGeneric} from './utils'
+import {MethodSignature, ParameterDeclaration, SourceFile, TypeAliasDeclaration} from 'ts-morph'
+import {isHttpVerb, isValidDataType, singleValidationErr, validateNotGeneric} from './utils'
 import {isQueryParamableString, queryParamables} from '../types'
-import {parseJsDocComment} from '../parser'
+import {parseJsDocComment, parseServiceMethods, parseServices} from '../parser'
 
 // Valid HTTP error codes
 export const errCodes = [400, 401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417, 418, 422, 425, 426, 428, 429, 431, 451, 500, 501, 502, 503, 504, 505, 506, 507, 508, 510, 511]
@@ -15,13 +15,6 @@ export const isResponseCode = (code: number | undefined): code is HTTPResponseCo
 
 // is the number used in the JsDoc @throws tag a valid typerpc HTTPErrCode?
 export const isErrCode = (code: number | undefined): code is HTTPErrCode => errCodes.includes(code ?? 0)
-
-// parses all service declarations from a schema file
-const parseServices = (file: SourceFile): TypeAliasDeclaration[] =>
-  file.getTypeAliases().filter(alias => isService(alias))
-
-// parse all of the methods from an rpc.Service type alias
-export const parseServiceMethods = (type: TypeAliasDeclaration): MethodSignature[] => type.getTypeNode()!.getChildrenOfKind(SyntaxKind.TypeLiteral)[0].getChildrenOfKind(SyntaxKind.MethodSignature)
 
 // TODO test this function
 const validateMethodJsDoc = (method: MethodSignature): Error[] => {

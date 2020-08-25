@@ -36,6 +36,6 @@ test('fromQueryString() should return correct parser function', () => {
   }
 })
 
-test('buildTypes() should return correct types', () => {
+test('buildTypes() should return correct messages', () => {
 
 })

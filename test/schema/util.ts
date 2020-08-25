@@ -1,7 +1,7 @@
 import {Project, SourceFile} from 'ts-morph'
 import * as faker from 'faker'
 
-export const validImport = 'import {t} from \'@typerpc/types\''
+export const validImport = 'import {t} from \'@typerpc/messages\''
 export const validInterface = `
   interface Test {
     getNames(name: t.str): t.bool
@@ -65,17 +65,17 @@ export function randomNumber(min: number, max: number) {
   return Math.floor(Math.random() * (max - min) + min)
 }
 
-// list of type strings that adhere to @typerpc/types => rpc.Comparable type
+// list of type strings that adhere to @typerpc/messages => rpc.Comparable type
 const comparables = ['t.bool', 't.int8', 't.uint8', 't.uint16', 't.int16', 't.int32', 't.uint32', 't.int64', 't.uint64', 't.float32', 't.float64', 't.str', 't.timestamp', 't.err', 't.dyn']
 
-// creates a random @typerpc/types => rpc.Comparable
+// creates a random @typerpc/messages => rpc.Comparable
 const randomComparable = () => comparables[randomNumber(0, comparables.length - 1)]
 
 // a list of @typerpc/type => rpc.Container strings with rpc.Comparables
 // as key type
 const containers = [`t.Dict<${randomComparable()}, ${randomComparable()}>`, `t.List<${randomComparable()}>`, `t.Tuple2<${randomComparable()}, ${randomComparable()}>`, `t.Tuple3<${randomComparable()}, ${randomComparable()}, ${randomComparable()}>`, `t.Tuple4<${randomComparable()}, ${randomComparable()}, ${randomComparable()}, ${randomComparable()}>`, `t.Tuple5<${randomComparable()},${randomComparable()}, ${randomComparable()}, ${randomComparable()}, ${randomComparable()}>`]
 
-// returns a random @typerpc/types => rpc.Container string
+// returns a random @typerpc/messages => rpc.Container string
 const randomContainer = (): string => containers[randomNumber(0, containers.length - 1)]
 
 // creates a random name for a struct
@@ -90,7 +90,7 @@ const randomStructName =  (): string => {
   return name
 }
 
-// list of types that can be used as a container dataType
+// list of messages that can be used as a container dataType
 const keyables = [randomComparable, randomContainer]
 
 // returns a random dataType for a container

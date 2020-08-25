@@ -1,9 +1,9 @@
 import {PropertySignature, SourceFile, TypeAliasDeclaration, TypeNode} from 'ts-morph'
-import {isMsg, isMsgLiteral, isValidDataType, singleValidationErr} from './utils'
-import {parseMsgProps} from '../parser'
+import {isMsgLiteral, isValidDataType, singleValidationErr} from './utils'
+import {parseMessages, parseMsgProps} from '../parser'
 
 const validateProp = (prop: PropertySignature): Error[] =>
-  isValidDataType(prop.getTypeNode()) ? [] : [singleValidationErr(prop, 'Invalid property type, Only types imported from @typerpc/types, rpc.Msg types, and other rpc.Msg types declared in the same file may be used as property types')]
+  isValidDataType(prop.getTypeNode()) ? [] : [singleValidationErr(prop, 'Invalid property type, Only messages imported from @typerpc/messages, rpc.Msg messages, and other rpc.Msg messages declared in the same file may be used as property messages')]
 
 // TODO test this
 const validateMsgProps = (props: PropertySignature[]): Error[] => {
@@ -19,9 +19,6 @@ const validateMsgProps = (props: PropertySignature[]): Error[] => {
   }
   return errs
 }
-
-// parses all message declarations from a schema file
-const parseMessages = (file: SourceFile): TypeAliasDeclaration[] => file.getTypeAliases().filter(alias => isMsg(alias))
 
 export const validateMessage = (msg: TypeAliasDeclaration| TypeNode): Error[] =>
   validateMsgProps(parseMsgProps(msg))

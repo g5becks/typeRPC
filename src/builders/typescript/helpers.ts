@@ -1,9 +1,9 @@
 /* eslint-disable new-cap */
 import {DataType, is, make, QueryParamable, QueryParamablePrim} from '../../schema/types'
-import {Interface, Method, Param, Property, Schema, TypeDef} from '../../schema'
+import {Service, Method, Param, Property, Schema, Message} from '../../schema'
 import {capitalize, lowerCase} from '../utils'
 
-// Maps typerpc types to typescript data-types
+// Maps typerpc messages to typescript data-messages
 export const typesMap: Map<DataType, string> = new Map<DataType, string>(
   [
     [make.bool, 'boolean'],
@@ -120,7 +120,7 @@ const buildProps = (props: ReadonlyArray<Property>): string => {
 }
 
 // builds a single type alias declaration
-const buildType = (type: TypeDef): string => {
+const buildType = (type: Message): string => {
   return `
 export type ${capitalize(type.name)} = {
   ${buildProps(type.properties)}
@@ -130,7 +130,7 @@ export type ${capitalize(type.name)} = {
 // builds all type aliases for a schema file
 export const buildTypes = (schema: Schema): string => {
   let types =  ''
-  for (const type of schema.types) {
+  for (const type of schema.messages) {
     types = types.concat(buildType(type))
   }
   return types
@@ -161,15 +161,15 @@ const buildMethods = (methods: ReadonlyArray<Method>): string => {
 }
 
 // builds a single interface
-const buildInterface = (interfc: Interface): string => {
+const buildInterface = (interfc: Service): string => {
   return `
 export interface ${capitalize(interfc.name)} {
   ${buildMethods(interfc.methods)}
 }\n`
 }
 
-// builds all interfaces of a Schema file
-export const buildInterfaces = (interfaces: ReadonlyArray<Interface>): string => {
+// builds all services of a Schema file
+export const buildInterfaces = (interfaces: ReadonlyArray<Service>): string => {
   let interfacesString = ''
   for (const interfc of interfaces) {
     interfacesString = interfacesString.concat(buildInterface(interfc))

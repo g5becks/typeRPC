@@ -23,7 +23,7 @@ const validateImports = (sourceFile: SourceFile): Error[] => {
   const importNames = imports[0].getImportClause()?.getNamedImports().map(imp => imp.getName())
   let errs: Error[] = []
   if (imports.length !== 1) {
-    errs = errs.concat(singleValidationErr(sourceFile, 'typerpc schema files must contain only one import declaration, import {rpc, t} from \'@typerpc/types\''))
+    errs = errs.concat(singleValidationErr(sourceFile, 'typerpc schema files must contain only one import declaration, import {rpc, t} from \'@typerpc/messages\''))
   } else if (importNames?.length !== 2 && importNames![0] !== 'rpc' && importNames![1] !== 't') {
     errs.push(singleValidationErr(sourceFile, `Invalid import statement => ${importNames}, @typerpc/types  can only be imported as import {rpc, t} from '@typerpc/types', aliasing is not allowed`))
   }
