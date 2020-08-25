@@ -1,8 +1,7 @@
 import {Code, CodeBuilder} from '..'
-import {Service, Method, Schema} from '../../schema'
+import {Service, Method, Schema, is} from '../../schema'
 import {capitalize, fileHeader, lowerCase, serverResponseContentType} from '../utils'
 import {buildInterfaces, buildTypes, dataType, fromQueryString, makeParamsVar, paramNames} from './helpers'
-import {isQueryParamable} from '../../schema/types/is'
 
 const logger = `
 interface ErrLogger {
@@ -30,7 +29,7 @@ const buildPath = (method: Method): string => {
 // correct messages using the fromQueryString function
 const buildDestructuredQueryParams = (method: Method): string =>
   `{${method.params.map((param, i) => {
-    if (isQueryParamable(param.type)) {
+    if (is.QueryParamable(param.type)) {
       const useComma = i === method.params.length - 1 ? '' : ','
       return `${param.name}: ${fromQueryString(`ctx.query.${param.name}`, param.type)}${useComma}`
     }

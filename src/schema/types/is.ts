@@ -1,11 +1,7 @@
-import {DataType, QueryParamable, queryParamables, Struct, StructLiteral} from './data-type'
+import {DataType, queryParamables, Struct, StructLiteral} from './data-type'
 import {$, internal as x} from '@typerpc/types'
 
 // TODO test this function
-// determines if the type text is a valid QueryParamable Type
-export const isQueryParamableString = (type: string): boolean => queryParamables.some(paramable => type.toString().startsWith(paramable))
-
-export const isQueryParamable = (type: DataType): type is QueryParamable => isQueryParamableString(type.toString())
 const validateType = (type: unknown, ...propNames: string[]): boolean => {
   const props = Object.getOwnPropertyNames(type).filter(prop => !prop.includes('toString'))
   return propNames.every(name => props.includes(name)) && props.length === propNames.length
@@ -31,4 +27,5 @@ export const is = {
   Struct: (type: unknown): type is Struct => validateType(type, 'name', 'useCbor'),
   StructLiteral: (type: unknown): type is StructLiteral => validateType(type, 'properties'),
   Container: (type: DataType): boolean => [is.Struct, is.List, is.Dict, is.Tuple2, is.Tuple3, is.Tuple4, is.Tuple3, is.Tuple5, is.StructLiteral].some(func => func(type)),
+  QueryParamable: (type: DataType): boolean => queryParamables.some(paramable => type.toString().startsWith(paramable)),
 }
