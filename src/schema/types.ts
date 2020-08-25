@@ -1,7 +1,6 @@
 import {$, internal as x} from '@typerpc/types'
-import {Node, TypeAliasDeclaration, TypeNode} from 'ts-morph'
-import {isValidMsg} from './validator/utils'
-import {parseJsDocComment} from './parser'
+import {Node, TypeNode} from 'ts-morph'
+import {useCbor} from './parser'
 
 // A struct represents a Type Alias defined in a schema file
 export type Struct = Readonly<{
@@ -30,13 +29,6 @@ export type StructLiteral = Readonly<{
 const typeError = (type: TypeNode | Node, msg: string) =>  new TypeError(`error in file ${type.getSourceFile().getFilePath()}
     at line number: ${type.getStartLineNumber()}
     message: ${msg}`)
-
-// Determines if the generated type should use cbor for serialization/deserialization
-// based on the JsDoc @kind tag
-const useCbor = (type: TypeAliasDeclaration): boolean => {
-  const comment = parseJsDocComment(type,   'kind')?.trim().toLowerCase() ?? ''
-  return comment.includes('cbor')
-}
 
 export const make = {
   Struct: (type: Node | TypeNode): Struct => {
@@ -99,6 +91,7 @@ export const make = {
       return `$.List<${dataType.toString()}>`
     }} as unknown as DataType
   },
+  primitive: (type: TypeNode | Node): DataType|undefined => primsMap.get(type.getText().trim()),
   get bool(): DataType {
     return {toString: () => '$.bool'} as DataType
   },
@@ -153,7 +146,6 @@ export const make = {
   get blob(): DataType {
     return {toString: () => '$.blob'} as DataType
   },
-  primitive: (type: string): DataType|undefined => primsMap.get(type),
 }
 
 const builtPrimitives = [make.blob, make.unit, make.timestamp, make.dyn, make.err, make.str, make.nil, make.float64, make.float32, make.uint64, make.int64, make.uint32, make.int32, make.uint16, make.int16, make.uint8, make.int8, make.bool]

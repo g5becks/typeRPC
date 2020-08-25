@@ -32,3 +32,9 @@ export const parseJsDocComment = (method: MethodSignature | TypeAliasDeclaration
   const tags = method.getJsDocs()[0]?.getTags()
   return tags?.filter(tag => tag.getTagName() === tagName)[0]?.getComment()?.trim()
 }
+// Determines if the generated type should use cbor for serialization/deserialization
+// based on the JsDoc @kind tag
+export const useCbor = (type: TypeAliasDeclaration): boolean => {
+  const comment = parseJsDocComment(type, 'kind')?.trim().toLowerCase() ?? ''
+  return comment.includes('cbor')
+}

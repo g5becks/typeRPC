@@ -9,7 +9,7 @@ import {
   SourceFile,
   TypeNode,
 } from 'ts-morph'
-import {DataType, fetch, is, make, prims, StructLiteralProp} from './types'
+import {DataType, is, make, StructLiteralProp} from './types'
 import {Schema} from '.'
 import {HTTPErrCode, HTTPResponseCode, HTTPVerb, Interface, Method, Param, Property, TypeDef} from './schema'
 import {isContainer, isHttpVerb, isMsgLiteral, isPrimitive, isValidDataType} from './validator/utils'
@@ -20,19 +20,6 @@ import {parseJsDocComment, parseMsgProps, parseTypeParams} from './parser'
 const isType = (type: TypeNode | Node, typeText: string): boolean => type.getText().trim().startsWith(typeText)
 
 const isOptionalProp = (prop: PropertySignature): boolean => typeof prop.getQuestionTokenNode() !== 'undefined'
-
-const makePrim = (type: TypeNode | Node): DataType => prims.get(type.getText()!.trim()) as DataType
-
-const makeStruct = (type: Node | TypeNode): DataType => {
-  // get the text of the field
-  const name = type.getText()?.trim()
-  // check to see if there is a type alias with this name in the file
-  const alias = type.getSourceFile().getTypeAlias(name)
-  if (typeof alias === 'undefined') {
-    throw typeError(type, `${name} does not exist in schema file`)
-  }
-  return make.Struct(name, useCbor(alias))
-}
 
 const makeStructLiteralProp = (prop: PropertySignature): StructLiteralProp =>
   make.StructLiteralProp(prop.getName(), makeDataType(prop.getTypeNode()!), isOptionalProp(prop))
@@ -46,7 +33,11 @@ const makeList = (type: TypeNode | Node): DataType => make
 
 const makeDict = (type: TypeNode | Node): DataType => {
   const params = parseTypeParams(type)
-  return make.Dict(prims.get(params[0].getText().trim()) as DataType, makeDataType(params[1])) as DataType
+  const key = make.primitive(params[0])
+  if (!key) {
+    throw typeError(type, `${type.getText()} is not a valid Dict key type`)
+  }
+  return make.Dict(key, makeDataType(params[1]))
 }
 
 const makeTuple = (type: TypeNode | Node): DataType => {
@@ -62,7 +53,7 @@ const makeTuple = (type: TypeNode | Node): DataType => {
   case 5:
     return make.Tuple5(makeDataType(params[0]), makeDataType(params[1]), makeDataType(params[2]), makeDataType(params[3]), makeDataType(params[4]))
   default:
-    return make.Tuple2(fetch.dyn, fetch.dyn)
+    return make.Tuple2(make.dyn, make.dyn)
   }
 }
 const typeError = (type: TypeNode | Node, msg: string) =>  new TypeError(`error in file ${type.getSourceFile().getFilePath()}
@@ -74,11 +65,11 @@ const makeDataType = (type: TypeNode | Node): DataType => {
   if (isValidDataType(type)) {
     throw typeError(type, `${typeText} is not a valid typerpc DataType`)
   }
-  if (isPrimitive(type)) {
-    return makePrim(type)
+  if (make.primitive(type)) {
+    return make.primitive(type)!
   }
   if (!isContainer(type) && !isMsgLiteral(type)) {
-    return makeStruct(type)
+    return make.Struct(type)
   }
   if (!isContainer(type) && !isMsgLiteral(type)) {
 
@@ -93,7 +84,7 @@ const makeDataType = (type: TypeNode | Node): DataType => {
     return makeTuple(type)
   }
 
-  return fetch.dyn
+  return make.dyn
 }
 
 // builds the httpVerb for a method using the parsed JsDoc
@@ -159,7 +150,7 @@ const buildMethod = (method: MethodSignature): Method => {
     errorCode: buildErrCode(method),
     get isVoidReturn(): boolean {
       // noinspection JSDeepBugsBinOperand
-      return this.returnType === fetch.unit
+      return this.returnType === make.unit
     },
     get isGet(): boolean {
       return this.httpVerb.toUpperCase() === 'GET'
