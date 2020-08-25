@@ -12,21 +12,12 @@ import {
 import {DataType, is, make, StructLiteralProp} from './types'
 import {Schema} from '.'
 import {HTTPErrCode, HTTPResponseCode, HTTPVerb, Interface, Method, Param, Property, TypeDef} from './schema'
-import {isContainer, isHttpVerb, isMsgLiteral, isPrimitive, isValidDataType} from './validator/utils'
+import {isContainer, isHttpVerb, isMsgLiteral, isValidDataType} from './validator/utils'
 import {isErrCode, isResponseCode} from './validator/service'
 import {validateSchemas} from './validator'
-import {parseJsDocComment, parseMsgProps, parseTypeParams} from './parser'
+import {isOptionalProp, parseJsDocComment, parseMsgProps, parseTypeParams} from './parser'
 
 const isType = (type: TypeNode | Node, typeText: string): boolean => type.getText().trim().startsWith(typeText)
-
-const isOptionalProp = (prop: PropertySignature): boolean => typeof prop.getQuestionTokenNode() !== 'undefined'
-
-const makeStructLiteralProp = (prop: PropertySignature): StructLiteralProp =>
-  make.StructLiteralProp(prop.getName(), makeDataType(prop.getTypeNode()!), isOptionalProp(prop))
-
-const makeStructLiteral = (type: Node | TypeNode): DataType => {
-  const props = parseMsgProps(type)
-}
 
 const makeList = (type: TypeNode | Node): DataType => make
 .List(makeDataType(parseTypeParams(type)[0]))
@@ -62,17 +53,18 @@ const typeError = (type: TypeNode | Node, msg: string) =>  new TypeError(`error 
 
 const makeDataType = (type: TypeNode | Node): DataType => {
   const typeText = type.getText()?.trim()
-  if (isValidDataType(type)) {
+  if (!isValidDataType(type)) {
     throw typeError(type, `${typeText} is not a valid typerpc DataType`)
   }
-  if (make.primitive(type)) {
-    return make.primitive(type)!
+  const prim = make.primitive(type)
+  if (prim) {
+    return prim
   }
-  if (!isContainer(type) && !isMsgLiteral(type)) {
+  if (isMsgLiteral(type)) {
+    return make.StructLiteral(type, makeDataType)
+  }
+  if (!isContainer(type)) {
     return make.Struct(type)
-  }
-  if (!isContainer(type) && !isMsgLiteral(type)) {
-
   }
   if (isType(type, '$.List')) {
     return makeList(type)

@@ -38,3 +38,6 @@ export const useCbor = (type: TypeAliasDeclaration): boolean => {
   const comment = parseJsDocComment(type, 'kind')?.trim().toLowerCase() ?? ''
   return comment.includes('cbor')
 }
+
+// is the type property optional?
+export const isOptionalProp = (prop: PropertySignature): boolean => typeof prop.getQuestionTokenNode() !== 'undefined'

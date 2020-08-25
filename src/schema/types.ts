@@ -1,6 +1,6 @@
 import {$, internal as x} from '@typerpc/types'
-import {Node, TypeNode} from 'ts-morph'
-import {useCbor} from './parser'
+import {Node, PropertySignature, TypeNode} from 'ts-morph'
+import {isOptionalProp, parseMsgProps, useCbor} from './parser'
 
 // A struct represents a Type Alias defined in a schema file
 export type Struct = Readonly<{
@@ -30,6 +30,20 @@ const typeError = (type: TypeNode | Node, msg: string) =>  new TypeError(`error 
     at line number: ${type.getStartLineNumber()}
     message: ${msg}`)
 
+const structLiteralProp = (name: string, type: DataType, isOptional: boolean): StructLiteralProp => {
+  return {name, type, isOptional, toString(): string {
+    return `property: {
+          name: ${name},
+          isOptional: ${isOptional},
+          type: ${type.toString()}
+      }`
+  }}
+}
+
+const makeStructLiteralProps = (props: PropertySignature[], makeDataType: (type: TypeNode | Node) => DataType): StructLiteralProp[] =>
+  props.map(prop => structLiteralProp(prop.getName(), makeDataType(prop.getTypeNode()!),
+    isOptionalProp(prop)))
+
 export const make = {
   Struct: (type: Node | TypeNode): Struct => {
     // get the text of the Type field
@@ -43,16 +57,8 @@ export const make = {
     }} as Struct
   },
 
-  StructLiteralProp: (name: string, type: DataType, isOptional: boolean): StructLiteralProp => {
-    return {name, type, isOptional, toString(): string {
-      return `property: {
-          name: ${name},
-          isOptional: ${isOptional},
-          type: ${type.toString()}
-      }`
-    }}
-  },
-  StructLiteral: (properties: ReadonlyArray<StructLiteralProp>): DataType => {
+  StructLiteral: (type: TypeNode | Node, makeDataType: (type: TypeNode | Node) => DataType): DataType => {
+    const properties = makeStructLiteralProps(parseMsgProps(type), makeDataType)
     return {properties, toString(): string {
       return `{${properties.map(prop => prop.toString())}}`
     }}
