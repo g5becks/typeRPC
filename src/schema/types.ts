@@ -26,9 +26,9 @@ export type StructLiteral = Readonly<{
   toString(): string;
 }>
 
-const typeError = (type: TypeNode | Node, msg: string) =>  new TypeError(`error in file ${type.getSourceFile().getFilePath()}
+export const typeError = (type: TypeNode | Node) =>  new TypeError(`error in file ${type.getSourceFile().getFilePath()}
     at line number: ${type.getStartLineNumber()}
-    message: ${msg}`)
+    message: ${type.getText()} is not a valid typerpc DataType`)
 
 const structLiteralProp = (name: string, type: DataType, isOptional: boolean): StructLiteralProp => {
   return {name, type, isOptional, toString(): string {
@@ -50,7 +50,7 @@ export const make = {
     const name = type.getText()?.trim()
     const alias = type.getSourceFile().getTypeAlias(name)
     if (typeof alias === 'undefined') {
-      throw typeError(type, `${name} does not exist in schema file`)
+      throw typeError(type)
     }
     return {name: type.getText()?.trim(), useCbor: useCbor(alias), toString() {
       return this.name
@@ -69,7 +69,7 @@ export const make = {
     const key = make.primitive(params[0])
     const val = makeDataType(params[1])
     if (!key) {
-      throw typeError(type, `${type.getText()} is not a valid Dict key type`)
+      throw typeError(type)
     }
     return {key, val, toString() {
       return `$.Dict<${key.toString()}, ${val.toString()}>`
@@ -111,7 +111,7 @@ export const make = {
     }
 
     default:
-      throw typeError(type, `${type.getText()} is not a valid typerpc DataType`)
+      throw typeError(type)
     }
   },
 

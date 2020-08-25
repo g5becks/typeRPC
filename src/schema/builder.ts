@@ -9,24 +9,19 @@ import {
   SourceFile,
   TypeNode,
 } from 'ts-morph'
-import {DataType, is, make, StructLiteralProp} from './types'
+import {DataType, is, make, typeError} from './types'
 import {Schema} from '.'
 import {HTTPErrCode, HTTPResponseCode, HTTPVerb, Interface, Method, Param, Property, TypeDef} from './schema'
 import {isContainer, isHttpVerb, isMsgLiteral, isValidDataType} from './validator/utils'
 import {isErrCode, isResponseCode} from './validator/service'
 import {validateSchemas} from './validator'
-import {isOptionalProp, parseJsDocComment, parseMsgProps, parseTypeParams} from './parser'
+import {isOptionalProp, parseJsDocComment} from './parser'
 
 const isType = (type: TypeNode | Node, typeText: string): boolean => type.getText().trim().startsWith(typeText)
 
-const typeError = (type: TypeNode | Node, msg: string) =>  new TypeError(`error in file ${type.getSourceFile().getFilePath()}
-    at line number: ${type.getStartLineNumber()}
-    message: ${msg}`)
-
 const makeDataType = (type: TypeNode | Node): DataType => {
-  const typeText = type.getText()?.trim()
   if (!isValidDataType(type)) {
-    throw typeError(type, `${typeText} is not a valid typerpc DataType`)
+    throw typeError(type)
   }
   const prim = make.primitive(type)
   if (prim) {
