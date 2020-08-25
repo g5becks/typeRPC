@@ -15,7 +15,7 @@ import {HTTPErrCode, HTTPResponseCode, HTTPVerb, Service, Method, Param, Propert
 import {isContainer, isHttpVerb, isMsgLiteral, isValidDataType} from './validator/utils'
 import {isErrCode, isResponseCode} from './validator/service'
 import {validateSchemas} from './validator'
-import {isOptionalProp, parseJsDocComment} from './parser'
+import {isOptionalProp, parseJsDocComment, parseMessages, parseMsgProps} from './parser'
 
 const isType = (type: TypeNode | Node, typeText: string): boolean => type.getText().trim().startsWith(typeText)
 
@@ -46,41 +46,43 @@ const makeDataType = (type: TypeNode | Node): DataType => {
   return make.dyn
 }
 
-// builds the httpVerb for a method using the parsed JsDoc
+// builds the HTTPVerb for a Method Schema using the parsed JsDoc
 const buildHttpVerb = (method: MethodSignature): HTTPVerb => {
   const comment = parseJsDocComment(method, 'access') as HTTPVerb ?? 'POST'
   return isHttpVerb(comment) ? comment : 'POST'
 }
 
+// builds the HTTPResponseCode for a Method Schema using the parsed JsDoc
 const buildResponseCode = (method: MethodSignature): HTTPResponseCode => {
   const comment = parseJsDocComment(method, 'returns')  ?? '200'
   const response = parseInt(comment)
   return isResponseCode(response) ? response as HTTPResponseCode : 200
 }
 
+// builds the HTTPErrCode for a Method Schema using the parsed JsDoc
 const buildErrCode = (method: MethodSignature): HTTPErrCode => {
   const comment = parseJsDocComment(method, 'throws') ?? '500'
   const response = parseInt(comment)
   return isErrCode(response) ? response as HTTPErrCode : 500
 }
 
-// builds all properties of a type alias
+// builds all properties of an rpc.Msg
 const buildProps = (properties: PropertySignature[]): Property[] =>
   properties.map(prop => {
-    return {isOptional: isOptionalProp(prop), type: makeDataType(getTypeNode(prop)), name: prop.getName().trim()}
+    return {isOptional: isOptionalProp(prop), type: makeDataType(prop.getTypeNodeOrThrow()), name: prop.getName().trim()}
   })
 
-// Converts all type aliases found in schema files into TypeDefs
-const buildTypes = (sourceFile: SourceFile): Message[] => {
-  const typeAliases = sourceFile.getTypeAliases()
-  if (typeAliases.length === 0) {
+// Converts all rpc.Msg types in files into Schema Messages
+const buildMessages = (file: SourceFile): Message[] => {
+  const messages = parseMessages(file)
+  if (messages.length === 0) {
     return []
   }
 
-  return [...new Set(typeAliases.map(typeDef => {
+  return [...new Set(messages.map(msg => {
     return {
-      name: typeDef.getNameNode().getText().trim(),
-      properties: [...new Set(buildProps(typeDef.getTypeNode()!.forEachChildAsArray())) as ReadonlySet<Property>]}
+      name: msg.getNameNode().getText().trim(),
+      properties: [...new Set(buildProps(parseMsgProps(msg)))]}
   }))]
 }
 
@@ -145,7 +147,7 @@ const buildInterfaces = (sourceFile: SourceFile): Service[] => {
 const buildSchema = (file: SourceFile): Schema => {
   return {
     fileName: file.getBaseNameWithoutExtension(),
-    messages: buildTypes(file),
+    messages: buildMessages(file),
     services: buildInterfaces(file),
     get hasCbor(): boolean {
       return this.services.flatMap(interfc => [...interfc.methods]).some(method => method.hasCborParams || method.hasCborReturn)
@@ -165,7 +167,7 @@ export const internalTesting = {
   buildMethod,
   buildParams,
   buildProps,
-  buildTypes,
+  buildTypes: buildMessages,
   buildHttpVerb,
   buildErrCode,
   buildResponseCode,
