@@ -46,10 +46,10 @@ OPTIONS
 
 EXAMPLE
   $ typerpc hello
-  hello world from ./src/new.ts!
+  hello world from ./src/create.ts!
 ```
 
-_See code: [src/commands/new.ts](https://github.com/typerpc/cli/blob/v1.0.1/src/commands/hello.ts)_
+_See code: [src/commands/create.ts](https://github.com/typerpc/cli/blob/v1.0.1/src/commands/hello.ts)_
 
 ## `typerpc help [COMMAND]`
 
