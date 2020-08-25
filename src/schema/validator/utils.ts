@@ -1,4 +1,4 @@
-import {containers, prims} from '../types'
+import {containers, make} from '../types'
 import {
   MethodSignature,
   Node,
@@ -11,7 +11,7 @@ import {
 import {HTTPVerb} from '../schema'
 
 // is the type found is a typerpc primitive type?
-export const isPrimitive = (type: TypeNode | Node): boolean => prims.has(type.getText().trim())
+export const isPrimitive = (type: TypeNode | Node): boolean => Boolean(make.primitive(type))
 
 // is the type found a typerpc container type?
 export const isContainer = (type: TypeNode | Node): boolean => containers.some(container => type.getText().trim().startsWith(container))
