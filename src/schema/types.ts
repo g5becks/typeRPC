@@ -1,6 +1,6 @@
 import {$, internal as x} from '@typerpc/types'
 import {Node, PropertySignature, TypeNode} from 'ts-morph'
-import {isOptionalProp, parseMsgProps, useCbor} from './parser'
+import {isOptionalProp, parseMsgProps, parseTypeParams, useCbor} from './parser'
 
 // A struct represents a Type Alias defined in a schema file
 export type Struct = Readonly<{
@@ -63,36 +63,60 @@ export const make = {
       return `{${properties.map(prop => prop.toString())}}`
     }}
   },
-  Dict: (keyType: DataType, valType: DataType): DataType => {
-    return {keyType, valType, toString() {
-      return `$.Dict<${keyType.toString()}, ${valType.toString()}>`
+
+  Dict: (type: TypeNode | Node, makeDataType: (type: TypeNode | Node) => DataType): DataType => {
+    const params = parseTypeParams(type)
+    const key = make.primitive(params[0])
+    const val = makeDataType(params[1])
+    if (!key) {
+      throw typeError(type, `${type.getText()} is not a valid Dict key type`)
+    }
+    return {key, val, toString() {
+      return `$.Dict<${key.toString()}, ${val.toString()}>`
     }} as unknown as DataType
   },
-  Tuple2: (item1: DataType, item2: DataType): DataType => {
-    return {item1, item2, toString() {
-      return `$.Tuple2<${item1.toString()}, ${item2.toString()}>`
-    }} as unknown as DataType
-  },
-  Tuple3: (item1: DataType, item2: DataType, item3: DataType): DataType => {
-    return {item1, item2, item3, toString() {
-      return `$.Tuple3<${item1.toString()}, ${item2.toString()}, ${item3.toString()}>`
-    }} as unknown as DataType
+  Tuple: (type: TypeNode| Node, makeDataType: (type: TypeNode| Node) => DataType): DataType => {
+    const params = parseTypeParams(type)
+    const tuple: DataType = make.dyn
+    const item1 = makeDataType(params[0])
+    const item2 = makeDataType(params[1])
+    switch (params.length) {
+    case 2:
+      return {item1, item2, toString() {
+        return `$.Tuple2<${item1.toString()}, ${item2.toString()}>`
+      }} as unknown as DataType
+
+    case 3: {
+      const item3 = makeDataType(params[2])
+      return {item1, item2, item3, toString() {
+        return `$.Tuple3<${item1.toString()}, ${item2.toString()}, ${item3.toString()}>`
+      }} as unknown as DataType
+    }
+    case 4: {
+      const item3 = makeDataType(params[2])
+      const item4 = makeDataType(params[3])
+      return {
+        item1, item2, item3, item4, toString() {
+          return `$.Tuple4<${item1.toString()}, ${item2.toString()}, ${item3.toString()}, ${item4.toString()}>`
+        },
+      } as unknown as DataType
+    }
+    case 5: {
+      const item3 = makeDataType(params[2])
+      const item4 = makeDataType(params[3])
+      const item5 = makeDataType(params[4])
+      return {item1, item2, item3, item4, item5, toString() {
+        return `$.Tuple5<${item1.toString()}, ${item2.toString()}, ${item3.toString()}, ${item4.toString()}, ${item5.toString()}>`
+      }} as unknown as DataType
+    }
+
+    default:
+      throw typeError(type, `${type.getText()} is not a valid typerpc DataType`)
+    }
   },
 
-  Tuple4: (item1: DataType, item2: DataType, item3: DataType, item4: DataType): DataType => {
-    return {item1, item2, item3, item4, toString() {
-      return `$.Tuple4<${item1.toString()}, ${item2.toString()}, ${item3.toString()}, ${item4.toString()}>`
-    }} as unknown as DataType
-  },
-
-  /* eslint-disable max-params */
-  Tuple5: (item1: DataType, item2: DataType, item3: DataType, item4: DataType, item5: DataType): DataType => {
-    return {item1, item2, item3, item4, item5, toString() {
-      return `$.Tuple5<${item1.toString()}, ${item2.toString()}, ${item3.toString()}, ${item4.toString()}, ${item5.toString()}>`
-    }} as unknown as DataType
-  },
-
-  List: (dataType: DataType): DataType => {
+  List: (type: TypeNode | Node, makeDataType: (type: TypeNode | Node) => DataType): DataType => {
+    const dataType = makeDataType(parseTypeParams(type)[0])
     return {dataType, toString() {
       return `$.List<${dataType.toString()}>`
     }} as unknown as DataType

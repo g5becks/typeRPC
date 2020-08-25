@@ -19,34 +19,6 @@ import {isOptionalProp, parseJsDocComment, parseMsgProps, parseTypeParams} from 
 
 const isType = (type: TypeNode | Node, typeText: string): boolean => type.getText().trim().startsWith(typeText)
 
-const makeList = (type: TypeNode | Node): DataType => make
-.List(makeDataType(parseTypeParams(type)[0]))
-
-const makeDict = (type: TypeNode | Node): DataType => {
-  const params = parseTypeParams(type)
-  const key = make.primitive(params[0])
-  if (!key) {
-    throw typeError(type, `${type.getText()} is not a valid Dict key type`)
-  }
-  return make.Dict(key, makeDataType(params[1]))
-}
-
-const makeTuple = (type: TypeNode | Node): DataType => {
-  const params = parseTypeParams(type)
-  switch (params.length) {
-  case 2:
-    return make.Tuple2(makeDataType(params[0]), makeDataType(params[1]))
-
-  case 3:
-    return make.Tuple3(makeDataType(params[0]), makeDataType(params[1]), makeDataType(params[2]))
-  case 4:
-    return make.Tuple4(makeDataType(params[0]), makeDataType(params[1]), makeDataType(params[2]), makeDataType(params[3]))
-  case 5:
-    return make.Tuple5(makeDataType(params[0]), makeDataType(params[1]), makeDataType(params[2]), makeDataType(params[3]), makeDataType(params[4]))
-  default:
-    return make.Tuple2(make.dyn, make.dyn)
-  }
-}
 const typeError = (type: TypeNode | Node, msg: string) =>  new TypeError(`error in file ${type.getSourceFile().getFilePath()}
     at line number: ${type.getStartLineNumber()}
     message: ${msg}`)
@@ -67,13 +39,13 @@ const makeDataType = (type: TypeNode | Node): DataType => {
     return make.Struct(type)
   }
   if (isType(type, '$.List')) {
-    return makeList(type)
+    return make.List(type, makeDataType)
   }
   if (isType(type, '$.Dict')) {
-    return makeDict(type)
+    return make.Dict(type, makeDataType)
   }
   if (isType(type, '$.Tuple')) {
-    return makeTuple(type)
+    return make.Tuple(type, makeDataType)
   }
 
   return make.dyn
