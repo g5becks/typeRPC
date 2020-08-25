@@ -42,6 +42,8 @@ export type Property = Readonly<{
 export type Service = Readonly<{
   name: string;
   methods: ReadonlyArray<Method>;
+  // If true, use CBOR instead of Json for all param
+  // and return type of all this service's methods.
   useCbor: boolean;
 }>
 
@@ -52,7 +54,7 @@ export type Message = Readonly<{
 }>
 
 export type Schema = Readonly<{
-  // Name of the file this schema was generated from
+  // Name of the file this schema was generated from without extension.
   fileName: string;
   messages: ReadonlyArray<Message>;
   services: ReadonlyArray<Service>;

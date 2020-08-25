@@ -1,10 +1,10 @@
 // builds the HTTPVerb for a Method Schema using the parsed JsDoc
-import {InterfaceDeclaration, MethodSignature, ParameterDeclaration, SourceFile, TypeAliasDeclaration} from 'ts-morph'
+import {MethodSignature, ParameterDeclaration, SourceFile, TypeAliasDeclaration} from 'ts-morph'
 import {HTTPErrCode, HTTPResponseCode, HTTPVerb, Method, Param, Service} from '../schema'
 import {makeDataType, useCbor} from './data-type'
-import {parseJsDocComment, parseServiceMethods} from '../parser'
+import {parseJsDocComment, parseServiceMethods, parseServices} from '../parser'
 import {isErrCode, isHttpVerb, isResponseCode} from '../validator'
-import {is, make} from '../types'
+import {DataType, is, make} from '../types'
 
 export const buildHttpVerb = (method: MethodSignature): HTTPVerb => {
   const comment = parseJsDocComment(method, 'access') as HTTPVerb ?? 'POST'
@@ -32,6 +32,7 @@ export const buildParams = (params: ParameterDeclaration[]): Param[] => {
   }))]
 }
 const getMethodName = (method: MethodSignature): string => method.getNameNode().getText().trim()
+
 export const buildMethod = (method: MethodSignature): Method => {
   return {
     httpVerb: buildHttpVerb(method),
@@ -69,10 +70,10 @@ const buildService = (service: TypeAliasDeclaration): Service => {
     useCbor: useCbor(service),
   }
 }
-export const buildServices = (sourceFile: SourceFile): Service[] => {
-  const interfaces = sourceFile.getInterfaces()
-  if (interfaces.length === 0) {
+export const buildServices = (file: SourceFile): Service[] => {
+  const services = parseServices(file)
+  if (services.length === 0) {
     return []
   }
-  return [...new Set(interfaces.map(interfc => buildService(interfc)))]
+  return [...new Set(services.map(srvc => buildService(srvc)))]
 }
