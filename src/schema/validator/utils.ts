@@ -1,4 +1,4 @@
-import {containersList, primitivesMap} from '../types'
+import {containersList, prims} from '../types'
 import {
   MethodSignature,
   Node,
@@ -11,10 +11,10 @@ import {
 import {HTTPVerb} from '../schema'
 
 // is the type found is a typerpc primitive type?
-export const isPrimitive = (type: TypeNode | Node): boolean => primitivesMap.has(type.getText().trim())
+export const isPrimitive = (type: TypeNode | Node): boolean => prims.has(type.getText().trim())
 
 // is the type found a typerpc container type?
-export const isContainer = (typeText: string): boolean => containersList.some(container => typeText.trim().startsWith(container))
+export const isContainer = (type: TypeNode | Node): boolean => containersList.some(container => type.getText().trim().startsWith(container))
 
 // is the type alias or node an rpc.Msg?
 export const isMsg = (type: TypeAliasDeclaration | PropertySignature | ParameterDeclaration): boolean =>
@@ -82,12 +82,12 @@ export const validateNotGeneric = (type: TypeAliasDeclaration | MethodSignature)
 }
 
 // is the node an rpc.Msg literal?
-export const isMsgLiteral = (type: TypeNode): boolean => type.getText().trim().startsWith('rpc.Msg<{')
+export const isMsgLiteral = (type: TypeNode| Node): boolean => type.getText().trim().startsWith('rpc.Msg<{')
 
 // is the node a valid typerpc data type?
-export const isValidDataType = (type: TypeNode| undefined): boolean => {
+export const isValidDataType = (type: TypeNode| Node | undefined): boolean => {
   if (typeof type === 'undefined') {
     return false
   }
-  return isPrimitive(type) || isContainer(type.getText().trim()) || isValidMsg(type) || isMsgLiteral(type)
+  return isPrimitive(type) || isContainer(type) || isValidMsg(type) || isMsgLiteral(type)
 }

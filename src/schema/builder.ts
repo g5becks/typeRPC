@@ -4,55 +4,38 @@ import {
   InterfaceDeclaration,
   MethodSignature,
   Node,
-  ParameterDeclaration,
-  SourceFile,
+  ParameterDeclaration, QualifiedName,
+  SourceFile, SyntaxKind, SyntaxList,
   TypeAliasDeclaration,
-  TypeNode,
+  TypeNode, TypeReferenceNode,
 } from 'ts-morph'
-import {DataType, is, make, primitives, primitivesMap} from './types'
+import {DataType, is, make, fetch, prims} from './types'
 import {Schema} from '.'
 import {HTTPErrCode, HTTPResponseCode, HTTPVerb, Interface, Method, Param, Property, TypeDef} from './schema'
-import {isContainer, isHttpVerb, isPrimitive} from './validator/utils'
+import {isContainer, isHttpVerb, isMsgLiteral, isPrimitive, isValidDataType} from './validator/utils'
 import {isErrCode, isResponseCode} from './validator/service'
 import {validateSchemas} from './validator'
 
 const isType = (type: TypeNode | Node, typeText: string): boolean => type.getText().trim().startsWith(typeText)
 
-const makeDataType = (type: TypeNode | Node): DataType => {
-  const typeText = type.getText()?.trim()
-  const invalids = ['', ':', '?', '}', '{', ';']
-  if (invalids.includes(typeText) || typeof type === 'undefined') {
-    return primitives.dyn
-  }
-  if (isPrimitive(type)) {
-    return primitivesMap.get(typeText) as DataType
-  }
-  if (!isContainer(typeText)) {
-    return makeStruct(type)
-  }
-  if (isType(type, '$.List')) {
-    return makeList(type)
-  }
-  if (isType(type, '$.Dict')) {
-    return makeDict(type)
-  }
-  if (isType(type, '$.Tuple')) {
-    return makeTuple(type)
-  }
-
-  return primitives.dyn
-}
+const makePrim = (type: TypeNode | Node): DataType => prims.get(type.getText()!.trim()) as DataType
 
 // returns the type parameters portion of the type as an array
-const getTypeParams = (type: Node | TypeNode): Node[] => type.getChildren()[2].getChildren().filter(child => child.getText().trim() !== ',')
+const getTypeParams = (type: Node | TypeNode): TypeReferenceNode[] => type.getChildrenOfKind(SyntaxKind.TypeReference)
 
 const makeStruct = (type: Node | TypeNode): DataType => {
+  // get the text of the field
   const name = type.getText()?.trim()
-  const alias = type.getSourceFile().getTypeAlias(type.getText()?.trim())
+  // check to see if there is a type alias with this name in the file
+  const alias = type.getSourceFile().getTypeAlias(name)
   if (typeof alias === 'undefined') {
-    return make.Struct('any', false)
+    throw typeError(type, `${name} does not exist in schema file`)
   }
   return make.Struct(name, useCbor(alias))
+}
+
+const makeStructLiteral = (type: Node | TypeNode): DataType => {
+
 }
 
 const makeList = (type: TypeNode | Node): DataType => make
@@ -60,7 +43,7 @@ const makeList = (type: TypeNode | Node): DataType => make
 
 const makeDict = (type: TypeNode | Node): DataType => {
   const params = getTypeParams(type)
-  return make.Dict(primitivesMap.get(params[0].getText().trim()) as DataType, makeDataType(params[1])) as DataType
+  return make.Dict(prims.get(params[0].getText().trim()) as DataType, makeDataType(params[1])) as DataType
 }
 
 const makeTuple = (type: TypeNode | Node): DataType => {
@@ -76,8 +59,38 @@ const makeTuple = (type: TypeNode | Node): DataType => {
   case 5:
     return make.Tuple5(makeDataType(params[0]), makeDataType(params[1]), makeDataType(params[2]), makeDataType(params[3]), makeDataType(params[4]))
   default:
-    return make.Tuple2(primitives.dyn, primitives.dyn)
+    return make.Tuple2(fetch.dyn, fetch.dyn)
   }
+}
+const typeError = (type: TypeNode | Node, msg: string) =>  new TypeError(`error in file ${type.getSourceFile().getFilePath()}
+    at line number: ${type.getStartLineNumber()}
+    message: ${msg}`)
+
+const makeDataType = (type: TypeNode | Node): DataType => {
+  const typeText = type.getText()?.trim()
+  if (isValidDataType(type)) {
+    throw typeError(type, `${typeText} is not a valid typerpc DataType`)
+  }
+  if (isPrimitive(type)) {
+    return makePrim(type)
+  }
+  if (!isContainer(type) && !isMsgLiteral(type)) {
+    return makeStruct(type)
+  }
+  if (!isContainer(type) && !isMsgLiteral(type)) {
+
+  }
+  if (isType(type, '$.List')) {
+    return makeList(type)
+  }
+  if (isType(type, '$.Dict')) {
+    return makeDict(type)
+  }
+  if (isType(type, '$.Tuple')) {
+    return makeTuple(type)
+  }
+
+  return fetch.dyn
 }
 
 // gets the comment portion of a JsDoc comment base on the tagName
@@ -158,7 +171,7 @@ const buildMethod = (method: MethodSignature): Method => {
     errorCode: buildErrCode(method),
     get isVoidReturn(): boolean {
       // noinspection JSDeepBugsBinOperand
-      return this.returnType === primitives.unit
+      return this.returnType === fetch.unit
     },
     get isGet(): boolean {
       return this.httpVerb.toUpperCase() === 'GET'

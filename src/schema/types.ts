@@ -72,7 +72,7 @@ export const make = {
       return `$.Tuple5<${item1.toString()}, ${item2.toString()}, ${item3.toString()}, ${item4.toString()}, ${item5.toString()}>`
     }} as unknown as DataType
   },
-  /* eslint-enable max-params */
+
   List: (dataType: DataType): DataType => {
     return {dataType, toString() {
       return `$.List<${dataType.toString()}>`
@@ -179,10 +179,11 @@ export const is = {
   Tuple5: (type: unknown): type is $.Tuple5<x.Paramable, x.Paramable, x.Paramable, x.Paramable, x.Paramable> => validateTuple(type, 5),
   List: (type: unknown): type is $.List<x.Paramable> => validateType(type, 'dataType'),
   Struct: (type: unknown): type is Struct => validateType(type, 'name', 'useCbor'),
-  Container: (type: DataType): boolean => [is.Struct, is.List, is.Dict, is.Tuple2, is.Tuple3, is.Tuple4, is.Tuple3, is.Tuple5].some(func => func(type)),
+  StructLiteral: (type: unknown): type is StructLiteral => validateType(type, 'pseudoName', 'properties'),
+  Container: (type: DataType): boolean => [is.Struct, is.List, is.Dict, is.Tuple2, is.Tuple3, is.Tuple4, is.Tuple3, is.Tuple5, is.StructLiteral].some(func => func(type)),
 }
 
-export const primitivesMap = new Map<string, x.Primitive>(
+export const prims = new Map<string, x.Primitive>(
   Object.entries(fetch).map(([_, v]) => [v.toString(), v])
 )
 
