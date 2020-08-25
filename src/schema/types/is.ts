@@ -1,7 +1,6 @@
 import {DataType, queryParamables, Struct, StructLiteral} from './data-type'
 import {$, internal as x} from '@typerpc/types'
 
-// TODO test this function
 const validateType = (type: unknown, ...propNames: string[]): boolean => {
   const props = Object.getOwnPropertyNames(type).filter(prop => !prop.includes('toString'))
   return propNames.every(name => props.includes(name)) && props.length === propNames.length
@@ -27,5 +26,5 @@ export const is = {
   Struct: (type: unknown): type is Struct => validateType(type, 'name', 'useCbor'),
   StructLiteral: (type: unknown): type is StructLiteral => validateType(type, 'properties'),
   Container: (type: DataType): boolean => [is.Struct, is.List, is.Dict, is.Tuple2, is.Tuple3, is.Tuple4, is.Tuple3, is.Tuple5, is.StructLiteral].some(func => func(type)),
-  QueryParamable: (type: DataType): boolean => queryParamables.some(paramable => type.toString().startsWith(paramable)),
+  QueryParamable: (type: DataType): boolean => queryParamables.some(param => type.toString().startsWith(param)),
 }
