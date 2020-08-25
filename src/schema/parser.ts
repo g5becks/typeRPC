@@ -13,13 +13,6 @@ import {isMsg, isMsgLiteral, isService} from './validator'
 const isTypeAlias = (type: any): type is TypeAliasDeclaration => 'getName' in type
 const isTypeNode = (type: any): type is TypeNode => !('getName' in type)
 
-// Determines if the generated type should use cbor for serialization/deserialization
-// based on the JsDoc @kind tag
-export const useCbor = (type: TypeAliasDeclaration): boolean => {
-  const comment = parseJsDocComment(type, 'kind')?.trim().toLowerCase() ?? ''
-  return comment.includes('cbor')
-}
-
 // is the type property optional?
 export const isOptionalProp = (prop: PropertySignature): boolean => typeof prop.getQuestionTokenNode() !== 'undefined'
 

@@ -2,7 +2,7 @@ import {Code, CodeBuilder} from '..'
 import {Service, Method, Schema} from '../../schema'
 import {capitalize, fileHeader, lowerCase, serverResponseContentType} from '../utils'
 import {buildInterfaces, buildTypes, dataType, fromQueryString, makeParamsVar, paramNames} from './helpers'
-import {isQueryParamable} from '../../schema/types'
+import {isQueryParamable} from '../../schema/types/is'
 
 const logger = `
 interface ErrLogger {

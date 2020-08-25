@@ -1,4 +1,4 @@
-import {DataType} from './types'
+import {DataType} from './types/data-type'
 
 export type HTTPVerb = 'POST' | 'GET'
 

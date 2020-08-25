@@ -1,8 +1,8 @@
 import {SourceFile} from 'ts-morph'
 import {validateDeclarations} from './declarations'
 import {validateMessages} from './message'
-import {validateServices} from './service'
-import {isMsg, isMsgLiteral, isService} from './utils'
+import {isErrCode, isResponseCode, validateServices} from './service'
+import {isContainer, isHttpVerb, isMsg, isMsgLiteral, isService, isValidDataType} from './utils'
 
 const validateSchema = (file: SourceFile): Error[] => {
   return [
@@ -15,4 +15,4 @@ const validateSchema = (file: SourceFile): Error[] => {
 export const validateSchemas = (schemas: SourceFile[]): Error[] =>
   schemas.flatMap(schema => [...validateSchema(schema)])
 
-export {isMsg, isMsgLiteral, isService}
+export {isMsg, isMsgLiteral, isService, isContainer, isHttpVerb,  isValidDataType, isErrCode, isResponseCode}

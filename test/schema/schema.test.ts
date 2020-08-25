@@ -1,6 +1,5 @@
 import {Project} from 'ts-morph'
 import {getSourceFile, methodSchemaTestSource, schemaWithCbor, schemaWithoutCbor} from './util'
-import {internalTesting} from '../../src/schema/builder'
 import {Method} from '../../src/schema'
 
 const {buildSchema, buildMethod} = internalTesting

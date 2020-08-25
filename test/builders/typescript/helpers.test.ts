@@ -1,6 +1,9 @@
 /* eslint-disable new-cap */
-import {DataType, isQueryParamable, make, fetch} from '../../../src/schema/types'
+import {fetch} from '../../../src/schema/types'
 import {dataType, fromQueryString} from '../../../src/builders/typescript/helpers'
+import {DataType} from '../../../src/schema/types/data-type'
+import {make} from '../../../src/schema/types/make'
+import {isQueryParamable} from '../../../src/schema/types/is'
 
 const typesMap: Map<DataType, string> = new Map<DataType, string>([
   [make.Struct('Test', false), 'Test'],

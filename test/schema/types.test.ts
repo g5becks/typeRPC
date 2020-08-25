@@ -1,5 +1,7 @@
 /* eslint-disable new-cap */
-import {is, make, primitives} from '../../src/schema/types'
+import {primitives} from '../../src/schema/types'
+import {make} from '../../src/schema/types/make'
+import {is} from '../../src/schema'
 
 test('is.Struct() should return correct value', () => {
   expect(is.Struct(make.Struct('gare', false))).toBeTruthy()

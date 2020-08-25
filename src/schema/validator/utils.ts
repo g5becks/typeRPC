@@ -1,4 +1,3 @@
-import {containers, make} from '../types'
 import {
   MethodSignature,
   Node,
@@ -9,6 +8,8 @@ import {
   TypeNode,
 } from 'ts-morph'
 import {HTTPVerb} from '../schema'
+import {containers} from '../types/data-type'
+import {make} from '../types/make'
 
 // is the type found is a typerpc primitive type?
 export const isPrimitive = (type: TypeNode | Node): boolean => Boolean(make.primitive(type))

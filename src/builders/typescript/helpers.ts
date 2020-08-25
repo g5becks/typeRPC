@@ -1,7 +1,8 @@
 /* eslint-disable new-cap */
-import {DataType, is, make, QueryParamable, QueryParamablePrim} from '../../schema/types'
-import {Service, Method, Param, Property, Schema, Message} from '../../schema'
+import {Service, Method, Param, Property, Schema, Message, is} from '../../schema'
 import {capitalize, lowerCase} from '../utils'
+import {DataType, QueryParamable, QueryParamablePrim} from '../../schema/types/data-type'
+import {make} from '../../schema/types/make'
 
 // Maps typerpc messages to typescript data-messages
 export const typesMap: Map<DataType, string> = new Map<DataType, string>(

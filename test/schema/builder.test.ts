@@ -1,9 +1,11 @@
 /* eslint-disable new-cap */
-import {getTypeNode, internalTesting, isOptional} from '../../src/schema/builder'
+import {getTypeNode, isOptional} from '../../src/schema/builder'
 import {Project} from 'ts-morph'
-import {containers, is, prims} from '../../src/schema/types'
+import {prims} from '../../src/schema/types'
 
 import {getSourceFile, makeStructTestSource, makeTestFile, makeTestFiles, testController, testProp} from './util'
+import {containers} from '../../src/schema/types/data-type'
+import {is} from '../../src/schema'
 
 const {
   isType,
