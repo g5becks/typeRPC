@@ -12,6 +12,7 @@ export const buildProps = (properties: PropertySignature[]): Property[] =>
       name: prop.getName().trim(),
     }
   })
+
 // Converts all rpc.Msg types in files into Schema Messages
 export const buildMessages = (file: SourceFile): Message[] => {
   const messages = parseMessages(file)

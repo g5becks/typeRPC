@@ -1,7 +1,7 @@
 import {SourceFile} from 'ts-morph'
 import {Schema} from '../schema'
 import {buildMessages, buildProps} from './message'
-import {buildErrCode, buildHttpVerb, buildServices, buildMethod, buildParams, buildResponseCode} from './service'
+import {buildErrCode, buildHttpVerb, buildMethod, buildParams, buildResponseCode, buildServices} from './service'
 import {isType, makeDataType, useCbor} from './data-type'
 import {validateSchemas} from '../validator'
 
@@ -11,7 +11,7 @@ const buildSchema = (file: SourceFile): Schema => {
     messages: buildMessages(file),
     services: buildServices(file),
     get hasCbor(): boolean {
-      return this.services.flatMap(interfc => [...interfc.methods]).some(method => method.hasCborParams || method.hasCborReturn)
+      return this.services.flatMap(service => [...service.methods]).some(method => method.hasCborParams || method.hasCborReturn) || this.services.some(service => service.useCbor)
     },
   }
 }

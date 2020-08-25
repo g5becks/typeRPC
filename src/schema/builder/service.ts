@@ -1,36 +1,41 @@
-// builds the HTTPVerb for a Method Schema using the parsed JsDoc
 import {MethodSignature, ParameterDeclaration, SourceFile, TypeAliasDeclaration} from 'ts-morph'
 import {HTTPErrCode, HTTPResponseCode, HTTPVerb, Method, Param, Service} from '../schema'
 import {makeDataType, useCbor} from './data-type'
 import {parseJsDocComment, parseServiceMethods, parseServices} from '../parser'
 import {isErrCode, isHttpVerb, isResponseCode} from '../validator'
-import {DataType, is, make} from '../types'
+import {is, make} from '../types'
 
+// builds the HTTPVerb for a Method Schema using the parsed JsDoc
 export const buildHttpVerb = (method: MethodSignature): HTTPVerb => {
   const comment = parseJsDocComment(method, 'access') as HTTPVerb ?? 'POST'
   return isHttpVerb(comment) ? comment : 'POST'
 }
+
 // builds the HTTPResponseCode for a Method Schema using the parsed JsDoc
 export const buildResponseCode = (method: MethodSignature): HTTPResponseCode => {
   const comment = parseJsDocComment(method, 'returns') ?? '200'
   const response = parseInt(comment)
   return isResponseCode(response) ? response as HTTPResponseCode : 200
 }
+
 // builds the HTTPErrCode for a Method Schema using the parsed JsDoc
 export const buildErrCode = (method: MethodSignature): HTTPErrCode => {
   const comment = parseJsDocComment(method, 'throws') ?? '500'
   const response = parseInt(comment)
   return isErrCode(response) ? response as HTTPErrCode : 500
 }
+
+// builds all Schema Param for a method
 export const buildParams = (params: ParameterDeclaration[]): Param[] => {
   return [...new Set<Param>(params.map(param => {
     return {
       name: param.getName().trim(),
       isOptional: param.isOptional(),
-      type: makeDataType(param.getTypeNode()!),
+      type: makeDataType(param.getTypeNodeOrThrow()),
     }
   }))]
 }
+
 const getMethodName = (method: MethodSignature): string => method.getNameNode().getText().trim()
 
 export const buildMethod = (method: MethodSignature): Method => {
@@ -38,7 +43,7 @@ export const buildMethod = (method: MethodSignature): Method => {
     httpVerb: buildHttpVerb(method),
     name: getMethodName(method),
     params: buildParams(method.getParameters()),
-    returnType: makeDataType(method.getReturnTypeNode()!),
+    returnType: makeDataType(method.getReturnTypeNodeOrThrow()),
     responseCode: buildResponseCode(method),
     errorCode: buildErrCode(method),
     get isVoidReturn(): boolean {
@@ -59,6 +64,7 @@ export const buildMethod = (method: MethodSignature): Method => {
     },
   }
 }
+
 const buildMethods = (methods: MethodSignature[]): Method[] => [...new Set(methods.map(method => buildMethod(method)))]
 
 const getServiceName = (service: TypeAliasDeclaration): string => service.getNameNode().getText().trim()
