@@ -28,6 +28,7 @@ export const buildSchemas = (sourceFiles: SourceFile[]): Schema[] | Error[] => {
   const errs = validateSchemas(sourceFiles)
   return errs ? errs : [...new Set<Schema>(sourceFiles.map(file => buildSchema(file)))]
 }
+
 export const internalTesting = {
   useCbor,
   isType,
