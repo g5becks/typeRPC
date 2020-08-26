@@ -4,15 +4,15 @@ import {validateMessages} from './message'
 import {isErrCode, isResponseCode, validateServices} from './service'
 import {isContainer, isHttpVerb, isMsg, isMsgLiteral, isService, isValidDataType} from './utils'
 
-const validateSchema = (file: SourceFile): Error[] => {
+const validateSchema = (file: SourceFile, projectFiles: SourceFile[]): Error[] => {
   return [
-    ...validateDeclarations(file),
-    ...validateMessages(file),
-    ...validateServices(file),
+    ...validateDeclarations(file, projectFiles),
+    ...validateMessages(file, projectFiles),
+    ...validateServices(file, projectFiles),
   ]
 }
 
 export const validateSchemas = (schemas: SourceFile[]): Error[] =>
-  schemas.flatMap(schema => [...validateSchema(schema)])
+  schemas.flatMap(schema => [...validateSchema(schema, schemas)])
 
 export {isMsg, isMsgLiteral, isService, isContainer, isHttpVerb,  isValidDataType, isErrCode, isResponseCode}
