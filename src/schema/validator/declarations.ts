@@ -1,4 +1,4 @@
-import {ImportDeclaration, Project, SourceFile, SyntaxKind, TypeAliasDeclaration} from 'ts-morph'
+import {ImportDeclaration, SourceFile, SyntaxKind, TypeAliasDeclaration} from 'ts-morph'
 import {isMsg, isService, multiValidationErr, singleValidationErr, validateNotGeneric, Violator} from './utils'
 
 const validate = (declarations: Violator[]): Error[] => declarations.length > 0 ? [multiValidationErr(declarations)] : []
@@ -22,12 +22,10 @@ const validateImports = (file: SourceFile, projectFiles: SourceFile[]): Error[] 
   for (const imp of imports) {
     if (typeof imp.getModuleSpecifierSourceFile() === 'undefined') {
       errs = errs.concat(err(imp))
-      continue
     } else if (!projectFiles.includes(imp.getModuleSpecifierSourceFile()!)) {
       errs = errs.concat(err(imp))
     } else if (typeof imp.getImportClause() === 'undefined') {
       errs = errs.concat(err(imp))
-      continue
     }
     // validate node default or namespace import
     else if (typeof imp.getDefaultImport() !== 'undefined' || typeof imp.getNamespaceImport() !== 'undefined') {
@@ -36,7 +34,7 @@ const validateImports = (file: SourceFile, projectFiles: SourceFile[]): Error[] 
       const module = imp.getModuleSpecifierValue()
       // validates that the import is located in the same directory by checking
       // that the import starts with ./ and there is only a single slash.
-      if (module !== '@typerpc/types' && !module.startsWith('./') || module.split('/').length !== 2) {
+      if (module !== '@typerpc/types' && !module.startsWith('./') && module.split('/').length !== 2) {
         errs = errs.concat(singleValidationErr(imp, 'invalid import. Only files located in the same directory are allowed'))
       }
       // validate no aliased imports

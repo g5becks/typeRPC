@@ -25,7 +25,7 @@ export const isMsg = (type: TypeAliasDeclaration | PropertySignature | Parameter
 export const isService = (type: TypeAliasDeclaration): boolean => Boolean(type.getTypeNode()?.getText().startsWith('rpc.Service<{'))
 
 // is the type alias an rpc.Msg defined in this schema file?
-export const isValidMsg = (type: TypeNode | Node): boolean => type.getSourceFile().getTypeAliases().map(alias => isMsg(alias) && alias.getNameNode().getText().trim()).includes(type.getText().trim())
+export const isValidMsg = (type: TypeNode | Node, projectFiles: SourceFile[]): boolean => projectFiles.flatMap(file => file.getTypeAliases()).flatMap(alias => isMsg(alias) && alias.getNameNode().getText().trim()).includes(type.getText().trim())
 
 // is the http verb used in the JsDoc @access tag a valid typerpc HTTPVerb?
 export const isHttpVerb = (method: string | undefined): method is HTTPVerb =>
@@ -86,9 +86,9 @@ export const validateNotGeneric = (type: TypeAliasDeclaration | MethodSignature)
 export const isMsgLiteral = (type: TypeNode| Node): boolean => type.getText().trim().startsWith('rpc.Msg<{')
 
 // is the node a valid typerpc data type?
-export const isValidDataType = (type: TypeNode| Node | undefined): boolean => {
+export const isValidDataType = (type: TypeNode| Node | undefined, projectFiles: SourceFile[]): boolean => {
   if (typeof type === 'undefined') {
     return false
   }
-  return isPrimitive(type) || isContainer(type) || isValidMsg(type) || isMsgLiteral(type)
+  return isPrimitive(type) || isContainer(type) || isValidMsg(type, projectFiles) || isMsgLiteral(type)
 }
