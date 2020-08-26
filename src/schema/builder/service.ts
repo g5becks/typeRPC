@@ -38,7 +38,7 @@ export const buildParams = (params: ParameterDeclaration[], projectFiles: Source
 
 const getMethodName = (method: MethodSignature): string => method.getNameNode().getText().trim()
 
-export const buildMethod = (method: MethodSignature, projectFiles: SourceFile[]): Method => {
+export const buildMethod = (method: MethodSignature, isCborService: boolean, projectFiles: SourceFile[]): Method => {
   return {
     httpVerb: buildHttpVerb(method),
     name: getMethodName(method),
@@ -54,10 +54,10 @@ export const buildMethod = (method: MethodSignature, projectFiles: SourceFile[])
       return this.httpVerb.toUpperCase() === 'GET'
     },
     get hasCborParams(): boolean {
-      return [...this.params].some(param => is.Struct(param.type) && param.type.useCbor)
+      return ([...this.params].some(param => is.Struct(param.type) && param.type.useCbor)) || isCborService || useCbor(method)
     },
     get hasCborReturn(): boolean {
-      return is.Struct(this.returnType) && this.returnType.useCbor
+      return (is.Struct(this.returnType) && this.returnType.useCbor) || isCborService || useCbor(method)
     },
     get hasParams(): boolean {
       return this.params.length > 0
@@ -65,15 +65,16 @@ export const buildMethod = (method: MethodSignature, projectFiles: SourceFile[])
   }
 }
 
-const buildMethods = (methods: MethodSignature[], projectFiles: SourceFile[]): Method[] => [...new Set(methods.map(method => buildMethod(method, projectFiles)))]
+const buildMethods = (methods: MethodSignature[], serviceIsCbor: boolean, projectFiles: SourceFile[]): Method[] => [...new Set(methods.map(method => buildMethod(method, serviceIsCbor, projectFiles)))]
 
 const getServiceName = (service: TypeAliasDeclaration): string => service.getNameNode().getText().trim()
 
 const buildService = (service: TypeAliasDeclaration, projectFiles: SourceFile[]): Service => {
+  const isCbor = useCbor(service)
   return {
     name: getServiceName(service),
-    methods: buildMethods(parseServiceMethods(service), projectFiles),
-    useCbor: useCbor(service),
+    methods: buildMethods(parseServiceMethods(service), isCbor, projectFiles),
+    useCbor: isCbor,
   }
 }
 export const buildServices = (file: SourceFile, projectFiles: SourceFile[]): Service[] => {

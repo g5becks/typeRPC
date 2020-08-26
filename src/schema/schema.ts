@@ -16,9 +16,15 @@ export type Method = Readonly<{
   name: string;
   params:  ReadonlyArray<Param>;
   returnType: DataType;
-  // serialize|deserialize params using cbor ?
+  // if any of this method's parameter were annotated
+  // with the '@kind cbor' JsDoc tag this will be true
+  // and all of the params should be
+  // serialized/deserialized using cbor
   hasCborParams:  boolean;
-  // serialize|deserialize return type using cbor ?
+  // if the method's return type was annotated with the
+  // '@kind cbor' JsDoc tag this will be true and this
+  // method's return type should be serialized/deserialized
+  // using cbor
   hasCborReturn:  boolean;
   // method has parameters ?
   hasParams:  boolean;

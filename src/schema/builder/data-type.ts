@@ -1,4 +1,4 @@
-import {Node, SourceFile, TypeAliasDeclaration, TypeNode} from 'ts-morph'
+import {MethodSignature, Node, SourceFile, TypeAliasDeclaration, TypeNode} from 'ts-morph'
 import {DataType, make, typeError} from '../types'
 import {isContainer, isMsgLiteral, isValidDataType} from '../validator'
 import {parseJsDocComment} from '../parser'
@@ -31,9 +31,9 @@ export const makeDataType = (type: TypeNode | Node, projectFiles: SourceFile[]):
 
   return make.dyn
 }
-// Determines if the generated type should use cbor for serialization/deserialization
+// Determines if the generated type or method should use cbor for serialization/deserialization
 // based on the JsDoc @kind tag
-export const useCbor = (type: TypeAliasDeclaration): boolean => {
+export const useCbor = (type: TypeAliasDeclaration | MethodSignature): boolean => {
   const comment = parseJsDocComment(type, 'kind')?.trim().toLowerCase() ?? ''
   return comment.includes('cbor')
 }
