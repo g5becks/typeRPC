@@ -13,11 +13,11 @@ const buildImports = (file: SourceFile): ReadonlyArray<Import> =>
     }
   })
 
-const buildSchema = (file: SourceFile): Schema => {
+const buildSchema = (file: SourceFile, projectFiles: SourceFile[]): Schema => {
   return {
     imports: buildImports(file),
     fileName: file.getBaseNameWithoutExtension(),
-    messages: buildMessages(file),
+    messages: buildMessages(file, projectFiles),
     services: buildServices(file),
     get hasCbor(): boolean {
       return this.services.flatMap(service => [...service.methods]).some(method => method.hasCborParams || method.hasCborReturn) || this.services.some(service => service.useCbor)
@@ -26,7 +26,7 @@ const buildSchema = (file: SourceFile): Schema => {
 }
 export const buildSchemas = (sourceFiles: SourceFile[]): Schema[] | Error[] => {
   const errs = validateSchemas(sourceFiles)
-  return errs ? errs : [...new Set<Schema>(sourceFiles.map(file => buildSchema(file)))]
+  return errs ? errs : [...new Set<Schema>(sourceFiles.map(file => buildSchema(file, sourceFiles)))]
 }
 
 export const internalTesting = {
