@@ -1,5 +1,6 @@
 import {ImportDeclaration, SourceFile, SyntaxKind, TypeAliasDeclaration} from 'ts-morph'
 import {isMsg, isService, multiValidationErr, singleValidationErr, validateNotGeneric, Violator} from './utils'
+import exp from 'constants'
 
 const validate = (declarations: Violator[]): Error[] => declarations.length > 0 ? [multiValidationErr(declarations)] : []
 // Ensure zero function declarations
@@ -48,8 +49,38 @@ const validateImports = (file: SourceFile, projectFiles: SourceFile[]): Error[] 
   return errs
 }
 
-// Ensure zero exports
-const validateExports = (file: SourceFile): Error[] => typeof file.getDefaultExportSymbol() === 'undefined' ? [] : [new Error(`default export found in file ${file.getFilePath().toString()}. Default exports are not allowed`)]
+const validateExports = (file: SourceFile): Error[] => {
+  let errs: Error[] = []
+  const exportErr = (exportType: string) => new Error(`${exportType} found in file ${file.getFilePath().toString()} ${exportType}s are not allowed. Try using an export declaration of the form 'export type SomeType' instead. Note: only rpc.Msg types are allowed to be exported`)
+  const exported = file.getExportedDeclarations()
+  // validate no default exports.
+  if (typeof file.getDefaultExportSymbol() !== 'undefined') {
+    errs = errs.concat(exportErr('default export'))
+  }
+  // validate no export assignments. E.G. export =
+  if (file.getExportAssignments().length !== 0) {
+    errs = errs.concat(exportErr('export assignment'))
+  }
+  // validate no export lists. E.G. export {name, var, etc}
+  if (file.getExportDeclarations().length !== 0) {
+    errs = errs.concat(exportErr('export list'))
+  }
+  // validate only rpc.Msg is exported
+  if (exported.size > 0) {
+    for (const v of exported.values()) {
+      if (v.length !== 1) {
+        errs = errs.concat(exportErr('invalid export declaration'))
+      }
+      for (const type of v) {
+        if (!type.getFirstChildByKind(SyntaxKind.TypeReference)?.getText().startsWith('rpc.Msg<{')) {
+          errs = errs.concat(exportErr('non rpm.Msg type'))
+        }
+      }
+    }
+  }
+
+  return errs
+}
 
 // Ensure zero namespaces
 const validateNameSpaces = (file: SourceFile): Error[] => validate(file.getNamespaces())

@@ -222,3 +222,11 @@ export const paramsType = (params: ReadonlyArray<Param>): string => {
 // makes a destructured parameters variable. E.G.
 // const {name, age}: {name: string, age: number }
 export const makeParamsVar = (params: ReadonlyArray<Param>): string => `const {${paramNames(params)}}: {${paramsType(params)}}`
+
+export const buildMsgImports = (imports: ReadonlyArray<string>): string => {
+  let importsStr = ''
+  for (const imp of imports) {
+    importsStr = importsStr.concat(imp + '\n')
+  }
+  return importsStr
+}

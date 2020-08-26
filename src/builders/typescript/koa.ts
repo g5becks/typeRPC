@@ -1,7 +1,15 @@
 import {Code, CodeBuilder} from '..'
 import {Service, Method, Schema, is} from '../../schema'
 import {capitalize, fileHeader, lowerCase, serverResponseContentType} from '../utils'
-import {buildInterfaces, buildTypes, dataType, fromQueryString, makeParamsVar, paramNames} from './helpers'
+import {
+  buildInterfaces,
+  buildMsgImports,
+  buildTypes,
+  dataType,
+  fromQueryString,
+  makeParamsVar,
+  paramNames,
+} from './helpers'
 
 const logger = `
 interface ErrLogger {
@@ -95,6 +103,7 @@ const buildAllRoutes = (interfaces: ReadonlyArray<Service>): string => {
 
 const buildImports = (schema: Schema): string => {
   const cbor = `
+${buildMsgImports(schema.imports)}
 import {encodeAsync} from 'cbor'`
   const useCbor = schema.hasCbor ? cbor : ''
   return `
