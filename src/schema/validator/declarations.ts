@@ -1,6 +1,5 @@
 import {ImportDeclaration, SourceFile, SyntaxKind, TypeAliasDeclaration} from 'ts-morph'
 import {isMsg, isService, multiValidationErr, singleValidationErr, validateNotGeneric, Violator} from './utils'
-import exp from 'constants'
 
 const validate = (declarations: Violator[]): Error[] => declarations.length > 0 ? [multiValidationErr(declarations)] : []
 // Ensure zero function declarations

@@ -1,5 +1,17 @@
 /* eslint-disable new-cap */
-import {is, make, Message, Method, Param, Property, Schema, Service, DataType, StructLiteralProp} from '../../schema'
+import {
+  is,
+  make,
+  Message,
+  Method,
+  Param,
+  Property,
+  Schema,
+  Service,
+  DataType,
+  StructLiteralProp,
+  Import,
+} from '../../schema'
 import {capitalize, lowerCase} from '../utils'
 
 // Maps typerpc messages to typescript data-messages
@@ -223,10 +235,17 @@ export const paramsType = (params: ReadonlyArray<Param>): string => {
 // const {name, age}: {name: string, age: number }
 export const makeParamsVar = (params: ReadonlyArray<Param>): string => `const {${paramNames(params)}}: {${paramsType(params)}}`
 
-export const buildMsgImports = (imports: ReadonlyArray<string>): string => {
+// builds the import strings from Schema Imports
+export const buildMsgImports = (imports: ReadonlyArray<Import>): string => {
   let importsStr = ''
   for (const imp of imports) {
-    importsStr = importsStr.concat(imp + '\n')
+    let msgs = ''
+    let i = 0
+    while (i < imp.messageNames.length) {
+      msgs = msgs.concat(`${imp.messageNames[i]} ${i === imp.messageNames.length - 1 ? '' : ','}`)
+      i++
+    }
+    importsStr = importsStr.concat(`import {${msgs}} from './${imp.filePath}'\n`)
   }
   return importsStr
 }

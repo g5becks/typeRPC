@@ -50,13 +50,20 @@ export type Service = Readonly<{
 // rpc.Msg from schema file
 export type Message = Readonly<{
   name: string;
+  isExported: boolean;
   properties: ReadonlyArray<Property>;
 }>
 
+export type Import = Readonly<{
+    // names of imported messages
+    messageNames: ReadonlyArray<string>;
+    // path to the file they are imported from
+    filePath: string;
+}>
 export type Schema = Readonly<{
   // Name of the file this schema was generated from without extension.
   fileName: string;
-  imports: ReadonlyArray<string>;
+  imports: ReadonlyArray<Import>;
   messages: ReadonlyArray<Message>;
   services: ReadonlyArray<Service>;
   hasCbor: boolean;
