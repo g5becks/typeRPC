@@ -26,24 +26,24 @@ export const buildErrCode = (method: MethodSignature): HTTPErrCode => {
 }
 
 // builds all Schema Param for a method
-export const buildParams = (params: ParameterDeclaration[]): Param[] => {
+export const buildParams = (params: ParameterDeclaration[], projectFiles: SourceFile[]): Param[] => {
   return [...new Set<Param>(params.map(param => {
     return {
       name: param.getName().trim(),
       isOptional: param.isOptional(),
-      type: makeDataType(param.getTypeNodeOrThrow()),
+      type: makeDataType(param.getTypeNodeOrThrow(), projectFiles),
     }
   }))]
 }
 
 const getMethodName = (method: MethodSignature): string => method.getNameNode().getText().trim()
 
-export const buildMethod = (method: MethodSignature): Method => {
+export const buildMethod = (method: MethodSignature, projectFiles: SourceFile[]): Method => {
   return {
     httpVerb: buildHttpVerb(method),
     name: getMethodName(method),
-    params: buildParams(method.getParameters()),
-    returnType: makeDataType(method.getReturnTypeNodeOrThrow()),
+    params: buildParams(method.getParameters(), projectFiles),
+    returnType: makeDataType(method.getReturnTypeNodeOrThrow(), projectFiles),
     responseCode: buildResponseCode(method),
     errorCode: buildErrCode(method),
     get isVoidReturn(): boolean {
@@ -65,21 +65,21 @@ export const buildMethod = (method: MethodSignature): Method => {
   }
 }
 
-const buildMethods = (methods: MethodSignature[]): Method[] => [...new Set(methods.map(method => buildMethod(method)))]
+const buildMethods = (methods: MethodSignature[], projectFiles: SourceFile[]): Method[] => [...new Set(methods.map(method => buildMethod(method, projectFiles)))]
 
 const getServiceName = (service: TypeAliasDeclaration): string => service.getNameNode().getText().trim()
 
-const buildService = (service: TypeAliasDeclaration): Service => {
+const buildService = (service: TypeAliasDeclaration, projectFiles: SourceFile[]): Service => {
   return {
     name: getServiceName(service),
-    methods: buildMethods(parseServiceMethods(service)),
+    methods: buildMethods(parseServiceMethods(service), projectFiles),
     useCbor: useCbor(service),
   }
 }
-export const buildServices = (file: SourceFile): Service[] => {
+export const buildServices = (file: SourceFile, projectFiles: SourceFile[]): Service[] => {
   const services = parseServices(file)
   if (services.length === 0) {
     return []
   }
-  return [...new Set(services.map(srvc => buildService(srvc)))]
+  return [...new Set(services.map(srvc => buildService(srvc, projectFiles)))]
 }
