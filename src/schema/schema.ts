@@ -20,11 +20,14 @@ export type Method = Readonly<{
   // with the '@kind cbor' JsDoc tag this will be true
   // and all of the params should be
   // serialized/deserialized using cbor
+  // this will also return true if the '@kind cbor' tag
+  // was used at either the service or method level
   hasCborParams:  boolean;
   // if the method's return type was annotated with the
   // '@kind cbor' JsDoc tag this will be true and this
   // method's return type should be serialized/deserialized
-  // using cbor
+  // using cbor. This will also return true if the '@kind cbor' tag
+  // was used at either the service or method level
   hasCborReturn:  boolean;
   // method has parameters ?
   hasParams:  boolean;
