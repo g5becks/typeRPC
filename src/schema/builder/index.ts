@@ -18,7 +18,7 @@ const buildSchema = (file: SourceFile, projectFiles: SourceFile[]): Schema => {
     imports: buildImports(file),
     fileName: file.getBaseNameWithoutExtension(),
     messages: buildMessages(file, projectFiles),
-    services: buildServices(file),
+    services: buildServices(file, projectFiles),
     get hasCbor(): boolean {
       return this.services.flatMap(service => [...service.methods]).some(method => method.hasCborParams || method.hasCborReturn) || this.services.some(service => service.useCbor)
     },
