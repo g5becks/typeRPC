@@ -29,7 +29,7 @@ export const isValidMsg = (type: TypeNode | Node, projectFiles: SourceFile[]): b
 
 // is the http verb used in the JsDoc @access tag a valid typerpc HTTPVerb?
 export const isHttpVerb = (method: string | undefined): method is HTTPVerb =>
-  ['POST', 'GET'].includes(method ?? '')
+  ['POST', 'GET'].includes(method?.toUpperCase() ?? '')
 
 // A ts-morph declaration found in a schema file that has a getName() method
 // E.G. FunctionDeclaration, VariableDeclaration

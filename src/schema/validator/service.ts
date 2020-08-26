@@ -22,7 +22,7 @@ const validateMethodJsDoc = (method: MethodSignature): Error[] => {
   if (typeof tags === 'undefined' || tags.length === 0) {
     return []
   }
-  const validTags = ['throws', 'access', 'returns']
+  const validTags = ['throws', 'access', 'returns', 'kind']
   const errs: Error[] = []
   for (const tag of tags) {
     const tagName = tag.getTagName()
@@ -42,6 +42,9 @@ const validateMethodJsDoc = (method: MethodSignature): Error[] => {
       } catch (error) {
         errs.push(err)
       }
+    }
+    if (tagName === 'kind' && comment.toLowerCase() !== 'cbor') {
+      errs.push(singleValidationErr(tag, `invalid usage of @kind tag. The only valid value for the @kind tag is 'cbor', found: ${comment}`))
     }
     if (tagName === 'returns') {
       const err = singleValidationErr(tag, `${tag.getComment()} is not a valid HTTP success response code. Valid success response codes are : ${responseCodes}`)
