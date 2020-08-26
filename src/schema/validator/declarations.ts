@@ -51,9 +51,7 @@ const validateImports = (file: SourceFile, projectFiles: SourceFile[]): Error[] 
 }
 
 // Ensure zero exports
-const validateExports = (file: SourceFile): Error[] => {
-  return [...validate(file.getExportAssignments()), ...validate(file.getExportDeclarations())]
-}
+const validateExports = (file: SourceFile): Error[] => typeof file.getDefaultExportSymbol() === 'undefined' ? [] : [new Error(`default export found in file ${file.getFilePath().toString()}. Default exports are not allowed`)]
 
 // Ensure zero namespaces
 const validateNameSpaces = (file: SourceFile): Error[] => validate(file.getNamespaces())
