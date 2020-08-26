@@ -1,86 +1,106 @@
-import {SourceFile, SyntaxKind, TypeAliasDeclaration} from 'ts-morph'
+import {ImportDeclaration, Project, SourceFile, SyntaxKind, TypeAliasDeclaration} from 'ts-morph'
 import {isMsg, isService, multiValidationErr, singleValidationErr, validateNotGeneric, Violator} from './utils'
 
 const validate = (declarations: Violator[]): Error[] => declarations.length > 0 ? [multiValidationErr(declarations)] : []
 // Ensure zero function declarations
-const validateFunctions = (sourceFile: SourceFile): Error[] => validate(sourceFile.getFunctions())
+const validateFunctions = (file: SourceFile): Error[] => validate(file.getFunctions())
 
 // Ensure zero variable declarations
-const validateVariables = (sourceFile: SourceFile): Error[] => validate(sourceFile.getVariableDeclarations())
+const validateVariables = (file: SourceFile): Error[] => validate(file.getVariableDeclarations())
 
 // Ensure Zero Interfaces
-const validateInterfaces = (sourceFile: SourceFile): Error[] => validate(sourceFile.getInterfaces())
+const validateInterfaces = (file: SourceFile): Error[] => validate(file.getInterfaces())
 
 // Ensure zero class declarations
-const validateClasses = (sourceFile: SourceFile): Error[] => validate(sourceFile.getClasses())
+const validateClasses = (file: SourceFile): Error[] => validate(file.getClasses())
 
-// Ensure only one valid import without aliasing namespaces
-const validateImports = (sourceFile: SourceFile): Error[] => {
-  const imports = sourceFile.getImportDeclarations()
-  if (typeof imports[0].getImportClause() === 'undefined') {
-    return [singleValidationErr(sourceFile, `no import statement found. Please add import {rpc, t} from '@typerpc/types to ${sourceFile.getFilePath().toString()}'`)]
-  }
-  const importNames = imports[0].getImportClause()?.getNamedImports().map(imp => imp.getName())
+// TODO, test this
+const validateImports = (file: SourceFile, projectFiles: SourceFile[]): Error[] => {
+  const imports = file.getImportDeclarations()
+  const err = (i: ImportDeclaration) => singleValidationErr(i, 'invalid import declaration')
   let errs: Error[] = []
-  if (imports.length !== 1) {
-    errs = errs.concat(singleValidationErr(sourceFile, 'typerpc schema files must contain only one import declaration, import {rpc, t} from \'@typerpc/messages\''))
-  } else if (importNames?.length !== 2 && importNames![0] !== 'rpc' && importNames![1] !== 't') {
-    errs.push(singleValidationErr(sourceFile, `Invalid import statement => ${importNames}, @typerpc/types  can only be imported as import {rpc, t} from '@typerpc/types', aliasing is not allowed`))
+  for (const imp of imports) {
+    if (typeof imp.getModuleSpecifierSourceFile() === 'undefined') {
+      errs = errs.concat(err(imp))
+      continue
+    } else if (!projectFiles.includes(imp.getModuleSpecifierSourceFile()!)) {
+      errs = errs.concat(err(imp))
+    } else if (typeof imp.getImportClause() === 'undefined') {
+      errs = errs.concat(err(imp))
+      continue
+    }
+    // validate node default or namespace import
+    else if (typeof imp.getDefaultImport() !== 'undefined' || typeof imp.getNamespaceImport() !== 'undefined') {
+      errs = errs.concat(singleValidationErr(imp, 'invalid import statement. typerpc only allows named imports'))
+    } else {
+      const module = imp.getModuleSpecifierValue()
+      // validates that the import is located in the same directory by checking
+      // that the import starts with ./ and there is only a single slash.
+      if (module !== '@typerpc/types' && !module.startsWith('./') || module.split('/').length !== 2) {
+        errs = errs.concat(singleValidationErr(imp, 'invalid import. Only files located in the same directory are allowed'))
+      }
+      // validate no aliased imports
+      for (const name of imp.getNamedImports()) {
+        if (typeof name.getAliasNode() !== 'undefined') {
+          errs = errs.concat(singleValidationErr(name, 'import aliasing not allowed'))
+        }
+      }
+    }
   }
   return errs
 }
 
 // Ensure zero exports
-const validateExports = (sourceFile: SourceFile): Error[] => {
-  return [...validate(sourceFile.getExportAssignments()), ...validate(sourceFile.getExportDeclarations())]
+const validateExports = (file: SourceFile): Error[] => {
+  return [...validate(file.getExportAssignments()), ...validate(file.getExportDeclarations())]
 }
 
 // Ensure zero namespaces
-const validateNameSpaces = (sourceFile: SourceFile): Error[] => validate(sourceFile.getNamespaces())
+const validateNameSpaces = (file: SourceFile): Error[] => validate(file.getNamespaces())
 
 // Ensure zero top level statements
-const validateStatements = (sourceFile: SourceFile): Error[] => {
-  const stmnts = sourceFile.getStatements()
+const validateStatements = (file: SourceFile): Error[] => {
+  const stmnts = file.getStatements()
   const invalidKinds = [SyntaxKind.AbstractKeyword, SyntaxKind.AwaitExpression, SyntaxKind.ArrayType, SyntaxKind.ArrowFunction, SyntaxKind.TaggedTemplateExpression, SyntaxKind.SpreadAssignment, SyntaxKind.JsxExpression, SyntaxKind.ForStatement, SyntaxKind.ForInStatement, SyntaxKind.ForOfStatement, SyntaxKind.SwitchStatement, SyntaxKind.LessThanLessThanEqualsToken]
   const invalids = stmnts.filter(stmnt => invalidKinds.includes(stmnt.getKind()))
   return invalids.length > 0 ? [multiValidationErr(invalids)] : []
 }
 // Ensure zero enums
-const validateEnums = (sourceFile: SourceFile): Error[] => validate(sourceFile.getEnums())
+const validateEnums = (file: SourceFile): Error[] => validate(file.getEnums())
 
 // Ensure zero references to other files
-const validateRefs = (sourceFile: SourceFile): Error[] => {
+const validateRefs = (file: SourceFile): Error[] => {
   const errs: Error[] = []
   // should be 1
-  const nodeSourceRefs = sourceFile.getNodesReferencingOtherSourceFiles()
+  const nodeSourceRefs = file.getNodesReferencingOtherSourceFiles()
   if (nodeSourceRefs.length !== 1) {
     errs.push(multiValidationErr(nodeSourceRefs))
   }
   // should be 1
-  const literalSourceRefs = sourceFile.getLiteralsReferencingOtherSourceFiles()
+  const literalSourceRefs = file.getLiteralsReferencingOtherSourceFiles()
   if (literalSourceRefs.length !== 1) {
     errs.push(multiValidationErr(literalSourceRefs))
   }
   // should be 1
-  const sourceRefs = sourceFile.getReferencedSourceFiles()
+  const sourceRefs = file.getReferencedSourceFiles()
   if (sourceRefs.length !== 1) {
     errs.push(multiValidationErr(sourceRefs))
   }
-  const otherErr = (msg: string) => new Error(`error in file: ${sourceFile.getFilePath().toString()
+  const otherErr = (msg: string) => new Error(`error in file: ${file.getFilePath().toString()
   }
   message: ${msg}`)
   // should be 0
-  const libraryRefs = sourceFile.getLibReferenceDirectives()
+  const libraryRefs = file.getLibReferenceDirectives()
   if (libraryRefs.length > 0) {
     errs.push(otherErr('library reference found'))
   }
   // should be 0
-  const pathRefs = sourceFile.getPathReferenceDirectives()
+  const pathRefs = file.getPathReferenceDirectives()
   if (pathRefs.length > 0) {
     errs.push(otherErr('path reference found'))
   }
   // should be 0
-  const typeDirRefs = sourceFile.getTypeReferenceDirectives()
+  const typeDirRefs = file.getTypeReferenceDirectives()
   if (typeDirRefs.length > 0) {
     errs.push(otherErr('type directive reference found'))
   }
@@ -126,15 +146,15 @@ const preValidateType = (type: TypeAliasDeclaration): Error[] => {
   return errs
 }
 
-const validateTypes = (sourceFile: SourceFile): Error[] =>
-  sourceFile.getTypeAliases().flatMap(alias => preValidateType(alias))
+const validateTypes = (file: SourceFile): Error[] =>
+  file.getTypeAliases().flatMap(alias => preValidateType(alias))
 
-export const validateDeclarations = (file: SourceFile): Error[] => {
+export const validateDeclarations = (file: SourceFile, projectFiles: SourceFile[]): Error[] => {
   return [...validateFunctions(file),
     ...validateVariables(file),
     ...validateInterfaces(file),
     ...validateClasses(file),
-    ...validateImports(file),
+    ...validateImports(file, projectFiles),
     ...validateExports(file),
     ...validateNameSpaces(file),
     ...validateStatements(file),

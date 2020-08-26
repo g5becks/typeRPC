@@ -56,6 +56,7 @@ export type Message = Readonly<{
 export type Schema = Readonly<{
   // Name of the file this schema was generated from without extension.
   fileName: string;
+  imports: ReadonlyArray<string>;
   messages: ReadonlyArray<Message>;
   services: ReadonlyArray<Service>;
   hasCbor: boolean;

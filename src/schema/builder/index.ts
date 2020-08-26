@@ -7,6 +7,7 @@ import {validateSchemas} from '../validator'
 
 const buildSchema = (file: SourceFile): Schema => {
   return {
+    imports: file.getImportStringLiterals().map(imp => imp.getLiteralValue()),
     fileName: file.getBaseNameWithoutExtension(),
     messages: buildMessages(file),
     services: buildServices(file),
