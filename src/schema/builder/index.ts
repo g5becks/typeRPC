@@ -1,13 +1,21 @@
 import {SourceFile} from 'ts-morph'
-import {Schema} from '../schema'
+import {Import, Schema} from '../schema'
 import {buildMessages, buildProps} from './message'
 import {buildErrCode, buildHttpVerb, buildMethod, buildParams, buildResponseCode, buildServices} from './service'
 import {isType, makeDataType, useCbor} from './data-type'
 import {validateSchemas} from '../validator'
 
+const buildImports = (file: SourceFile): ReadonlyArray<Import> =>
+  file.getImportDeclarations().map(imp => {
+    return {
+      messageNames: imp.getNamedImports().map(name => name.getName()),
+      fileName: imp.getModuleSpecifierValue().replace('./', ''),
+    }
+  })
+
 const buildSchema = (file: SourceFile): Schema => {
   return {
-    imports: file.getImportStringLiterals().map(imp => imp.getLiteralValue()),
+    imports: buildImports(file),
     fileName: file.getBaseNameWithoutExtension(),
     messages: buildMessages(file),
     services: buildServices(file),

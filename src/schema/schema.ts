@@ -57,8 +57,8 @@ export type Message = Readonly<{
 export type Import = Readonly<{
     // names of imported messages
     messageNames: ReadonlyArray<string>;
-    // path to the file they are imported from
-    filePath: string;
+    // name of the file the import is from
+    fileName: string;
 }>
 export type Schema = Readonly<{
   // Name of the file this schema was generated from without extension.

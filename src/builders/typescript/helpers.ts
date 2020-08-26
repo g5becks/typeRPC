@@ -245,7 +245,7 @@ export const buildMsgImports = (imports: ReadonlyArray<Import>): string => {
       msgs = msgs.concat(`${imp.messageNames[i]} ${i === imp.messageNames.length - 1 ? '' : ','}`)
       i++
     }
-    importsStr = importsStr.concat(`import {${msgs}} from './${imp.filePath}'\n`)
+    importsStr = importsStr.concat(`import {${msgs}} from './${imp.fileName}'\n`)
   }
   return importsStr
 }
