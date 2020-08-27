@@ -2,6 +2,7 @@ import {Node, PropertySignature, TypeNode} from 'ts-morph'
 import {DataType, scalarsMap, Struct, structLiteralProp, StructLiteralProp} from './data-type'
 import {isOptionalProp, parseMsgProps, parseTypeParams} from '../parser'
 import {useCbor} from '../builder/data-type'
+import {isValidMsg} from '../validator'
 
 export const typeError = (type: TypeNode | Node) => new TypeError(`error in file ${type.getSourceFile().getFilePath()}
     at line number: ${type.getStartLineNumber()}
@@ -15,7 +16,7 @@ export const make = {
     // get the text of the Type field
     const name = type.getText()?.trim()
     const alias = type.getSourceFile().getTypeAlias(name)
-    if (typeof alias === 'undefined') {
+    if (!isValidMsg(type)) {
       throw typeError(type)
     }
     return {

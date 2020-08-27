@@ -1,6 +1,6 @@
 import {containers, is, scalars, testing} from '../../../src/schema'
 import {Project, TypeAliasDeclaration} from 'ts-morph'
-import {genMsgNamesFunc, genSourceFile, genSourceFiles, genTestMessageFiles} from '../util'
+import {genSourceFile, genSourceFiles, genTestMessageFiles} from '../util'
 import {parseMsgProps} from '../../../src/schema/parser'
 import {genMsgNames} from '../util/message-gen'
 
