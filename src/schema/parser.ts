@@ -29,6 +29,9 @@ export const parseMsgProps = (type: TypeAliasDeclaration | TypeNode | Node): Pro
   return kids
 }
 
+// parses all of the named imports for a file
+export const parseNamedImports = (file: SourceFile): string[] => file.getImportDeclarations().flatMap(imp => imp.getNamedImports()).flatMap(imp => imp.getName())
+
 // returns the type parameters portion of the type as an array
 export const parseTypeParams = (type: Node | TypeNode): TypeReferenceNode[] => type.getChildrenOfKind(SyntaxKind.TypeReference)
 

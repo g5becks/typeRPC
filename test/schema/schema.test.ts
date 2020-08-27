@@ -1,5 +1,5 @@
 import {Project} from 'ts-morph'
-import {getSourceFile, methodSchemaTestSource, schemaWithCbor, schemaWithoutCbor} from './util'
+import {genSourceFile, methodSchemaTestSource, schemaWithCbor, schemaWithoutCbor} from './util'
 import {MutationMethod} from '../../src/schema'
 
 const {buildSchema, buildMethod} = internalTesting
@@ -8,7 +8,7 @@ let method2: MutationMethod
 let method3: MutationMethod
 let method4: MutationMethod
 beforeAll(() => {
-  const interfc = getSourceFile(methodSchemaTestSource, new Project()).getInterfaces()[0]
+  const interfc = genSourceFile(methodSchemaTestSource, new Project()).getInterfaces()[0]
   method1 = buildMethod(interfc.getMethod('method1')!)
   method2 = buildMethod(interfc.getMethod('method2')!)
   method3 = buildMethod(interfc.getMethod('method3')!)
@@ -33,13 +33,13 @@ test('hasParams() method should return correct boolean value', () => {
 })
 
 test('hasCbor should return false when schema has not methods with cbor', () => {
-  const file = getSourceFile(schemaWithoutCbor, new Project())
+  const file = genSourceFile(schemaWithoutCbor, new Project())
   const schema = buildSchema(file)
   expect(schema.hasCbor).toBeFalsy()
 })
 
 test('hasCbor should return true when schema has methods with cbor', () => {
-  const file = getSourceFile(schemaWithCbor, new Project())
+  const file = genSourceFile(schemaWithCbor, new Project())
   const schema = buildSchema(file)
   expect(schema.hasCbor).toBeTruthy()
 })

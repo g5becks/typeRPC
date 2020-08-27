@@ -9,6 +9,7 @@ import {
 } from 'ts-morph'
 import {containers} from '../types/data-type'
 import {make} from '../types'
+import {parseNamedImports} from '../parser'
 
 // is the type found is a typerpc primitive type?
 export const isPrimitive = (type: TypeNode | Node): boolean => Boolean(make.primitive(type))
@@ -25,11 +26,18 @@ const getTypeNodeText = (type: TypeAliasDeclaration): string|undefined => type.g
 // is the type alias an rpc.QuerySvc?
 export const isQuerySvc = (type: TypeAliasDeclaration): boolean => Boolean(getTypeNodeText(type)?.startsWith('rpc.QuerySvc<{'))
 
-// is the type alias an rpc.MutationSvc
+// determines if the type alias an rpc.MutationSvc
 export const isMutationSvc = (type: TypeAliasDeclaration): boolean => Boolean(getTypeNodeText(type)?.startsWith('rpc.MutationSvc<{'))
 
-// is the type alias an rpc.Msg defined in this schema file?
-export const isValidMsg = (type: TypeNode | Node, projectFiles: SourceFile[]): boolean => projectFiles.flatMap(file => file.getTypeAliases()).flatMap(alias => isMsg(alias) && alias.getNameNode().getText().trim()).includes(type.getText().trim())
+// determines if the type alias is a valid rpc.Msg that was either
+// defined is this file or imported from another file in this project.
+export const isValidMsg = (type: TypeNode | Node): boolean => {
+  const file = type.getSourceFile()
+  const typeText = type.getText().trim()
+  const isLocal = file.getTypeAliases().flatMap(alias => alias.getName()).includes(typeText)
+  const isImported = parseNamedImports(file).includes(typeText)
+  return isLocal || isImported
+}
 
 // A ts-morph declaration found in a schema file that has a getName() method
 // E.G. FunctionDeclaration, VariableDeclaration
@@ -86,9 +94,9 @@ export const validateNotGeneric = (type: TypeAliasDeclaration | MethodSignature)
 export const isMsgLiteral = (type: TypeNode| Node): boolean => type.getText().trim().startsWith('rpc.Msg<{')
 
 // is the node a valid typerpc data type?
-export const isValidDataType = (type: TypeNode| Node | undefined, projectFiles: SourceFile[]): boolean => {
+export const isValidDataType = (type: TypeNode| Node | undefined): boolean => {
   if (typeof type === 'undefined') {
     return false
   }
-  return isPrimitive(type) || isContainer(type) || isValidMsg(type, projectFiles) || isMsgLiteral(type)
+  return isPrimitive(type) || isContainer(type) || isValidMsg(type) || isMsgLiteral(type)
 }

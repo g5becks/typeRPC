@@ -1,5 +1,7 @@
-import {DataType, queryParamables, Struct, StructLiteral} from './data-type'
+import {DataType, queryParamables, scalarsMap, Struct, StructLiteral} from './data-type'
 import {$, internal as x} from '@typerpc/types'
+import {makeDataType} from '../builder/data-type'
+import {make} from './make'
 
 const validateType = (type: unknown, ...propNames: string[]): boolean => {
   const props = Object.getOwnPropertyNames(type).filter(prop => !prop.includes('toString'))
@@ -25,6 +27,7 @@ export const is = {
   List: (type: unknown): type is $.List<x.Paramable> => validateType(type, 'dataType'),
   Struct: (type: unknown): type is Struct => validateType(type, 'name', 'useCbor'),
   StructLiteral: (type: unknown): type is StructLiteral => validateType(type, 'properties'),
-  Container: (type: DataType): boolean => [is.Struct, is.List, is.Dict, is.Tuple2, is.Tuple3, is.Tuple4, is.Tuple3, is.Tuple5, is.StructLiteral].some(func => func(type)),
+  Container: (type: unknown): boolean => [is.Struct, is.List, is.Dict, is.Tuple2, is.Tuple3, is.Tuple4, is.Tuple3, is.Tuple5, is.StructLiteral].some(func => func(type)),
   QueryParamable: (type: DataType): boolean => queryParamables.some(param => type.toString().startsWith(param)),
+  DataType: (type: any): type is DataType => is.Container(type) || scalarsMap.has(type.toString()),
 }

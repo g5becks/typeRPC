@@ -1,6 +1,9 @@
 import {Project, SourceFile} from 'ts-morph'
 import {randomNumber} from './data-gen'
+import {genMsgNames, genTestMessageFiles} from './message-gen'
+import {containers, scalars} from '../../../src/schema'
 
+export {genTestMessageFiles}
 export const validImport = 'import {$, rpc} from \'@typerpc/types\''
 export const validQuerySvc = `
 type TestService = rpc.QuerySvc<{
@@ -57,9 +60,15 @@ ${source}
 ${validQuerySvc}
 `
 
-export const getSourceFile = (source: string, project: Project): SourceFile =>
-  project.createSourceFile('tes$.ts', source)
+export const genSourceFile = (source: string, project: Project, name = 'test.ts'): SourceFile =>
+  project.createSourceFile(name, source)
 
+export const genSourceFiles = (sources: [string, string][], project: Project): SourceFile[] => {
+  for (const [name, source] of sources) {
+    project.createSourceFile(name, source)
+  }
+  return project.getSourceFiles()
+}
 export const makeStructTestSource = `
   /** @kind cbor */
 type CborType = {}
@@ -120,3 +129,10 @@ export const useCbor = () => randomNumber(0, 5) === 1 ? `
  * @kind cbor
  */
  ` : ''
+
+export const genMsgNamesFunc = () => {
+  const names = [...genMsgNames()]
+  return names[randomNumber(0, names.length)]
+}
+
+export const validDataTypes = (msgNames: string[]) =>  [...scalars, ...containers, 'rpc.Msg<{', msgNames]

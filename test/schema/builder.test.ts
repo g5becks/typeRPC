@@ -2,7 +2,7 @@
 import {Project} from 'ts-morph'
 import {prims} from '../../src/schema/types'
 
-import {getSourceFile, makeStructTestSource, makeTestFile, makeTestFiles, testController, testProp} from './util'
+import {genSourceFile, makeStructTestSource, makeTestFile, makeTestFiles, testController, testProp} from './util'
 import {containers} from '../../src/schema/types/data-type'
 import {is} from '../../src/schema'
 
@@ -44,7 +44,7 @@ type BinaryType = {
   data: t.blob
 }
 `
-  expect(useCbor(getSourceFile(source, project).getTypeAliases()[0])).toBeTruthy()
+  expect(useCbor(genSourceFile(source, project).getTypeAliases()[0])).toBeTruthy()
 })
 
 test('isOptional() should return true when given optional prop', () => {
@@ -52,13 +52,13 @@ test('isOptional() should return true when given optional prop', () => {
  type TypeWithOptional = {
     name?: string;
  }`
-  const alias = getSourceFile(source, project).getTypeAliases()[0]
+  const alias = genSourceFile(source, project).getTypeAliases()[0]
   const prop = alias.getTypeNode()!.forEachChildAsArray()[0]
   expect(isOptional(prop)).toBeTruthy()
 })
 
 test('buildHttpVerb() should return correct HttpVerb', () => {
-  const methods = getSourceFile(testController, project).getInterfaces()[0].getMethods()
+  const methods = genSourceFile(testController, project).getInterfaces()[0].getMethods()
   for (let i = 0; i < methods.length; i++) {
     const verb = buildHttpVerb(methods[i])
     switch (i) {
@@ -88,7 +88,7 @@ test('buildHttpVerb() should return correct HttpVerb', () => {
 })
 
 test('buildErrCode() should return correct HttpErrorCode', () => {
-  const methods = getSourceFile(testController, project).getInterfaces()[0].getMethods()
+  const methods = genSourceFile(testController, project).getInterfaces()[0].getMethods()
 
   for (let i = 0; i < methods.length; i++) {
     const errCode = buildErrCode(methods[i])
@@ -115,7 +115,7 @@ test('buildErrCode() should return correct HttpErrorCode', () => {
 })
 
 test('buildResponseCode() should return correct HttpResponse', () => {
-  const methods = getSourceFile(testController, project).getInterfaces()[0].getMethods()
+  const methods = genSourceFile(testController, project).getInterfaces()[0].getMethods()
   for (let i = 0; i < methods.length; i++) {
     const responseCode = buildResponseCode(methods[i])
     switch (i) {
@@ -203,7 +203,7 @@ test('buildSchema() should have correct name, num messages, and num services', (
 })
 
 test('makeStruct() should return a struct with correct useCbor param set', () => {
-  const file = getSourceFile(makeStructTestSource, project)
+  const file = genSourceFile(makeStructTestSource, project)
   const hasCbor = file.getTypeAlias('TestType1')!.getTypeNode()!.forEachChildAsArray()
   const noCbor = file.getTypeAlias('TestType2')!.getTypeNode()!.forEachChildAsArray()
   for (const node of hasCbor) {
