@@ -24,16 +24,15 @@ export const genRpcMessages = (names: string[], genMsgName: () => string): strin
   return types
 }
 
-export const genTestMessageFiles = (genMsgName: () => string): [string, string][] => {
-  const count = randomNumber(1, 7)
+const genImports = (msgNames: string[]): string => {
+  let imports = ''
   let i = 0
-  let files: [string, string][] = []
-  while (i < count) {
-    const names = genMsgNames()
-    files = [...files, [`test${i}.ts`, genRpcMessages([...names], genMsgName)]]
+  while (i < msgNames.length) {
+    const useComma = i === msgNames.length - 1 ? '' : ', '
+    imports = imports.concat(msgNames[i] + useComma)
     i++
   }
-  return files
+  return `import ${imports} from ./dummy-file\n`
 }
 
 export const genMsgNames = (): Set<string> => {
@@ -43,4 +42,17 @@ export const genMsgNames = (): Set<string> => {
     names = names.concat(genRandomName())
   }
   return new Set<string>(names)
+}
+
+export const genTestMessageFiles = (genMsgName: () => string): [string, string][] => {
+  const count = randomNumber(1, 7)
+  let i = 0
+  let files: [string, string][] = []
+  while (i < count) {
+    const names = genMsgNames()
+    const imports = genImports([...names])
+    files = [...files, [`test${i}.ts`, imports.concat(genRpcMessages([...names], genMsgName))]]
+    i++
+  }
+  return files
 }

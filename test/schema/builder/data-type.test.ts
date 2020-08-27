@@ -32,7 +32,7 @@ test('makeDataType() should return correct DataType for type prop', () => {
   const types: TypeAliasDeclaration[] = sources.flatMap(source => source.getTypeAliases())
   const propTypes = types.flatMap(type => parseMsgProps(type)).flatMap(prop => prop.getTypeNodeOrThrow())
   for (const type of propTypes) {
-    const dataType = makeDataType(type, sources)
+    const dataType = makeDataType(type)
     console.log(dataType.toString())
     expect(is.DataType(dataType)).toBeTruthy()
   }

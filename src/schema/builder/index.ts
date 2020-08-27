@@ -13,13 +13,13 @@ const buildImports = (file: SourceFile): ReadonlyArray<Import> =>
     }
   })
 
-const buildSchema = (file: SourceFile, projectFiles: SourceFile[]): Schema => {
+const buildSchema = (file: SourceFile): Schema => {
   return {
     imports: buildImports(file),
     fileName: file.getBaseNameWithoutExtension(),
-    messages: buildMessages(file, projectFiles),
-    queryServices: buildQueryServices(file, projectFiles),
-    mutationServices: buildMutationServices(file, projectFiles),
+    messages: buildMessages(file),
+    queryServices: buildQueryServices(file),
+    mutationServices: buildMutationServices(file),
     get hasCbor(): boolean {
       return this.mutationServices.flatMap(svc => [...svc.methods]).some(method => method.hasCborParams || method.hasCborReturn) || this.queryServices.flatMap(svc => [...svc.methods]).some(method => method.hasCborReturn)
     },
@@ -27,7 +27,7 @@ const buildSchema = (file: SourceFile, projectFiles: SourceFile[]): Schema => {
 }
 export const buildSchemas = (sourceFiles: SourceFile[]): Schema[] | Error[] => {
   const errs = validateSchemas(sourceFiles)
-  return errs ? errs : [...new Set<Schema>(sourceFiles.map(file => buildSchema(file, sourceFiles)))]
+  return errs ? errs : [...new Set<Schema>(sourceFiles.map(file => buildSchema(file)))]
 }
 
 export const internalTesting = {
