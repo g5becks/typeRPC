@@ -4,17 +4,17 @@ import {Message, Property} from '../schema'
 import {isOptionalProp, parseMessages, parseMsgProps} from '../parser'
 import {makeDataType} from './data-type'
 
-export const buildProps = (properties: PropertySignature[], projectFiles: SourceFile[]): Property[] =>
+export const buildProps = (properties: PropertySignature[]): Property[] =>
   properties.map(prop => {
     return {
       isOptional: isOptionalProp(prop),
-      type: makeDataType(prop.getTypeNodeOrThrow(), projectFiles),
+      type: makeDataType(prop.getTypeNodeOrThrow()),
       name: prop.getName().trim(),
     }
   })
 
 // Converts all rpc.Msg types in files into Schema Messages
-export const buildMessages = (file: SourceFile, projectFiles: SourceFile[]): Message[] => {
+export const buildMessages = (file: SourceFile): Message[] => {
   const messages = parseMessages(file)
   if (messages.length === 0) {
     return []
@@ -24,7 +24,7 @@ export const buildMessages = (file: SourceFile, projectFiles: SourceFile[]): Mes
     return {
       isExported: msg.isExported(),
       name: msg.getNameNode().getText().trim(),
-      properties: [...new Set(buildProps(parseMsgProps(msg), projectFiles))],
+      properties: [...new Set(buildProps(parseMsgProps(msg)))],
     }
   }))]
 }
