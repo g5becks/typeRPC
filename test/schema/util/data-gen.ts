@@ -28,22 +28,22 @@ const paramables = [genRandomComparable, genRandomScalarContainer]
 
 // returns a random rpc.Paramable DataType
 
-const genRandomParamableType = (genMsgName: () => string) => {
-  const funcs = [...paramables, genMsgName]
+const genRandomParamableType = (msgNames: string[]) => {
+  const funcs = [...paramables, () => msgNames[randomNumber(0, msgNames.length)]]
   return funcs[randomNumber(0, funcs.length)]()
 }
 
-const genDict = (genMsgName: () => string) => `$.Dict<${genRandomComparable()}, ${genRandomParamableType(genMsgName)}>`
+const genDict = (msgNames: string[]) => `$.Dict<${genRandomComparable()}, ${genRandomParamableType(msgNames)}>`
 
-const genList = (genMsgName: () => string) => `$.List<${genRandomParamableType(genMsgName)}>`
+const genList = (msgNames: string[]) => `$.List<${genRandomParamableType(msgNames)}>`
 
-const genTuple2 = (genMsgName: () => string) => `$.Tuple2<${genRandomParamableType(genMsgName)}, ${genRandomParamableType(genMsgName)}>`
+const genTuple2 = (msgNames: string[]) => `$.Tuple2<${genRandomParamableType(msgNames)}, ${genRandomParamableType(msgNames)}>`
 
-const genTuple3 = (genMsgName: () => string) => `$.Tuple3<${genRandomParamableType(genMsgName)}, ${genRandomParamableType(genMsgName)}, ${genRandomParamableType(genMsgName)}>`
+const genTuple3 = (msgNames: string[]) => `$.Tuple3<${genRandomParamableType(msgNames)}, ${genRandomParamableType(msgNames)}, ${genRandomParamableType(msgNames)}>`
 
-const genTuple4 = (genMsgName: () => string) => `$.Tuple4<${genRandomParamableType(genMsgName)}, ${genRandomParamableType(genMsgName)}, ${genRandomParamableType(genMsgName)}, ${genRandomParamableType(genMsgName)}>`
+const genTuple4 = (msgNames: string[]) => `$.Tuple4<${genRandomParamableType(msgNames)}, ${genRandomParamableType(msgNames)}, ${genRandomParamableType(msgNames)}, ${genRandomParamableType(msgNames)}>`
 
-const genTuple5 = (genMsgName: () => string) => `$.Tuple5<${genRandomParamableType(genMsgName)}, ${genRandomParamableType(genMsgName)}, ${genRandomParamableType(genMsgName)}, ${genRandomParamableType(genMsgName)}, ${genRandomParamableType(genMsgName)}>`
+const genTuple5 = (msgNames: string[]) => `$.Tuple5<${genRandomParamableType(msgNames)}, ${genRandomParamableType(msgNames)}, ${genRandomParamableType(msgNames)}, ${genRandomParamableType(msgNames)}, ${genRandomParamableType(msgNames)}>`
 
 // creates a random name for a Msg
 export const genRandomName = (): string => {
@@ -57,12 +57,12 @@ export const genRandomName = (): string => {
   return name
 }
 
-export const genRandomContainer = (genMsgName: () => string) => {
+export const genRandomContainer = (msgNames: string[]) => {
   const gen = [genDict, genList, genTuple2, genTuple3, genTuple4, genTuple5]
-  return gen[randomNumber(0, gen.length)](genMsgName)
+  return gen[randomNumber(0, gen.length)](msgNames)
 }
 
-export const genRandomDataType = (genMsgName: () => string) => {
-  const generated = [genRandomContainer(genMsgName), ...comparables, '$.nil', '$.unit']
+export const genRandomDataType = (msgNames: string[]) => {
+  const generated = [genRandomContainer(msgNames), ...comparables, '$.nil', '$.unit']
   return generated[randomNumber(0, generated.length)]
 }
