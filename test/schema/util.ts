@@ -1,45 +1,41 @@
 import {Project, SourceFile} from 'ts-morph'
 import * as faker from 'faker'
+import {queryParamables} from '../../src/schema'
 
 export const validImport = 'import {$, rpc} from \'@typerpc/types\''
 export const validQuerySvc = `
 type TestService = rpc.QuerySvc<{
-    getNames(name: t.str): t.bool
+    getNames(name: $.str): $.bool
   }>
   `
 
 export const testQuerySvc = `
-type TestQuerySvc TestController {
+type TestQuerySvc = rpc.QuerySvc<{
   /**
-   * @access GET
    * @throws 404
    * @returns 200
    */
   getSomethingById(id: number): string;
 
   /**
-   * @access POST
    * @throws 500
    * @returns 202
    */
   addSomething(something: any): any;
 
   /**
-   * @access PUT
    * @throws 401
    * @returns 201
    */
   addSomethingElse(something: any): any;
 
   /**
-   * @access DELETE
    * @throws 400
    * @returns 204
    */
   deleteSomething(something: any): any;
 
   /**
-   * @access HEAD
    * @throws 403
    * @returns 301
    */
@@ -66,14 +62,18 @@ export function randomNumber(min: number, max: number) {
 }
 
 // list of type strings that adhere to @typerpc/messages => rpc.Comparable type
-const comparables = ['t.bool', 't.int8', 't.uint8', 't.uint16', 't.int16', 't.int32', 't.uint32', 't.int64', 't.uint64', 't.float32', 't.float64', 't.str', 't.timestamp', 't.err', 't.dyn']
+const comparables = ['$.bool', '$.int8', '$.uint8', '$.uint16', '$.int16', '$.int32', '$.uint32', '$.int64', '$.uint64', '$.float32', '$.float64', '$.str', '$.timestamp', '$.err', '$.dyn']
 
 // creates a random @typerpc/messages => rpc.Comparable
-const randomComparable = () => comparables[randomNumber(0, comparables.length - 1)]
+const randomComparable = () => comparables[randomNumber(0, comparables.length)]
+
+const randomQueryParamable = () => queryParamables[randomNumber(0, queryParamables.length)]
+
+const randomQueryParamableList = () => `$.List<${randomQueryParamable()}>`
 
 // a list of @typerpc/type => rpc.Container strings with rpc.Comparables
 // as key type
-const containers = [`t.Dict<${randomComparable()}, ${randomComparable()}>`, `t.List<${randomComparable()}>`, `t.Tuple2<${randomComparable()}, ${randomComparable()}>`, `t.Tuple3<${randomComparable()}, ${randomComparable()}, ${randomComparable()}>`, `t.Tuple4<${randomComparable()}, ${randomComparable()}, ${randomComparable()}, ${randomComparable()}>`, `t.Tuple5<${randomComparable()},${randomComparable()}, ${randomComparable()}, ${randomComparable()}, ${randomComparable()}>`]
+const containers = [`$.Dict<${randomComparable()}, ${randomComparable()}>`, `$.List<${randomComparable()}>`, `$.Tuple2<${randomComparable()}, ${randomComparable()}>`, `$.Tuple3<${randomComparable()}, ${randomComparable()}, ${randomComparable()}>`, `$.Tuple4<${randomComparable()}, ${randomComparable()}, ${randomComparable()}, ${randomComparable()}>`, `$.Tuple5<${randomComparable()},${randomComparable()}, ${randomComparable()}, ${randomComparable()}, ${randomComparable()}>`]
 
 // returns a random @typerpc/messages => rpc.Container string
 const randomContainer = (): string => containers[randomNumber(0, containers.length - 1)]
@@ -99,24 +99,24 @@ const randomKeyable = (makeStruct: () => string) => {
   return funcs[randomNumber(0, funcs.length)]()
 }
 
-const makeDict = (makeStruct: () => string) => `t.Dict<${randomComparable()}, ${randomKeyable(makeStruct)}>`
+const makeDict = (makeStruct: () => string) => `$.Dict<${randomComparable()}, ${randomKeyable(makeStruct)}>`
 
-const makeList = (makeStruct: () => string) => `t.List<${randomKeyable(makeStruct)}>`
+const makeList = (makeStruct: () => string) => `$.List<${randomKeyable(makeStruct)}>`
 
-const makeTuple2 = (makeStruct: () => string) => `t.Tuple2<${randomKeyable(makeStruct)}, ${randomKeyable(makeStruct)}>`
+const makeTuple2 = (makeStruct: () => string) => `$.Tuple2<${randomKeyable(makeStruct)}, ${randomKeyable(makeStruct)}>`
 
-const makeTuple3 = (makeStruct: () => string) => `t.Tuple3<${randomKeyable(makeStruct)}, ${randomKeyable(makeStruct)}, ${randomKeyable(makeStruct)}>`
+const makeTuple3 = (makeStruct: () => string) => `$.Tuple3<${randomKeyable(makeStruct)}, ${randomKeyable(makeStruct)}, ${randomKeyable(makeStruct)}>`
 
-const makeTuple4 = (makeStruct: () => string) => `t.Tuple4<${randomKeyable(makeStruct)}, ${randomKeyable(makeStruct)}, ${randomKeyable(makeStruct)}, ${randomKeyable(makeStruct)}>`
+const makeTuple4 = (makeStruct: () => string) => `$.Tuple4<${randomKeyable(makeStruct)}, ${randomKeyable(makeStruct)}, ${randomKeyable(makeStruct)}, ${randomKeyable(makeStruct)}>`
 
-const makeTuple5 = (makeStruct: () => string) => `t.Tuple5<${randomKeyable(makeStruct)}, ${randomKeyable(makeStruct)}, ${randomKeyable(makeStruct)}, ${randomKeyable(makeStruct)}, ${randomKeyable(makeStruct)}>`
+const makeTuple5 = (makeStruct: () => string) => `$.Tuple5<${randomKeyable(makeStruct)}, ${randomKeyable(makeStruct)}, ${randomKeyable(makeStruct)}, ${randomKeyable(makeStruct)}, ${randomKeyable(makeStruct)}>`
 
 // make a method param
 const makeParam = (typeMaker: () => string): string => `${randomStructName().toLowerCase()}: ${typeMaker()}`
 // make optional method param
 const makeOptionalParam = (typeMaker: () => string): string => `${randomStructName().toLowerCase()}?: ${typeMaker()}`
 
-// make a method for interface
+// make a method for an rpc.Service
 const makeMethod = (typeMaker: () => string): string => {
   const paramsCount = randomNumber(0, 6)
   let params = ''
@@ -131,25 +131,25 @@ const makeMethod = (typeMaker: () => string): string => {
   return `${randomStructName().toLowerCase()}(${params}): ${typeMaker()};`
 }
 
-const makeInterface = (typeMaker: () => string): string => {
+const makeQueryService = (typeMaker: () => string): string => {
   const methodCount = randomNumber(5, 12)
   let methods = ''
   for (let i = 0; i < methodCount; i++) {
     methods = methods.concat(makeMethod(typeMaker) + '\n\n')
   }
   return `
-  interface ${randomStructName().toLowerCase()} {
+  type ${randomStructName().toLowerCase()} = rpc.QuerySvc<{
     ${methods}
-  }\n`
+  }>\n`
 }
 
-const makeInterfaces = (typeMaker: () => string): string => {
+const makeServices = (typeMaker: () => string): string => {
   const num = randomNumber(5, 12)
-  let interfaces = ''
+  let services = ''
   for (let i = 0; i < num; i++) {
-    interfaces = interfaces.concat(makeInterface(typeMaker))
+    services = services.concat(makeQueryService(typeMaker))
   }
-  return interfaces
+  return services
 }
 
 const optional = () => randomNumber(0, 2) === 0 ? '' : '?'
@@ -164,7 +164,7 @@ const useCbor = () => {
   return choices[randomNumber(0, 3)]
 }
 
-const makeTypeAlias = (name: string, typeMaker: () => string): string => {
+const makeRpcMsg = (name: string, typeMaker: () => string): string => {
   let props = ''
   const propCount = randomNumber(5, 22)
   for (let i = 0; i < propCount; i++) {
@@ -172,23 +172,23 @@ const makeTypeAlias = (name: string, typeMaker: () => string): string => {
   }
   return `
   ${useCbor()}
-  type ${name} = {
+  type ${name} = rpc.Msg<{
     ${props}
-  }\n`
+  }>\n`
 }
 
-const makeTypeAliases = (names: string[], typeMaker: () => string): string => {
+const makeRpcMessages = (names: string[], typeMaker: () => string): string => {
   let types = ''
   for (const name of names) {
-    types = types.concat(makeTypeAlias(name, typeMaker))
+    types = types.concat(makeRpcMsg(name, typeMaker))
   }
   return types
 }
 
 export const getSourceFile = (source: string, project: Project): SourceFile =>
-  project.createSourceFile('test.ts', source)
+  project.createSourceFile('tes$.ts', source)
 
-const makeTypeNames = (): Set<string> => {
+const makeMsgNames = (): Set<string> => {
   const num = randomNumber(30, 50)
   let names: string[] = []
   for (let i = 0; i < num; i++) {
@@ -196,14 +196,17 @@ const makeTypeNames = (): Set<string> => {
   }
   return new Set<string>(names)
 }
-export const makeTestFile = (project: Project, fileName = 'test.ts'): SourceFile => {
-  const typeNames: string[] = [...makeTypeNames()]
+export const makeTestFile = (project: Project, fileName = 'tes$.ts'): SourceFile => {
+  const typeNames: string[] = [...makeMsgNames()]
   const randomStruct = () => typeNames[randomNumber(0, typeNames.length)]
-  const makers = [makeDict, makeList, makeTuple2, makeTuple3, makeTuple4, makeTuple5, randomComparable, () => 't.unit', () => 't.nil']
+  const makers = [makeDict, makeList, makeTuple2, makeTuple3, makeTuple4, makeTuple5, randomComparable, () => '$.unit', () => '$.nil']
+  const queryParamableMakers = [randomQueryParamable, randomQueryParamableList]
   const typeMaker = () => makers[randomNumber(0, makers.length)](randomStruct)
-  const types = makeTypeAliases(typeNames, typeMaker)
-  const interfaces = makeInterfaces(typeMaker)
-  return project.createSourceFile(fileName, types.concat(interfaces))
+  const queryParamableMaker = () => queryParamableMakers[randomNumber(0, queryParamableMakers.length)]()
+  const queryServices = makeServices(queryParamableMaker)
+  const mutationServices = makeServices(typeMaker)
+  const types = makeRpcMessages(typeNames, typeMaker)
+  return project.createSourceFile(fileName, types.concat(queryServices).concat(mutationServices))
 }
 
 export const makeTestFiles = (project: Project): SourceFile[] => {
@@ -246,7 +249,7 @@ interface MethodsTest {
   method1(cborParam: CborType, param2: NoBor): NoCbor;
   method2(): AnotherCbor
   method3(param: TestType2): NoCbor;
-  method4(): t.unit;
+  method4(): $.unit;
 }
 `)
 
