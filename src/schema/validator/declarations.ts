@@ -1,5 +1,5 @@
 import {ImportDeclaration, SourceFile, SyntaxKind, TypeAliasDeclaration} from 'ts-morph'
-import {isMsg, isService, multiValidationErr, singleValidationErr, validateNotGeneric, Violator} from './utils'
+import {isMsg, isQuerySvc, multiValidationErr, singleValidationErr, validateNotGeneric, Violator} from './utils'
 
 const validate = (declarations: Violator[]): Error[] => declarations.length > 0 ? [multiValidationErr(declarations)] : []
 // Ensure zero function declarations
@@ -162,7 +162,7 @@ const preValidateType = (type: TypeAliasDeclaration): Error[] => {
       },
       Typescript types (number, string[]), intersections, and unions are not supported.`)]
   }
-  if (!isMsg(type) || isService(type)) {
+  if (!isMsg(type) || isQuerySvc(type)) {
     errs = errs.concat(singleValidationErr(type, `typerpc schema files cannot contain type
 	  aliases that are not either rpc.Msg, or rpc.Service definitions.`))
   }

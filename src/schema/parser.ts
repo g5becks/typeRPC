@@ -8,7 +8,7 @@ import {
   TypeNode,
   TypeReferenceNode,
 } from 'ts-morph'
-import {isMsg, isMsgLiteral, isService} from './validator'
+import {isMsg, isMsgLiteral, isQuerySvc} from './validator'
 
 const isTypeAlias = (type: any): type is TypeAliasDeclaration => 'getName' in type
 const isTypeNode = (type: any): type is TypeNode => !('getName' in type)
@@ -42,7 +42,7 @@ export const parseMessages = (file: SourceFile): TypeAliasDeclaration[] => file.
 
 // parses all service declarations from a schema file
 export const parseServices = (file: SourceFile): TypeAliasDeclaration[] =>
-  file.getTypeAliases().filter(alias => isService(alias))
+  file.getTypeAliases().filter(alias => isQuerySvc(alias))
 
 // parse all of the methods from an rpc.QueryService type alias
 export const parseServiceMethods = (type: TypeAliasDeclaration): MethodSignature[] => type.getTypeNode()!.getChildrenOfKind(SyntaxKind.TypeLiteral)[0].getChildrenOfKind(SyntaxKind.MethodSignature)

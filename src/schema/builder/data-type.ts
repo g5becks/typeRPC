@@ -31,6 +31,7 @@ export const makeDataType = (type: TypeNode | Node, projectFiles: SourceFile[]):
 
   return make.dyn
 }
+
 // Determines if the generated type or method should use cbor for serialization/deserialization
 // based on the JsDoc @kind tag
 export const useCbor = (type: TypeAliasDeclaration | MethodSignature): boolean => {
