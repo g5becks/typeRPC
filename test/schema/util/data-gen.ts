@@ -27,7 +27,10 @@ const genRandomScalarContainer = (): string => containers[randomNumber(0, contai
 const paramables = [genRandomComparable, genRandomScalarContainer]
 
 // returns a random rpc.Paramable DataType
-
+// THIS FUNCTION AND EVERY FUNCTION THAT CALLS IS TAKES A msgNames PARAM
+// BECAUSE THE SCHEMA VALIDATOR WILL THROW AN ERROR IF IT FINDS A TYPE THAT
+// IS USED AND NOT DEFINED IN THE SAME FILE OR IMPORTED IN THE FILE, SO
+// THE NAMES OF THE MESSAGES TO GENERATE NEED TO BE KNOWN BEFOREHAND
 const genRandomParamableType = (msgNames: string[]) => {
   const funcs = [...paramables, () => msgNames[randomNumber(0, msgNames.length)]]
   return funcs[randomNumber(0, funcs.length)]()

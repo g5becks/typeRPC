@@ -1,25 +1,25 @@
 import {genRandomDataType, genRandomName, randomNumber} from './data-gen'
 import {optional, useCbor} from '.'
 
-export const genRpcMsgLiteral = (genMsgName: () => string): string => {
+export const genRpcMsgLiteral = (msgNames: string[]): string => {
   let props = ''
   const propCount = randomNumber(5, 12)
   for (let i = 0; i < propCount; i++) {
-    props = props.concat(`prop${i}${optional()}: ${genRandomDataType(genMsgName)};\n`)
+    props = props.concat(`prop${i}${optional()}: ${genRandomDataType(msgNames)};\n`)
   }
   return `rpc.Msg<{
       ${props}
       }\n`
 }
-const genRpcMsg = (name: string, genMsgName: () => string): string => `
+const genRpcMsg = (name: string, msgNames: string[]): string => `
   ${useCbor()}
-  type ${name} = ${genRpcMsgLiteral(genMsgName)}
+  type ${name} = ${genRpcMsgLiteral(msgNames)}
   `
 
-export const genRpcMessages = (names: string[], genMsgName: () => string): string => {
+export const genRpcMessages = (names: string[], msgNames: string[]): string => {
   let types = ''
   for (const name of names) {
-    types = types.concat(genRpcMsg(name, genMsgName))
+    types = types.concat(genRpcMsg(name, msgNames))
   }
   return types
 }
@@ -44,14 +44,14 @@ export const genMsgNames = (): Set<string> => {
   return new Set<string>(names)
 }
 
-export const genTestMessageFiles = (genMsgName: () => string): [string, string][] => {
+export const genTestMessageFiles = (msgNames: string[]): [string, string][] => {
   const count = randomNumber(1, 7)
   let i = 0
   let files: [string, string][] = []
   while (i < count) {
     const names = genMsgNames()
-    const imports = genImports([...names])
-    files = [...files, [`test${i}.ts`, imports.concat(genRpcMessages([...names], genMsgName))]]
+    const imports = genImports(msgNames)
+    files = [...files, [`test${i}.ts`, imports.concat(genRpcMessages([...names], msgNames))]]
     i++
   }
   return files

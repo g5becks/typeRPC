@@ -2,6 +2,7 @@ import {containers, is, scalars, testing} from '../../../src/schema'
 import {Project, TypeAliasDeclaration} from 'ts-morph'
 import {genMsgNamesFunc, genSourceFile, genSourceFiles, genTestMessageFiles} from '../util'
 import {parseMsgProps} from '../../../src/schema/parser'
+import {genMsgNames} from '../util/message-gen'
 
 const {
   isType,
@@ -28,7 +29,7 @@ test('isType() should return true when given the proper type', () => {
 })
 
 test('makeDataType() should return correct DataType for type prop', () => {
-  const sources = genSourceFiles(genTestMessageFiles(genMsgNamesFunc), project)
+  const sources = genSourceFiles(genTestMessageFiles([...genMsgNames()]), project)
   const types: TypeAliasDeclaration[] = sources.flatMap(source => source.getTypeAliases())
   const propTypes = types.flatMap(type => parseMsgProps(type)).flatMap(prop => prop.getTypeNodeOrThrow())
   for (const type of propTypes) {

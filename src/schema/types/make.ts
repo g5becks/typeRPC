@@ -5,7 +5,7 @@ import {useCbor} from '../builder/data-type'
 
 export const typeError = (type: TypeNode | Node) => new TypeError(`error in file ${type.getSourceFile().getFilePath()}
     at line number: ${type.getStartLineNumber()}
-    message: ${type.getText()} is neither a valid typerpc DataType or rpc.Msg defined in this file or imported to it.`)
+    message: ${type.getText()} is neither a valid typerpc DataType or rpc.Msg that was imported or defined in this file.`)
 
 const makeStructLiteralProps = (props: PropertySignature[], makeDataType: (type: TypeNode | Node) => DataType): StructLiteralProp[] =>
   props.map(prop => structLiteralProp(prop.getName(), makeDataType(prop.getTypeNodeOrThrow()),
