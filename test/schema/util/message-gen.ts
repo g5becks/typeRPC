@@ -32,7 +32,7 @@ const genImports = (msgNames: string[]): string => {
     imports = imports.concat(msgNames[i] + useComma)
     i++
   }
-  return `import ${imports} from ./dummy-file\n`
+  return `import {${imports}} from ./dummy-file\n`
 }
 
 export const genMsgNames = (): Set<string> => {
