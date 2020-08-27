@@ -8,7 +8,7 @@ import {
   TypeNode,
 } from 'ts-morph'
 import {containers} from '../types/data-type'
-import {make} from '../types/make'
+import {make} from '../types'
 
 // is the type found is a typerpc primitive type?
 export const isPrimitive = (type: TypeNode | Node): boolean => Boolean(make.primitive(type))

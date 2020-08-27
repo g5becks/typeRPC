@@ -1,7 +1,7 @@
 import {HTTPErrCode, HTTPResponseCode} from '../schema'
 import {MethodSignature, ParameterDeclaration, SourceFile, TypeAliasDeclaration} from 'ts-morph'
 import {isHttpVerb, isValidDataType, singleValidationErr, validateNotGeneric} from './utils'
-import {parseJsDocComment, parseServiceMethods, parseServices} from '../parser'
+import {parseJsDocComment, parseServiceMethods, parseQueryServices} from '../parser'
 import {queryParamables} from '../types'
 
 // Valid HTTP error codes
@@ -88,4 +88,4 @@ const validateParams = (method: MethodSignature, projectFiles: SourceFile[]): Er
 // Validates all methods of an rpc.QueryService
 const validateService = (service: TypeAliasDeclaration, projectFiles: SourceFile[]): Error[] => parseServiceMethods(service).flatMap(method => [...validateParams(method, projectFiles), ...validateReturnType(method, projectFiles), ...validateNotGeneric(method), ...validateMethodJsDoc(method), ...validateGetRequestMethodParams(method)])
 
-export const validateServices = (file: SourceFile, projectFiles: SourceFile[]): Error[] => parseServices(file).flatMap(type => validateService(type, projectFiles))
+export const validateServices = (file: SourceFile, projectFiles: SourceFile[]): Error[] => parseQueryServices(file).flatMap(type => validateService(type, projectFiles))

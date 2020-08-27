@@ -1,7 +1,7 @@
 import {MethodSignature, ParameterDeclaration, SourceFile, TypeAliasDeclaration} from 'ts-morph'
 import {HTTPErrCode, HTTPResponseCode, MutationMethod, Param, QueryService} from '../schema'
 import {makeDataType, useCbor} from './data-type'
-import {parseJsDocComment, parseServiceMethods, parseServices} from '../parser'
+import {parseJsDocComment, parseServiceMethods, parseQueryServices} from '../parser'
 import {isErrCode, isHttpVerb, isResponseCode} from '../validator'
 import {is, make} from '../types'
 
@@ -68,7 +68,7 @@ const buildService = (service: TypeAliasDeclaration, projectFiles: SourceFile[])
   }
 }
 export const buildServices = (file: SourceFile, projectFiles: SourceFile[]): QueryService[] => {
-  const services = parseServices(file)
+  const services = parseQueryServices(file)
   if (services.length === 0) {
     return []
   }
