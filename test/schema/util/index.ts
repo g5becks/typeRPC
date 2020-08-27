@@ -1,19 +1,5 @@
 import {Project, SourceFile} from 'ts-morph'
-import {
-  genRandomQueryParamableList,
-  genRandomQueryParamableScalar,
-  makeDict,
-  makeList,
-  makeRandomComparable,
-  makeRandomMsgName,
-  makeTuple2,
-  makeTuple3,
-  makeTuple4,
-  makeTuple5,
-  randomNumber,
-} from './data-gen'
-import {makeServices} from './service-gen'
-import {makeMsgNames, makeRpcMessages} from './message-gen'
+import {randomNumber} from './data-gen'
 
 export const validImport = 'import {$, rpc} from \'@typerpc/types\''
 export const validQuerySvc = `
@@ -74,29 +60,6 @@ ${validQuerySvc}
 export const getSourceFile = (source: string, project: Project): SourceFile =>
   project.createSourceFile('tes$.ts', source)
 
-export const makeTestFile = (project: Project, fileName = 'tes$.ts'): SourceFile => {
-  const typeNames: string[] = [...makeMsgNames()]
-  const randomStruct = () => typeNames[randomNumber(0, typeNames.length)]
-  const makers = [makeDict, makeList, makeTuple2, makeTuple3, makeTuple4, makeTuple5, makeRandomComparable, () => '$.unit', () => '$.nil']
-  const queryParamableMakers = [genRandomQueryParamableScalar, genRandomQueryParamableList]
-  const typeMaker = () => makers[randomNumber(0, makers.length)](randomStruct)
-  const queryParamableMaker = () => queryParamableMakers[randomNumber(0, queryParamableMakers.length)]()
-  const queryServices = makeServices(queryParamableMaker)
-  const mutationServices = makeServices(typeMaker)
-  const types = makeRpcMessages(typeNames, typeMaker)
-  return project.createSourceFile(fileName, types.concat(queryServices).concat(mutationServices))
-}
-
-export const makeTestFiles = (project: Project): SourceFile[] => {
-  const fileCount = randomNumber(12, 35)
-  let files: SourceFile[] =  []
-  for (let i = 0; i < fileCount; i++) {
-    const fileName = makeRandomMsgName().toLowerCase() + i.toString() + '.ts'
-    files = files.concat(makeTestFile(project, fileName))
-  }
-  return files
-}
-
 export const makeStructTestSource = `
   /** @kind cbor */
 type CborType = {}
@@ -151,3 +114,9 @@ export type testProp = {
     name: string;
     type: string;
   }
+export const optional = () => randomNumber(0, 4) === 1 ? '?' : ''
+export const useCbor = () => randomNumber(0, 5) === 1 ? `
+  /**
+ * @kind cbor
+ */
+ ` : ''

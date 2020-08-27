@@ -1,14 +1,7 @@
 import {genRandomDataType, genRandomName, randomNumber} from './data-gen'
+import {optional, useCbor} from '.'
 
-const optional = () => randomNumber(0, 4) === 1 ? '?' : ''
-
-export const useCbor = () => randomNumber(0, 5) === 1 ? `
-  /**
- * @kind cbor
- */
- ` : ''
-
-const genRpcMsgLiteral = (genMsgName: () => string): string => {
+export const genRpcMsgLiteral = (genMsgName: () => string): string => {
   let props = ''
   const propCount = randomNumber(5, 12)
   for (let i = 0; i < propCount; i++) {
