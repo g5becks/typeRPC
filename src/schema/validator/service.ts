@@ -85,7 +85,7 @@ const validateParams = (method: MethodSignature, projectFiles: SourceFile[]): Er
   !method.getParameters() ? [] :
     method.getParameters().map(param => param.getTypeNode()).flatMap(type => isValidDataType(type, projectFiles) ? [] : singleValidationErr(type, `method parameter type '${type?.getText().trim()}', is either not a valid typerpc type or a type alias that is not defined in this file`))
 
-// Validates all methods of an rpc.Service
+// Validates all methods of an rpc.QueryService
 const validateService = (service: TypeAliasDeclaration, projectFiles: SourceFile[]): Error[] => parseServiceMethods(service).flatMap(method => [...validateParams(method, projectFiles), ...validateReturnType(method, projectFiles), ...validateNotGeneric(method), ...validateMethodJsDoc(method), ...validateGetRequestMethodParams(method)])
 
 export const validateServices = (file: SourceFile, projectFiles: SourceFile[]): Error[] => parseServices(file).flatMap(type => validateService(type, projectFiles))

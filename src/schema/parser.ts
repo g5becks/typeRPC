@@ -44,5 +44,5 @@ export const parseMessages = (file: SourceFile): TypeAliasDeclaration[] => file.
 export const parseServices = (file: SourceFile): TypeAliasDeclaration[] =>
   file.getTypeAliases().filter(alias => isService(alias))
 
-// parse all of the methods from an rpc.Service type alias
+// parse all of the methods from an rpc.QueryService type alias
 export const parseServiceMethods = (type: TypeAliasDeclaration): MethodSignature[] => type.getTypeNode()!.getChildrenOfKind(SyntaxKind.TypeLiteral)[0].getChildrenOfKind(SyntaxKind.MethodSignature)

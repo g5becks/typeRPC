@@ -1,5 +1,5 @@
 import {Code, CodeBuilder} from '..'
-import {Service, Method, Schema, is} from '../../schema'
+import {QueryService, MutationMethod, Schema, is} from '../../schema'
 import {capitalize, fileHeader, lowerCase, serverResponseContentType} from '../utils'
 import {
   buildInterfaces,
@@ -22,7 +22,7 @@ const defaultLogger: ErrLogger = {
   }
 }`
 
-const buildPath = (method: Method): string => {
+const buildPath = (method: MutationMethod): string => {
   if (method.isGet || !method.hasParams) {
     return `/${method.name}`
   }
@@ -35,7 +35,7 @@ const buildPath = (method: Method): string => {
 
 // destructures the query params by converting them to the
 // correct messages using the fromQueryString function
-const buildDestructuredQueryParams = (method: Method): string =>
+const buildDestructuredQueryParams = (method: MutationMethod): string =>
   `{${method.params.map((param, i) => {
     if (is.QueryParamable(param.type)) {
       const useComma = i === method.params.length - 1 ? '' : ','
@@ -43,11 +43,11 @@ const buildDestructuredQueryParams = (method: Method): string =>
     }
   })}}`
 
-const destructuredParams = (method: Method): string => method.params.length === 0 ? '' : `
+const destructuredParams = (method: MutationMethod): string => method.params.length === 0 ? '' : `
   ${makeParamsVar(method.params)} = ${method.isGet ? buildDestructuredQueryParams(method) : 'ctx.body'}\n
   `
 
-const methodCall = (interfaceName: string, method: Method): string => {
+const methodCall = (interfaceName: string, method: MutationMethod): string => {
   const getParams = destructuredParams(method)
   const useBraces = (args: string) => method.hasParams ? `{${args}}` : ''
   const invokeMethod = method.isVoidReturn ? '' : `const res: ${dataType(method.returnType)} = await ${interfaceName}.${method.name}(${useBraces(paramNames(method.params))})`
@@ -55,9 +55,9 @@ const methodCall = (interfaceName: string, method: Method): string => {
   return `${getParams}\n${invokeMethod}\n${sendResponse}`
 }
 
-const setContentType = (method: Method): string => `ctx.type = ${serverResponseContentType(method)}`
+const setContentType = (method: MutationMethod): string => `ctx.type = ${serverResponseContentType(method)}`
 
-const buildHandler = (interfaceName: string, method: Method): string =>  {
+const buildHandler = (interfaceName: string, method: MutationMethod): string =>  {
   return `
 router.${method.httpVerb.toLowerCase()}('${interfaceName}/${method.name}', /${buildPath(method)}, async ctx => {
     try {
@@ -72,7 +72,7 @@ router.${method.httpVerb.toLowerCase()}('${interfaceName}/${method.name}', /${bu
 `
 }
 
-const buildHandlers = (interfc: Service): string => {
+const buildHandlers = (interfc: QueryService): string => {
   let handlers = ''
   for (const method of interfc.methods) {
     handlers = handlers.concat(buildHandler(interfc.name, method))
@@ -80,7 +80,7 @@ const buildHandlers = (interfc: Service): string => {
   return handlers
 }
 
-const buildRoutes = (interfc: Service): string => {
+const buildRoutes = (interfc: QueryService): string => {
   return `
 export const ${lowerCase(interfc.name)}Routes = (${lowerCase(interfc.name)}: ${capitalize(interfc.name)}, logger: ErrLogger = defaultLogger): Middleware<Koa.ParameterizedContext<any, Router.RouterParamContext>> => {
 	const router = new Router<any, {}>({
@@ -93,7 +93,7 @@ export const ${lowerCase(interfc.name)}Routes = (${lowerCase(interfc.name)}: ${c
 `
 }
 
-const buildAllRoutes = (interfaces: ReadonlyArray<Service>): string => {
+const buildAllRoutes = (interfaces: ReadonlyArray<QueryService>): string => {
   let routes = ''
   for (const interfc of interfaces) {
     routes = routes.concat(buildRoutes(interfc))

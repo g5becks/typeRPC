@@ -3,11 +3,11 @@ import {
   is,
   make,
   Message,
-  Method,
+  MutationMethod,
   Param,
   Property,
   Schema,
-  Service,
+  QueryService,
   DataType,
   StructLiteralProp,
   Import,
@@ -127,7 +127,7 @@ export const fromQueryString  = (paramName: string, type: DataType): string => {
     return primFromQueryParam(paramName as string, type)
   }
   if (is.List(type)) {
-    if (type.dataType.toString() === 't.str') {
+    if (type.dataType.toString() === '$.str') {
       return paramName
     }
   }
@@ -174,12 +174,12 @@ const buildParams = (params: ReadonlyArray<Param>): string => {
 }
 
 // builds a single method of an interface
-const buildMethod = (method: Method): string => {
+const buildMethod = (method: MutationMethod): string => {
   return `async ${lowerCase(method.name)}(${buildParams(method.params)}): Promise<${dataType(method.returnType)}>;\n`
 }
 
 // builds all methods of an interface
-const buildMethods = (methods: ReadonlyArray<Method>): string => {
+const buildMethods = (methods: ReadonlyArray<MutationMethod>): string => {
   let methodsString = ''
   for (const method of methods) {
     methodsString = methodsString.concat(buildMethod(method))
@@ -188,7 +188,7 @@ const buildMethods = (methods: ReadonlyArray<Method>): string => {
 }
 
 // builds a single interface
-const buildInterface = (interfc: Service): string => {
+const buildInterface = (interfc: QueryService): string => {
   return `
 export interface ${capitalize(interfc.name)} {
   ${buildMethods(interfc.methods)}
@@ -196,7 +196,7 @@ export interface ${capitalize(interfc.name)} {
 }
 
 // builds all services of a Schema file
-export const buildInterfaces = (interfaces: ReadonlyArray<Service>): string => {
+export const buildInterfaces = (interfaces: ReadonlyArray<QueryService>): string => {
   let interfacesString = ''
   for (const interfc of interfaces) {
     interfacesString = interfacesString.concat(buildInterface(interfc))

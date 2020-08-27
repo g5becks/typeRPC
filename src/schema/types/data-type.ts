@@ -2,7 +2,7 @@ import {internal as x} from '@typerpc/types'
 import {make} from './make'
 
 // A reference to a Type Alias (rpc.Msg) defined in a schema file
-// and used as Type in either another rpc.Msg or a service Method parameter
+// and used as Type in either another rpc.Msg or a service MutationMethod parameter
 // or return Type.
 export type Struct = Readonly<{
   name: string;
@@ -23,8 +23,8 @@ export type StructLiteralProp = Readonly<{
 // When generating code for said language,
 // It is suggested to create a class/struct/object using the
 // name of the owning rpc.Message + property name if used inside of an rpc.Message.
-// If used as a method param, use the Service name + Method name + param name.
-// If used as a method return, use the Service name + Method name + 'Result'
+// If used as a method param, use the QueryService name + MutationMethod name + param name.
+// If used as a method return, use the QueryService name + MutationMethod name + 'Result'
 export type StructLiteral = Readonly<{
   properties: ReadonlyArray<StructLiteralProp>;
   toString(): string;
@@ -41,10 +41,11 @@ export const structLiteralProp = (name: string, type: DataType, isOptional: bool
     },
   }
 }
-const builtPrimitives = [make.blob, make.unit, make.timestamp, make.dyn, make.err, make.str, make.nil, make.float64, make.float32, make.uint64, make.int64, make.uint32, make.int32, make.uint16, make.int16, make.uint8, make.int8, make.bool]
-const primitives = ['$.blob', '$.unit', '$.timestamp', '$.dyn', '$.err', '$.str', '$.nil', '$.float64', '$.float32', '$.uint64', '$.int64', '$.uint32', '$.int32', '$.uint16', '$.int16', '$.uint8', '$.int8', '$.bool']
+const builtScalars = [make.blob, make.unit, make.timestamp, make.dyn, make.err, make.str, make.nil, make.float64, make.float32, make.uint64, make.int64, make.uint32, make.int32, make.uint16, make.int16, make.uint8, make.int8, make.bool]
 
-export const primsMap = new Map<string, DataType>(primitives.map((prim, i) => [prim, builtPrimitives[i]]))
+const scalars = ['$.blob', '$.unit', '$.timestamp', '$.dyn', '$.err', '$.str', '$.nil', '$.float64', '$.float32', '$.uint64', '$.int64', '$.uint32', '$.int32', '$.uint16', '$.int16', '$.uint8', '$.int8', '$.bool']
+
+export const scalarsMap = new Map<string, DataType>(scalars.map((prim, i) => [prim, builtScalars[i]]))
 
 export const containers = ['$.Dict', '$.Tuple2', '$.Tuple3', '$.Tuple4', '$.Tuple5', '$.List']
 

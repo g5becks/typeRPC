@@ -1,12 +1,12 @@
 import {Project} from 'ts-morph'
 import {getSourceFile, methodSchemaTestSource, schemaWithCbor, schemaWithoutCbor} from './util'
-import {Method} from '../../src/schema'
+import {MutationMethod} from '../../src/schema'
 
 const {buildSchema, buildMethod} = internalTesting
-let method1: Method
-let method2: Method
-let method3: Method
-let method4: Method
+let method1: MutationMethod
+let method2: MutationMethod
+let method3: MutationMethod
+let method4: MutationMethod
 beforeAll(() => {
   const interfc = getSourceFile(methodSchemaTestSource, new Project()).getInterfaces()[0]
   method1 = buildMethod(interfc.getMethod('method1')!)

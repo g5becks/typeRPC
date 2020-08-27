@@ -21,8 +21,8 @@ export const isContainer = (type: TypeNode | Node): boolean => containers.some(c
 export const isMsg = (type: TypeAliasDeclaration | PropertySignature | ParameterDeclaration): boolean =>
   Boolean(type.getTypeNode()?.getText().startsWith('rpc.Msg<{'))
 
-// is the type alias an rpc.Service?
-export const isService = (type: TypeAliasDeclaration): boolean => Boolean(type.getTypeNode()?.getText().startsWith('rpc.Service<{'))
+// is the type alias an rpc.QueryService?
+export const isService = (type: TypeAliasDeclaration): boolean => Boolean(type.getTypeNode()?.getText().startsWith('rpc.QueryService<{'))
 
 // is the type alias an rpc.Msg defined in this schema file?
 export const isValidMsg = (type: TypeNode | Node, projectFiles: SourceFile[]): boolean => projectFiles.flatMap(file => file.getTypeAliases()).flatMap(alias => isMsg(alias) && alias.getNameNode().getText().trim()).includes(type.getText().trim())

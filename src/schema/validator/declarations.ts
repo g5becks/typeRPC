@@ -146,7 +146,7 @@ const validateJsDoc = (type: TypeAliasDeclaration): Error[] => {
 
 // Runs a pre-validation step on all type aliases found in a schema file
 // to ensure they are eligible to move forward into the next validation stage.
-// This check ensures the type is either an rpc.Service or rpc.Msg,
+// This check ensures the type is either an rpc.QueryService or rpc.Msg,
 // that the type has a typeNode, that the typeNode is a TypeLiteral
 // and that the type is not generic
 const preValidateType = (type: TypeAliasDeclaration): Error[] => {

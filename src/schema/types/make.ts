@@ -1,5 +1,5 @@
 import {Node, PropertySignature, SourceFile, TypeNode} from 'ts-morph'
-import {DataType, primsMap, Struct, structLiteralProp, StructLiteralProp} from './data-type'
+import {DataType, scalarsMap, Struct, structLiteralProp, StructLiteralProp} from './data-type'
 import {isOptionalProp, parseMsgProps, parseTypeParams} from '../parser'
 import {useCbor} from '../builder/data-type'
 
@@ -99,7 +99,7 @@ export const make = {
       },
     } as unknown as DataType
   },
-  primitive: (type: TypeNode | Node): DataType | undefined => primsMap.get(type.getText().trim()),
+  primitive: (type: TypeNode | Node): DataType | undefined => scalarsMap.get(type.getText().trim()),
   get bool(): DataType {
     return {toString: () => '$.bool'} as DataType
   },

@@ -1,6 +1,6 @@
-import {HTTPVerb, Message, Method, Param, Property, Schema, Service, Import} from './schema'
+import {HTTPVerb, Message, MutationMethod, Param, Property, Schema, QueryService, Import} from './schema'
 import {DataType, is, make, Struct, StructLiteral, StructLiteralProp} from './types'
 import {buildSchemas} from './builder'
 
-export {buildSchemas, Schema, make, DataType, is, HTTPVerb, Import, Service, Message, Param, Property, Method, Struct, StructLiteral, StructLiteralProp}
+export {buildSchemas, Schema, make, DataType, is, HTTPVerb, Import, QueryService, Message, Param, Property, MutationMethod, Struct, StructLiteral, StructLiteralProp}
 
