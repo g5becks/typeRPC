@@ -1,5 +1,4 @@
 /* eslint-disable new-cap */
-import {getTypeNode, isOptional} from '../../src/schema/builder'
 import {Project} from 'ts-morph'
 import {prims} from '../../src/schema/types'
 

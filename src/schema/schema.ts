@@ -1,4 +1,4 @@
-import {DataType} from './types/data-type'
+import {DataType} from './types'
 
 type HttpMethod = 'GET' | 'POST'
 
