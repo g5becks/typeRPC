@@ -5,8 +5,8 @@ import {parseJsDocComment} from '../parser'
 
 export const isType = (type: TypeNode | Node, typeText: string): boolean => type.getText().trim().startsWith(typeText)
 
-export const makeDataType = (type: TypeNode | Node, projectFiles: SourceFile[]): DataType => {
-  if (!isValidDataType(type, projectFiles)) {
+export const makeDataType = (type: TypeNode | Node): DataType => {
+  if (!isValidDataType(type)) {
     throw typeError(type)
   }
   const prim = make.primitive(type)
@@ -14,7 +14,7 @@ export const makeDataType = (type: TypeNode | Node, projectFiles: SourceFile[]):
     return prim
   }
   if (isMsgLiteral(type)) {
-    return make.StructLiteral(type, projectFiles, makeDataType)
+    return make.StructLiteral(type, makeDataType)
   }
   if (!isContainer(type)) {
     return make.Struct(type)
