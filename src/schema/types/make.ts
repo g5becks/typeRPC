@@ -36,14 +36,14 @@ export const make = {
   },
   Dict: (type: TypeNode | Node, makeDataType: (type: TypeNode | Node) => DataType): DataType => {
     const params = parseTypeParams(type)
-    const key = make.primitive(params[0])
-    const val = makeDataType(params[1])
-    if (!key) {
+    const keyType = make.primitive(params[0])
+    const valType = makeDataType(params[1])
+    if (!keyType) {
       throw typeError(type)
     }
     return {
-      key, val, toString() {
-        return `$.Dict<${key.toString()}, ${val.toString()}>`
+      keyType, valType, toString() {
+        return `$.Dict<${keyType.toString()}, ${valType.toString()}>`
       },
     } as unknown as DataType
   },

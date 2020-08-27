@@ -34,6 +34,10 @@ test('makeDataType() should return correct DataType for type prop', () => {
   const propTypes = types.flatMap(type => parseMsgProps(type)).flatMap(prop => prop.getTypeNodeOrThrow())
   for (const type of propTypes) {
     const dataType = makeDataType(type)
+    if (!is.DataType(dataType)) {
+      const type = dataType as any
+      console.log(type.toString())
+    }
     expect(is.DataType(dataType)).toBeTruthy()
   }
 })
