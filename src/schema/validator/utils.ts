@@ -7,8 +7,7 @@ import {
   TypeAliasDeclaration,
   TypeNode,
 } from 'ts-morph'
-import {containers} from '../types/data-type'
-import {make} from '../types'
+import {containers, make} from '../types'
 import {parseNamedImports} from '../parser'
 
 // is the type found is a typerpc primitive type?
