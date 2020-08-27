@@ -16,7 +16,7 @@ export type Param = Readonly<{
   isOptional: boolean;
 }>
 
-interface Method {
+export interface Method {
   /** the name of the method */
   readonly name: string;
   /** the method's parameters */
