@@ -25,19 +25,6 @@ beforeEach(() => {
   project = new Project()
 })
 
-test('isType() should return true when given the proper type', () => {
-  let vars = ''
-  const types = [...prims.keys(), ...containers]
-  for (const type of prims.keys()) {
-    vars = vars.concat(`var ${type.replace('t.', '')}: ${type}\n`)
-  }
-  for (const type of containers) {
-    vars = vars.concat(`var ${type.replace('t.', '')}: ${type}\n`)
-  }
-  getSourceFile(vars, project).getVariableDeclarations().forEach((variable, i) =>
-    expect(isType(variable.getTypeNode()!, types[i])).toBeTruthy())
-})
-
 test('makeDataType() should return correct DataType for type prop', () => {
   const file = makeTestFile(project)
   const types = file.getTypeAliases()

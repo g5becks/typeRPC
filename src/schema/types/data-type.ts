@@ -43,7 +43,7 @@ export const structLiteralProp = (name: string, type: DataType, isOptional: bool
 }
 const builtScalars = [make.blob, make.unit, make.timestamp, make.dyn, make.err, make.str, make.nil, make.float64, make.float32, make.uint64, make.int64, make.uint32, make.int32, make.uint16, make.int16, make.uint8, make.int8, make.bool]
 
-const scalars = ['$.blob', '$.unit', '$.timestamp', '$.dyn', '$.err', '$.str', '$.nil', '$.float64', '$.float32', '$.uint64', '$.int64', '$.uint32', '$.int32', '$.uint16', '$.int16', '$.uint8', '$.int8', '$.bool']
+export const scalars = ['$.blob', '$.unit', '$.timestamp', '$.dyn', '$.err', '$.str', '$.nil', '$.float64', '$.float32', '$.uint64', '$.int64', '$.uint32', '$.int32', '$.uint16', '$.int16', '$.uint8', '$.int8', '$.bool']
 
 export const scalarsMap = new Map<string, DataType>(scalars.map((prim, i) => [prim, builtScalars[i]]))
 

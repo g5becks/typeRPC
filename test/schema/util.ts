@@ -1,15 +1,15 @@
 import {Project, SourceFile} from 'ts-morph'
 import * as faker from 'faker'
 
-export const validImport = 'import {t} from \'@typerpc/messages\''
-export const validInterface = `
-  interface Test {
+export const validImport = 'import {$, rpc} from \'@typerpc/types\''
+export const validQuerySvc = `
+type TestService = rpc.QuerySvc<{
     getNames(name: t.str): t.bool
-  }
+  }>
   `
 
-export const testController = `
-  interface TestController {
+export const testQuerySvc = `
+type TestQuerySvc TestController {
   /**
    * @access GET
    * @throws 404
@@ -59,7 +59,7 @@ export const testController = `
 export const sourceWithValidImportAndInterface = (source: string) => `
 ${validImport}
 ${source}
-${validInterface}
+${validQuerySvc}
 `
 export function randomNumber(min: number, max: number) {
   return Math.floor(Math.random() * (max - min) + min)

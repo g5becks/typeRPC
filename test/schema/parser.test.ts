@@ -1,7 +1,7 @@
 // file deepcode ignore no-unused-expression: test file
 // file deepcode ignore semicolon: conflict with eslint
 import {Project} from 'ts-morph'
-import {sourceWithValidImportAndInterface, validInterface} from './util'
+import {sourceWithValidImportAndInterface, validQuerySvc} from './util'
 import {validateSchemas} from '../../src/schema/validator'
 
 let project: Project
@@ -61,7 +61,7 @@ test(testName(1, 'extra imports'), () => {
 test(testName(1, 'aliased @typerpc import'), () => {
   const source = `
   import {t as v} from '@typerpc/types'
-  ${validInterface}
+  ${validQuerySvc}
   `
   runTest(project, source, 1)
 })

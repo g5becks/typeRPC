@@ -22,14 +22,10 @@ const validateMethodJsDoc = (method: MethodSignature): Error[] => {
   if (typeof tags === 'undefined' || tags.length === 0) {
     return []
   }
-  const validTags = ['throws', 'returns', 'kind']
   const errs: Error[] = []
   for (const tag of tags) {
     const tagName = tag.getTagName()
     const comment = tag?.getComment()?.trim() ?? ''
-    if (!validTags.includes(tag.getTagName())) {
-      errs.push(singleValidationErr(tag, `${tag.getTagName()} is not a valid typerpc JsDoc tag. Valid tags are :${validTags}`))
-    }
     if (tagName === 'throws') {
       const err = singleValidationErr(tag, `${comment} is not a valid HTTP error response code. Valid error response codes are : ${errCodes}`)
       try {
