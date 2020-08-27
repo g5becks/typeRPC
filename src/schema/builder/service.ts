@@ -29,12 +29,12 @@ export const buildErrCode = (method: MethodSignature): HTTPErrCode => {
 }
 
 // builds all Schema Param for a method
-export const buildParams = (params: ParameterDeclaration[], projectFiles: SourceFile[]): Param[] => {
+export const buildParams = (params: ParameterDeclaration[]): Param[] => {
   return [...new Set<Param>(params.map(param => {
     return {
       name: param.getName().trim(),
       isOptional: param.isOptional(),
-      type: makeDataType(param.getTypeNodeOrThrow(), projectFiles),
+      type: makeDataType(param.getTypeNodeOrThrow()),
     }
   }))]
 }
@@ -45,11 +45,11 @@ const hasCborParams = (params: ReadonlyArray<Param>, method: MethodSignature, is
   return ([...params].some(param => is.Struct(param.type) && param.type.useCbor)) || isCborSvc || useCbor(method)
 }
 
-const buildMethod = (method: MethodSignature, isCborSvc: boolean, projectFiles: SourceFile[]): Method => {
+const buildMethod = (method: MethodSignature, isCborSvc: boolean): Method => {
   return {
     name: getMethodName(method),
-    params: buildParams(method.getParameters(), projectFiles),
-    returnType: makeDataType(method.getReturnTypeNodeOrThrow(), projectFiles),
+    params: buildParams(method.getParameters()),
+    returnType: makeDataType(method.getReturnTypeNodeOrThrow()),
     responseCode: buildResponseCode(method),
     errorCode: buildErrCode(method),
     httpMethod: 'GET',
@@ -65,58 +65,58 @@ const buildMethod = (method: MethodSignature, isCborSvc: boolean, projectFiles: 
   }
 }
 
-const buildQueryMethod = (method: MethodSignature, isCborSvc: boolean, projectFiles: SourceFile[]): QueryMethod => {
-  return {...buildMethod(method, isCborSvc, projectFiles),
+const buildQueryMethod = (method: MethodSignature, isCborSvc: boolean): QueryMethod => {
+  return {...buildMethod(method, isCborSvc),
     httpMethod: 'GET',
   }
 }
 
-const buildMutationMethod = (method: MethodSignature, isCborSvc: boolean, projectFiles: SourceFile[]): MutationMethod => {
-  const builtMethod = buildMethod(method, isCborSvc, projectFiles)
+const buildMutationMethod = (method: MethodSignature, isCborSvc: boolean): MutationMethod => {
+  const builtMethod = buildMethod(method, isCborSvc)
   return {...builtMethod,
     httpMethod: 'POST',
     hasCborParams: hasCborParams(builtMethod.params, method, isCborSvc),
   }
 }
 
-const buildQueryMethods = (methods: MethodSignature[], isCborSvc: boolean, projectFiles: SourceFile[]): QueryMethod[] => [...new Set(methods.map(method => buildQueryMethod(method, isCborSvc, projectFiles)))]
+const buildQueryMethods = (methods: MethodSignature[], isCborSvc: boolean): QueryMethod[] => [...new Set(methods.map(method => buildQueryMethod(method, isCborSvc)))]
 
-const buildMutationMethods = (methods: MethodSignature[], isCborSvc: boolean, projectFiles: SourceFile[]): MutationMethod[] => [...new Set(methods.map(method => buildMutationMethod(method, isCborSvc, projectFiles)))]
+const buildMutationMethods = (methods: MethodSignature[], isCborSvc: boolean): MutationMethod[] => [...new Set(methods.map(method => buildMutationMethod(method, isCborSvc)))]
 
 const getServiceName = (service: TypeAliasDeclaration): string => service.getNameNode().getText().trim()
 
-const buildQuerySvc = (service: TypeAliasDeclaration, projectFiles: SourceFile[]): QueryService => {
+const buildQuerySvc = (service: TypeAliasDeclaration): QueryService => {
   const isCbor = useCbor(service)
   return {
     type: 'QueryService',
     name: getServiceName(service),
-    methods: buildQueryMethods(parseServiceMethods(service), isCbor, projectFiles),
+    methods: buildQueryMethods(parseServiceMethods(service), isCbor),
     useCbor: isCbor,
   }
 }
-const buildMutationSvc = (service: TypeAliasDeclaration, projectFiles: SourceFile[]): MutationService => {
+const buildMutationSvc = (service: TypeAliasDeclaration): MutationService => {
   const isCbor = useCbor(service)
   return {
     type: 'MutationService',
     name: getServiceName(service),
-    methods: buildMutationMethods(parseServiceMethods(service), isCbor, projectFiles),
+    methods: buildMutationMethods(parseServiceMethods(service), isCbor),
     useCbor: isCbor,
   }
 }
-export const buildQueryServices = (file: SourceFile, projectFiles: SourceFile[]): QueryService[] => {
+export const buildQueryServices = (file: SourceFile): QueryService[] => {
   const services = parseQueryServices(file)
   if (services.length === 0) {
     return []
   }
-  return [...new Set(services.map(svc => buildQuerySvc(svc, projectFiles)))]
+  return [...new Set(services.map(svc => buildQuerySvc(svc)))]
 }
 
-export const buildMutationServices = (file: SourceFile, projectFiles: SourceFile[]): MutationService[] => {
+export const buildMutationServices = (file: SourceFile): MutationService[] => {
   const services = parseMutationServices(file)
   if (services.length === 0) {
     return []
   }
-  return [...new Set(services.map(svc => buildMutationSvc(svc, projectFiles)))]
+  return [...new Set(services.map(svc => buildMutationSvc(svc)))]
 }
 
 // TODO remove all the duplication at some point
