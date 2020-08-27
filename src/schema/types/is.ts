@@ -1,7 +1,5 @@
 import {DataType, queryParamables, scalarsMap, Struct, StructLiteral} from './data-type'
 import {$, internal as x} from '@typerpc/types'
-import {makeDataType} from '../builder/data-type'
-import {make} from './make'
 
 const validateType = (type: unknown, ...propNames: string[]): boolean => {
   const props = Object.getOwnPropertyNames(type).filter(prop => !prop.includes('toString'))
