@@ -8,7 +8,7 @@ const validateSchema = (file: SourceFile, projectFiles: SourceFile[]): Error[] =
   return [
     ...validateDeclarations(file, projectFiles),
     ...validateMessages(file),
-    ...validateServices(file, projectFiles),
+    ...validateServices(file),
   ]
 }
 
