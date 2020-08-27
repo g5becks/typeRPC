@@ -27,13 +27,11 @@ test('isType() should return true when given the proper type', () => {
 })
 
 test('makeDataType() should return correct DataType for type prop', () => {
-  const file = makeTestFile(project)
+  const file = mak
   const types = file.getTypeAliases()
   for (const type of types) {
-    for (const node of type.getTypeNode()!.forEachChildAsArray()) {
-      const propType = getTypeNode(node)
-      const dataType = makeDataType(propType)
-      expect(dataType.toString()).toEqual(propType.getText().trim())
-    }
+    const propType = getTypeNode(node)
+    const dataType = makeDataType(propType)
+    expect(dataType.toString()).toEqual(propType.getText().trim())
   }
 })
