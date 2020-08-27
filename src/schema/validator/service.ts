@@ -69,16 +69,16 @@ const validateQueryMethodParams = (method: MethodSignature): Error[] => {
 
 // Ensures return type of a method is either a valid typerpc type or a type
 // declared in the same project.
-const validateReturnType = (method: MethodSignature, projectFiles: SourceFile[]): Error[] =>  isValidDataType(method.getReturnTypeNode(), projectFiles) ? [] : [singleValidationErr(method,
+const validateReturnType = (method: MethodSignature): Error[] =>  isValidDataType(method.getReturnTypeNode()) ? [] : [singleValidationErr(method,
   `${method.getName()} has an invalid return type. All rpc.Service methods must return a valid typerpc type, an rpc.Msg literal, or an rpc.Msg defined in the same file. To return nothing, use 't.unit'`)]
 
 // Ensure type of method params is either a typerpc type or a type
 // declared in the same source project.
-const validateParams = (method: MethodSignature, projectFiles: SourceFile[]): Error[] =>
+const validateParams = (method: MethodSignature): Error[] =>
   !method.getParameters() ? [] :
-    method.getParameters().map(param => param.getTypeNode()).flatMap(type => isValidDataType(type, projectFiles) ? [] : singleValidationErr(type, `method parameter type '${type?.getText().trim()}', is either not a valid typerpc type or a type alias that is not defined in this file`))
+    method.getParameters().map(param => param.getTypeNode()).flatMap(type => isValidDataType(type) ? [] : singleValidationErr(type, `method parameter type '${type?.getText().trim()}', is either not a valid typerpc type or a type alias that is not defined in this file`))
 
 // Validates all methods of an rpc.QueryService
-const validateService = (service: TypeAliasDeclaration, projectFiles: SourceFile[]): Error[] => parseServiceMethods(service).flatMap(method => [...validateParams(method, projectFiles), ...validateReturnType(method, projectFiles), ...validateNotGeneric(method), ...validateMethodJsDoc(method), ...validateQueryMethodParams(method)])
+const validateService = (service: TypeAliasDeclaration): Error[] => parseServiceMethods(service).flatMap(method => [...validateParams(method), ...validateReturnType(method), ...validateNotGeneric(method), ...validateMethodJsDoc(method), ...validateQueryMethodParams(method)])
 
-export const validateServices = (file: SourceFile, projectFiles: SourceFile[]): Error[] => parseQueryServices(file).flatMap(type => validateService(type, projectFiles))
+export const validateServices = (file: SourceFile): Error[] => parseQueryServices(file).flatMap(type => validateService(type))
