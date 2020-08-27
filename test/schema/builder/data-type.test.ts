@@ -30,13 +30,9 @@ test('isType() should return true when given the proper type', () => {
 test('makeDataType() should return correct DataType for type prop', () => {
   const sources = genSourceFiles(genTestMessageFiles(genMsgNamesFunc), project)
   const types: TypeAliasDeclaration[] = sources.flatMap(source => source.getTypeAliases())
-  for (const source of sources) {
-    console.log(source.getText())
-  }
   const propTypes = types.flatMap(type => parseMsgProps(type)).flatMap(prop => prop.getTypeNodeOrThrow())
   for (const type of propTypes) {
     const dataType = makeDataType(type)
-    console.log(dataType.toString())
     expect(is.DataType(dataType)).toBeTruthy()
   }
 })
