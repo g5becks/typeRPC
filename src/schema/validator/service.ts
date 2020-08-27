@@ -1,6 +1,6 @@
 import {HTTPErrCode, HTTPResponseCode} from '../schema'
 import {MethodSignature, ParameterDeclaration, SourceFile, TypeAliasDeclaration} from 'ts-morph'
-import {isHttpVerb, isValidDataType, singleValidationErr, validateNotGeneric} from './utils'
+import {isValidDataType, singleValidationErr, validateNotGeneric} from './utils'
 import {parseJsDocComment, parseServiceMethods, parseQueryServices} from '../parser'
 import {queryParamables} from '../types'
 
@@ -22,16 +22,13 @@ const validateMethodJsDoc = (method: MethodSignature): Error[] => {
   if (typeof tags === 'undefined' || tags.length === 0) {
     return []
   }
-  const validTags = ['throws', 'access', 'returns', 'kind']
+  const validTags = ['throws', 'returns', 'kind']
   const errs: Error[] = []
   for (const tag of tags) {
     const tagName = tag.getTagName()
     const comment = tag?.getComment()?.trim() ?? ''
     if (!validTags.includes(tag.getTagName())) {
       errs.push(singleValidationErr(tag, `${tag.getTagName()} is not a valid typerpc JsDoc tag. Valid tags are :${validTags}`))
-    }
-    if (tagName === 'access' && !isHttpVerb(comment)) {
-      errs.push(singleValidationErr(tag, `${tag.getComment()} HTTP method is not supported by typerpc. Valids methods are 'POST' | 'GET'`))
     }
     if (tagName === 'throws') {
       const err = singleValidationErr(tag, `${comment} is not a valid HTTP error response code. Valid error response codes are : ${errCodes}`)
@@ -60,32 +57,32 @@ const validateMethodJsDoc = (method: MethodSignature): Error[] => {
   return errs
 }
 
-const validateGetMethodParam = (param: ParameterDeclaration): Error[] => {
+const validateQueryMethodParam = (param: ParameterDeclaration): Error[] => {
   return queryParamables.some(val => param.getTypeNode()!.getText().trim().startsWith(val)) ?
     [singleValidationErr(param, `${param.getName()} has an invalid type. Methods annotated with @access GET are only allowed to use the following types for parameters: ${queryParamables}. Note: a t.List<> can only use one of the mentioned primitive types as a type parameter`)] : []
 }
 
 // TODO test this function
-const validateGetRequestMethodParams = (method: MethodSignature): Error[] => {
+const validateQueryMethodParams = (method: MethodSignature): Error[] => {
   const params = method.getParameters()
   if (parseJsDocComment(method, 'access')?.toUpperCase() !== 'GET' || params.length === 0) {
     return []
   }
-  return params.flatMap(param => validateGetMethodParam(param))
+  return params.flatMap(param => validateQueryMethodParam(param))
 }
 
 // Ensures return type of a method is either a valid typerpc type or a type
-// declared in the same file.
+// declared in the same project.
 const validateReturnType = (method: MethodSignature, projectFiles: SourceFile[]): Error[] =>  isValidDataType(method.getReturnTypeNode(), projectFiles) ? [] : [singleValidationErr(method,
   `${method.getName()} has an invalid return type. All rpc.Service methods must return a valid typerpc type, an rpc.Msg literal, or an rpc.Msg defined in the same file. To return nothing, use 't.unit'`)]
 
 // Ensure type of method params is either a typerpc type or a type
-// declared in the same source file.
+// declared in the same source project.
 const validateParams = (method: MethodSignature, projectFiles: SourceFile[]): Error[] =>
   !method.getParameters() ? [] :
     method.getParameters().map(param => param.getTypeNode()).flatMap(type => isValidDataType(type, projectFiles) ? [] : singleValidationErr(type, `method parameter type '${type?.getText().trim()}', is either not a valid typerpc type or a type alias that is not defined in this file`))
 
 // Validates all methods of an rpc.QueryService
-const validateService = (service: TypeAliasDeclaration, projectFiles: SourceFile[]): Error[] => parseServiceMethods(service).flatMap(method => [...validateParams(method, projectFiles), ...validateReturnType(method, projectFiles), ...validateNotGeneric(method), ...validateMethodJsDoc(method), ...validateGetRequestMethodParams(method)])
+const validateService = (service: TypeAliasDeclaration, projectFiles: SourceFile[]): Error[] => parseServiceMethods(service).flatMap(method => [...validateParams(method, projectFiles), ...validateReturnType(method, projectFiles), ...validateNotGeneric(method), ...validateMethodJsDoc(method), ...validateQueryMethodParams(method)])
 
 export const validateServices = (file: SourceFile, projectFiles: SourceFile[]): Error[] => parseQueryServices(file).flatMap(type => validateService(type, projectFiles))

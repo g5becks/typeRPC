@@ -1,7 +1,13 @@
 import {SourceFile} from 'ts-morph'
 import {Import, Schema} from '../schema'
 import {buildMessages, buildProps} from './message'
-import {buildErrCode, buildHttpVerb, buildMethod, buildParams, buildResponseCode, buildServices} from './service'
+import {
+  buildErrCode,
+  buildMutationServices,
+  buildParams,
+  buildQueryServices,
+  buildResponseCode,
+} from './service'
 import {isType, makeDataType, useCbor} from './data-type'
 import {validateSchemas} from '../validator'
 
@@ -18,7 +24,8 @@ const buildSchema = (file: SourceFile, projectFiles: SourceFile[]): Schema => {
     imports: buildImports(file),
     fileName: file.getBaseNameWithoutExtension(),
     messages: buildMessages(file, projectFiles),
-    services: buildServices(file, projectFiles),
+    queryServices: buildQueryServices(file, projectFiles),
+    mutationServices: buildMutationServices(file, projectFiles),
     get hasCbor(): boolean {
       return this.services.flatMap(service => [...service.methods]).some(method => method.hasCborParams || method.hasCborReturn) || this.services.some(service => service.useCbor)
     },
@@ -33,11 +40,9 @@ export const internalTesting = {
   useCbor,
   isType,
   buildSchema,
-  buildMethod,
   buildParams,
   buildProps,
   buildMessages,
-  buildHttpVerb,
   buildErrCode,
   buildResponseCode,
   makeDataType,
