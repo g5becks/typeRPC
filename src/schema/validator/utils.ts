@@ -7,7 +7,6 @@ import {
   TypeAliasDeclaration,
   TypeNode,
 } from 'ts-morph'
-import {HTTPVerb} from '../schema'
 import {containers} from '../types/data-type'
 import {make} from '../types/make'
 
@@ -31,10 +30,6 @@ export const isMutationSvc = (type: TypeAliasDeclaration): boolean => Boolean(ge
 
 // is the type alias an rpc.Msg defined in this schema file?
 export const isValidMsg = (type: TypeNode | Node, projectFiles: SourceFile[]): boolean => projectFiles.flatMap(file => file.getTypeAliases()).flatMap(alias => isMsg(alias) && alias.getNameNode().getText().trim()).includes(type.getText().trim())
-
-// is the http verb used in the JsDoc @access tag a valid typerpc HTTPVerb?
-export const isHttpVerb = (method: string | undefined): method is HTTPVerb =>
-  ['POST', 'GET'].includes(method?.toUpperCase() ?? '')
 
 // A ts-morph declaration found in a schema file that has a getName() method
 // E.G. FunctionDeclaration, VariableDeclaration
