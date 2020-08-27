@@ -20,13 +20,13 @@ export const makeDataType = (type: TypeNode | Node): DataType => {
     return make.Struct(type)
   }
   if (isType(type, '$.List')) {
-    return make.List(type, projectFiles, makeDataType)
+    return make.List(type, makeDataType)
   }
   if (isType(type, '$.Dict')) {
-    return make.Dict(type, projectFiles, makeDataType)
+    return make.Dict(type, makeDataType)
   }
   if (isType(type, '$.Tuple')) {
-    return make.Tuple(type, projectFiles, makeDataType)
+    return make.Tuple(type, makeDataType)
   }
 
   return make.dyn
