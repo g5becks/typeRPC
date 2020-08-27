@@ -7,7 +7,7 @@ import {
   randomNumber,
 } from './data-gen'
 import {genRpcMsgLiteral} from './message-gen'
-import {optional, useCbor} from '.'
+import {useCbor} from '.'
 
 const genQuerySvcParamType = () => {
   const generated = [genRandomQueryParamableScalar(), genRandomQueryParamableList()]
@@ -39,7 +39,7 @@ const genMethod = (type: SvcType, genMsgName: () => string): string => {
     if (i < 3) {
       params = params.concat(`${genParam(type, false, genMsgName)},`)
     } else {
-      const useComma = i !== paramsCount - 1 ? ', ' : ''
+      const useComma = i === paramsCount - 1 ? '' : ', '
       params = params.concat(`${genParam(type, true, genMsgName)}${useComma}`)
     }
   }
@@ -48,24 +48,24 @@ const genMethod = (type: SvcType, genMsgName: () => string): string => {
   ${genRandomName().toLowerCase()}(${params}): ${genReturnType(genMsgName)};`
 }
 
-const genQueryService = (genMsgName: () => string, cbor: boolean): string => {
+const genSvc = (type: SvcType, genMsgName: () => string, cbor: boolean): string => {
   const methodCount = randomNumber(5, 12)
   let methods = ''
   for (let i = 0; i < methodCount; i++) {
-    methods = methods.concat(genMethod('Query', genMsgName) + '\n\n')
+    methods = methods.concat(genMethod(type, genMsgName) + '\n\n')
   }
   return `
   ${cbor ? useCbor() : ''}
-  type ${genRandomName().toLowerCase()} = rpc.QuerySvc<{
+  type ${genRandomName().toLowerCase()} = rpc.${type}Svc<{
     ${methods}
   }>\n`
 }
 
-export const genServices = (typeMaker: () => string): string => {
+export const genServices = (type: SvcType, genMsgName: () => string): string => {
   const num = randomNumber(5, 12)
   let services = ''
   for (let i = 0; i < num; i++) {
-    services = services.concat(genQueryService(typeMaker))
+    services = services.concat(genSvc(type, genMsgName, false))
   }
   return services
 }
