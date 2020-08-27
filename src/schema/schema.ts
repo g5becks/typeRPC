@@ -94,7 +94,7 @@ export type QueryService = Readonly<{
   name: string;
   methods: ReadonlyArray<QueryMethod>;
   /**
-   * If this methods Schema was annotated with
+   * If this service's  Schema was annotated with
    * a valid @kind JsDoc tag, this will be true and
    * cause the hasCborReturn property for all of this service's
    * methods to return true.
@@ -107,8 +107,12 @@ export type MutationService = Readonly<{
   type: 'MutationService';
   name: string;
   methods: ReadonlyArray<MutationMethod>;
-  // If true, use CBOR instead of Json for all param
-  // and return type of all this service's methods.
+  /**
+   * If this service's  Schema was annotated with
+   * a valid @kind JsDoc tag, this will be true and
+   * cause the hasCborParams and hasCborReturn properties
+   * for all of this service's methods to return true.
+   */
   useCbor: boolean;
 }>
 
