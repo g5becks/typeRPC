@@ -1,5 +1,5 @@
 import {testing} from '../../../src/schema'
-import {genMsgNames, genSourceFiles, genTestMessageFiles} from '../util'
+import {exportTestMessages, genMsgNames, genSourceFile, genSourceFiles, genTestMessageFiles} from '../util'
 import {Project, SourceFile} from 'ts-morph'
 import {parseMsgProps} from '../../../src/schema/parser'
 
@@ -31,4 +31,8 @@ test('buildMessages() should return all messages with correct number of properti
 })
 
 test('buildMessages() should return correct isExported value for exported types', () => {
+  const file = genSourceFile(exportTestMessages, project)
+  const messages = buildMessages(file)
+  expect(messages[0].isExported).toBeTruthy()
+  expect(messages[1].isExported).toBeFalsy()
 })

@@ -137,6 +137,11 @@ export const genMsgNamesFunc = () => {
 export const validDataTypes = (msgNames: string[]) =>  [...scalars, ...containers, 'rpc.Msg<{', msgNames]
 
 export const exportTestMessages = `
-export type SomeType = rpc.Msg<{
+export type ExportedType = rpc.Msg<{
   name: $.str
-}>`
+}>
+
+type NonExportedType = rpc.Msg<{
+  name: $.str
+}>
+`
