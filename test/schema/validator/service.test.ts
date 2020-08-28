@@ -4,8 +4,6 @@ import {genMsgNames, genServices, genSourceFile} from '../util'
 
 let project: Project
 
-const {parseQueryServices, parseServiceMethods} = testing
-
 beforeEach(() => {
   project = new Project()
 })
@@ -16,6 +14,8 @@ const {
   validateReturnType,
   validateMethodJsDoc,
   validateQueryMethodParams,
+  parseQueryServices,
+  parseServiceMethods,
 } = testing
 
 test('validateService() should not return error when service is valid', () => {
@@ -63,4 +63,13 @@ test('validateMethodJsDoc() should return an error when @throws tag has invalid 
   }`
   const method = genSourceFile(source, project).getInterface('Test')!.getMethod('method')!
   expect(validateMethodJsDoc(method).length).toEqual(1)
+})
+
+test('validateMethodNotGeneric() should return an error when method is generic', () => {
+  const source = `
+  type SomeSvc = rpc.MutationSvc<{
+    getNames<T extends $.int8>(namesSlot: T): $.List<$.str>;
+  }>`
+  const method = parseServiceMethods(genSourceFile(source, project).getTypeAlias('SomeSvc')!)[0]
+  expect(validateNotGeneric(method).length).toEqual(1)
 })
