@@ -34,7 +34,7 @@ export const makeDataType = (type: TypeNode | Node): DataType => {
 
 // Determines if the generated type or method should use cbor for serialization/deserialization
 // based on the JsDoc @kind tag
-export const useCbor = (type: TypeAliasDeclaration | MethodSignature | undefined): boolean => {
+export const useCbor = (type: TypeAliasDeclaration | MethodSignature| undefined): boolean => {
   if (typeof type === 'undefined') {
     return false
   }

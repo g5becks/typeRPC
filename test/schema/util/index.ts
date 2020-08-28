@@ -3,7 +3,7 @@ import {randomNumber} from './data-gen'
 import {genMsgNames, genTestMessageFiles} from './message-gen'
 import {containers, scalars} from '../../../src/schema'
 
-export {genTestMessageFiles}
+export {genTestMessageFiles, genMsgNames}
 export const validImport = 'import {$, rpc} from \'@typerpc/types\''
 export const validQuerySvc = `
 type TestService = rpc.QuerySvc<{
@@ -71,11 +71,10 @@ export const genSourceFiles = (sources: [string, string][], project: Project): S
 }
 export const makeStructTestSource = `
   /** @kind cbor */
-type CborType = {}
+type CborType = rpc.Msg<{}>
 
 /** @kind cbor */
-
-type AnotherCbor = {}
+type AnotherCbor = rpc.Msg<{}>
 type TestType1 = {
   prop1: CborType;
   prop2: AnotherCbor;
@@ -84,9 +83,9 @@ type TestType1 = {
 /**
 *
 */
-type NoCbor = {}
+type NoCbor = rpc.Msg<{}>
 
-type MoreNoCbor = {}
+type MoreNoCbor = rpc.Msg<{}>
 
 type TestType2 = {
   prop1: NoCbor;

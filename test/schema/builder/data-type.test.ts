@@ -1,13 +1,12 @@
 import {containers, is, scalars, testing} from '../../../src/schema'
 import {Project, TypeAliasDeclaration} from 'ts-morph'
-import {genSourceFile, genSourceFiles, genTestMessageFiles} from '../util'
-import {parseMsgProps} from '../../../src/schema/parser'
-import {genMsgNames} from '../util/message-gen'
+import {genSourceFile, genSourceFiles, genTestMessageFiles, makeStructTestSource, genMsgNames} from '../util'
 
 const {
   isType,
   useCbor,
   makeDataType,
+  parseMsgProps,
 } = testing
 
 let project: Project
@@ -33,11 +32,19 @@ test('makeDataType() should return correct DataType for type prop', () => {
   const types: TypeAliasDeclaration[] = sources.flatMap(source => source.getTypeAliases())
   const propTypes = types.flatMap(type => parseMsgProps(type)).flatMap(prop => prop.getTypeNodeOrThrow())
   for (const type of propTypes) {
-    const dataType = makeDataType(type)
-    if (!is.DataType(dataType)) {
-      const type = dataType as any
-      console.log(type.toString())
-    }
-    expect(is.DataType(dataType)).toBeTruthy()
+    expect(is.DataType(makeDataType(type))).toBeTruthy()
   }
+})
+
+test('useCbor() should return the correct boolean value based on JsDoc tag', () => {
+  const file = genSourceFile(makeStructTestSource, project)
+  const cbor1 = file.getTypeAlias('CborType')
+  const cbor2 = file.getTypeAlias('AnotherCbor')
+  const noCbor1 = file.getTypeAlias('NoCbor')
+  const noCbor2 = file.getTypeAlias('MoreNoCbor')
+
+  expect(useCbor(cbor1)).toBeTruthy()
+  expect(useCbor(cbor2)).toBeTruthy()
+  expect(useCbor(noCbor1)).toBeFalsy()
+  expect(useCbor(noCbor2)).toBeFalsy()
 })
