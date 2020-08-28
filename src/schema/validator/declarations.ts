@@ -17,15 +17,15 @@ const validateClasses = (file: SourceFile): Error[] => validate(file.getClasses(
 // TODO, test this
 const validateImports = (file: SourceFile, projectFiles: SourceFile[]): Error[] => {
   const imports = file.getImportDeclarations()
-  const err = (i: ImportDeclaration) => singleValidationErr(i, 'invalid import declaration')
+  const err = (i: ImportDeclaration, msg: string) => singleValidationErr(i, 'invalid import declaration : ' + i.getText() + ` reason: ${msg}`)
   let errs: Error[] = []
   for (const imp of imports) {
     if (typeof imp.getModuleSpecifierSourceFile() === 'undefined') {
-      errs = errs.concat(err(imp))
+      errs = errs.concat(err(imp, 'module specifier is undefined'))
     } else if (!projectFiles.includes(imp.getModuleSpecifierSourceFile()!)) {
-      errs = errs.concat(err(imp))
+      errs = errs.concat(err(imp, 'module not found in this project'))
     } else if (typeof imp.getImportClause() === 'undefined') {
-      errs = errs.concat(err(imp))
+      errs = errs.concat(err(imp, 'import clause is undefined'))
     }
     // validate node default or namespace import
     else if (typeof imp.getDefaultImport() !== 'undefined' || typeof imp.getNamespaceImport() !== 'undefined') {

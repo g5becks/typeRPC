@@ -10,7 +10,6 @@ beforeEach(() => {
 })
 const {
   validateTypes,
-  validateJsDoc,
   validateExports,
   validateImports,
   validateEnums,
@@ -130,3 +129,37 @@ test(testName('type alias with invalid type property'), () =>
     name: Name;
   }
   `, validateTypes))
+
+test('validateJsDoc() should return error when @kind tag value != cbor', () => {
+  runTest(`
+  /** @kind json */
+  type SomeType = rpc.Msg<{
+    name: $.str
+    }>`, validateTypes)
+})
+
+test('validateImports() should return an error when module is not in the same dir', () => {
+  const source = 'import {B} from \'./some/other\''
+  const file = genSourceFile(source, project)
+  expect(validateImports(file, project.getSourceFiles()).length).toEqual(1)
+})
+
+test('validateImports() should return an error when module is valid but not a part of project', () => {
+  const file = genSourceFile('import {B} from \'.other\'', project)
+  expect(validateImports(file, project.getSourceFiles()).length).toEqual(1)
+})
+
+test('validateImports() should return an error when import is default', () => {
+  project.createSourceFile('./somefile.ts')
+  const file = genSourceFile('import B from \'./somefile\'', project)
+  expect(project.getSourceFiles().length).toEqual(2)
+  expect(validateImports(file, project.getSourceFiles()).length).toEqual(1)
+})
+
+test('validateImports() should NOT return an error when import is valid', () => {
+  const proj = new Project({tsConfigFilePath: './test/schema/validator/tsconfig.json', skipFileDependencyResolution: true})
+
+  const file = proj.createSourceFile('./test/schema/validator/test.ts', 'import {B} from \'./declarations.test\'')
+
+  expect(validateImports(file, proj.getSourceFiles()).length).toEqual(0)
+})
