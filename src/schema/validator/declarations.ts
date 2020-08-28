@@ -188,3 +188,18 @@ export const validateDeclarations = (file: SourceFile, projectFiles: SourceFile[
     ...validateRefs(file),
     ...validateTypes(file)]
 }
+
+export const internal = {
+  validateTypes,
+  validateJsDoc,
+  validateExports,
+  validateImports,
+  validateEnums,
+  validateNameSpaces,
+  validateClasses,
+  validateStatements,
+  validateVariables,
+  validateInterfaces,
+  validateFunctions,
+
+}

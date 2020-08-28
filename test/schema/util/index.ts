@@ -62,7 +62,7 @@ ${validQuerySvc}
 `
 
 export const genSourceFile = (source: string, project: Project, name = 'test.ts'): SourceFile =>
-  project.createSourceFile(name, source)
+  project.createSourceFile(name, source, {overwrite: true})
 
 export const genSourceFiles = (sources: [string, string][], project: Project): SourceFile[] => {
   for (const [name, source] of sources) {

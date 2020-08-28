@@ -17,32 +17,6 @@ const runTest = (project: Project, source: string, errLength: number): void => {
   expect(validateSchemas([project.getSourceFile('test.ts')!]).length).toBe(errLength)
 }
 
-test(testName(1, 'function'), () => {
-  const source = `
-  function name() {
-  }
-  `
-  runTest(project, sourceWithValidImportAndInterface(source), 1)
-})
-
-test(testName(1, 'multiple functions'), () => {
-  const source = `
-  function name() {
-  }
-
-  function name2() {
-  }
-  `
-  runTest(project, sourceWithValidImportAndInterface(source), 1)
-})
-
-test(testName(1, 'variable declaration'), () => {
-  const source = `
-  var names: string = 'gary'
-  `
-  runTest(project, sourceWithValidImportAndInterface(source), 1)
-})
-
 test(testName(1, 'class declaration'), () => {
   const source = `
   class MyClass {

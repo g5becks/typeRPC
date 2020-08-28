@@ -12,12 +12,22 @@ import {
 } from './types'
 import {buildSchemas, internalTesting} from './builder'
 
-import {parseMsgProps, isOptionalProp, parseServiceMethods, parseMutationServices, parseQueryServices, parseMessages} from './parser'
+import {
+  isOptionalProp,
+  parseMessages,
+  parseMsgProps,
+  parseMutationServices,
+  parseQueryServices,
+  parseServiceMethods,
+} from './parser'
+
+import {internal} from './validator'
 
 export {buildSchemas, Schema, make, DataType, is, Import, QueryService, Message, Param, Property, MutationMethod, Struct, StructLiteral, StructLiteralProp, scalars, containers, queryParamables}
 
 export const testing = {
   ...internalTesting,
+  ...internal,
   parseMsgProps,
   isOptionalProp,
   parseServiceMethods,
