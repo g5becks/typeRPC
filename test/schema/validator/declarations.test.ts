@@ -1,7 +1,6 @@
 import {Project, SourceFile} from 'ts-morph'
 import {testing} from '../../../src/schema'
 import {genSourceFile} from '../util'
-import {run} from '@oclif/command'
 
 let project: Project
 
@@ -171,3 +170,11 @@ test('validateImports() should fail when it finds an aliased import', () => {
 
   expect(validateImports(file, proj.getSourceFiles()).length).toEqual(1)
 })
+
+test('validateExports() should fail when it finds an exports assignment', () => runTest(`
+  const name = ''
+  export = name`, validateExports))
+
+test('validateExports() should fail when it finds a default export', () =>
+  expect(validateExports(genSourceFile('export default  \'\'', project)).length).toEqual(3)
+)
