@@ -186,3 +186,21 @@ export const genTestFile = () => {
   const imports = genImports(names2)
   return imports.concat(messages).concat(queryServices).concat(mutationServices)
 }
+
+export const  isValidDataTypeTestSource = `
+  type Valid = rpc.Msg<{
+      dummy: $.str
+  }>
+  type SomeSvc = rpc.Msg<{
+      invalidType = string
+      validType = $.str
+      inValid = rpc.Ms<{
+      name: $.str
+      }>
+      valid = $.int8
+      invalid1 = $.int
+      valid1 = $.uint8
+      invalid2 = Who
+      valid2 = Valid
+  }>
+`

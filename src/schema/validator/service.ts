@@ -57,7 +57,7 @@ const validateQueryMethodParam = (param: ParameterDeclaration): Error[] => {
     [] :  [singleValidationErr(param, `${param.getName()} has an invalid type. Methods annotated with @access GET are only allowed to use the following types for parameters: ${queryParamables}. Note: a t.List<> can only use one of the mentioned primitive types as a type parameter`)]
 }
 
-// TODO test this function
+// validates that all methods of an rpc.QuerySvc have valid params
 const validateQueryMethodParams = (method: MethodSignature): Error[] => {
   const params = method.getParameters()
   if (params.length === 0) {
