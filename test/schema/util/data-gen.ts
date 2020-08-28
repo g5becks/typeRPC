@@ -12,7 +12,7 @@ const comparables = ['$.bool', '$.int8', '$.uint8', '$.uint16', '$.int16', '$.in
 const genRandomComparable = () => comparables[randomNumber(0, comparables.length)]
 // creates a random scalar type that can be used as an rpc.QuerySvc param
 
-export const genRandomQueryParamableScalar = () => queryParamables[randomNumber(0, queryParamables.length)]
+export const genRandomQueryParamableScalar = () => queryParamables.filter(val => val !== '$.List')[randomNumber(0, queryParamables.length - 1)]
 
 export const genRandomQueryParamableList = () => `$.List<${genRandomQueryParamableScalar()}>`
 

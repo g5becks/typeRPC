@@ -25,47 +25,6 @@ beforeEach(() => {
   project = new Project()
 })
 
-test('buildResponseCode() should return correct HttpResponse', () => {
-  const methods = genSourceFile(testController, project).getInterfaces()[0].getMethods()
-  for (let i = 0; i < methods.length; i++) {
-    const responseCode = buildResponseCode(methods[i])
-    switch (i) {
-    case 0:
-      expect(responseCode).toEqual(200)
-      break
-    case 1:
-      expect(responseCode).toEqual(202)
-      break
-    case 2:
-      expect(responseCode).toEqual(201)
-      break
-    case 3:
-      expect(responseCode).toEqual(204)
-      break
-    case 4:
-      expect(responseCode).toEqual(301)
-      break
-    default:
-      expect(responseCode).toEqual(200)
-    }
-  }
-})
-
-test('buildParams() should return correct Params', () => {
-  const interfaces = makeTestFile(project).getInterfaces()
-  const methods = interfaces.flatMap(interfc => interfc.getMethods())
-  for (const method of methods) {
-    const params = method.getParameters()
-    const builtParams = buildParams(params)
-    expect(params.length).toEqual(builtParams.length)
-    for (let i = 0; i < params.length; i++) {
-      expect(params[i].isOptional()).toEqual(builtParams[i].isOptional)
-      expect(params[i].getNameNode().getText().trim()).toEqual(builtParams[i].name)
-      expect(params[i].getTypeNode()!.getText().trim()).toEqual(builtParams[i].type.toString())
-    }
-  }
-})
-
 test('buildMethod() should return method with correct params and return type', () => {
   const interfaces = makeTestFile(project).getInterfaces()
   const methods = interfaces.flatMap(interfc => interfc.getMethods())

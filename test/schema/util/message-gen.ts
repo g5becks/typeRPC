@@ -1,5 +1,5 @@
 import {genRandomDataType, genRandomName, randomNumber} from './data-gen'
-import {optional, useCbor} from '.'
+import {genImports, optional, useCbor} from '.'
 
 export const genRpcMsgLiteral = (msgNames: string[]): string => {
   let props = ''
@@ -9,7 +9,7 @@ export const genRpcMsgLiteral = (msgNames: string[]): string => {
   }
   return `rpc.Msg<{
       ${props}
-      }\n`
+      }`
 }
 const genRpcMsg = (name: string, msgNames: string[]): string => `
   ${useCbor()}
@@ -22,17 +22,6 @@ export const genRpcMessages = (names: string[], msgNames: string[]): string => {
     types = types.concat(genRpcMsg(name, msgNames))
   }
   return types
-}
-
-const genImports = (msgNames: string[]): string => {
-  let imports = ''
-  let i = 0
-  while (i < msgNames.length) {
-    const useComma = i === msgNames.length - 1 ? '' : ', '
-    imports = imports.concat(msgNames[i] + useComma)
-    i++
-  }
-  return `import {${imports}} from ./dummy-file\n`
 }
 
 export const genMsgNames = (): string[] => {

@@ -145,3 +145,13 @@ type NonExportedType = rpc.Msg<{
   name: $.str
 }>
 `
+export const genImports = (msgNames: string[]): string => {
+  let imports = ''
+  let i = 0
+  while (i < msgNames.length) {
+    const useComma = i === msgNames.length - 1 ? '' : ', '
+    imports = imports.concat(msgNames[i] + useComma)
+    i++
+  }
+  return `import {${imports}} from ./dummy-file\n`
+}
