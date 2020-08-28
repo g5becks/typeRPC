@@ -1,7 +1,7 @@
 import {SourceFile} from 'ts-morph'
 import {internal as decInternal, validateDeclarations} from './declarations'
 import {validateMessage, validateMessages} from './message'
-import {isErrCode, isResponseCode, validateServices} from './service'
+import {isErrCode, isResponseCode, serviceValidatorTesting, validateServices} from './service'
 import {isContainer, isMsg, isMsgLiteral, isQuerySvc, isValidDataType, isValidMsg} from './utils'
 
 const validateSchema = (file: SourceFile, projectFiles: SourceFile[]): Error[] => {
@@ -19,6 +19,8 @@ export {isMsg, isValidMsg, isMsgLiteral, isQuerySvc, isContainer, isValidDataTyp
 
 export const internal = {
   ...decInternal,
+  ...serviceValidatorTesting,
   validateMessage,
+
 }
 

@@ -17,21 +17,6 @@ const runTest = (project: Project, source: string, errLength: number): void => {
   expect(validateSchemas([project.getSourceFile('test.ts')!]).length).toBe(errLength)
 }
 
-test(testName(1, 'extra imports'), () => {
-  const source = `
-  import * as path from 'path'
-  `
-  runTest(project, sourceWithValidImportAndInterface(source), 1)
-})
-
-test(testName(1, 'aliased @typerpc import'), () => {
-  const source = `
-  import {t as v} from '@typerpc/types'
-  ${validQuerySvc}
-  `
-  runTest(project, source, 1)
-})
-
 test(testName(1, 'method with invalid param type'), () => {
   const source = `
   interface Person {

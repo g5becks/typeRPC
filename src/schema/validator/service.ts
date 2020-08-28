@@ -16,7 +16,6 @@ export const isResponseCode = (code: number | undefined): code is HTTPResponseCo
 // is the number used in the JsDoc @throws tag a valid typerpc HTTPErrCode?
 export const isErrCode = (code: number | undefined): code is HTTPErrCode => errCodes.includes(code ?? 0)
 
-// TODO test this function
 const validateMethodJsDoc = (method: MethodSignature): Error[] => {
   const tags = method.getJsDocs()[0]?.getTags()
   if (typeof tags === 'undefined' || tags.length === 0) {
@@ -82,3 +81,11 @@ const validateParams = (method: MethodSignature): Error[] =>
 const validateService = (service: TypeAliasDeclaration): Error[] => parseServiceMethods(service).flatMap(method => [...validateParams(method), ...validateReturnType(method), ...validateNotGeneric(method), ...validateMethodJsDoc(method), ...validateQueryMethodParams(method)])
 
 export const validateServices = (file: SourceFile): Error[] => parseQueryServices(file).flatMap(type => validateService(type))
+
+export const serviceValidatorTesting = {
+  validateService,
+  validateNotGeneric,
+  validateReturnType,
+  validateMethodJsDoc,
+  validateQueryMethodParams,
+}
