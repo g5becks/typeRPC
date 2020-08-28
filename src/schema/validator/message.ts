@@ -5,7 +5,6 @@ import {parseMessages, parseMsgProps} from '../parser'
 const validateProp = (prop: PropertySignature): Error[] =>
   isValidDataType(prop.getTypeNode()) ? [] : [singleValidationErr(prop, 'Invalid property type, Only messages imported from @typerpc/messages, rpc.Msg messages, and other rpc.Msg messages declared in the same file may be used as property messages')]
 
-// TODO test this
 const validateMsgProps = (props: PropertySignature[]): Error[] => {
   let errs: Error[] = []
   for (const prop of props) {

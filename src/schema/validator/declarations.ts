@@ -1,5 +1,6 @@
 import {ImportDeclaration, SourceFile, SyntaxKind, TypeAliasDeclaration} from 'ts-morph'
 import {isMsg, isQuerySvc, multiValidationErr, singleValidationErr, validateNotGeneric, Violator} from './utils'
+import {validateMessages} from './message'
 
 const validate = (declarations: Violator[]): Error[] => declarations.length > 0 ? [multiValidationErr(declarations)] : []
 // Ensure zero function declarations
@@ -14,7 +15,6 @@ const validateInterfaces = (file: SourceFile): Error[] => validate(file.getInter
 // Ensure zero class declarations
 const validateClasses = (file: SourceFile): Error[] => validate(file.getClasses())
 
-// TODO, test this
 const validateImports = (file: SourceFile, projectFiles: SourceFile[]): Error[] => {
   const imports = file.getImportDeclarations()
   const err = (i: ImportDeclaration, msg: string) => singleValidationErr(i, 'invalid import declaration : ' + i.getText() + ` reason: ${msg}`)
@@ -201,5 +201,6 @@ export const internal = {
   validateVariables,
   validateInterfaces,
   validateFunctions,
+  validateMessages,
 
 }
