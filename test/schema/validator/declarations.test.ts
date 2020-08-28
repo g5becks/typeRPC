@@ -63,4 +63,9 @@ test(testName('variable declaration'), () => {
   let you: number = 2`, validateVariables)
 })
 
-test(testName())
+test(testName('class declaration'), () => {
+  runTest(`
+  class MyClass {
+  private name: string = ''
+  }`, validateClasses)
+})

@@ -17,14 +17,6 @@ const runTest = (project: Project, source: string, errLength: number): void => {
   expect(validateSchemas([project.getSourceFile('test.ts')!]).length).toBe(errLength)
 }
 
-test(testName(1, 'class declaration'), () => {
-  const source = `
-  class MyClass {
-  private name: string = ''
-  }`
-  runTest(project, sourceWithValidImportAndInterface(source), 1)
-})
-
 test(testName(1, 'extra imports'), () => {
   const source = `
   import * as path from 'path'
