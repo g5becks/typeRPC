@@ -1,7 +1,6 @@
-import {genMsgNames, genSourceFile, testQuerySvc} from '../util'
+import {genMsgNames, genServices, genSourceFile, hasCborParamsTestData, testQuerySvc} from '../util'
 import {testing} from '../../../src/schema'
 import {Project} from 'ts-morph'
-import {genServices} from '../util/service-gen'
 
 let project: Project
 beforeEach(() => {
@@ -11,6 +10,8 @@ const {buildErrCode,
   parseServiceMethods,
   buildResponseCode,
   buildParams,
+  buildMethod,
+  buildMutationMethod,
 } = testing
 
 test('buildErrCode() should return correct error code or 500 when incorrect value provided', () => {
@@ -67,9 +68,7 @@ test('buildResponseCode() should return correct HttpResponse', () => {
 })
 
 test('buildParams() should return correct Params', () => {
-  const svc = genServices('Query', genMsgNames())
-  console.log(svc)
-  const services = genSourceFile(svc, project).getTypeAliases()
+  const services = genSourceFile(genServices('Query', genMsgNames()), project).getTypeAliases()
   const methods = services.flatMap(svc => parseServiceMethods(svc))
   for (const method of methods) {
     const params = method.getParameters()
@@ -81,4 +80,26 @@ test('buildParams() should return correct Params', () => {
       expect(params[i].getTypeNode()!.getText().trim()).toEqual(builtParams[i].type.toString())
     }
   }
+})
+
+test('buildMethod() should return method with correct params and return type', () => {
+  const services = genSourceFile(genServices('Mutation', genMsgNames()), project).getTypeAliases()
+  const methods = services.flatMap(svc => parseServiceMethods(svc))
+  for (const method of methods) {
+    const builtMethod = buildMethod(method, false)
+    expect(method.getReturnTypeNode()!.getText().trim()).toEqual(builtMethod.returnType.toString())
+    expect(method.getNameNode().getText().trim()).toEqual(builtMethod.name)
+    expect(method.getParameters().length).toEqual(builtMethod.params.length)
+  }
+})
+
+test('hasCborParams() should return correct boolean value', () => {
+  const file = genSourceFile(hasCborParamsTestData, project)
+  const service1Methods = parseServiceMethods(file.getTypeAlias('TestService1')!)
+  const service2Methods = parseServiceMethods(file.getTypeAlias('TestService2')!)
+  const service3Methods = parseServiceMethods(file.getTypeAlias('TestService3')!)
+  expect(buildMutationMethod(service1Methods[0], false).hasCborParams).toBeTruthy()
+  expect(buildMutationMethod(service2Methods[0], false).hasCborParams).toBeTruthy()
+  expect(buildMutationMethod(service3Methods[0], true).hasCborParams).toBeTruthy()
+  expect(buildMutationMethod(service1Methods[1], false).hasCborReturn).toBeTruthy()
 })

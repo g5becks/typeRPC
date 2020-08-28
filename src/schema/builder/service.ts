@@ -41,11 +41,11 @@ export const buildParams = (params: ParameterDeclaration[]): Param[] => {
 
 const getMethodName = (method: MethodSignature): string => method.getNameNode().getText().trim()
 
-const hasCborParams = (params: ReadonlyArray<Param>, method: MethodSignature, isCborSvc: boolean): boolean =>  {
+export const hasCborParams = (params: ReadonlyArray<Param>, method: MethodSignature, isCborSvc: boolean): boolean =>  {
   return ([...params].some(param => is.Struct(param.type) && param.type.useCbor)) || isCborSvc || useCbor(method)
 }
 
-const buildMethod = (method: MethodSignature, isCborSvc: boolean): Method => {
+export const buildMethod = (method: MethodSignature, isCborSvc: boolean): Method => {
   return {
     name: getMethodName(method),
     params: buildParams(method.getParameters()),
@@ -65,13 +65,13 @@ const buildMethod = (method: MethodSignature, isCborSvc: boolean): Method => {
   }
 }
 
-const buildQueryMethod = (method: MethodSignature, isCborSvc: boolean): QueryMethod => {
+export const buildQueryMethod = (method: MethodSignature, isCborSvc: boolean): QueryMethod => {
   return {...buildMethod(method, isCborSvc),
     httpMethod: 'GET',
   }
 }
 
-const buildMutationMethod = (method: MethodSignature, isCborSvc: boolean): MutationMethod => {
+export const buildMutationMethod = (method: MethodSignature, isCborSvc: boolean): MutationMethod => {
   const builtMethod = buildMethod(method, isCborSvc)
   return {...builtMethod,
     httpMethod: 'POST',

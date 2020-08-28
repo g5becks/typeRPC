@@ -1,7 +1,7 @@
 import {SourceFile} from 'ts-morph'
 import {Import, Schema} from '../schema'
 import {buildMessages} from './message'
-import {buildErrCode, buildMutationServices, buildParams, buildQueryServices, buildResponseCode} from './service'
+import {buildErrCode, buildMutationServices, buildParams, buildQueryServices, buildResponseCode, buildMethod, buildMutationMethod, buildQueryMethod, hasCborParams} from './service'
 import {isType, makeDataType, useCbor} from './data-type'
 import {validateSchemas} from '../validator'
 
@@ -39,4 +39,9 @@ export const internalTesting = {
   buildErrCode,
   buildResponseCode,
   makeDataType,
+  buildMutationMethod,
+  buildMethod,
+  buildQueryMethod,
+  hasCborParams,
+  buildImports,
 }

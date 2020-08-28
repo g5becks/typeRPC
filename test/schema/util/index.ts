@@ -2,8 +2,9 @@ import {Project, SourceFile} from 'ts-morph'
 import {randomNumber} from './data-gen'
 import {genMsgNames, genRpcMessages, genTestMessageFiles} from './message-gen'
 import {containers, scalars} from '../../../src/schema'
+import {genServices} from './service-gen'
 
-export {genTestMessageFiles, genMsgNames, genRpcMessages}
+export {genTestMessageFiles, genMsgNames, genRpcMessages, genServices}
 export const validImport = 'import {$, rpc} from \'@typerpc/types\''
 export const validQuerySvc = `
 type TestService = rpc.QuerySvc<{
@@ -153,5 +154,35 @@ export const genImports = (msgNames: string[]): string => {
     imports = imports.concat(msgNames[i] + useComma)
     i++
   }
-  return `import {${imports}} from ./dummy-file\n`
+  return `import {${imports}} from './dummy-file'\n`
+}
+
+export const hasCborParamsTestData = `
+
+/** @kind cbor */
+type CborParam = rpc.Msg<{}>
+type TestService1 = rpc.MutationSvc<{
+  method1(param: CborParam, param2: $.str): $.List<$.int8>;
+  method2(param: $.int8): CborParam;
+}>
+
+type TestService2 = rpc.MutationSvc<{
+  /** @kind cbor */
+  method1(param: $.str, param2: $.int8): $.unit;
+  method2(param: $.str, param3: $.int16): $.nil;
+}>
+
+type TestService3 = rpc.MutationSvc<{
+  method1(param: $.str): $.unit;
+}>
+`
+
+export const genTestFile = () => {
+  const names = genMsgNames()
+  const names2 = genMsgNames()
+  const messages = genRpcMessages(names, names2)
+  const queryServices = genServices('Query', names)
+  const mutationServices = genServices('Mutation', names)
+  const imports = genImports(names2)
+  return imports.concat(messages).concat(queryServices).concat(mutationServices)
 }

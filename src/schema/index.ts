@@ -12,7 +12,7 @@ import {
 } from './types'
 import {buildSchemas, internalTesting} from './builder'
 
-import {parseMsgProps, isOptionalProp, parseServiceMethods} from './parser'
+import {parseMsgProps, isOptionalProp, parseServiceMethods, parseMutationServices, parseQueryServices, parseMessages} from './parser'
 
 export {buildSchemas, Schema, make, DataType, is, Import, QueryService, Message, Param, Property, MutationMethod, Struct, StructLiteral, StructLiteralProp, scalars, containers, queryParamables}
 
@@ -21,5 +21,7 @@ export const testing = {
   parseMsgProps,
   isOptionalProp,
   parseServiceMethods,
-
+  parseQueryServices,
+  parseMutationServices,
+  parseMessages,
 }
