@@ -78,16 +78,6 @@ export interface MutationMethod extends Method {
   readonly hasCborParams: boolean;
 }
 
-/** A Property that Belongs to an rpc.Msg */
-export type Property = Readonly<{
-  /** The name of this property */
-  name: string;
-  /** The property's DataType */
-  type: DataType;
-  /** Whether or not this Property is optional */
-  isOptional: boolean;
-}>
-
 /** An rpc.QuerySvc */
 export type QueryService = Readonly<{
   type: 'QueryService';
@@ -114,6 +104,16 @@ export type MutationService = Readonly<{
    * for all of this service's methods to return true.
    */
   useCbor: boolean;
+}>
+
+/** A Property that Belongs to an rpc.Msg */
+export type Property = Readonly<{
+  /** The name of this property */
+  name: string;
+  /** The property's DataType */
+  type: DataType;
+  /** Whether or not this Property is optional */
+  isOptional: boolean;
 }>
 
 /** An rpc.Msg from schema file */
