@@ -25,28 +25,6 @@ beforeEach(() => {
   project = new Project()
 })
 
-test('makeDataType() should return correct DataType for type prop', () => {
-  const file = makeTestFile(project)
-  const types = file.getTypeAliases()
-  for (const type of types) {
-    for (const node of type.getTypeNode()!.forEachChildAsArray()) {
-      const propType = getTypeNode(node)
-      const dataType = makeDataType(propType)
-      expect(dataType.toString()).toEqual(propType.getText().trim())
-    }
-  }
-})
-
-test('useCbor() should return true when jsDoc contains cbor string', () => {
-  const source = `
-/** @kind cbor */
-type BinaryType = {
-  data: t.blob
-}
-`
-  expect(useCbor(genSourceFile(source, project).getTypeAliases()[0])).toBeTruthy()
-})
-
 test('isOptional() should return true when given optional prop', () => {
   const source = `
  type TypeWithOptional = {
@@ -55,36 +33,6 @@ test('isOptional() should return true when given optional prop', () => {
   const alias = genSourceFile(source, project).getTypeAliases()[0]
   const prop = alias.getTypeNode()!.forEachChildAsArray()[0]
   expect(isOptional(prop)).toBeTruthy()
-})
-
-test('buildHttpVerb() should return correct HttpVerb', () => {
-  const methods = genSourceFile(testController, project).getInterfaces()[0].getMethods()
-  for (let i = 0; i < methods.length; i++) {
-    const verb = buildHttpVerb(methods[i])
-    switch (i) {
-    case 0:
-      expect(verb).toEqual('GET')
-      break
-    case 1:
-      expect(verb).toEqual('POST')
-      break
-    case 2:
-      expect(verb).toEqual('POST')
-      break
-    case 3:
-      expect(verb).toEqual('POST')
-      break
-    case 4:
-      expect(verb).toEqual('POST')
-      break
-    case 5:
-      expect(verb).toEqual('POST')
-      break
-    case 6:
-      expect(verb).toEqual('POST')
-      break
-    }
-  }
 })
 
 test('buildErrCode() should return correct HttpErrorCode', () => {
@@ -137,33 +85,6 @@ test('buildResponseCode() should return correct HttpResponse', () => {
     default:
       expect(responseCode).toEqual(200)
     }
-  }
-})
-
-test('buildProps() should return correct type alias properties', () => {
-  const file = makeTestFile(project)
-  const types = file.getTypeAliases()
-  for (const type of types) {
-    const props = type.getTypeNode()!.forEachChildAsArray()
-    const builtProps = buildProps(props)
-    const testProps: testProp[] = props.map(prop => {
-      return {isOptional: prop.getText().includes('?'), name: prop.getChildAtIndex(0).getText().trim(), type: getTypeNode(prop).getText().trim()}
-    })
-    for (let i = 0; i < builtProps.length; i++) {
-      expect(builtProps[i].name).toEqual(testProps[i].name)
-      expect(builtProps[i].isOptional).toEqual(testProps[i].isOptional)
-      expect(builtProps[i].type.toString()).toEqual(testProps[i].type)
-    }
-  }
-})
-
-test('buildTypes() should return correct Set of messages', () => {
-  const file = makeTestFile(project)
-  const aliases = file.getTypeAliases()
-  const builtTypes = buildTypes(file)
-  expect(builtTypes.length).toEqual(aliases.length)
-  for (let i = 0; i < builtTypes.length; i++) {
-    expect(builtTypes[i].properties.length).toEqual(aliases[i].getTypeNode()!.forEachChildAsArray().length)
   }
 })
 

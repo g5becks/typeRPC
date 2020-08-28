@@ -20,8 +20,12 @@ const validateMsgProps = (props: PropertySignature[]): Error[] => {
   return errs
 }
 
-export const validateMessage = (msg: TypeAliasDeclaration| TypeNode): Error[] =>
-  validateMsgProps(parseMsgProps(msg))
+export const validateMessage = (msg: TypeAliasDeclaration| TypeNode): Error[] => {
+  if (parseMsgProps(msg).length === 0) {
+    return ([singleValidationErr(msg, 'Message has no properties. Empty messages are not allowed.')])
+  }
+  return validateMsgProps(parseMsgProps(msg))
+}
 
 export const validateMessages = (file: SourceFile): Error[] =>
   parseMessages(file).flatMap(msg => validateMessage(msg))

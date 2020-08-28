@@ -35,13 +35,13 @@ const genImports = (msgNames: string[]): string => {
   return `import {${imports}} from ./dummy-file\n`
 }
 
-export const genMsgNames = (): Set<string> => {
+export const genMsgNames = (): string[] => {
   const num = randomNumber(30, 50)
   let names: string[] = []
   for (let i = 0; i < num; i++) {
     names = names.concat(genRandomName())
   }
-  return new Set<string>(names)
+  return [...new Set<string>(names)]
 }
 
 export const genTestMessageFiles = (msgNames: string[]): [string, string][] => {

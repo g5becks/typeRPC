@@ -4,7 +4,7 @@ import {Message, Property} from '../schema'
 import {isOptionalProp, parseMessages, parseMsgProps} from '../parser'
 import {makeDataType} from './data-type'
 
-export const buildProps = (properties: PropertySignature[]): Property[] =>
+const buildProps = (properties: PropertySignature[]): Property[] =>
   properties.map(prop => {
     return {
       isOptional: isOptionalProp(prop),

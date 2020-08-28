@@ -1,9 +1,9 @@
 import {Project, SourceFile} from 'ts-morph'
 import {randomNumber} from './data-gen'
-import {genMsgNames, genTestMessageFiles} from './message-gen'
+import {genMsgNames, genRpcMessages, genTestMessageFiles} from './message-gen'
 import {containers, scalars} from '../../../src/schema'
 
-export {genTestMessageFiles, genMsgNames}
+export {genTestMessageFiles, genMsgNames, genRpcMessages}
 export const validImport = 'import {$, rpc} from \'@typerpc/types\''
 export const validQuerySvc = `
 type TestService = rpc.QuerySvc<{
@@ -135,3 +135,8 @@ export const genMsgNamesFunc = () => {
 }
 
 export const validDataTypes = (msgNames: string[]) =>  [...scalars, ...containers, 'rpc.Msg<{', msgNames]
+
+export const exportTestMessages = `
+export type SomeType = rpc.Msg<{
+  name: $.str
+}>`
