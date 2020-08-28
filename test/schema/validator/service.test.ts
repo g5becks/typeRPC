@@ -73,3 +73,26 @@ test('validateMethodNotGeneric() should return an error when method is generic',
   const method = parseServiceMethods(genSourceFile(source, project).getTypeAlias('SomeSvc')!)[0]
   expect(validateNotGeneric(method).length).toEqual(1)
 })
+
+test('validateReturnType() should return an error when return type is not valid', () => {
+  const source =
+    `type SomeSvc = rpc.MutationSvc<{
+    getNames<T extends $.int8>(namesSlot: T): string[];
+    getNames<T extends $.int8>(namesSlot: T): $.List<$.str>;
+  }>
+  `
+  const methods =  parseServiceMethods(genSourceFile(source, project).getTypeAlias('SomeSvc')!)
+  expect(validateReturnType(methods[0]).length).toEqual(1)
+  expect(validateReturnType(methods[1]).length).toEqual(0)
+})
+
+test('validateQueryMethodParams() should return an error when an invalid type is used', () => {
+  const source = `
+  type SomeSvc = rpc.QuerySvc<{
+    testMethod(names: $.Dict<$.int8, $.bool>):$.unit;
+    testMethod(names: $.List<$.int8>): $.unit;
+  }>`
+  const methods = parseServiceMethods(genSourceFile(source, project).getTypeAlias('SomeSvc')!)
+  expect(validateQueryMethodParams(methods[0]).length).toEqual(1)
+  expect(validateQueryMethodParams(methods[1]).length).toEqual(0)
+})

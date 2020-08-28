@@ -54,13 +54,13 @@ const validateMethodJsDoc = (method: MethodSignature): Error[] => {
 
 const validateQueryMethodParam = (param: ParameterDeclaration): Error[] => {
   return queryParamables.some(val => param.getTypeNode()!.getText().trim().startsWith(val)) ?
-    [singleValidationErr(param, `${param.getName()} has an invalid type. Methods annotated with @access GET are only allowed to use the following types for parameters: ${queryParamables}. Note: a t.List<> can only use one of the mentioned primitive types as a type parameter`)] : []
+    [] :  [singleValidationErr(param, `${param.getName()} has an invalid type. Methods annotated with @access GET are only allowed to use the following types for parameters: ${queryParamables}. Note: a t.List<> can only use one of the mentioned primitive types as a type parameter`)]
 }
 
 // TODO test this function
 const validateQueryMethodParams = (method: MethodSignature): Error[] => {
   const params = method.getParameters()
-  if (parseJsDocComment(method, 'access')?.toUpperCase() !== 'GET' || params.length === 0) {
+  if (params.length === 0) {
     return []
   }
   return params.flatMap(param => validateQueryMethodParam(param))
