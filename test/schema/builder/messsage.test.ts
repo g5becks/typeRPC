@@ -1,6 +1,7 @@
 import {testing} from '../../../src/schema'
 import {exportTestMessages, genMsgNames, genSourceFile, genSourceFiles, genTestMessageFiles} from '../util'
 import {Project, SourceFile} from 'ts-morph'
+import 'array-flat-polyfill'
 
 const {buildMessages, parseMsgProps, isOptionalProp} = testing
 

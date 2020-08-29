@@ -2,6 +2,7 @@
 import {Node, Project, TypeNode} from 'ts-morph'
 import {is, make, testing} from '../../../src/schema'
 import {genSourceFile, typesTestData} from '../util'
+import 'array-flat-polyfill'
 
 const types: {[key: string]: Node| TypeNode} = {}
 const {makeDataType} = testing

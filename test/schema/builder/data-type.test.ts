@@ -1,6 +1,7 @@
 import {containers, is, scalars, testing} from '../../../src/schema'
 import {Project, TypeAliasDeclaration} from 'ts-morph'
 import {genSourceFile, genSourceFiles, genTestMessageFiles, makeStructTestSource, genMsgNames} from '../util'
+import 'array-flat-polyfill'
 
 const {
   isType,

@@ -1,6 +1,8 @@
 import {Project} from 'ts-morph'
 import {testing} from '../../../src/schema'
+// @ts-ignore
 import {genMsgNames, genServices, genSourceFile} from '../util'
+import 'array-flat-polyfill'
 
 let project: Project
 
