@@ -157,6 +157,8 @@ export const  isValidDataTypeTestSource = `
 
 export const typesTestData = `
 import {SomeStruct} from './somewhere'
+/** @kind cbor */
+type CborType = rpc.Msg<{name: $.str}>
 
 type TestType = rpc.Msg<{
   dict: $.Dict<$.int8, $.int8>
@@ -167,4 +169,5 @@ type TestType = rpc.Msg<{
   list: $.List<$.bool>
   struct: SomeStruct
   structLiteral: rpc.Msg<{name: $.str, age: $.int8}>
+  cborType: CborType
 }>`
