@@ -36,7 +36,7 @@ export const make = {
   },
   Dict: (type: TypeNode | Node, makeDataType: (type: TypeNode | Node) => DataType): DataType => {
     const params = parseTypeParams(type)
-    const keyType = make.primitive(params[0])
+    const keyType = make.scalar(params[0])
     const valType = makeDataType(params[1])
     if (!keyType) {
       throw typeError(type)
@@ -100,59 +100,59 @@ export const make = {
       },
     } as unknown as DataType
   },
-  primitive: (type: TypeNode | Node): DataType | undefined => scalarsMap.get(type.getText().trim()),
+  scalar: (type: TypeNode | Node): DataType | undefined => scalarsMap.get(type.getText().trim()),
   get bool(): DataType {
-    return {toString: () => '$.bool'} as DataType
+    return {type: 'bool', toString: () => '$.bool'} as unknown as DataType
   },
   get int8(): DataType {
-    return {toString: () => '$.int8'} as DataType
+    return {type: 'int8', toString: () => '$.int8'} as unknown as DataType
   },
   get uint8(): DataType {
-    return {toString: () => '$.uint8'} as DataType
+    return {type: 'uint8', toString: () => '$.uint8'} as unknown as DataType
   },
   get int16(): DataType {
-    return {toString: () => '$.int16'} as DataType
+    return {type: 'int16', toString: () => '$.int16'} as unknown as DataType
   },
   get uint16(): DataType {
-    return {toString: () => '$.uint16'} as DataType
+    return {type: 'uint16', toString: () => '$.uint16'} as unknown as DataType
   },
   get int32(): DataType {
-    return {toString: () => '$.int32'} as DataType
+    return {type: 'int32', toString: () => '$.int32'} as unknown as DataType
   },
   get uint32(): DataType {
-    return {toString: () => '$.uint32'} as DataType
+    return {type: 'uint32', toString: () => '$.uint32'} as unknown as DataType
   },
   get int64(): DataType {
-    return {toString: () => '$.int64'} as DataType
+    return {type: 'int64', toString: () => '$.int64'} as unknown as DataType
   },
   get uint64(): DataType {
-    return {toString: () => '$.uint64'} as DataType
+    return {type: 'uint64', toString: () => '$.uint64'} as unknown as DataType
   },
   get float32(): DataType {
-    return {toString: () => '$.float32'} as DataType
+    return {type: 'float32', toString: () => '$.float32'} as unknown as DataType
   },
   get float64(): DataType {
-    return {toString: () => '$.float64'} as DataType
+    return {type: 'float64', toString: () => '$.float64'} as unknown as DataType
   },
   get nil(): DataType {
-    return {toString: () => '$.nil'} as DataType
+    return {type: 'nil', toString: () => '$.nil'} as unknown as DataType
   },
   get str(): DataType {
-    return {toString: () => '$.str'} as DataType
+    return {type: 'str', toString: () => '$.str'} as unknown as DataType
   },
   get err(): DataType {
-    return {toString: () => '$.err'} as DataType
+    return {type: 'err', toString: () => '$.err'} as unknown as DataType
   },
   get dyn(): DataType {
-    return {toString: () => '$.dyn'} as DataType
+    return {type: 'dyn', toString: () => '$.dyn'} as unknown as DataType
   },
   get timestamp(): DataType {
-    return {toString: () => '$.timestamp'} as DataType
+    return {type: 'timestamp', toString: () => '$.timestamp'} as unknown as DataType
   },
   get unit(): DataType {
-    return {toString: () => '$.unit'} as DataType
+    return {type: 'unit', toString: () => '$.unit'} as unknown as DataType
   },
   get blob(): DataType {
-    return {toString: () => '$.blob'} as DataType
+    return {type: 'blob', toString: () => '$.blob'} as unknown as DataType
   },
 }

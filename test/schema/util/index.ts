@@ -168,6 +168,11 @@ type TestType = rpc.Msg<{
   tuple5: $.Tuple5<$.str, $.bool, $.bool, $.str, $.bool>
   list: $.List<$.bool>
   struct: SomeStruct
-  structLiteral: rpc.Msg<{name: $.str, age: $.int8}>
+  structLiteral: rpc.Msg<{
+    name: $.str,
+    age: $.int8,
+    birthDate: $.timestamp,
+    weight: $.float32
+    }>
   cborType: CborType
 }>`
