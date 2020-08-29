@@ -43,8 +43,10 @@ const typeLiteral = (props: ReadonlyArray<StructLiteralProp>): string => {
   let properties = ''
   let i = 0
   while (i < props.length) {
+    /* eslint-disable @typescript-eslint/no-use-before-define */
     properties = properties.concat(`${props[i].name}${props[i].isOptional ? '?' : ''}: ${dataType(props[i].type)} ${i === props.length - 1 ? ',' : ''}\n`)
     i++
+    /* eslint-disable @typescript-eslint/no-use-before-define */
   }
   return `{
       ${properties}
