@@ -161,9 +161,9 @@ import {SomeStruct} from './somewhere'
 type TestType = rpc.Msg<{
   dict: $.Dict<$.int8, $.int8>
   tuple2: $.Tuple2<$.int8, $.int8>
-  tuple3: $.Tuple3<$.int8, $.int8, $int8>
-  tuple4: $.Tuple4<$.int8, $.str, $.str>
-  tuple5: $.Tuple5<$.str, $.bool, $.bool>
+  tuple3: $.Tuple3<$.int8, $.int8, $.int8>
+  tuple4: $.Tuple4<$.int8, $.str, $.str, $.str>
+  tuple5: $.Tuple5<$.str, $.bool, $.bool, $.str, $.bool>
   list: $.List<$.bool>
   struct: SomeStruct
   structLiteral: rpc.Msg<{name: $.str, age: $.int8}>
