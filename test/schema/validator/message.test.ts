@@ -1,5 +1,5 @@
 import {Project} from 'ts-morph'
-import {genMsgNames, genSourceFile, genSourceFiles, genTestMessageFiles} from '../util'
+import {genMsgNames, genSourceFile, genSourceFiles, genTestMessageFiles} from '../../util'
 import {testing} from '../../../src/schema'
 
 const {validateMessages, validateMessage} = testing

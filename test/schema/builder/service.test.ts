@@ -1,4 +1,4 @@
-import {genMsgNames, genServices, genSourceFile, hasCborParamsTestData, testQuerySvc} from '../util'
+import {genMsgNames, genServices, genSourceFile, hasCborParamsTestData, testQuerySvc} from '../../util'
 import {testing} from '../../../src/schema'
 import {Project} from 'ts-morph'
 

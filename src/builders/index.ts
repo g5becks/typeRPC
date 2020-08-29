@@ -1,5 +1,5 @@
 import {Schema} from '../schema'
-import {KoaBuilder} from './typescript/koa'
+import {KoaBuilder, dataType} from './typescript'
 
 export type Code = {
   readonly fileName: string;
@@ -20,3 +20,7 @@ export type CodeBuilder = {
 export const builders: CodeBuilder[] = [
   KoaBuilder,
 ]
+
+export const _testing = {
+  dataType,
+}

@@ -1,7 +1,7 @@
 /* eslint-disable new-cap */
 import {Node, Project, TypeNode} from 'ts-morph'
 import {is, make, testing} from '../../../src/schema'
-import {genSourceFile, typesTestData} from '../util'
+import {genSourceFile, typesTestData} from '../../util'
 
 const types: {[key: string]: Node| TypeNode} = {}
 const {makeDataType} = testing

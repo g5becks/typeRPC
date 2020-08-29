@@ -1,4 +1,4 @@
-import {genSourceFile, genTestFile} from '../util'
+import {genSourceFile, genTestFile} from '../../util'
 import {Project} from 'ts-morph'
 import {testing} from '../../../src/schema'
 

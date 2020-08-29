@@ -1,5 +1,5 @@
-import {AxiosBuilder} from './axios-builder'
-import {FastifyBuilder} from './fastify-builder'
+import {Axios} from './axios'
+import {KoaBuilder} from './koa'
+import {dataType} from './utils'
 
-export {AxiosBuilder}
-export {FastifyBuilder}
+export {Axios, KoaBuilder, dataType}

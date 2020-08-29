@@ -1,6 +1,6 @@
 import {Project, SourceFile} from 'ts-morph'
 import {testing} from '../../../src/schema'
-import {genSourceFile} from '../util'
+import {genSourceFile} from '../../util'
 
 let project: Project
 

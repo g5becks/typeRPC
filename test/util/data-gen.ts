@@ -1,4 +1,4 @@
-import {queryParamables} from '../../../src/schema/types'
+import {queryParamables} from '../../src/schema/types'
 import faker from 'faker'
 
 export function randomNumber(min: number, max: number) {

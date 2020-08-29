@@ -1,5 +1,5 @@
 import {testing} from '../../../src/schema'
-import {exportTestMessages, genMsgNames, genSourceFile, genSourceFiles, genTestMessageFiles} from '../util'
+import {exportTestMessages, genMsgNames, genSourceFile, genSourceFiles, genTestMessageFiles} from '../../util'
 import {Project, SourceFile} from 'ts-morph'
 
 const {buildMessages, parseMsgProps, isOptionalProp} = testing

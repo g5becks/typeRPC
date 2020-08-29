@@ -1,6 +1,6 @@
 import {Project} from 'ts-morph'
 import {testing} from '../../../src/schema'
-import {genSourceFile, isValidDataTypeTestSource} from '../util'
+import {genSourceFile, isValidDataTypeTestSource} from '../../util'
 
 let project: Project
 beforeEach(() => {

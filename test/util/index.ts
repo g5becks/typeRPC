@@ -191,6 +191,50 @@ type TestType = rpc.Msg<{
   timestamp: $.timestamp
   blob: $.blob
   dyn: $.dyn
-  unit: $.unit
+	unit: $.unit
   nil: $.nil
+  nestedDict: $.Dict<$.int8, $.List<$.Dict<$.bool, $.List<$.str>>>>
+  nestedList: $.List<$.Tuple4<$.Tuple2<$.int64, $.List<$.blob>>, $.str, $.bool, $.Dict<$.str, $.timestamp>>>
+	nestedMsg: rpc.Msg<{
+  	    name: $.str
+		data: $.Dict<$.int8, $.List<$.Dict<$.bool, $.List<$.str>>>>
+	}>
+	nestedTuple: $.Tuple3<$.List<$.Tuple2<$.float32, $.float64>>, $.err, $.dyn>
+}>
+`
+export const dataTypeTestsSource = `
+type TestType = rpc.Msg<{
+  dict: $.Dict<$.int8, $.int8>
+  tuple2: $.Tuple2<$.int8, $.int8>
+  tuple3: $.Tuple3<$.int8, $.int16, $.uint16>
+  tuple4: $.Tuple4<$.int8, $.str, $.bool, $.timestamp>
+  tuple5: $.Tuple5<$.str, $.err, $.dyn, $.blob, $.float32>
+  list: $.List<$.bool>
+  structLiteral: rpc.Msg<{
+    name: $.str,
+    age: $.int8,
+    birthDate: $.timestamp,
+    weight: $.float32
+    }>
+  bool: $.bool
+  int8: $.int8
+  uint8: $.uint8
+  int16: $.int16
+  uint16: $.uint16
+  int32: $.int32
+  uint32: $.uint32
+  int64: $.int64
+  uint64: $.uint64
+  float32: $.float32
+  float64: $.float64
+  str: $.str
+  err: $.err
+  timestamp: $.timestamp
+  blob: $.blob
+  dyn: $.dyn
+  nestedDict: $.Dict<$.int8, $.List<$.Dict<$.bool, $.List<$.str>>>>
+  nestedList: $.List<$.Tuple4<$.Tuple2<$.int64, $.List<$.blob>>, $.bool, $.err, $.dyn>>
 }>`
+
+export const expectedTsDataTypes = ['Map<number, number>', '[number, number]', '[number, number, number]', '[number, string, boolean, number]', '[string, Error, any, Uint8Array, number]', 'Array<boolean>', '{name: string; age: number; birthDate: number; weight: number; }', 'boolean', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'string', 'Error', 'number', 'Uint8Array', 'any', 'Map<number, Array<Map<boolean, Array<string>>>>', 'Array<[[number, Array<Uint8Array>], boolean, Error, any]>']
+
