@@ -3,7 +3,6 @@ import {genSourceFile, typesTestData} from '../util'
 import {make, StructLiteral, testing} from '../../../src/schema'
 import {Node, Project, TypeNode} from 'ts-morph'
 import {$, internal as _} from '@typerpc/types'
-import 'array-flat-polyfill'
 
 export const types: {[key: string]: Node| TypeNode} = {}
 

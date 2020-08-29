@@ -1,7 +1,7 @@
 import {Project, SourceFile} from 'ts-morph'
 import {testing} from '../../../src/schema'
 import {genSourceFile} from '../util'
-import 'array-flat-polyfill'
+
 let project: Project
 
 beforeEach(() => {
