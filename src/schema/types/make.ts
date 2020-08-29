@@ -100,7 +100,7 @@ export const make = {
       },
     } as unknown as DataType
   },
-  scalar: (type: TypeNode | Node): DataType | undefined => scalarsMap.get(type.getText().trim()),
+  scalar: (type: TypeNode | Node): _.Scalar | undefined => scalarsMap.get(type.getText().trim()),
   get bool(): _.Scalar {
     return {type: 'bool', toString: () => '$.bool'} as unknown as _.Scalar
   },

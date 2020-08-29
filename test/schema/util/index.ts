@@ -163,9 +163,9 @@ type CborType = rpc.Msg<{name: $.str}>
 type TestType = rpc.Msg<{
   dict: $.Dict<$.int8, $.int8>
   tuple2: $.Tuple2<$.int8, $.int8>
-  tuple3: $.Tuple3<$.int8, $.int8, $.int8>
-  tuple4: $.Tuple4<$.int8, $.str, $.str, $.str>
-  tuple5: $.Tuple5<$.str, $.bool, $.bool, $.str, $.bool>
+  tuple3: $.Tuple3<$.int8, $.int16, $.uint16>
+  tuple4: $.Tuple4<$.int8, $.str, $.bool, $.timestamp>
+  tuple5: $.Tuple5<$.str, $.err, $.dyn, $.blob, $.float32>
   list: $.List<$.bool>
   struct: SomeStruct
   structLiteral: rpc.Msg<{
@@ -175,4 +175,21 @@ type TestType = rpc.Msg<{
     weight: $.float32
     }>
   cborType: CborType
+  bool: $.bool
+  int8: $.int8
+  uint8: $.uint8
+  int16: $.int16
+  uint16: $.uint16
+  int32: $.int32
+  uint32: $.uint32
+  int64: $.uint64
+  float32: $.float32
+  float64: $.float64
+  str: $.str
+  err: $.err
+  timestamp: $.timestamp
+  blob: $.blob
+  dyn: $.dyn
+  unit: $.unit
+  nil: $.nil
 }>`

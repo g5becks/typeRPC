@@ -28,6 +28,6 @@ export const is = {
   StructLiteral: (type: unknown): type is StructLiteral => validateType(type, 'properties'),
   Container: (type: unknown): boolean => [is.Struct, is.List, is.Dict, is.Tuple2, is.Tuple3, is.Tuple4, is.Tuple3, is.Tuple5, is.StructLiteral].some(func => func(type)),
   QueryParamable: (type: DataType): boolean => queryParamables.some(param => type.toString().startsWith(param)),
-  Scalar: (type: unknown): type is x.Scalar => !is.Container(type),
+  Scalar: (type: any): type is x.Scalar => !is.Container(type) && scalarsMap.has(type.toString()),
   DataType: (type: any): type is DataType => is.Container(type) || scalarsMap.has(type.toString()),
 }

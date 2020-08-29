@@ -55,3 +55,6 @@ test('is.StructLiteral should return true when given a valid rpc.Msg literal typ
   expect(is.StructLiteral(make.StructLiteral(types.structLiteral, makeDataType))).toBeTruthy()
 })
 
+test('is.Scalar should return true for all scalar types and false for all others', () => {
+
+})

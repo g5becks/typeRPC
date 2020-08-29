@@ -1,4 +1,4 @@
-import {internal as x} from '@typerpc/types'
+import {internal as _} from '@typerpc/types'
 import {make} from './make'
 
 // A reference to a Type Alias (rpc.Msg) defined in a schema file
@@ -45,10 +45,10 @@ const builtScalars = [make.blob, make.unit, make.timestamp, make.dyn, make.err, 
 
 export const scalars = ['$.blob', '$.unit', '$.timestamp', '$.dyn', '$.err', '$.str', '$.nil', '$.float64', '$.float32', '$.uint64', '$.int64', '$.uint32', '$.int32', '$.uint16', '$.int16', '$.uint8', '$.int8', '$.bool']
 
-export const scalarsMap = new Map<string, DataType>(scalars.map((prim, i) => [prim, builtScalars[i]]))
+export const scalarsMap = new Map<string, _.Scalar>(scalars.map((prim, i) => [prim, builtScalars[i]]))
 
 export const containers = ['$.Dict', '$.Tuple2', '$.Tuple3', '$.Tuple4', '$.Tuple5', '$.List']
 
 // types that are valid to use a query param in a get request
 export const queryParamables = ['$.bool', '$.timestamp', '$.int8', '$.uint8', '$.int16', '$.uint16', '$.int32', '$.uint32', '$.uint64', '$.int64', '$.float32', '$.float64', '$.str', '$.List']
-export type DataType = x.RpcType | Struct | StructLiteral
+export type DataType = _.RpcType | Struct | StructLiteral
