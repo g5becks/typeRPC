@@ -1,40 +1,29 @@
 /* eslint-disable new-cap */
-import {
-  is,
-  make,
-  Message,
-  MutationMethod,
-  Param,
-  Property,
-  Schema,
-  QueryService,
-  DataType,
-  StructLiteralProp,
-  Import,
-} from '../../schema'
+import {DataType, Import, is, make, Message, Param, QueryService, Schema, StructLiteralProp} from '../../schema'
 import {capitalize, lowerCase} from '../utils'
+import {Method, MutationService} from '../../schema/schema'
 
 // Maps typerpc messages to typescript data-messages
-export const typesMap: Map<DataType, string> = new Map<DataType, string>(
+export const typeMap: Map<string, string> = new Map<string, string>(
   [
-    [make.bool, 'boolean'],
-    [make.int8, 'number'],
-    [make.uint8, 'number'],
-    [make.int16, 'number'],
-    [make.uint16, 'number'],
-    [make.int32, 'number'],
-    [make.uint32, 'number'],
-    [make.int64, 'number'],
-    [make.uint64, 'number'],
-    [make.float32, 'number'],
-    [make.float64, 'number'],
-    [make.nil, 'null'],
-    [make.str, 'string'],
-    [make.err, 'Error'],
-    [make.dyn, 'any'],
-    [make.timestamp, 'number'],
-    [make.unit, 'void'],
-    [make.blob, 'Uint8Array'],
+    [make.bool.type, 'boolean'],
+    [make.int8.type, 'number'],
+    [make.uint8.type, 'number'],
+    [make.int16.type, 'number'],
+    [make.uint16.type, 'number'],
+    [make.int32.type, 'number'],
+    [make.uint32.type, 'number'],
+    [make.int64.type, 'number'],
+    [make.uint64.type, 'number'],
+    [make.float32.type, 'number'],
+    [make.float64.type, 'number'],
+    [make.nil.type, 'null'],
+    [make.str.type, 'string'],
+    [make.err.type, 'Error'],
+    [make.dyn.type, 'any'],
+    [make.timestamp.type, 'number'],
+    [make.unit.type, 'void'],
+    [make.blob.type, 'Uint8Array'],
 
   ]
 )
@@ -42,9 +31,10 @@ export const typesMap: Map<DataType, string> = new Map<DataType, string>(
 const typeLiteral = (props: ReadonlyArray<StructLiteralProp>): string => {
   let properties = ''
   let i = 0
+  const useComma = props.length > 2 && i === props.length - 1 ? ',' : '\n'
   while (i < props.length) {
     /* eslint-disable @typescript-eslint/no-use-before-define */
-    properties = properties.concat(`${props[i].name}${props[i].isOptional ? '?' : ''}: ${dataType(props[i].type)} ${i === props.length - 1 ? ',' : ''}\n`)
+    properties = properties.concat(`${props[i].name}${props[i].isOptional ? '?' : ''}: ${dataType(props[i].type)} ${useComma}`)
     i++
     /* eslint-disable @typescript-eslint/no-use-before-define */
   }
@@ -55,12 +45,12 @@ const typeLiteral = (props: ReadonlyArray<StructLiteralProp>): string => {
 
 // Converts the input DataType into a typescript representation
 export const dataType = (type: DataType): string => {
-  if (!is.Container(type) && !typesMap.has(type)) {
-    return 'any'
+  if (!is.Container(type) && !is.Scalar(type)) {
+    throw new TypeError(`invalid data type: ${type.toString()}`)
   }
 
-  if (typesMap.has(type)) {
-    return typesMap.get(type)!
+  if (is.Scalar(type)) {
+    return typeMap.get(type.type)!
   }
 
   if (is.Dict(type)) {
@@ -98,65 +88,56 @@ export const dataType = (type: DataType): string => {
   return 'any'
 }
 
-// convert parsed querystring scalar to correct type
-const primFromQueryParam = (paramName: string, type: DataType): string => {
-  switch (type.toString()) {
-  case make.str.toString():
-    return paramName
-  case make.float32.toString():
-  case make.float64.toString():
-    return `parseFloat(${paramName})`
-  case make.bool.toString():
-    return `Boolean(${paramName})`
-  case make.timestamp.toString():
-    return `parseInt(${paramName})`
-  case make.int8.toString():
-  case make.uint8.toString():
-  case make.int16.toString():
-  case make.uint16.toString():
-  case make.int32.toString():
-  case make.uint32.toString():
-  case make.int64.toString():
-  case make.uint64.toString():
-    return `parseInt(${paramName})`
+// returns a string representation of a function call used to
+// convert parsed querystring scalar to correct ts type
+const scalarFromQueryParam = (paramName: string, type: DataType): string => {
+  if (!is.Scalar(type)) {
+    throw new Error(`${type.toString()} is not a valid QuerySvc parameter type`)
+  } else {
+    switch (type.type) {
+    case make.str.type:
+      return paramName
+    case make.float32.type:
+    case make.float64.type:
+      return `parseFloat(${paramName})`
+    case make.bool.type:
+      return `Boolean(${paramName})`
+    case make.timestamp.type:
+      return `parseInt(${paramName})`
+    case make.int8.type:
+    case make.uint8.type:
+    case make.int16.type:
+    case make.uint16.type:
+    case make.int32.type:
+    case make.uint32.type:
+    case make.int64.type:
+    case make.uint64.type:
+      return `parseInt(${paramName})`
+    }
   }
   return paramName
 }
 
-// convert parsed querystring param to correct type
+// returns a string representation of a function call used to
+// convert parsed querystring param List to correct ts type
 export const fromQueryString  = (paramName: string, type: DataType): string => {
-  if (typesMap.has(type)) {
-    return primFromQueryParam(paramName as string, type)
+  if (is.Scalar(type)) {
+    return scalarFromQueryParam(paramName, type)
   }
-  if (is.List(type)) {
-    if (type.dataType.toString() === '$.str') {
-      return paramName
-    }
-  }
-  return  is.List(type) ? `${paramName}.map(val => ${primFromQueryParam('val', type.dataType)})` : paramName
+  return  is.List(type) ? `${paramName}.map(val => ${scalarFromQueryParam('val', type.dataType)})` : paramName
 }
 
 // add question mark to optional type alias property or method param if needed
 export const handleOptional = (isOptional: boolean): string => isOptional ? '?' : ''
 
-// builds all the properties of a type alias
-const buildProps = (props: ReadonlyArray<Property>): string => {
-  let propsString = ''
-  for (const prop of props) {
-    propsString = propsString.concat(`${prop.name}${handleOptional(prop.isOptional)}: ${dataType(prop.type)}\n`)
-  }
-  return propsString
-}
-
-// builds a single type alias declaration
-const buildType = (type: Message): string => {
+// builds a type alias from an rpc.Msg
+const buildType = (msg: Message): string => {
   return `
-export type ${capitalize(type.name)} = {
-  ${buildProps(type.properties)}
-}\n`
+export type ${capitalize(msg.name)} = ${typeLiteral(msg.properties)}
+`
 }
 
-// builds all type aliases for a schema file
+// converts all rpc.Msg in a schema into type aliases
 export const buildTypes = (schema: Schema): string => {
   let types =  ''
   for (const type of schema.messages) {
@@ -175,35 +156,34 @@ const buildParams = (params: ReadonlyArray<Param>): string => {
   return paramsString
 }
 
-// builds a single method of an interface
-const buildMethod = (method: MutationMethod): string => {
-  return `async ${lowerCase(method.name)}(${buildParams(method.params)}): Promise<${dataType(method.returnType)}>;\n`
+// builds a single method signature for an interface
+const buildMethodSignature = (method: Method): string => {
+  return `async ${lowerCase(method.name)}(${buildParams(method.params)}): Promise<${dataType(method.returnType)}>;
+`
 }
 
-// builds all methods of an interface
-const buildMethods = (methods: ReadonlyArray<MutationMethod>): string => {
+// builds an interface definition from a Schema Service
+const buildInterface = (svc: QueryService | MutationService): string => {
   let methodsString = ''
-  for (const method of methods) {
-    methodsString = methodsString.concat(buildMethod(method))
+  for (const method of svc.methods) {
+    methodsString = methodsString.concat(buildMethodSignature(method))
   }
-  return methodsString
-}
-
-// builds a single interface
-const buildInterface = (interfc: QueryService): string => {
   return `
-export interface ${capitalize(interfc.name)} {
-  ${buildMethods(interfc.methods)}
+export interface ${capitalize(svc.name)} {
+  ${methodsString}
 }\n`
 }
 
-// builds all services of a Schema file
-export const buildInterfaces = (interfaces: ReadonlyArray<QueryService>): string => {
-  let interfacesString = ''
-  for (const interfc of interfaces) {
-    interfacesString = interfacesString.concat(buildInterface(interfc))
+// builds interfaces for all QuerySvc and MutationSvc in a schemaFile
+export const buildInterfaces = (schema: Schema): string => {
+  let services = ''
+  for (const svc of schema.queryServices) {
+    services = services.concat(buildInterface(svc))
   }
-  return interfacesString
+  for (const svc of schema.mutationServices) {
+    services = services.concat(buildInterface(svc))
+  }
+  return services
 }
 
 // builds the names of the parameters of a method E.G.
