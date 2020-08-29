@@ -70,9 +70,14 @@ test('make.scalar should return the correct scalar type', () => {
   expectScalar(types.nil, make.nil)
 })
 
-test('make.Dict should return correct $.Dict type', () => {
+test('make.Dict should return $.Dict with correct keyType and valType', () => {
   const dict = make.Dict(types.dict, makeDataType) as $.Dict<any, any>
   expect(dict.keyType.toString()).toEqual('$.int8')
   expect(dict.valType.toString()).toEqual('$.int8')
+})
+
+test('make.List should return $.List with correct dataType', () => {
+  const list = make.List(types.list, makeDataType) as $.List<any>
+  expect(list.dataType.toString()).toEqual('$.bool')
 })
 

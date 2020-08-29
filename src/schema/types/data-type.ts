@@ -33,11 +33,7 @@ export type StructLiteral = Readonly<{
 export const structLiteralProp = (name: string, type: DataType, isOptional: boolean): StructLiteralProp => {
   return {
     name, type, isOptional, toString(): string {
-      return `property: {
-          name: ${name},
-          isOptional: ${isOptional},;1
-          type: ${type.toString()}
-      }`
+      return `${name}${isOptional ? '?' : ''}: ${type.toString()};`
     },
   }
 }
