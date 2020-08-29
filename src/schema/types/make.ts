@@ -30,7 +30,11 @@ export const make = {
     const properties = makeStructLiteralProps(parseMsgProps(type), makeDataType)
     return {
       properties, toString(): string {
-        return `{${properties.map(prop => prop.toString())}}`
+        let props = ''
+        for (const prop of properties) {
+          props = props.concat(prop + '\n')
+        }
+        return `rpc.Msg<{${props}}>`
       },
     }
   },
