@@ -186,7 +186,7 @@ export const buildInterfaces = (schema: Schema): string => {
   return services
 }
 
-// builds the names of the parameters of a method E.G.
+// builds the param names list for a method E.G.
 // name, age, gender
 export const paramNames = (params: ReadonlyArray<Param>) => {
   if (params.length === 0) {
@@ -200,7 +200,8 @@ export const paramNames = (params: ReadonlyArray<Param>) => {
   return names
 }
 
-// builds the type for destructured parameters
+// builds the type specifier for destructured parameters E.G.
+// {name: string, age: number, gender: string}
 export const paramsType = (params: ReadonlyArray<Param>): string => {
   if (params.length === 0) {
     return ''
@@ -217,7 +218,7 @@ export const paramsType = (params: ReadonlyArray<Param>): string => {
 // const {name, age}: {name: string, age: number }
 export const makeParamsVar = (params: ReadonlyArray<Param>): string => `const {${paramNames(params)}}: {${paramsType(params)}}`
 
-// builds the import strings from Schema Imports
+// builds the import strings from a Schema's Imports list
 export const buildMsgImports = (imports: ReadonlyArray<Import>): string => {
   let importsStr = ''
   for (const imp of imports) {
