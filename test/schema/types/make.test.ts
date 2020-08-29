@@ -2,9 +2,9 @@
 import {genSourceFile, typesTestData} from '../util'
 import {make, StructLiteral, testing} from '../../../src/schema'
 import {Node, Project, TypeNode} from 'ts-morph'
-import {$} from '@typerpc/types'
+import {$, internal as _} from '@typerpc/types'
 
-export const made: {[key: string]: Node| TypeNode} = {}
+export const types: {[key: string]: Node| TypeNode} = {}
 
 export const {makeDataType} = testing
 
@@ -14,25 +14,25 @@ beforeAll(() => {
   const type = file.getTypeAliasOrThrow('TestType')
   const props = parseMsgProps(type)
   props.forEach(prop => {
-    made[prop.getName()] = prop.getTypeNodeOrThrow()
+    types[prop.getName()] = prop.getTypeNodeOrThrow()
   })
 })
 
 test('make.Struct should return struct with correct name and useCbor values', () => {
-  expect(make.Struct(made.struct).name).toEqual('SomeStruct')
-  expect(make.Struct(made.cborType).useCbor).toBeTruthy()
+  expect(make.Struct(types.struct).name).toEqual('SomeStruct')
+  expect(make.Struct(types.cborType).useCbor).toBeTruthy()
 })
 
 test('make.StructLiteral should return struct with correct number of properties', () => {
-  const literal = make.StructLiteral(made.structLiteral, makeDataType) as StructLiteral
+  const literal = make.StructLiteral(types.structLiteral, makeDataType) as StructLiteral
   expect(literal.properties.length).toEqual(4)
 })
 
 test('make.Tuple should return tuples with correct DataTypes', () => {
-  const tuple2 = make.Tuple(made.tuple2, makeDataType) as $.Tuple2<any, any>
-  const tuple3 = make.Tuple(made.tuple3, makeDataType) as $.Tuple3<any, any, any>
-  const tuple4 = make.Tuple(made.tuple4, makeDataType) as $.Tuple4<any, any, any, any>
-  const tuple5 = make.Tuple(made.tuple5, makeDataType) as $.Tuple5<any, any, any, any, any>
+  const tuple2 = make.Tuple(types.tuple2, makeDataType) as $.Tuple2<any, any>
+  const tuple3 = make.Tuple(types.tuple3, makeDataType) as $.Tuple3<any, any, any>
+  const tuple4 = make.Tuple(types.tuple4, makeDataType) as $.Tuple4<any, any, any, any>
+  const tuple5 = make.Tuple(types.tuple5, makeDataType) as $.Tuple5<any, any, any, any, any>
   expect(tuple2.item1.type).toEqual(make.int8.type)
   expect(tuple2.item2.type).toEqual(make.int8.type)
   expect(tuple3.item1.type).toEqual(make.int8.type)
@@ -50,5 +50,29 @@ test('make.Tuple should return tuples with correct DataTypes', () => {
 })
 
 test('make.scalar should return the correct scalar type', () => {
-  make.scalar(made.int8)!
+  const expectScalar = (type: Node|TypeNode, expected: _.Scalar) => expect(make.scalar(type)?.type).toEqual(expected.type)
+  expectScalar(types.int8, make.int8)
+  expectScalar(types.uint8, make.uint8)
+  expectScalar(types.int16, make.int16)
+  expectScalar(types.uint16, make.uint16)
+  expectScalar(types.int32, make.int32)
+  expectScalar(types.uint32, make.uint32)
+  expectScalar(types.int64, make.int64)
+  expectScalar(types.uint64, make.uint64)
+  expectScalar(types.float32, make.float32)
+  expectScalar(types.float64, make.float64)
+  expectScalar(types.str, make.str)
+  expectScalar(types.err, make.err)
+  expectScalar(types.timestamp, make.timestamp)
+  expectScalar(types.blob, make.blob)
+  expectScalar(types.dyn, make.dyn)
+  expectScalar(types.unit, make.unit)
+  expectScalar(types.nil, make.nil)
 })
+
+test('make.Dict should return correct $.Dict type', () => {
+  const dict = make.Dict(types.dict, makeDataType) as $.Dict<any, any>
+  expect(dict.keyType.toString()).toEqual('$.int8')
+  expect(dict.valType.toString()).toEqual('$.int8')
+})
+
