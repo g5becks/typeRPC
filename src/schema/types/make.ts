@@ -1,9 +1,9 @@
 import {Node, PropertySignature, TypeNode} from 'ts-morph'
 import {DataType, scalarsMap, Struct, structLiteralProp, StructLiteralProp} from './data-type'
 import {isOptionalProp, parseMsgProps, parseTypeParams} from '../parser'
-import {useCbor} from '../builder/data-type'
+import {useCbor} from '../builder'
 import {isValidMsg} from '../validator'
-
+import {internal as _} from '@typerpc/types'
 export const typeError = (type: TypeNode | Node) => new TypeError(`error in file ${type.getSourceFile().getFilePath()}
     at line number: ${type.getStartLineNumber()}
     message: ${type.getText()} is neither a valid typerpc DataType or rpc.Msg that was imported or defined in this file.`)
@@ -101,58 +101,58 @@ export const make = {
     } as unknown as DataType
   },
   scalar: (type: TypeNode | Node): DataType | undefined => scalarsMap.get(type.getText().trim()),
-  get bool(): DataType {
-    return {type: 'bool', toString: () => '$.bool'} as unknown as DataType
+  get bool(): _.Scalar {
+    return {type: 'bool', toString: () => '$.bool'} as unknown as _.Scalar
   },
-  get int8(): DataType {
-    return {type: 'int8', toString: () => '$.int8'} as unknown as DataType
+  get int8(): _.Scalar {
+    return {type: 'int8', toString: () => '$.int8'} as unknown as _.Scalar
   },
-  get uint8(): DataType {
-    return {type: 'uint8', toString: () => '$.uint8'} as unknown as DataType
+  get uint8(): _.Scalar {
+    return {type: 'uint8', toString: () => '$.uint8'} as unknown as _.Scalar
   },
-  get int16(): DataType {
-    return {type: 'int16', toString: () => '$.int16'} as unknown as DataType
+  get int16(): _.Scalar {
+    return {type: 'int16', toString: () => '$.int16'} as unknown as _.Scalar
   },
-  get uint16(): DataType {
-    return {type: 'uint16', toString: () => '$.uint16'} as unknown as DataType
+  get uint16(): _.Scalar {
+    return {type: 'uint16', toString: () => '$.uint16'} as unknown as _.Scalar
   },
-  get int32(): DataType {
-    return {type: 'int32', toString: () => '$.int32'} as unknown as DataType
+  get int32(): _.Scalar {
+    return {type: 'int32', toString: () => '$.int32'} as unknown as _.Scalar
   },
-  get uint32(): DataType {
-    return {type: 'uint32', toString: () => '$.uint32'} as unknown as DataType
+  get uint32(): _.Scalar {
+    return {type: 'uint32', toString: () => '$.uint32'} as unknown as _.Scalar
   },
-  get int64(): DataType {
-    return {type: 'int64', toString: () => '$.int64'} as unknown as DataType
+  get int64(): _.Scalar {
+    return {type: 'int64', toString: () => '$.int64'} as unknown as _.Scalar
   },
-  get uint64(): DataType {
-    return {type: 'uint64', toString: () => '$.uint64'} as unknown as DataType
+  get uint64(): _.Scalar {
+    return {type: 'uint64', toString: () => '$.uint64'} as unknown as _.Scalar
   },
-  get float32(): DataType {
-    return {type: 'float32', toString: () => '$.float32'} as unknown as DataType
+  get float32(): _.Scalar {
+    return {type: 'float32', toString: () => '$.float32'} as unknown as _.Scalar
   },
-  get float64(): DataType {
-    return {type: 'float64', toString: () => '$.float64'} as unknown as DataType
+  get float64(): _.Scalar {
+    return {type: 'float64', toString: () => '$.float64'} as unknown as _.Scalar
   },
-  get nil(): DataType {
-    return {type: 'nil', toString: () => '$.nil'} as unknown as DataType
+  get nil(): _.Scalar {
+    return {type: 'nil', toString: () => '$.nil'} as unknown as _.Scalar
   },
-  get str(): DataType {
-    return {type: 'str', toString: () => '$.str'} as unknown as DataType
+  get str(): _.Scalar {
+    return {type: 'str', toString: () => '$.str'} as unknown as _.Scalar
   },
-  get err(): DataType {
-    return {type: 'err', toString: () => '$.err'} as unknown as DataType
+  get err(): _.Scalar {
+    return {type: 'err', toString: () => '$.err'} as unknown as _.Scalar
   },
-  get dyn(): DataType {
-    return {type: 'dyn', toString: () => '$.dyn'} as unknown as DataType
+  get dyn(): _.Scalar {
+    return {type: 'dyn', toString: () => '$.dyn'} as unknown as _.Scalar
   },
-  get timestamp(): DataType {
-    return {type: 'timestamp', toString: () => '$.timestamp'} as unknown as DataType
+  get timestamp(): _.Scalar {
+    return {type: 'timestamp', toString: () => '$.timestamp'} as unknown as _.Scalar
   },
-  get unit(): DataType {
-    return {type: 'unit', toString: () => '$.unit'} as unknown as DataType
+  get unit(): _.Scalar {
+    return {type: 'unit', toString: () => '$.unit'} as unknown as _.Scalar
   },
-  get blob(): DataType {
-    return {type: 'blob', toString: () => '$.blob'} as unknown as DataType
+  get blob(): _.Scalar {
+    return {type: 'blob', toString: () => '$.blob'} as unknown as _.Scalar
   },
 }

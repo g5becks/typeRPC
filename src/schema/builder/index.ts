@@ -5,6 +5,7 @@ import {buildErrCode, buildMutationServices, buildParams, buildQueryServices, bu
 import {isType, makeDataType, useCbor} from './data-type'
 import {validateSchemas} from '../validator'
 
+export {useCbor}
 const buildImports = (file: SourceFile): ReadonlyArray<Import> =>
   file.getImportDeclarations().map(imp => {
     return {

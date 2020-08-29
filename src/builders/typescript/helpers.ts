@@ -96,7 +96,7 @@ export const dataType = (type: DataType): string => {
   return 'any'
 }
 
-// convert parsed querystring primitive to correct type
+// convert parsed querystring scalar to correct type
 const primFromQueryParam = (paramName: string, type: DataType): string => {
   switch (type.toString()) {
   case make.str.toString():

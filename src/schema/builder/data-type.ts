@@ -1,4 +1,5 @@
-import {MethodSignature, Node, SourceFile, TypeAliasDeclaration, TypeNode} from 'ts-morph'
+/* eslint-disable new-cap */
+import {MethodSignature, Node, TypeAliasDeclaration, TypeNode} from 'ts-morph'
 import {DataType, make, typeError} from '../types'
 import {isContainer, isMsgLiteral, isValidDataType} from '../validator'
 import {parseJsDocComment} from '../parser'
@@ -9,7 +10,7 @@ export const makeDataType = (type: TypeNode | Node): DataType => {
   if (!isValidDataType(type)) {
     throw typeError(type)
   }
-  const prim = make.primitive(type)
+  const prim = make.scalar(type)
   if (prim) {
     return prim
   }

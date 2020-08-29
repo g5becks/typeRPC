@@ -1,3 +1,4 @@
+/* eslint-disable new-cap */
 import {DataType, queryParamables, scalarsMap, Struct, StructLiteral} from './data-type'
 import {$, internal as x} from '@typerpc/types'
 

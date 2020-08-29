@@ -31,6 +31,6 @@ test('make.StructLiteral should return struct with correct number of properties'
 test('make.Tuple should return tuples with correct DataTypes', () => {
   const tuple2 = make.Tuple(made.tuple2, makeDataType) as $.Tuple2<any, any>
   console.log(tuple2.item1.toString())
-  expect(tuple2.item1).toEqual(make.int8)
+  expect(tuple2.item1.type).toEqual(make.int8.type)
   expect(tuple2.item2).toEqual(make.int8)
 })

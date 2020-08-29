@@ -11,7 +11,7 @@ import {containers, make} from '../types'
 import {parseNamedImports} from '../parser'
 
 // is the type found is a typerpc scalar type?
-export const isScalar = (type: TypeNode | Node): boolean => Boolean(make.primitive(type))
+export const isScalar = (type: TypeNode | Node): boolean => Boolean(make.scalar(type))
 
 // is the type found a typerpc container type?
 export const isContainer = (type: TypeNode | Node): boolean => containers.some(container => type.getText().trim().startsWith(container))
