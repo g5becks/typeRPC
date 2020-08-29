@@ -1,5 +1,3 @@
-import {Axios} from './axios'
-import {KoaBuilder} from './koa'
-import {dataType} from './utils'
+import {dataType, fromQueryString} from './utils'
 
-export {Axios, KoaBuilder, dataType}
+export {dataType, fromQueryString}

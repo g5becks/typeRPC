@@ -234,7 +234,8 @@ type TestType = rpc.Msg<{
   dyn: $.dyn
   nestedDict: $.Dict<$.int8, $.List<$.Dict<$.bool, $.List<$.str>>>>
   nestedList: $.List<$.Tuple4<$.Tuple2<$.int64, $.List<$.blob>>, $.bool, $.err, $.dyn>>
+  queryParamList: $.List<$.int8>
 }>`
 
-export const expectedTsDataTypes = ['Map<number, number>', '[number, number]', '[number, number, number]', '[number, string, boolean, number]', '[string, Error, any, Uint8Array, number]', 'Array<boolean>', '{name: string; age: number; birthDate: number; weight: number; }', 'boolean', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'string', 'Error', 'number', 'Uint8Array', 'any', 'Map<number, Array<Map<boolean, Array<string>>>>', 'Array<[[number, Array<Uint8Array>], boolean, Error, any]>']
+export const expectedTsDataTypes = ['Map<number, number>', '[number, number]', '[number, number, number]', '[number, string, boolean, number]', '[string, Error, any, Uint8Array, number]', 'Array<boolean>', '{name: string; age: number; birthDate: number; weight: number; }', 'boolean', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'string', 'Error', 'number', 'Uint8Array', 'any', 'Map<number, Array<Map<boolean, Array<string>>>>', 'Array<[[number, Array<Uint8Array>], boolean, Error, any]>', 'Array<number>']
 

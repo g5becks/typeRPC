@@ -76,7 +76,7 @@ test('make.Dict should return $.Dict with correct keyType and valType', () => {
   expect(dict.valType.toString()).toEqual('$.int8')
 })
 
-test('make.List should return $.List with correct dataType', () => {
+test('make.List should return $.List with correct tsDataType', () => {
   const list = make.List(types.list, makeDataType) as $.List<any>
   expect(list.dataType.toString()).toEqual('$.bool')
 })
