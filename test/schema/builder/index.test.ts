@@ -24,3 +24,4 @@ test('buildImports() should return the correct import names', () => {
   const names = file.getImportDeclarations().flatMap(imp => imp.getNamedImports()).flatMap(imp => imp.getName())
   expect(names).toEqual(imports.flatMap(imp => imp.messageNames))
 })
+

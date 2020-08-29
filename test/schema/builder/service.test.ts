@@ -103,3 +103,4 @@ test('hasCborParams() should return correct boolean value', () => {
   expect(buildMutationMethod(service3Methods[0], true).hasCborParams).toBeTruthy()
   expect(buildMutationMethod(service1Methods[1], false).hasCborReturn).toBeTruthy()
 })
+
