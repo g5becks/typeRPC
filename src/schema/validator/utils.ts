@@ -10,8 +10,8 @@ import {
 import {containers, make} from '../types'
 import {parseNamedImports} from '../parser'
 
-// is the type found is a typerpc primitive type?
-export const isPrimitive = (type: TypeNode | Node): boolean => Boolean(make.primitive(type))
+// is the type found is a typerpc scalar type?
+export const isScalar = (type: TypeNode | Node): boolean => Boolean(make.primitive(type))
 
 // is the type found a typerpc container type?
 export const isContainer = (type: TypeNode | Node): boolean => containers.some(container => type.getText().trim().startsWith(container))
@@ -97,5 +97,5 @@ export const isValidDataType = (type: TypeNode| Node | undefined): boolean => {
   if (typeof type === 'undefined') {
     return false
   }
-  return isPrimitive(type) || isContainer(type) || isValidMsg(type) || isMsgLiteral(type)
+  return isScalar(type) || isContainer(type) || isValidMsg(type) || isMsgLiteral(type)
 }
