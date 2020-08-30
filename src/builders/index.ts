@@ -1,5 +1,5 @@
 import {Schema} from '../schema'
-import {dataType as tsDataType, fromQueryString as tsFromQueryString} from './typescript'
+import {dataType as tsDataType, fromQueryString as tsFromQueryString, KoaBuilder} from './typescript'
 
 export type Code = {
   readonly fileName: string;
@@ -17,12 +17,9 @@ export type CodeBuilder = {
   readonly builder: (schemas: Schema[]) => Code[];
 }
 
-/*
 export const builders: CodeBuilder[] = [
   KoaBuilder,
 ]
-
- */
 
 export const _testing = {
   tsDataType,
