@@ -7,9 +7,7 @@ export const genRpcMsgLiteral = (msgNames: string[]): string => {
   for (let i = 0; i < propCount; i++) {
     props = props.concat(`prop${i}${optional()}: ${genRandomDataType(msgNames)};\n`)
   }
-  return `rpc.Msg<{
-      ${props}
-      }>`
+  return `rpc.Msg<{${props}}>`
 }
 const genRpcMsg = (name: string, msgNames: string[]): string => `
   ${useCbor()}
