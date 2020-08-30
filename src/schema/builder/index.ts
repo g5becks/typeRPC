@@ -1,9 +1,18 @@
 import {SourceFile} from 'ts-morph'
 import {Import, Schema} from '../schema'
 import {buildMessages} from './message'
-import {buildErrCode, buildMutationServices, buildParams, buildQueryServices, buildResponseCode, buildMethod, buildMutationMethod, buildQueryMethod, hasCborParams} from './service'
+import {
+  buildErrCode,
+  buildMethod,
+  buildMutationMethod,
+  buildMutationServices,
+  buildParams,
+  buildQueryMethod,
+  buildQueryServices,
+  buildResponseCode,
+  hasCborParams,
+} from './service'
 import {isType, makeDataType, useCbor} from './data-type'
-import {validateSchemas} from '../validator'
 
 export {useCbor}
 const buildImports = (file: SourceFile): ReadonlyArray<Import> =>
@@ -26,10 +35,8 @@ const buildSchema = (file: SourceFile): Schema => {
     },
   }
 }
-export const buildSchemas = (sourceFiles: SourceFile[]): Schema[] | Error[] => {
-  const errs = validateSchemas(sourceFiles)
-  return errs ? errs : [...new Set<Schema>(sourceFiles.map(file => buildSchema(file)))]
-}
+export const buildSchemas = (sourceFiles: SourceFile[]): Schema[] =>
+  [...new Set<Schema>(sourceFiles.map(file => buildSchema(file)))]
 
 export const internalTesting = {
   useCbor,

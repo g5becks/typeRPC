@@ -178,12 +178,12 @@ export const runServer = (opts: ServerOpts): http.Server => {
   `
   return {fileName: 'server.ts', source}
 }
-const builder = (schemas: Schema[]): Code[] => [...schemas.map(schema => buildFile(schema)), buildServer(schemas)]
+const build = (schemas: Schema[]): Code[] => [...schemas.map(schema => buildFile(schema)), buildServer(schemas)]
 
 export const KoaBuilder:  CodeBuilder = {
   lang: 'ts',
   target: 'server',
   framework: 'koa',
-  builder,
+  build,
 }
 

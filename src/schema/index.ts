@@ -21,9 +21,9 @@ import {
   parseServiceMethods,
 } from './parser'
 
-import {internal} from './validator'
+import {internal, validateSchemas} from './validator'
 
-export {buildSchemas, Schema, make, DataType, is, Import, QueryService, Message, Param, Property, MutationMethod, Struct, StructLiteral, StructLiteralProp, scalars, containers, queryParamables}
+export {buildSchemas, Schema, make, DataType, is, Import, QueryService, Message, Param, Property, MutationMethod, Struct, StructLiteral, StructLiteralProp, scalars, containers, queryParamables, validateSchemas}
 
 export const testing = {
   ...internalTesting,

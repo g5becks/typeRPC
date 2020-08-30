@@ -4,16 +4,19 @@ import {outputFile, pathExists} from 'fs-extra'
 import {nanoid} from 'nanoid'
 import path from 'path'
 import Listr from 'listr'
+import {buildSchemas, Schema} from '../schema'
+import {Project} from 'ts-morph'
 
 const isTarget = (target: string): target is Target => ['client', 'server'].includes(target)
 
-// ensure the output path is not empty
+// validate the output path is not empty
 const  validateOutputPath = (outputPath: string): void => {
   if (outputPath === '') {
     throw new Error('error: no output path provided')
   }
 }
 
+// validate the tsConfig file exists
 const tsconfigFileExists = (filePath: string): Promise<boolean> => {
   return pathExists(filePath)
 }
@@ -26,16 +29,19 @@ const validateTsConfigFile = async (tsConfigFile: string): Promise<void> => {
   }
 }
 
+// get all builders that match the target and programming language
 const getBuilders = (target: Target, lang: ProgrammingLanguage): CodeBuilder[] => {
-  return builders.filter(builder => {
+  return builders.filter(builder =>
     builder.lang === lang && builder.target
-  })
+  )
 }
 
+// find a build that matches the framework
 const filterBuilderByFramework = (framework: string, builders: CodeBuilder[]): CodeBuilder[] => {
   return builders.filter(builder => builder.framework === framework)
 }
 
+// report available frameworks for target language
 const reportAvailableFrameworks =  (builders: CodeBuilder[]): string[] => {
   return builders.map(builder => builder.framework)
 }
@@ -46,8 +52,10 @@ class Build extends Command {
   static flags = {
     help: flags.help({char: 'h'}),
     // flag with a value (-n, --name=VALUE)
-    tsConfig: flags.string({char: 't', name: 'tsconfig', description: 'path to tsconfig.json for project containing typeRPC schema files'}),
-    output: flags.string({char: 'o', name: 'output', description: 'path to a directory to place generated code'}),
+    tsConfig: flags.string({char: 't', name: 'tsconfig', description: 'path to tsconfig.json for project containing your typerpc schema files', required: true}),
+    output: flags.string({char: 'o', name: 'output', description: 'path to a directory to place generated code', required: true}),
+    lang: flags.string({char: 'l', name: 'lang', description: 'the programming language to use for generating code', required: true}),
+    framework: flags.string({char: 'f', name: 'framework', description: 'the framework to use for generating code'}),
   }
 
   static args = [
@@ -61,22 +69,22 @@ class Build extends Command {
 
   async writeOutput(outputPath: string, code: Code): Promise<void> {
     const results = []
-    const filePath = (file: string) => outputType === 'types' ? path.join(outputPath, 'types', file) : path.join(outputPath, `${file}`)
+    const filePath = (file: string) => path.join(outputPath, file)
     for (const [file, source] of Object.entries(code)) {
       results.push(outputFile(filePath(file), source))
     }
 
     try {
-      this.log(`saving ${outputType} code to ${outputPath}`)
+      this.log(`saving generated code to ${outputPath}`)
       await Promise.all(results)
-      this.log(`${outputType} generation complete, please check ${outputPath} for generated code`)
     } catch (error) {
       this.log(`error occurred writing files: ${error}`)
       throw error
     }
   }
 
-  validateInputs(target: Target, tsConfigFile: string, outputPath: string) {
+  validateInputs(target: Target, tsConfigFile: string, outputPath: string, lang: ProgrammingLanguage, framework: string) {
+    let builders: CodeBuilder[]
     return new Listr([{
       title: 'Validating Inputs',
       task: () => new Listr([{
@@ -85,7 +93,8 @@ class Build extends Command {
           if (isTarget(target)) {
             return true
           }
-          throw new Error(`error: invalid target ${target}`)
+          this.error(`invalid target: ${target}.
+          valid targets are: [client, server]`)
         },
       },
       {
@@ -97,36 +106,40 @@ class Build extends Command {
         task: () => validateOutputPath(outputPath),
       },
       {
+        title: `locating ${target} builders for language: ${lang}, framework: ${framework} `,
+        task: () =>  {
+          builders = getBuilders(target, lang)
+          if (builders.length === 0) {
+            this.error(`no ${target} builders were found for ${lang}`)
+          }
+          const filtered = filterBuilderByFramework(framework, builders)
+          if (filtered.length === 0) {
+            this.error(`no ${target} builder found for ${lang} using ${framework}. Available ${target} builders for ${lang} are ${reportAvailableFrameworks(builders)}`)
+          }
+        },
+      },
+      {
         title: 'Validation Successful, Generating JobId',
         task: () => true,
       }], {concurrent: true}),
     }])
   }
 
-  generateTypes(target: Target, tsConfigFile: string, outputPath: string, jobId: string) {
-    let types: Code
-    return new Listr([
-
-      {
-        title: `Generating Rpc types for ${target}, jobId: ${jobId}`,
-        task: () => {
-          types = buildTypes(target, tsConfigFile, outputPath, jobId)
-        },
-      },
-      {
-        title: `Saving ${target} types to ${outputPath}`,
-        task: async () => writeOutput(outputPath, types),
-      },
-    ])
+  buildSchemas(tsConfigFilePath: string): Schema[] | Error[] {
+    const project = new Project({tsConfigFilePath,
+      skipFileDependencyResolution: true})
+    return  buildSchemas(project.getSourceFiles())
   }
 
-  generateRpc(target: Target, tsConfigFile: string, outputPath: string, jobId: string) {
+  buildCode(target: Target, lang: ProgrammingLanguage, framework: string, tsConfigFile: string, outputPath: string, jobId: string) {
     let code: Code
+    const builder = filterBuilderByFramework(framework, getBuilders(target, lang))[0]
+
     return new Listr([
       {
-        title: `Generating Rpc code for ${target}, jobId: ${jobId}`,
+        title: `Attempting to generate ${lang} ${target} code using ${framework} framework`,
         task: () => {
-          code = generateCode(target, tsConfigFile, outputPath, jobId)
+          code = builder.build()
         },
       },
       {
@@ -144,8 +157,7 @@ class Build extends Command {
     const jobId = nanoid().toLowerCase()
 
     await this.validateInputs(target, tsConfig, outputPath).run()
-    await this.generateTypes(target, tsConfig, outputPath, jobId).run()
-    await this.generateRpc(target, tsConfig, outputPath, jobId).run()
+    await this.buildCode(target, tsConfig, outputPath, jobId).run()
 
     this.log(`JobId: ${jobId} complete, check ${outputPath} for generated ${target} code.`)
   }
