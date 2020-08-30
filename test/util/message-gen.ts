@@ -9,7 +9,7 @@ export const genRpcMsgLiteral = (msgNames: string[]): string => {
   }
   return `rpc.Msg<{
       ${props}
-      }`
+      }>`
 }
 const genRpcMsg = (name: string, msgNames: string[]): string => `
   ${useCbor()}

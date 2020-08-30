@@ -87,7 +87,9 @@ test('buildMethod() should return method with correct params and return type', (
   const methods = services.flatMap(svc => parseServiceMethods(svc))
   for (const method of methods) {
     const builtMethod = buildMethod(method, false)
-    expect(method.getReturnTypeNode()!.getText()).toEqual(builtMethod.returnType.toString())
+    const faulty = method.getReturnTypeNode()!.getText()
+    console.log(faulty)
+    expect(faulty).toEqual(builtMethod.returnType.toString())
     expect(method.getNameNode().getText().trim()).toEqual(builtMethod.name)
     expect(method.getParameters().length).toEqual(builtMethod.params.length)
   }
