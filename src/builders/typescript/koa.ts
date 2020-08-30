@@ -71,16 +71,16 @@ export const ${lowerCase(svc.name)}Routes = (${lowerCase(svc.name)}: ${capitaliz
 	})
   ${buildHandlers(svc)}
 	return router.routes()
-}\n
+}
 `
 }
 
-const buildAllRoutes = (interfaces: ReadonlyArray<QueryService>): string => {
-  let routes = ''
-  for (const interfc of interfaces) {
-    routes = routes.concat(buildService(interfc))
+const buildServices = (services: ReadonlyArray<QueryService> | ReadonlyArray<MutationService>): string => {
+  let builtServices = ''
+  for (const service of services) {
+    builtServices = builtServices.concat(buildService(service))
   }
-  return routes
+  return builtServices
 }
 
 const buildImports = (schema: Schema): string => {
@@ -99,8 +99,8 @@ ${buildImports(schema)}
 ${fileHeader()}
 ${logger}
 ${buildTypes(schema)}
-${buildInterfaces(schema.services)}
-${buildAllRoutes(schema.services)}
+${buildServices(schema.queryServices)}
+${buildServices(schema.mutationServices)}
 `
   return {fileName: schema.fileName + '.ts', source}
 }
