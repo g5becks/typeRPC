@@ -1,5 +1,5 @@
 import {Code, CodeBuilder} from '..'
-import {QueryService, MutationMethod, Schema, is} from '../../schema'
+import {QueryService, MutationMethod, Schema, is, Param} from '../../schema'
 import {capitalize, fileHeader, lowerCase, serverResponseContentType} from '../utils'
 import {
   buildInterfaces,
@@ -10,6 +10,7 @@ import {
   makeParamsVar,
   paramNames,
 } from './utils'
+import {isQueryMethod, MutationService, QueryMethod} from '../../schema/schema'
 
 const logger = `
 interface ErrLogger {
@@ -22,72 +23,53 @@ const defaultLogger: ErrLogger = {
   }
 }`
 
-const buildPath = (method: MutationMethod): string => {
-  if (method.isGet || !method.hasParams) {
-    return `/${method.name}`
-  }
-  let params = ''
-  for (const param of method.params) {
-    params = params.concat(`:${param.name}`)
-  }
-  return `/${method.name}/${params}`
-}
-
-// destructures the query params by converting them to the
-// correct messages using the fromQueryString function
-const buildDestructuredQueryParams = (method: MutationMethod): string =>
-  `{${method.params.map((param, i) => {
-    if (is.QueryParamable(param.type)) {
-      const useComma = i === method.params.length - 1 ? '' : ','
-      return `${param.name}: ${fromQueryString(`ctx.query.${param.name}`, param.type)}${useComma}`
-    }
-  })}}`
-
-const destructuredParams = (method: MutationMethod): string => method.params.length === 0 ? '' : `
-  ${makeParamsVar(method.params)} = ${method.isGet ? buildDestructuredQueryParams(method) : 'ctx.body'}\n
+// builds a destructured object from query params by converting them to the
+// correct types using the fromQueryString function
+const buildDestructuredParams = (params: ReadonlyArray<Param>): string => params.length === 0 ? '' :
+  `${makeParamsVar(params)} = {${params.map((param, i) => {
+    const useComma = i === params.length - 1 ? '' : ', '
+    return `${param.name}: ${fromQueryString(`ctx.query.${param.name}`, param.type)}${useComma}`
+  })}}
   `
 
-const methodCall = (interfaceName: string, method: MutationMethod): string => {
-  const getParams = destructuredParams(method)
+const methodCall = (svcName: string, method: MutationMethod | QueryMethod): string => {
+  const paramsFromBody = isQueryMethod(method) ? buildDestructuredParams(method.params) : `${makeParamsVar(method.params)} = ctx.request.body`
   const useBraces = (args: string) => method.hasParams ? `{${args}}` : ''
-  const invokeMethod = method.isVoidReturn ? '' : `const res: ${dataType(method.returnType)} = await ${interfaceName}.${method.name}(${useBraces(paramNames(method.params))})`
+  const invokeMethod = method.isVoidReturn ? `await ${svcName}.${method.name}(${useBraces(paramNames(method.params))})` : `const res: ${dataType(method.returnType)} = await ${svcName}.${method.name}(${useBraces(paramNames(method.params))})`
   const sendResponse = method.isVoidReturn ? '' : `ctx.body = ${method.hasCborReturn ? '{data: await encodeAsync(res)}' : '{data: res}'}`
-  return `${getParams}\n${invokeMethod}\n${sendResponse}`
+  return `${paramsFromBody}\n${invokeMethod}\n${sendResponse}`
 }
 
-const setContentType = (method: MutationMethod): string => `ctx.type = ${serverResponseContentType(method)}`
-
-const buildHandler = (interfaceName: string, method: MutationMethod): string =>  {
+const buildMethodHandler = (svcName: string, method: QueryMethod | MutationMethod): string => {
   return `
-router.${method.httpVerb.toLowerCase()}('${interfaceName}/${method.name}', /${buildPath(method)}, async ctx => {
+router.${method.httpMethod.toLowerCase()}('${svcName}/${method.name}', '/${method.name}', async ctx => {
     try {
-      ${setContentType(method)}
+      ctx.type == ${serverResponseContentType(method)}
       ctx.status = ${method.responseCode}
-      ${methodCall(interfaceName, method)}
-    } catch (e) {
+      ${methodCall(svcName, method)}
+    } catch (error) {
       logger.error(e)
       ctx.throw(${method.errorCode}, e.message)
     }
-	} )\n
-`
+})\n`
 }
 
-const buildHandlers = (interfc: QueryService): string => {
+const buildHandlers = (svc: QueryService | MutationService): string => {
   let handlers = ''
-  for (const method of interfc.methods) {
-    handlers = handlers.concat(buildHandler(interfc.name, method))
+  for (const method of svc.methods) {
+    handlers = handlers.concat(buildMethodHandler(svc.name, method))
   }
   return handlers
 }
 
-const buildRoutes = (interfc: QueryService): string => {
+const buildService = (svc: QueryService| MutationService): string => {
   return `
-export const ${lowerCase(interfc.name)}Routes = (${lowerCase(interfc.name)}: ${capitalize(interfc.name)}, logger: ErrLogger = defaultLogger): Middleware<Koa.ParameterizedContext<any, Router.RouterParamContext>> => {
-	const router = new Router<any, {}>({
-		prefix: '/${interfc.name}/',
+export const ${lowerCase(svc.name)}Routes = (${lowerCase(svc.name)}: ${capitalize(svc.name)}, logger: ErrLogger = defaultLogger): Middleware<Koa.ParameterizedContext<any, Router.RouterParamContext>> => {
+	const router = new Router({
+		prefix: '/${svc.name}/',
 		sensitive: true
 	})
-  ${buildHandlers(interfc)}
+  ${buildHandlers(svc)}
 	return router.routes()
 }\n
 `
@@ -96,7 +78,7 @@ export const ${lowerCase(interfc.name)}Routes = (${lowerCase(interfc.name)}: ${c
 const buildAllRoutes = (interfaces: ReadonlyArray<QueryService>): string => {
   let routes = ''
   for (const interfc of interfaces) {
-    routes = routes.concat(buildRoutes(interfc))
+    routes = routes.concat(buildService(interfc))
   }
   return routes
 }
