@@ -1,4 +1,3 @@
-/*
 import {Code, CodeBuilder} from '..'
 import {QueryService, MutationMethod, Schema, is} from '../../schema'
 import {capitalize, fileHeader, lowerCase, serverResponseContentType} from '../utils'
@@ -6,7 +5,7 @@ import {
   buildInterfaces,
   buildMsgImports,
   buildTypes,
-  tsDataType,
+  dataType,
   fromQueryString,
   makeParamsVar,
   paramNames,
@@ -51,7 +50,7 @@ const destructuredParams = (method: MutationMethod): string => method.params.len
 const methodCall = (interfaceName: string, method: MutationMethod): string => {
   const getParams = destructuredParams(method)
   const useBraces = (args: string) => method.hasParams ? `{${args}}` : ''
-  const invokeMethod = method.isVoidReturn ? '' : `const res: ${tsDataType(method.returnType)} = await ${interfaceName}.${method.name}(${useBraces(paramNames(method.params))})`
+  const invokeMethod = method.isVoidReturn ? '' : `const res: ${dataType(method.returnType)} = await ${interfaceName}.${method.name}(${useBraces(paramNames(method.params))})`
   const sendResponse = method.isVoidReturn ? '' : `ctx.body = ${method.hasCborReturn ? '{data: await encodeAsync(res)}' : '{data: res}'}`
   return `${getParams}\n${invokeMethod}\n${sendResponse}`
 }
@@ -133,4 +132,3 @@ export const KoaBuilder:  CodeBuilder = {
   builder,
 }
 
- */

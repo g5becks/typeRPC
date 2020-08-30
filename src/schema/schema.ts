@@ -92,6 +92,14 @@ export type QueryService = Readonly<{
   useCbor: boolean;
 }>
 
+export const isMutationSvc = (svc: any): svc is MutationService => svc.type === 'MutationService'
+
+export const isQuerySvc = (svc: any): svc is QueryService => svc.type === 'QueryService'
+
+export const isMutationMethod = (method: any): method is MutationMethod => method.httpMethod === 'POST'
+
+export const isQueryMethod = (method: any): method is QueryMethod => method.httpMethod === 'GET'
+
 /** An rpc.MutationSvc */
 export type MutationService = Readonly<{
   type: 'MutationService';
