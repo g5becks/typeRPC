@@ -1,5 +1,5 @@
 import {Code, CodeBuilder} from '..'
-import {QueryService, MutationMethod, Schema, is, Param} from '../../schema'
+import {MutationMethod, Param, QueryService, Schema} from '../../schema'
 import {capitalize, fileHeader, lowerCase, serverResponseContentType} from '../utils'
 import {
   buildInterfaces,
@@ -32,7 +32,7 @@ const buildDestructuredParams = (params: ReadonlyArray<Param>): string => params
   })}}
   `
 
-const methodCall = (svcName: string, method: MutationMethod | QueryMethod): string => {
+const buildMethodCall = (svcName: string, method: MutationMethod | QueryMethod): string => {
   const paramsFromBody = isQueryMethod(method) ? buildDestructuredParams(method.params) : `${makeParamsVar(method.params)} = ctx.request.body`
   const useBraces = (args: string) => method.hasParams ? `{${args}}` : ''
   const invokeMethod = method.isVoidReturn ? `await ${svcName}.${method.name}(${useBraces(paramNames(method.params))})` : `const res: ${dataType(method.returnType)} = await ${svcName}.${method.name}(${useBraces(paramNames(method.params))})`
@@ -40,13 +40,13 @@ const methodCall = (svcName: string, method: MutationMethod | QueryMethod): stri
   return `${paramsFromBody}\n${invokeMethod}\n${sendResponse}`
 }
 
-const buildMethodHandler = (svcName: string, method: QueryMethod | MutationMethod): string => {
+const buildRouteHandler = (svcName: string, method: QueryMethod | MutationMethod): string => {
   return `
 router.${method.httpMethod.toLowerCase()}('${svcName}/${method.name}', '/${method.name}', async ctx => {
     try {
       ctx.type == ${serverResponseContentType(method)}
       ctx.status = ${method.responseCode}
-      ${methodCall(svcName, method)}
+      ${buildMethodCall(svcName, method)}
     } catch (error) {
       logger.error(e)
       ctx.throw(${method.errorCode}, e.message)
@@ -54,10 +54,10 @@ router.${method.httpMethod.toLowerCase()}('${svcName}/${method.name}', '/${metho
 })\n`
 }
 
-const buildHandlers = (svc: QueryService | MutationService): string => {
+const buildRouteHandlers = (svc: QueryService | MutationService): string => {
   let handlers = ''
   for (const method of svc.methods) {
-    handlers = handlers.concat(buildMethodHandler(svc.name, method))
+    handlers = handlers.concat(buildRouteHandler(svc.name, method))
   }
   return handlers
 }
@@ -69,7 +69,7 @@ export const ${lowerCase(svc.name)}Routes = (${lowerCase(svc.name)}: ${capitaliz
 		prefix: '/${svc.name}/',
 		sensitive: true
 	})
-  ${buildHandlers(svc)}
+  ${buildRouteHandlers(svc)}
 	return router.routes()
 }
 `
@@ -99,6 +99,7 @@ ${buildImports(schema)}
 ${fileHeader()}
 ${logger}
 ${buildTypes(schema)}
+${buildInterfaces(schema)}
 ${buildServices(schema.queryServices)}
 ${buildServices(schema.mutationServices)}
 `
