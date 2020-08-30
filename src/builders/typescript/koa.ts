@@ -21,7 +21,8 @@ const defaultLogger: ErrLogger = {
   error(message: string, ...meta) {
     console.log(\`error occurred :\${message}, info: \${meta}\`)
   }
-}`
+}
+`
 
 // builds a destructured object from query params by converting them to the
 // correct types using the fromQueryString function
@@ -127,7 +128,21 @@ const buildServerOptsType = (schemas: Schema[]): string => {
   return `${type}\n${port}\n${host}\n${backlog}\n${callback}\n${mddlwr}\n${services}
   }`
 }
-const buildServer = (schemas: Schema[]) => Code => {
+
+const buildRoutesMiddleware = (schemas: Schema[]): string => {
+  let middleware = ''
+  for (const schema of schemas) {
+    for (const svc of schema.queryServices) {
+      middleware = middleware.concat(`${lowerCase(svc.name)}Routes(opts.${lowerCase(svc.name)}), `)
+    }
+    for (const svc of schema.mutationServices) {
+      middleware = middleware.concat(`${lowerCase(svc.name)}Routes(opts.${lowerCase(svc.name)}), `)
+    }
+  }
+  return middleware
+}
+
+const buildServer = (schemas: Schema[]): Code => {
   let imports = ''
   for (const schema of schemas) {
     for (const svc of schema.queryServices) {
@@ -156,13 +171,14 @@ ${buildServerOptsType(schemas)}
 
 export const runServer = (opts: ServerOpts): http.Server => {
 	const app = koaQs(new Koa())
-	const middlewares = [bodyParser(), cborParser(), koaHelmet(), logger(),cors(),...opts.middleware]
+	const middlewares = [bodyParser(), cborParser(), koaHelmet(), logger(),cors(),...opts.middleware, ${buildRoutesMiddleware(schemas)}]
 	middlewares.forEach(mddlwr => app.use(mddlwr))
 	return app.listen(opts.port, opts.hostname, opts.backlog, opts.callback)
 }
   `
+  return {fileName: 'server.ts', source}
 }
-const builder = (schemas: Schema[]): Code[] => schemas.map(schema => buildFile(schema))
+const builder = (schemas: Schema[]): Code[] => [...schemas.map(schema => buildFile(schema)), buildServer(schemas)]
 
 export const KoaBuilder:  CodeBuilder = {
   lang: 'ts',
