@@ -106,6 +106,62 @@ ${buildServices(schema.mutationServices)}
   return {fileName: schema.fileName + '.ts', source}
 }
 
+const buildServerOptsType = (schemas: Schema[]): string => {
+  const type = 'type ServerOpts = {'
+  const port = 'port: number,'
+  const host = 'hostname?: string,'
+  const backlog = 'backlog?: number,'
+  const callback = 'callback?: (...args: any[]) => void'
+  const mddlwr = 'middleware?: Middleware<Koa.ParameterizedContext>[]'
+  let services = ''
+  for (const schema of schemas) {
+    for (const svc of schema.queryServices) {
+      services = services.concat(`${lowerCase(svc.name)}: ${capitalize(svc.name)},
+      `)
+    }
+    for (const svc of schema.mutationServices) {
+      services = services.concat(`${lowerCase(svc.name)}: ${capitalize(svc.name)},
+      `)
+    }
+  }
+  return `${type}\n${port}\n${host}\n${backlog}\n${callback}\n${mddlwr}\n${services}
+  }`
+}
+const buildServer = (schemas: Schema[]) => Code => {
+  let imports = ''
+  for (const schema of schemas) {
+    for (const svc of schema.queryServices) {
+      imports = imports.concat(`import {${lowerCase(svc.name)}Routes} from './${schema.fileName}'
+      `)
+    }
+    for (const svc of schema.mutationServices) {
+      imports = imports.concat(`import {${lowerCase(svc.name)}Routes} from './${schema.fileName}'
+      `)
+    }
+  }
+
+  const source = `
+import Koa, {Middleware} from 'koa'
+import bodyParser from 'koa-bodyparser'
+import Router from '@koa/router'
+import cborParser from 'koa-cbor-bodyparser'
+import koaQs from 'koa-qs'
+import koaHelmet from 'koa-helmet'
+import cors from '@koa/cors'
+import * as http from 'http'
+import logger from 'koa-logger'
+${imports}
+
+${buildServerOptsType(schemas)}
+
+export const runServer = (opts: ServerOpts): http.Server => {
+	const app = koaQs(new Koa())
+	const middlewares = [bodyParser(), cborParser(), koaHelmet(), logger(),cors(),...opts.middleware]
+	middlewares.forEach(mddlwr => app.use(mddlwr))
+	return app.listen(opts.port, opts.hostname, opts.backlog, opts.callback)
+}
+  `
+}
 const builder = (schemas: Schema[]): Code[] => schemas.map(schema => buildFile(schema))
 
 export const KoaBuilder:  CodeBuilder = {

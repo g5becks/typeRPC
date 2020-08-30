@@ -26,23 +26,6 @@ const validateTsConfigFile = async (tsConfigFile: string): Promise<void> => {
   }
 }
 
-const writeOutput = (outputPath: string, code: Code): Promise<void> {
-    const results = []
-    const filePath = (file: string) => outputType === 'types' ? path.join(outputPath, 'types', file) : path.join(outputPath, `${file}`)
-    for (const [file, source] of Object.entries(code)) {
-      results.push(outputFile(filePath(file), source))
-    }
-
-    try {
-      this.log(`saving ${outputType} code to ${outputPath}`)
-      await Promise.all(results)
-      this.log(`${outputType} generation complete, please check ${outputPath} for generated code`)
-    } catch (error) {
-      this.log(`error occurred writing files: ${error}`)
-      throw error
-    }
-  }
-
 const getBuilders = (target: Target, lang: ProgrammingLanguage): CodeBuilder[] => {
   return builders.filter(builder => {
     builder.lang === lang && builder.target
@@ -75,6 +58,23 @@ class Build extends Command {
       options: ['client', 'server'],
     },
   ]
+
+  async writeOutput(outputPath: string, code: Code): Promise<void> {
+    const results = []
+    const filePath = (file: string) => outputType === 'types' ? path.join(outputPath, 'types', file) : path.join(outputPath, `${file}`)
+    for (const [file, source] of Object.entries(code)) {
+      results.push(outputFile(filePath(file), source))
+    }
+
+    try {
+      this.log(`saving ${outputType} code to ${outputPath}`)
+      await Promise.all(results)
+      this.log(`${outputType} generation complete, please check ${outputPath} for generated code`)
+    } catch (error) {
+      this.log(`error occurred writing files: ${error}`)
+      throw error
+    }
+  }
 
   validateInputs(target: Target, tsConfigFile: string, outputPath: string) {
     return new Listr([{
@@ -131,7 +131,7 @@ class Build extends Command {
       },
       {
         title: `Saving ${target} Rpc code to ${outputPath}`,
-        task: async () => writeOutput(outputPath, code, 'rpc'),
+        task: async () => this.writeOutput(outputPath, code, 'rpc'),
       },
     ])
   }
@@ -149,7 +149,6 @@ class Build extends Command {
 
     this.log(`JobId: ${jobId} complete, check ${outputPath} for generated ${target} code.`)
   }
-
 }
 
 export = Build
