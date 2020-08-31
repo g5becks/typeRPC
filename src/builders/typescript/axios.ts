@@ -1,7 +1,7 @@
 import {Code, CodeBuilder} from '..'
 import {buildMsgImports, buildParamsWithTypes, buildTypes, dataType, format, paramNames} from './utils'
 import {MutationMethod, QueryService, Schema} from '../../schema'
-import {capitalize, fileHeader} from '../utils'
+import {capitalize, fileHeader, lowerCase} from '../utils'
 import {isQueryMethod, MutationService, QueryMethod} from '../../schema/schema'
 
 const rpcConfig = `
@@ -19,7 +19,7 @@ type RpcConfig = Omit<AxiosRequestConfig, Excluded>
 `
 const buildImports = (schema: Schema): string => {
   return `
-import axios, {AxiosInstance, AxiosRequestConfig} from 'axios'
+import axios, {AxiosInstance, AxiosRequestConfig, AxiosResponse} from 'axios'
 import {URL} from 'url'
 ${buildMsgImports(schema.imports)}
 
@@ -33,8 +33,8 @@ const buildRequestData = (method: QueryMethod | MutationMethod): string =>
 
 const buildMethod = (method: MutationMethod| QueryMethod): string => {
   const returnType = dataType(method.returnType)
-  return `${method.name}(${buildParamsWithTypes(method.params)} ${method.isVoidReturn ? '' : ', '} cfg?:RpcConfig): Promise<AxiosResponse<${returnType}>> {
-    return this.#client.request<${returnType}>({...cfg, method: '${method.httpMethod}', ${method.hasParams ? buildRequestData(method) : ''}})
+  return `${method.name}(${buildParamsWithTypes(method.params)} ${method.hasParams ? ', ' : ''} cfg?:RpcConfig): Promise<AxiosResponse<${returnType}>> {
+    return this.#client.request<${returnType}>({...cfg, url: '/${method.name}', method: '${method.httpMethod}', ${method.hasParams ? buildRequestData(method) : ''}})
 }
 `
 }
@@ -51,17 +51,17 @@ const buildService = (svc: MutationService| QueryService): string => {
 export class ${capitalize(svc.name)} {
 	readonly #client: AxiosInstance
 	private constructor(protected readonly host: string) {
-	      this.#client = axios.create({baseURL: host})
+	      this.#client = axios.create({baseURL: \`\${host}/${lowerCase(svc.name)}\`})
 		this.#client.interceptors.response.use(response => response?.data?.data)
 	}
-	public static use(host: string): PersonQueries | Error {
+	public static use(host: string): ${capitalize(svc.name)} | Error {
 		let url: URL
 		try {
-			url = new URL(urlString)
+			url = new URL(host)
 		} catch (_) {
 			return new Error(\`\${host} is not a valid http(s) url\`)
 		}
-		return url.protocol === 'http:' || url.protocol === 'https:' ? new PersonQueries(host) : new Error(\`\${host} is not a valid http(s) url\`)
+		return url.protocol === 'http:' || url.protocol === 'https:' ? new ${capitalize(svc.name)}(host) : new Error(\`\${host} is not a valid http(s) url\`)
 	}
 
 	${buildMethods(svc)}

@@ -75,7 +75,7 @@ const buildService = (svc: QueryService| MutationService): string => {
   return `
 export const ${capitalize(svc.name)} = (${lowerCase(svc.name)}: ${capitalize(svc.name)}, logger: ErrLogger = defaultLogger): Middleware<Koa.ParameterizedContext<any, Router.RouterParamContext>> => {
 	const router = new Router({
-		prefix: '/${svc.name}/',
+		prefix: '/${lowerCase(svc.name)}/',
 		sensitive: true
 	})
   ${buildRouteHandlers(svc)}
