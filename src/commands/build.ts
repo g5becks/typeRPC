@@ -1,4 +1,13 @@
-import {builders, Code, CodeBuilder, ProgrammingLanguage, Target} from '../builders'
+import {
+  builders,
+  Code,
+  CodeBuilder,
+  isValidFramework,
+  isValidLang,
+  languages,
+  ProgrammingLanguage,
+  Target,
+} from '../builders'
 import {Command, flags} from '@oclif/command'
 import {outputFile, pathExists} from 'fs-extra'
 import {nanoid} from 'nanoid'
@@ -53,6 +62,9 @@ type Ctx = {
   lang: string;
   framework: string;
 }
+
+type BuildCtx = {builder?: CodeBuilder} & Ctx
+
 class Build extends Command {
   static description = 'describe command here'
 
@@ -90,9 +102,7 @@ class Build extends Command {
     }
   }
 
-  #builders: CodeBuilder[] = []
-
-  #ctx: Ctx = {
+  #validationCtx: Ctx = {
     target: '',
     lang: '',
     framework: '',
@@ -100,59 +110,75 @@ class Build extends Command {
     tsConfigFilePath: '',
   }
 
+  #buildCtx: BuildCtx = this.#validationCtx
+
   #code: Code[] = []
 
-  #validateInputs = new Listr<Ctx>([{
-    title: 'Validating Target',
-    task: async ctx => {
-      if (isTarget(ctx.target)) {
-        return true
-      }
-      throw new Error(`invalid target: ${ctx.target}.
+  #validateInputs = new Listr<Ctx>(
+    [
+      {
+        title: 'Validating tsconfig.json',
+        task: async ctx => validateTsConfigFile(ctx.tsConfigFilePath),
+      },
+      {
+        title: 'Validating Target',
+        task: async ctx => {
+          if (isTarget(ctx.target)) {
+            return true
+          }
+          throw new Error(`invalid target: ${ctx.target}.
           valid targets are: [client, server]`)
-    },
-  },
-  {
-    title: 'Validating tsconfig.json',
-    task: async ctx => validateTsConfigFile(ctx.tsConfigFilePath),
-  },
-  {
-    title: 'Validating Output Path',
-    task: async ctx => validateOutputPath(ctx.outputPath),
-  },
-  {
-    title: 'Validating Schema Files',
-    task: async ctx => {
-      const project = new Project({tsConfigFilePath: ctx.tsConfigFilePath, skipFileDependencyResolution: true})
-      const errs = validateSchemas(project.getSourceFiles())
-      if (errs.length === 0) {
-        return true
-      }
-      throw errs.reduce((err, val) => {
-        err.name.concat(val.name + '\n')
-        err.message.concat(val.message + '\n')
+        },
+
+      },
+      {
+        title: 'Validating Programming Language',
+        task: async ctx => {
+          if (!isValidLang(ctx.lang)) {
+            throw new Error(`${ctx.lang} is not a valid programming language selection
+        valid languages are ${languages}`)
+          }
+        },
+      },
+      {
+        title: 'Validating Output Path',
+        task: async ctx => validateOutputPath(ctx.outputPath),
+      },
+      {
+        title: 'Validating Framework',
+        task: ctx =>  {
+          const builders = getBuilders(ctx.target as Target, ctx.lang as ProgrammingLanguage)
+          if (builders.length === 0) {
+            this.error(`no ${ctx.target} builders were found for ${ctx.lang}`)
+          }
+          const filtered = filterBuilderByFramework(ctx.framework, builders)
+          if (filtered.length === 0) {
+            this.error(`no ${ctx.target} builder found for ${ctx.lang} using ${ctx.framework}. Available ${ctx.target} builders for ${ctx.lang} are ${reportAvailableFrameworks(builders)}`)
+          } else {
+            this.#buildCtx = {
+              ...ctx,
+              builder: filtered[0],
+            }
+          }
+        },
+      },
+      {
+        title: 'Validating Schema Files',
+        task: async ctx => {
+          const project = new Project({tsConfigFilePath: ctx.tsConfigFilePath, skipFileDependencyResolution: true})
+          const errs = validateSchemas(project.getSourceFiles())
+          if (errs.length === 0) {
+            return true
+          }
+          throw errs.reduce((err, val) => {
+            err.name.concat(val.name + '\n')
+            err.message.concat(val.message + '\n')
             err.stack?.concat(val.stack + '\n')
             return err
-      })
-    },
-  },
-  {
-    title: `locating ${this.#ctx.target} builders for language: ${this.#ctx.lang}, framework: ${this.#ctx.framework} `,
-    task: ctx =>  {
-      this.#builders = getBuilders(ctx.target as Target, ctx.lang as ProgrammingLanguage)
-      if (builders.length === 0) {
-        this.error(`no ${target} builders were found for ${lang}`)
-      }
-      const filtered = filterBuilderByFramework(framework, builders)
-      if (filtered.length === 0) {
-        this.error(`no ${target} builder found for ${lang} using ${framework}. Available ${target} builders for ${lang} are ${reportAvailableFrameworks(builders)}`)
-      }
-    },
-  },
-  {
-    title: 'Validation Successful, Generating JobId',
-    task: () => true,
-  }], {concurrent: true})
+          })
+        },
+      },
+    ], {concurrent: true, exitOnError: true, ctx: this.#validationCtx})
 
   buildCode(target: Target, tsConfigFilePath: string, outputPath: string, lang: ProgrammingLanguage, framework: string) {
     const builder = filterBuilderByFramework(framework, getBuilders(target, lang))[0]
@@ -177,9 +203,9 @@ class Build extends Command {
     const lang = flags.lang?.trim() ?? ''
     const framework = flags.framework?.trim() ?? ''
     const jobId = nanoid().toLowerCase()
-    this.#ctx = {target, tsConfigFilePath, outputPath, framework, lang}
+    this.#validationCtx = {target, tsConfigFilePath, outputPath, framework, lang}
     this.log('Beginning input validation...')
-    await this.#validateInputs.run(this.#ctx)
+    await this.#validateInputs.run()
     this.log()
     await this.buildCode(target, tsConfig, outputPath, lang as ProgrammingLanguage, framework).run()
     if (this.code.length === 0) {
