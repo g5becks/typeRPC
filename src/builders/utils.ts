@@ -21,7 +21,7 @@ export const fileHeader = () => `
 \n`
 
 // returns the correct content-type for a server response
-export const serverResponseContentType = (method: MutationMethod | QueryMethod) => method.hasCborReturn ? 'application/cbor' : 'application/json'
+export const serverResponseContentType = (method: MutationMethod | QueryMethod) => method.hasCborReturn ? "'application/cbor'" : "'application/json'"
 
 // returns the correct content-type for a client request
-export const clientRequestContentType = (method: MutationMethod) => method.hasCborParams ? 'application/cbor' : 'application/json'
+export const clientRequestContentType = (method: MutationMethod) => method.hasCborParams ? "'application/cbor'" : "'application/json'"
