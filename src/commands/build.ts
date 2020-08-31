@@ -3,7 +3,7 @@ import {Command, flags} from '@oclif/command'
 import {outputFile, pathExists} from 'fs-extra'
 import {nanoid} from 'nanoid'
 import path from 'path'
-import Listr from 'listr'
+import Listr from 'listr2'
 import {buildSchemas, validateSchemas} from '../schema'
 import {Project} from 'ts-morph'
 
