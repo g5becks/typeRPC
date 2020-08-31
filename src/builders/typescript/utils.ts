@@ -155,7 +155,7 @@ const buildParams = (params: ReadonlyArray<Param>): string => {
 
 // builds a single method signature for an interface
 const buildMethodSignature = (method: Method): string => {
-  return `async ${lowerCase(method.name)}(${buildParams(method.params)}): Promise<${dataType(method.returnType)}>;
+  return `${lowerCase(method.name)}(${buildParams(method.params)}): Promise<${dataType(method.returnType)}>;
 `
 }
 
