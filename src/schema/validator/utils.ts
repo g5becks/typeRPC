@@ -23,10 +23,10 @@ export const isMsg = (type: TypeAliasDeclaration | PropertySignature | Parameter
 const getTypeNodeText = (type: TypeAliasDeclaration): string|undefined => type.getTypeNode()?.getText()
 
 // is the type alias an rpc.QuerySvc?
-export const isQuerySvc = (type: TypeAliasDeclaration): boolean => Boolean(getTypeNodeText(type)?.startsWith('rpc.QuerySvc<{'))
+export const isQuerySvc = (type: TypeAliasDeclaration): boolean => Boolean(getTypeNodeText(type)?.trim().startsWith('rpc.QuerySvc<{'))
 
 // determines if the type alias an rpc.MutationSvc
-export const isMutationSvc = (type: TypeAliasDeclaration): boolean => Boolean(getTypeNodeText(type)?.startsWith('rpc.MutationSvc<{'))
+export const isMutationSvc = (type: TypeAliasDeclaration): boolean => Boolean(getTypeNodeText(type)?.trim().startsWith('rpc.MutationSvc<{'))
 
 // determines if the type alias is a valid rpc.Msg that was either
 // defined is this file or imported from another file in this project.

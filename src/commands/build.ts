@@ -108,6 +108,10 @@ class Build extends Command {
   #validateInputs = new Listr<Ctx>(
     [
       {
+        title: 'Log Context',
+        task: async ctx => console.log(ctx),
+      },
+      {
         title: 'Validating tsconfig.json',
         task: async ctx => validateTsConfigFile(ctx.tsConfigFilePath),
       },
@@ -169,7 +173,7 @@ class Build extends Command {
           })
         },
       },
-    ], {concurrent: true, exitOnError: true, ctx: this.#validationCtx})
+    ], {exitOnError: true})
 
   #build = new Listr<BuildCtx>([
     {
@@ -183,7 +187,7 @@ class Build extends Command {
         this.#code = ctx.builder.build(schemas)
       },
     },
-  ], {ctx: this.#buildCtx, exitOnError: true})
+  ], {exitOnError: true})
 
   async run() {
     const {args, flags} = this.parse(Build)
@@ -195,9 +199,8 @@ class Build extends Command {
     const jobId = nanoid().toLowerCase()
     this.#validationCtx = {target, tsConfigFilePath, outputPath, framework, lang}
     this.log('Beginning input validation...')
-    await this.#validateInputs.run()
-    this.log()
-    await this.#build.run()
+    await this.#validateInputs.run(this.#validationCtx)
+    await this.#build.run(this.#buildCtx)
     if (this.#code.length === 0) {
       this.error('no code found to save, exiting')
     } else {

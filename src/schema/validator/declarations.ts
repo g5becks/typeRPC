@@ -170,7 +170,7 @@ const preValidateType = (type: TypeAliasDeclaration): Error[] => {
       },
       Typescript types (number, string[]), intersections, and unions are not supported.`)]
   }
-  if (!isMsg(type) || isQuerySvc(type) || isMutationSvc(type)) {
+  if (!isMsg(type) && isQuerySvc(type) && isMutationSvc(type)) {
     errs = errs.concat(singleValidationErr(type, 'typerpc schema files can only declare rpc.Msg, rpc.QuerySvc and rpc.MutationSvc definitions.'))
   }
 
