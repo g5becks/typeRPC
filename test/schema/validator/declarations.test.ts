@@ -117,11 +117,6 @@ test(testName('type alias with object literal property'), () =>
   }`, validateTypes)
 )
 
-test(testName('empty rpc.Msg'), () =>
-  runTest(`
-  type TestType = rpm.Msg<{}>`, validateTypes)
-)
-
 test(testName('type alias with invalid type property'), () =>
   runTest(`
   type MyType = {
