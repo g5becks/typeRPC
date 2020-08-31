@@ -97,6 +97,7 @@ const buildImports = (schema: Schema): string => {
 import {encodeAsync} from 'cbor'`
   const useCbor = schema.hasCbor ? cbor : ''
   return `
+import Koa from 'koa'
 import Router, {Middleware} from '@koa/router'
 ${useCbor}
 ${buildMsgImports(schema.imports)}
