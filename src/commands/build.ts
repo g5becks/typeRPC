@@ -108,10 +108,6 @@ class Build extends Command {
   #validateInputs = new Listr<Ctx>(
     [
       {
-        title: 'Log Context',
-        task: async ctx => console.log(ctx),
-      },
-      {
         title: 'Validating tsconfig.json',
         task: async ctx => validateTsConfigFile(ctx.tsConfigFilePath),
       },
@@ -184,7 +180,7 @@ class Build extends Command {
         }
         const proj = new Project({tsConfigFilePath: ctx.tsConfigFilePath, skipFileDependencyResolution: true})
         const schemas = buildSchemas(proj.getSourceFiles())
-        this.#code = ctx.builder.build(schemas)
+        this.#code = typeof ctx.builder.format === 'undefined' ? ctx.builder.build(schemas) : ctx.builder.format(ctx.builder.build(schemas))
       },
     },
   ], {exitOnError: true})
