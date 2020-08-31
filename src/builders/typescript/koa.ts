@@ -35,11 +35,6 @@ const buildDestructuredParams = (params: ReadonlyArray<Param>): string => {
   let i = 0
   while (i < params.length) {
     const parsed = fromQueryString(`ctx.query.${params[i].name}`, params[i].type)
-
-    // eslint-disable-next-line no-console
-    console.log(params[i].type)
-    // eslint-disable-next-line no-console
-    console.log(parsed)
     const useComma = i === params.length - 1 ? '' : ', '
     parsedParams = parsedParams.concat(`${params[i].name}: ${parsed}${useComma}`)
     i++
