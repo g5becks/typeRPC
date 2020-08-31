@@ -73,7 +73,7 @@ const buildRouteHandlers = (svc: QueryService | MutationService): string => {
 
 const buildService = (svc: QueryService| MutationService): string => {
   return `
-export const ${lowerCase(svc.name)}Routes = (${lowerCase(svc.name)}: ${capitalize(svc.name)}, logger: ErrLogger = defaultLogger): Middleware<Koa.ParameterizedContext<any, Router.RouterParamContext>> => {
+export const ${capitalize(svc.name)} = (${lowerCase(svc.name)}: ${capitalize(svc.name)}, logger: ErrLogger = defaultLogger): Middleware<Koa.ParameterizedContext<any, Router.RouterParamContext>> => {
 	const router = new Router({
 		prefix: '/${svc.name}/',
 		sensitive: true
@@ -144,10 +144,10 @@ const buildRoutesMiddleware = (schemas: Schema[]): string => {
   let middleware = ''
   for (const schema of schemas) {
     for (const svc of schema.queryServices) {
-      middleware = middleware.concat(`${lowerCase(svc.name)}Routes(opts.${lowerCase(svc.name)}), `)
+      middleware = middleware.concat(`${capitalize(svc.name)}(opts.${lowerCase(svc.name)}), `)
     }
     for (const svc of schema.mutationServices) {
-      middleware = middleware.concat(`${lowerCase(svc.name)}Routes(opts.${lowerCase(svc.name)}), `)
+      middleware = middleware.concat(`${capitalize(svc.name)}(opts.${lowerCase(svc.name)}), `)
     }
   }
   return middleware
@@ -157,11 +157,11 @@ const buildServer = (schemas: Schema[]): Code => {
   let imports = ''
   for (const schema of schemas) {
     for (const svc of schema.queryServices) {
-      imports = imports.concat(`import {${lowerCase(svc.name)}Routes} from './${schema.fileName}'
+      imports = imports.concat(`import {${capitalize(svc.name)}} from './${schema.fileName}'
       `)
     }
     for (const svc of schema.mutationServices) {
-      imports = imports.concat(`import {${lowerCase(svc.name)}Routes} from './${schema.fileName}'
+      imports = imports.concat(`import {${capitalize(svc.name)}} from './${schema.fileName}'
       `)
     }
   }
