@@ -117,12 +117,6 @@ ${buildServices(schema.mutationServices)}
 }
 
 const buildServerOptsType = (schemas: Schema[]): string => {
-  const type = 'type ServerOpts = {'
-  const port = 'port: number,'
-  const host = 'hostname?: string,'
-  const backlog = 'backlog?: number,'
-  const callback = 'callback?: (...args: any[]) => void'
-  const mddlwr = 'middleware?: Middleware<Koa.ParameterizedContext>[]'
   let services = ''
   for (const schema of schemas) {
     for (const svc of schema.queryServices) {
@@ -134,8 +128,16 @@ const buildServerOptsType = (schemas: Schema[]): string => {
       `)
     }
   }
-  return `${type}\n${port}\n${host}\n${backlog}\n${callback}\n${mddlwr}\n${services}
-  }`
+  return `
+type ServerOptions = {
+  port: number
+  hostname?: string
+  backlog?: number
+  callback?: (...args: any[]) => void
+  middleware?: Middleware<Koa.ParameterizedContext>[]
+  ${services}
+}
+`
 }
 
 const buildRoutesMiddleware = (schemas: Schema[]): string => {
@@ -178,7 +180,7 @@ ${imports}
 
 ${buildServerOptsType(schemas)}
 
-export const runServer = (opts: ServerOpts): http.Server => {
+export const runServer = (opts: ServerOptions): http.Server => {
 	const app = koaQs(new Koa())
 	const middlewares = [bodyParser(), cborParser(), koaHelmet(), logger(),cors(),...opts.middleware, ${buildRoutesMiddleware(schemas)}]
 	middlewares.forEach(mddlwr => app.use(mddlwr))
