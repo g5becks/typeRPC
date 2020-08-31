@@ -1,18 +1,9 @@
-import {
-  builders,
-  Code,
-  CodeBuilder,
-  isValidFramework,
-  isValidLang,
-  languages,
-  ProgrammingLanguage,
-  Target,
-} from '../builders'
+import {builders, Code, CodeBuilder, isValidLang, languages, ProgrammingLanguage, Target} from '../builders'
 import {Command, flags} from '@oclif/command'
 import {outputFile, pathExists} from 'fs-extra'
 import {nanoid} from 'nanoid'
 import path from 'path'
-import {Listr, ListrTask} from 'listr2'
+import {Listr} from 'listr2'
 import {buildSchemas, validateSchemas} from '../schema'
 import {Project} from 'ts-morph'
 
@@ -180,20 +171,19 @@ class Build extends Command {
       },
     ], {concurrent: true, exitOnError: true, ctx: this.#validationCtx})
 
-  buildCode(target: Target, tsConfigFilePath: string, outputPath: string, lang: ProgrammingLanguage, framework: string) {
-    const builder = filterBuilderByFramework(framework, getBuilders(target, lang))[0]
-
-    return new Listr([
-      {
-        title: `Attempting to generate ${lang} ${target} code using ${framework} framework`,
-        task: () => {
-          const proj = new Project({tsConfigFilePath, skipFileDependencyResolution: true})
-          const schemas = buildSchemas(proj.getSourceFiles())
-          this.code = builder.build(schemas)
-        },
+  #build = new Listr<BuildCtx>([
+    {
+      title: `Attempting to generate ${this.#buildCtx.lang} ${this.#buildCtx.target} code using ${this.#buildCtx.framework} framework`,
+      task: async ctx => {
+        if (typeof ctx.builder === 'undefined') {
+          throw  new TypeError('builder not found')
+        }
+        const proj = new Project({tsConfigFilePath: ctx.tsConfigFilePath, skipFileDependencyResolution: true})
+        const schemas = buildSchemas(proj.getSourceFiles())
+        this.#code = ctx.builder.build(schemas)
       },
-    ])
-  }
+    },
+  ], {ctx: this.#buildCtx, exitOnError: true})
 
   async run() {
     const {args, flags} = this.parse(Build)
@@ -207,11 +197,11 @@ class Build extends Command {
     this.log('Beginning input validation...')
     await this.#validateInputs.run()
     this.log()
-    await this.buildCode(target, tsConfig, outputPath, lang as ProgrammingLanguage, framework).run()
-    if (this.code.length === 0) {
+    await this.#build.run()
+    if (this.#code.length === 0) {
       this.error('no code found to save, exiting')
     } else {
-      await this.writeOutput(outputPath, this.code)
+      await this.writeOutput(outputPath, this.#code)
     }
     this.log(`JobId: ${jobId} complete, check ${outputPath} for generated ${target} code.`)
   }

@@ -14,8 +14,6 @@ export const languages = ['go', 'dart', 'ts', 'js', 'ruby', 'python', 'C#', 'F#'
 
 export const isValidLang = (lang: string): lang is ProgrammingLanguage => languages.includes(lang)
 
-export const isValidFramework = (lang: string, target: Target, framework: string): boolean => isValidLang(lang) && builders.filter(builder => builder.lang === lang && builder.target === target && builder.framework === framework).length > 0
-
 export type CodeBuilder = {
   readonly lang: ProgrammingLanguage;
   readonly target: Target;
