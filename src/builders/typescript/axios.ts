@@ -33,8 +33,8 @@ const buildRequestData = (method: QueryMethod | MutationMethod): string =>
 
 const buildMethod = (method: MutationMethod| QueryMethod): string => {
   const returnType = dataType(method.returnType)
-  return `${method.name}(${buildParamsWithTypes(method.params)}, cfg?:RpcConfig): Promise<AxiosResponse<${returnType}>> {
-    return this.#client.request<${returnType}>({...cfg, method: '${method.httpMethod}', ${buildRequestData(method)}})
+  return `${method.name}(${buildParamsWithTypes(method.params)} ${method.isVoidReturn ? '' : ', '} cfg?:RpcConfig): Promise<AxiosResponse<${returnType}>> {
+    return this.#client.request<${returnType}>({...cfg, method: '${method.httpMethod}', ${method.hasParams ? buildRequestData(method) : ''}})
 }
 `
 }
