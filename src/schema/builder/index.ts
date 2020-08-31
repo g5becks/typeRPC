@@ -16,7 +16,7 @@ import {isType, makeDataType, useCbor} from './data-type'
 
 export {useCbor}
 const buildImports = (file: SourceFile): ReadonlyArray<Import> =>
-  file.getImportDeclarations().map(imp => {
+  file.getImportDeclarations().filter(imp => imp.getModuleSpecifierValue() !== '@typerpc/types').map(imp => {
     return {
       messageNames: imp.getNamedImports().map(name => name.getName()),
       fileName: imp.getModuleSpecifierValue().replace('./', ''),
