@@ -36,7 +36,7 @@ const buildDestructuredParams = (params: ReadonlyArray<Param>): string => params
 const buildMethodCall = (svcName: string, method: MutationMethod | QueryMethod): string => {
   const paramsFromBody = isQueryMethod(method) ? buildDestructuredParams(method.params) : `${makeParamsVar(method.params)} = ctx.request.body`
   const useBraces = (args: string) => method.hasParams ? `{${args}}` : ''
-  const invokeMethod = method.isVoidReturn ? `await ${svcName}.${method.name}(${useBraces(paramNames(method.params))})` : `const res: ${dataType(method.returnType)} = await ${svcName}.${method.name}(${useBraces(paramNames(method.params))})`
+  const invokeMethod = method.isVoidReturn ? `await ${lowerCase(svcName)}.${method.name}(${useBraces(paramNames(method.params))})` : `const res: ${dataType(method.returnType)} = await ${lowerCase(svcName)}.${method.name}(${useBraces(paramNames(method.params))})`
   const sendResponse = method.isVoidReturn ? '' : `ctx.body = ${method.hasCborReturn ? '{data: await encodeAsync(res)}' : '{data: res}'}`
   return `${paramsFromBody}\n${invokeMethod}\n${sendResponse}`
 }
