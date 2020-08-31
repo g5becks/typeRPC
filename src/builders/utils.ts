@@ -16,7 +16,7 @@ export const fileHeader = () => `
 // EDITING GENERATED CODE BY HAND IS HIGHLY DISCOURAGED,
 // EDITING SCHEMAS AND REGENERATING CODE IS PREFERRED.
 // TO REPORT A BUG, REQUEST A NEW FEATURE, OR OTHER
-// ISSUES, VISIT https://github.com/g5becks/typeRPC/issues
+// ISSUES, VISIT https://github.com/typerpc/cli/issues
 // ****************************************************
 \n`
 
