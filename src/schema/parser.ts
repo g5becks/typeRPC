@@ -46,11 +46,7 @@ export const parseMessages = (file: SourceFile): TypeAliasDeclaration[] => file.
 
 // parses all rpc.QuerySvc declarations from a schema file
 export const parseQueryServices = (file: SourceFile): TypeAliasDeclaration[] =>
-  file.getTypeAliases().filter(alias => {
-    // eslint-disable-next-line no-console
-    console.log(`Checking ${alias.getName()}`)
-    return isQuerySvc(alias)
-  })
+  file.getTypeAliases().filter(alias => isQuerySvc(alias))
 
 // parses all rpc.MutationSvc declarations from a schema file
 export const parseMutationServices = (file: SourceFile): TypeAliasDeclaration[] => file.getTypeAliases().filter(alias => isMutationSvc(alias))

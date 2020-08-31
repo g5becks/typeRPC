@@ -206,8 +206,6 @@ class Build extends Command {
       await this.writeOutput(outputPath, this.#code)
     }
     this.log(`JobId: ${jobId} complete, check ${outputPath} for generated ${target} code.`)
-    const sch = this.schemas.map(schema => `file = ${schema.fileName}\n, mutations = ${schema.mutationServices.map(svc => svc.name)}\n, queries = ${schema.queryServices.map(svc => svc.name)}\n`)
-    this.log(`${sch}`)
   }
 }
 
