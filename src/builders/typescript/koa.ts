@@ -7,7 +7,7 @@ import {
   buildTypes,
   dataType, format,
   fromQueryString,
-  makeParamsVar,
+  buildParamsVar,
   paramNames,
 } from './utils'
 import {isQueryMethod, MutationService, QueryMethod} from '../../schema/schema'
@@ -30,7 +30,7 @@ const buildDestructuredParams = (params: ReadonlyArray<Param>): string => {
   if (params.length === 0) {
     return ''
   }
-  const variable = makeParamsVar(params)
+  const variable = buildParamsVar(params)
   let parsedParams = ''
   let i = 0
   while (i < params.length) {
@@ -43,7 +43,7 @@ const buildDestructuredParams = (params: ReadonlyArray<Param>): string => {
 }
 
 const buildMethodCall = (svcName: string, method: MutationMethod | QueryMethod): string => {
-  const paramsFromBody = isQueryMethod(method) ? buildDestructuredParams(method.params) : `${makeParamsVar(method.params)} = ctx.request.body`
+  const paramsFromBody = isQueryMethod(method) ? buildDestructuredParams(method.params) : `${buildParamsVar(method.params)} = ctx.request.body`
   const invokeMethod = method.isVoidReturn ? `await ${lowerCase(svcName)}.${method.name}(${paramNames(method.params)})` : `const res: ${dataType(method.returnType)} = await ${lowerCase(svcName)}.${method.name}(${paramNames(method.params)})`
   const sendResponse = method.isVoidReturn ? '' : `ctx.body = ${method.hasCborReturn ? '{data: await encodeAsync(res)}' : '{data: res}'}`
   return `${paramsFromBody}\n${invokeMethod}\n${sendResponse}`
@@ -84,12 +84,15 @@ export const ${capitalize(svc.name)} = (${lowerCase(svc.name)}: ${capitalize(svc
 `
 }
 
-const buildServices = (services: ReadonlyArray<QueryService> | ReadonlyArray<MutationService>): string => {
-  let builtServices = ''
-  for (const service of services) {
-    builtServices = builtServices.concat(buildService(service))
+const buildServices = (schema: Schema): string => {
+  let services = ''
+  for (const svc of schema.queryServices) {
+    services = services.concat(buildService(svc))
   }
-  return builtServices
+  for (const svc of schema.mutationServices) {
+    services = services.concat(buildService(svc))
+  }
+  return services
 }
 
 const buildImports = (schema: Schema): string => {
@@ -110,8 +113,7 @@ ${fileHeader()}
 ${logger}
 ${buildTypes(schema)}
 ${buildInterfaces(schema)}
-${buildServices(schema.queryServices)}
-${buildServices(schema.mutationServices)}
+${buildServices(schema)}
 `
   return {fileName: schema.fileName + '.ts', source}
 }

@@ -199,9 +199,10 @@ export const paramNames = (params: ReadonlyArray<Param>) => {
   return names
 }
 
+// used for building input params for methods and also to
 // builds the type specifier for destructured parameters E.G.
 // {name: string, age: number, gender: string}
-export const paramsType = (params: ReadonlyArray<Param>): string => {
+export const buildParamsWithTypes = (params: ReadonlyArray<Param>): string => {
   if (params.length === 0) {
     return ''
   }
@@ -215,7 +216,7 @@ export const paramsType = (params: ReadonlyArray<Param>): string => {
 
 // makes a destructured parameters variable. E.G.
 // const {name, age}: {name: string, age: number }
-export const makeParamsVar = (params: ReadonlyArray<Param>): string => `const {${paramNames(params)}}: {${paramsType(params)}}`
+export const buildParamsVar = (params: ReadonlyArray<Param>): string => `const {${paramNames(params)}}: {${buildParamsWithTypes(params)}}`
 
 // builds the import strings from a Schema's Imports list
 export const buildMsgImports = (imports: ReadonlyArray<Import>): string => {
