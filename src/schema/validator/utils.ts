@@ -18,15 +18,15 @@ export const isContainer = (type: TypeNode | Node): boolean => containers.some(c
 
 // is the type alias or node an rpc.Msg?
 export const isMsg = (type: TypeAliasDeclaration | PropertySignature | ParameterDeclaration): boolean =>
-  Boolean(type.getTypeNode()?.getText().startsWith('rpc.Msg<{'))
+  Boolean(type.getTypeNode()?.getText().startsWith('rpc.Msg'))
 
 const getTypeNodeText = (type: TypeAliasDeclaration): string|undefined => type.getTypeNode()?.getText()
 
 // is the type alias an rpc.QuerySvc?
-export const isQuerySvc = (type: TypeAliasDeclaration): boolean => Boolean(getTypeNodeText(type)?.trim().startsWith('rpc.QuerySvc<{'))
+export const isQuerySvc = (type: TypeAliasDeclaration): boolean => Boolean(getTypeNodeText(type)?.trim().startsWith('rpc.QuerySvc'))
 
 // determines if the type alias an rpc.MutationSvc
-export const isMutationSvc = (type: TypeAliasDeclaration): boolean => Boolean(getTypeNodeText(type)?.trim().startsWith('rpc.MutationSvc<{'))
+export const isMutationSvc = (type: TypeAliasDeclaration): boolean => Boolean(getTypeNodeText(type)?.trim().startsWith('rpc.MutationSvc'))
 
 // determines if the type alias is a valid rpc.Msg that was either
 // defined is this file or imported from another file in this project.

@@ -4,7 +4,7 @@ import {outputFile, pathExists} from 'fs-extra'
 import {nanoid} from 'nanoid'
 import path from 'path'
 import {Listr} from 'listr2'
-import {buildSchemas, validateSchemas} from '../schema'
+import {buildSchemas, Schema, validateSchemas} from '../schema'
 import {Project} from 'ts-morph'
 
 const isTarget = (target: string): target is Target => ['client', 'server'].includes(target)
@@ -171,6 +171,8 @@ class Build extends Command {
       },
     ], {exitOnError: true})
 
+  schemas: ReadonlyArray<Schema> = []
+
   #build = new Listr<BuildCtx>([
     {
       title: `Attempting to generate ${this.#buildCtx.lang} ${this.#buildCtx.target} code using ${this.#buildCtx.framework} framework`,
@@ -180,6 +182,7 @@ class Build extends Command {
         }
         const proj = new Project({tsConfigFilePath: ctx.tsConfigFilePath, skipFileDependencyResolution: true})
         const schemas = buildSchemas(proj.getSourceFiles())
+        this.schemas = schemas
         this.#code = typeof ctx.builder.format === 'undefined' ? ctx.builder.build(schemas) : ctx.builder.format(ctx.builder.build(schemas))
       },
     },
@@ -203,6 +206,8 @@ class Build extends Command {
       await this.writeOutput(outputPath, this.#code)
     }
     this.log(`JobId: ${jobId} complete, check ${outputPath} for generated ${target} code.`)
+    const sch = this.schemas.map(schema => `file = ${schema.fileName}\n, mutations = ${schema.mutationServices.map(svc => svc.name)}\n, queries = ${schema.queryServices.map(svc => svc.name)}\n`)
+    this.log(`${sch}`)
   }
 }
 
