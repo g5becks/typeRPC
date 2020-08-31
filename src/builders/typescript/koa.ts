@@ -86,12 +86,12 @@ const buildServices = (services: ReadonlyArray<QueryService> | ReadonlyArray<Mut
 
 const buildImports = (schema: Schema): string => {
   const cbor = `
-${buildMsgImports(schema.imports)}
 import {encodeAsync} from 'cbor'`
   const useCbor = schema.hasCbor ? cbor : ''
   return `
 import Router, {Middleware} from '@koa/router'
 ${useCbor}
+${buildMsgImports(schema.imports)}
   `
 }
 const buildFile = (schema: Schema): Code => {
