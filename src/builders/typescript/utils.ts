@@ -2,7 +2,8 @@
 import {DataType, Import, is, make, Message, Param, QueryService, Schema, StructLiteralProp} from '../../schema'
 import {capitalize, lowerCase} from '../utils'
 import {Method, MutationService} from '../../schema/schema'
-
+import {Code} from '..'
+import {format as prettier} from 'prettier'
 // Maps typerpc messages to typescript data-messages
 export const typeMap: Map<string, string> = new Map<string, string>(
   [
@@ -230,3 +231,7 @@ export const buildMsgImports = (imports: ReadonlyArray<Import>): string => {
   }
   return importsStr
 }
+
+export const format = (code: Code[]): Code[] => code.map(c => {
+  return {...c, source: prettier(c.source, {semi: false, singleQuote: true, trailingComma: 'es5', parser: 'typescript'})}
+})

@@ -5,7 +5,7 @@ import {
   buildInterfaces,
   buildMsgImports,
   buildTypes,
-  dataType,
+  dataType, format,
   fromQueryString,
   makeParamsVar,
   paramNames,
@@ -194,5 +194,6 @@ export const KoaBuilder:  CodeBuilder = {
   target: 'server',
   framework: 'koa',
   build,
+  format,
 }
 
