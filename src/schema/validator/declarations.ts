@@ -17,13 +17,13 @@ const validateClasses = (file: SourceFile): Error[] => validate(file.getClasses(
 
 const validateImports = (file: SourceFile, projectFiles: SourceFile[]): Error[] => {
   const imports = file.getImportDeclarations()
-  const err = (i: ImportDeclaration, msg: string) => singleValidationErr(i, 'invalid import declaration : ' + i.getText() + ` reason: ${msg}`)
+  const err = (i: ImportDeclaration, msg: string) => singleValidationErr(i, 'invalid import declaration : ' + i.getText() + '\n' + ` reason: ${msg}`)
   let errs: Error[] = []
   for (const imp of imports) {
     if (typeof imp.getModuleSpecifierSourceFile() === 'undefined') {
       errs = errs.concat(err(imp, 'module specifier is undefined'))
-    } else if (!projectFiles.includes(imp.getModuleSpecifierSourceFile()!)) {
-      errs = errs.concat(err(imp, 'module not found in this project'))
+    } else if (imp.getModuleSpecifierValue() !== '@typerpc/types' && !projectFiles.includes(imp.getModuleSpecifierSourceFile()!)) {
+      errs = errs.concat(err(imp, `${imp.getModuleSpecifierSourceFile()?.getFilePath().toString()} is not a part of this project`))
     } else if (typeof imp.getImportClause() === 'undefined') {
       errs = errs.concat(err(imp, 'import clause is undefined'))
     }
