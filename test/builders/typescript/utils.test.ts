@@ -43,6 +43,12 @@ test('tsFromQueryString() should produce the correct output', () => {
   let i = 0
   while (i < types.length) {
     const name = filteredProps[i].getName()
+    // eslint-disable-next-line no-console
+    console.log(name)
+    const got = tsFromQueryString(name, types[i])
+
+    // eslint-disable-next-line no-console
+    console.log(got)
     expect(tsFromQueryString(name, types[i])).toEqual(propsMap[name])
     i++
   }

@@ -26,17 +26,30 @@ const defaultLogger: ErrLogger = {
 
 // builds a destructured object from query params by converting them to the
 // correct types using the fromQueryString function
-const buildDestructuredParams = (params: ReadonlyArray<Param>): string => params.length === 0 ? '' :
-  `${makeParamsVar(params)} = {${params.map((param, i) => {
+const buildDestructuredParams = (params: ReadonlyArray<Param>): string => {
+  if (params.length === 0) {
+    return ''
+  }
+  const variable = makeParamsVar(params)
+  let parsedParams = ''
+  let i = 0
+  while (i < params.length) {
+    const parsed = fromQueryString(`ctx.query.${params[i].name}`, params[i].type)
+
+    // eslint-disable-next-line no-console
+    console.log(params[i].type)
+    // eslint-disable-next-line no-console
+    console.log(parsed)
     const useComma = i === params.length - 1 ? '' : ', '
-    return `${param.name}: ${fromQueryString(`ctx.query.${param.name}`, param.type)}${useComma}`
-  })}}
-  `
+    parsedParams = parsedParams.concat(`${params[i].name}: ${parsed}${useComma}`)
+    i++
+  }
+  return `${variable} = {${parsedParams}}`
+}
 
 const buildMethodCall = (svcName: string, method: MutationMethod | QueryMethod): string => {
   const paramsFromBody = isQueryMethod(method) ? buildDestructuredParams(method.params) : `${makeParamsVar(method.params)} = ctx.request.body`
-  const useBraces = (args: string) => method.hasParams ? `{${args}}` : ''
-  const invokeMethod = method.isVoidReturn ? `await ${lowerCase(svcName)}.${method.name}(${useBraces(paramNames(method.params))})` : `const res: ${dataType(method.returnType)} = await ${lowerCase(svcName)}.${method.name}(${useBraces(paramNames(method.params))})`
+  const invokeMethod = method.isVoidReturn ? `await ${lowerCase(svcName)}.${method.name}(${paramNames(method.params)})` : `const res: ${dataType(method.returnType)} = await ${lowerCase(svcName)}.${method.name}(${paramNames(method.params)})`
   const sendResponse = method.isVoidReturn ? '' : `ctx.body = ${method.hasCborReturn ? '{data: await encodeAsync(res)}' : '{data: res}'}`
   return `${paramsFromBody}\n${invokeMethod}\n${sendResponse}`
 }
@@ -49,8 +62,8 @@ router.${method.httpMethod.toLowerCase()}('${svcName}/${method.name}', '/${metho
       ctx.status = ${method.responseCode}
       ${buildMethodCall(svcName, method)}
     } catch (error) {
-      logger.error(e)
-      ctx.throw(${method.errorCode}, e.message)
+      logger.error(error)
+      ctx.throw(${method.errorCode}, error.message)
     }
 })\n`
 }

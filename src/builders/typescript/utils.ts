@@ -88,6 +88,7 @@ export const dataType = (type: DataType): string => {
 // returns a string representation of a function call used to
 // convert parsed querystring scalar to correct ts type
 const scalarFromQueryParam = (paramName: string, type: DataType): string => {
+  // eslint-disable-next-line no-negated-condition
   if (!is.Scalar(type)) {
     throw new Error(`${type.toString()} is not a valid QuerySvc parameter type`)
   } else {
