@@ -22,7 +22,6 @@ const buildImports = (schema: Schema): string => {
 import axios, {AxiosInstance, AxiosRequestConfig, AxiosResponse} from 'axios'
 import {URL} from 'url'
 ${buildMsgImports(schema.imports)}
-
 `
 }
 
@@ -57,7 +56,21 @@ export class ${capitalize(svc.name)} {
 	readonly #client: AxiosInstance
 	private constructor(protected readonly host: string, cfg?: RpcConfig) {
 	      this.#client = axios.create({...cfg, baseURL: \`\${host}/${lowerCase(svc.name)}\`})
-		this.#client.interceptors.response.use(response => {return {...response, data: response?.data?.data}})
+        this.#client.interceptors.response.use(async response => {
+          if (response.headers['content-type'] === 'application/cbor') {
+            const [data] = await decodeAll(Buffer.from( response.data));
+            return {...response, data: data.data}
+          }
+          return {...response, data: response.data?.data}
+        })
+
+        this.#client.interceptors.request.use(async request => {
+          if (request.headers['content-type'] === 'application/cbor') {
+            request.data = await encodeAsync(request.data)
+            return request
+          }
+          return request
+        })
 	}
 	public static use(host: string, cfg?: RpcConfig): ${capitalize(svc.name)} | Error {
 		let url: URL

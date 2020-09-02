@@ -53,9 +53,9 @@ const buildRouteHandler = (svcName: string, method: QueryMethod | MutationMethod
   return `
 router.${method.httpMethod.toLowerCase()}('${svcName}/${method.name}', '/${method.name}', async ctx => {
     try {
+      ${buildMethodCall(svcName, method)}
       ctx.type = ${serverResponseContentType(method)}
       ctx.status = ${method.responseCode}
-      ${buildMethodCall(svcName, method)}
     } catch (error) {
       logger.error(error)
       ctx.throw(${method.errorCode}, error.message)
