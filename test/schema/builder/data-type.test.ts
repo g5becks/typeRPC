@@ -27,13 +27,13 @@ test('isType() should return true when given the proper type', () => {
     expect(isType(variable.getTypeNode()!, types[i])).toBeTruthy())
 })
 
-test('makeDataType() should return correct DataType for type prop', () => {
+test('makeDataType() should return correct dataType for type prop', () => {
   const sources = genSourceFiles(genTestMessageFiles(genMsgNames()), project)
   const types: TypeAliasDeclaration[] = sources.flatMap(source => source.getTypeAliases())
   const propTypes = types.flatMap(type => parseMsgProps(type)).flatMap(prop => prop.getTypeNodeOrThrow())
   for (const type of propTypes) {
     // eslint-disable-next-line new-cap
-    expect(is.DataType(makeDataType(type))).toBeTruthy()
+    expect(is.dataType(makeDataType(type))).toBeTruthy()
   }
 })
 

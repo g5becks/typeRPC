@@ -1,4 +1,3 @@
-/* eslint-disable new-cap */
 import {DataType, Import, is, make, Message, Param, QueryService, Schema, StructLiteralProp} from '../../schema'
 import {capitalize, lowerCase} from '../utils'
 import {Method, MutationService} from '../../schema/schema'
@@ -41,45 +40,45 @@ const typeLiteral = (props: ReadonlyArray<StructLiteralProp>): string => {
   return `{${properties}}`
 }
 
-// Converts the input DataType into a typescript representation
+// Converts the input dataType into a typescript representation
 export const dataType = (type: DataType): string => {
-  if (!is.Container(type) && !is.Scalar(type)) {
+  if (!is.container(type) && !is.scalar(type)) {
     throw new TypeError(`invalid data type: ${type.toString()}`)
   }
 
-  if (is.Scalar(type)) {
+  if (is.scalar(type)) {
     return typeMap.get(type.type)!
   }
 
-  if (is.Dict(type)) {
+  if (is.map(type)) {
     return `Map<${dataType(type.keyType)}, ${dataType(type.valType)}>`
   }
 
-  if (is.List(type)) {
+  if (is.list(type)) {
     return `Array<${dataType(type.dataType)}>`
   }
 
-  if (is.Struct(type)) {
+  if (is.struct(type)) {
     return type.name
   }
 
-  if (is.StructLiteral(type)) {
+  if (is.structLiteral(type)) {
     return typeLiteral(type.properties)
   }
 
-  if (is.Tuple2(type)) {
+  if (is.tuple2(type)) {
     return `[${dataType(type.item1)}, ${dataType(type.item2)}]`
   }
 
-  if (is.Tuple3(type)) {
+  if (is.tuple3(type)) {
     return `[${dataType(type.item1)}, ${dataType(type.item2)}, ${dataType(type.item3)}]`
   }
 
-  if (is.Tuple4(type)) {
+  if (is.tuple4(type)) {
     return `[${dataType(type.item1)}, ${dataType(type.item2)}, ${dataType(type.item3)}, ${dataType(type.item4)}]`
   }
 
-  if (is.Tuple5(type)) {
+  if (is.tuple5(type)) {
     return `[${dataType(type.item1)}, ${dataType(type.item2)}, ${dataType(type.item3)}, ${dataType(type.item4)}, ${dataType(type.item5)}]`
   }
 
@@ -90,7 +89,7 @@ export const dataType = (type: DataType): string => {
 // convert parsed querystring scalar to correct ts type
 const scalarFromQueryParam = (paramName: string, type: DataType): string => {
   // eslint-disable-next-line no-negated-condition
-  if (!is.Scalar(type)) {
+  if (!is.scalar(type)) {
     throw new Error(`${type.toString()} is not a valid QuerySvc parameter type`)
   } else {
     switch (type.type) {
@@ -120,10 +119,10 @@ const scalarFromQueryParam = (paramName: string, type: DataType): string => {
 // returns a string representation of a function call used to
 // convert parsed querystring param list to correct ts type
 export const fromQueryString  = (paramName: string, type: DataType): string => {
-  if (is.Scalar(type)) {
+  if (is.scalar(type)) {
     return scalarFromQueryParam(paramName, type)
   }
-  return  is.List(type) ? `${paramName}.map(val => ${scalarFromQueryParam('val', type.dataType)})` : paramName
+  return  is.list(type) ? `${paramName}.map(val => ${scalarFromQueryParam('val', type.dataType)})` : paramName
 }
 
 // add question mark to optional type alias property or method param if needed

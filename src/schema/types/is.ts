@@ -18,16 +18,16 @@ const validateTuple = (type: unknown, numItems: number): boolean => {
 }
 // functions to validate the type of a variable
 export const is = {
-  Dict: (type: unknown): type is $.map<$.str, x.Paramable> => validateType(type, 'keyType', 'valType'),
-  Tuple2: (type: unknown): type is $.tuple2<x.Paramable, x.Paramable> => validateTuple(type, 2),
-  Tuple3: (type: unknown): type is $.tuple3<x.Paramable, x.Paramable, x.Paramable> => validateTuple(type, 3),
-  Tuple4: (type: unknown): type is $.tuple4<x.Paramable, x.Paramable, x.Paramable, x.Paramable> => validateTuple(type, 4),
-  Tuple5: (type: unknown): type is $.tuple5<x.Paramable, x.Paramable, x.Paramable, x.Paramable, x.Paramable> => validateTuple(type, 5),
-  List: (type: unknown): type is $.list<x.Paramable> => validateType(type, 'dataType'),
-  Struct: (type: unknown): type is Struct => validateType(type, 'name', 'useCbor'),
-  StructLiteral: (type: unknown): type is StructLiteral => validateType(type, 'properties'),
-  Container: (type: unknown): boolean => [is.Struct, is.List, is.Dict, is.Tuple2, is.Tuple3, is.Tuple4, is.Tuple3, is.Tuple5, is.StructLiteral].some(func => func(type)),
-  QueryParamable: (type: DataType): boolean => queryParamables.some(param => type.toString().startsWith(param)),
-  Scalar: (type: any): type is x.Scalar => !is.Container(type) && scalarsMap.has(type.toString()),
-  DataType: (type: any): type is DataType => is.Container(type) || scalarsMap.has(type.toString()),
+  map: (type: unknown): type is $.map<$.str, x.Paramable> => validateType(type, 'keyType', 'valType'),
+  tuple2: (type: unknown): type is $.tuple2<x.Paramable, x.Paramable> => validateTuple(type, 2),
+  tuple3: (type: unknown): type is $.tuple3<x.Paramable, x.Paramable, x.Paramable> => validateTuple(type, 3),
+  tuple4: (type: unknown): type is $.tuple4<x.Paramable, x.Paramable, x.Paramable, x.Paramable> => validateTuple(type, 4),
+  tuple5: (type: unknown): type is $.tuple5<x.Paramable, x.Paramable, x.Paramable, x.Paramable, x.Paramable> => validateTuple(type, 5),
+  list: (type: unknown): type is $.list<x.Paramable> => validateType(type, 'dataType'),
+  struct: (type: unknown): type is Struct => validateType(type, 'name', 'useCbor'),
+  structLiteral: (type: unknown): type is StructLiteral => validateType(type, 'properties'),
+  container: (type: unknown): boolean => [is.struct, is.list, is.map, is.tuple2, is.tuple3, is.tuple4, is.tuple3, is.tuple5, is.structLiteral].some(func => func(type)),
+  queryParamable: (type: DataType): boolean => queryParamables.some(param => type.toString().startsWith(param)),
+  scalar: (type: any): type is x.Scalar => !is.container(type) && scalarsMap.has(type.toString()),
+  dataType: (type: any): type is DataType => is.container(type) || scalarsMap.has(type.toString()),
 }

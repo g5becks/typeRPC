@@ -10,7 +10,7 @@ export type HTTPResponseCode = 200 | 201 | 202 | 203 | 204 | 205 | 206 |300 | 30
 export type Param = Readonly<{
   /** the name of the parameter */
   name: string;
-  /** the parameter's DataType */
+  /** the parameter's dataType */
   type: DataType;
   /** whether or not this parameter is option */
   isOptional: boolean;
@@ -118,7 +118,7 @@ export type MutationService = Readonly<{
 export type Property = Readonly<{
   /** The name of this property */
   name: string;
-  /** The property's DataType */
+  /** The property's dataType */
   type: DataType;
   /** Whether or not this Property is optional */
   isOptional: boolean;

@@ -16,65 +16,65 @@ beforeAll(() => {
 })
 
 test('is.map() should return true when given valid $.map, false otherwise', () => {
-  expect(is.Dict(make.map(types.dict, makeDataType))).toBeTruthy()
-  expect(is.Dict(make.tuple(types.tuple2, makeDataType))).toBeFalsy()
+  expect(is.map(make.map(types.dict, makeDataType))).toBeTruthy()
+  expect(is.map(make.tuple(types.tuple2, makeDataType))).toBeFalsy()
 })
 
-test('is.Tuple2() should return true when given a valid $.Tuple2, false otherwise', () => {
-  expect(is.Tuple2(make.tuple(types.tuple2, makeDataType))).toBeTruthy()
-  expect(is.Tuple2(make.tuple(types.tuple3, makeDataType))).toBeFalsy()
+test('is.tuple2() should return true when given a valid $.tuple2, false otherwise', () => {
+  expect(is.tuple2(make.tuple(types.tuple2, makeDataType))).toBeTruthy()
+  expect(is.tuple2(make.tuple(types.tuple3, makeDataType))).toBeFalsy()
 })
 
-test('is.Tuple3() should return true when given a valid $.Tuple3, false otherwise', () => {
-  expect(is.Tuple3(make.tuple(types.tuple2, makeDataType))).toBeFalsy()
-  expect(is.Tuple3(make.tuple(types.tuple3, makeDataType))).toBeTruthy()
+test('is.tuple3() should return true when given a valid $.tuple3, false otherwise', () => {
+  expect(is.tuple3(make.tuple(types.tuple2, makeDataType))).toBeFalsy()
+  expect(is.tuple3(make.tuple(types.tuple3, makeDataType))).toBeTruthy()
 })
 
-test('is.Tuple4() should return true when given a valid $.Tuple4, false otherwise', () => {
-  expect(is.Tuple4(make.tuple(types.tuple5, makeDataType))).toBeFalsy()
-  expect(is.Tuple4(make.tuple(types.tuple4, makeDataType))).toBeTruthy()
+test('is.tuple4() should return true when given a valid $.tuple4, false otherwise', () => {
+  expect(is.tuple4(make.tuple(types.tuple5, makeDataType))).toBeFalsy()
+  expect(is.tuple4(make.tuple(types.tuple4, makeDataType))).toBeTruthy()
 })
 
-test('is.Tuple5() should return true when given a valid $.Tuple5, false otherwise', () => {
-  expect(is.Tuple5(make.tuple(types.tuple5, makeDataType))).toBeTruthy()
-  expect(is.Tuple5(make.tuple(types.tuple4, makeDataType))).toBeFalsy()
+test('is.tuple5() should return true when given a valid $.tuple5, false otherwise', () => {
+  expect(is.tuple5(make.tuple(types.tuple5, makeDataType))).toBeTruthy()
+  expect(is.tuple5(make.tuple(types.tuple4, makeDataType))).toBeFalsy()
 })
 
 test('is.list() should return true when given a valid $.list, false otherwise', () => {
-  expect(is.List(make.list(types.list, makeDataType))).toBeTruthy()
-  expect(is.List(make.blob)).toBeFalsy()
+  expect(is.list(make.list(types.list, makeDataType))).toBeTruthy()
+  expect(is.list(make.blob)).toBeFalsy()
 })
 
 test('is.struct() should return true when given a valid rpc.Msg type, false otherwise', () => {
-  expect(is.Struct(make.struct(types.struct))).toBeTruthy()
-  expect(is.Struct(make.structLiteral(types.structLiteral, makeDataType))).toBeFalsy()
+  expect(is.struct(make.struct(types.struct))).toBeTruthy()
+  expect(is.struct(make.structLiteral(types.structLiteral, makeDataType))).toBeFalsy()
 })
 
 test('is.structLiteral should return true when given a valid rpc.Msg literal type, false otherwise', () => {
-  expect(is.StructLiteral(make.struct(types.struct))).toBeFalsy()
-  expect(is.StructLiteral(make.structLiteral(types.structLiteral, makeDataType))).toBeTruthy()
+  expect(is.structLiteral(make.struct(types.struct))).toBeFalsy()
+  expect(is.structLiteral(make.structLiteral(types.structLiteral, makeDataType))).toBeTruthy()
 })
 
-test('is.Scalar should return true for all scalar types and false for all others', () => {
-  expect(is.Scalar(make.timestamp)).toBeTruthy()
-  expect(is.Scalar(make.int8)).toBeTruthy()
-  expect(is.Scalar(make.uint8)).toBeTruthy()
-  expect(is.Scalar(make.int16)).toBeTruthy()
-  expect(is.Scalar(make.uint16)).toBeTruthy()
-  expect(is.Scalar(make.int32)).toBeTruthy()
-  expect(is.Scalar(make.uint32)).toBeTruthy()
-  expect(is.Scalar(make.int64)).toBeTruthy()
-  expect(is.Scalar(make.uint64)).toBeTruthy()
-  expect(is.Scalar(make.float32)).toBeTruthy()
-  expect(is.Scalar(make.float64)).toBeTruthy()
-  expect(is.Scalar(make.str)).toBeTruthy()
-  expect(is.Scalar(make.blob)).toBeTruthy()
-  expect(is.Scalar(make.dyn)).toBeTruthy()
-  expect(is.Scalar(make.unit)).toBeTruthy()
-  expect(is.Scalar(make.nil)).toBeTruthy()
-  expect(is.Scalar(make.list(types.list, makeDataType))).toBeFalsy()
-  expect(is.Scalar(make.map(types.dict, makeDataType))).toBeFalsy()
-  expect(is.Scalar(make.tuple(types.tuple2, makeDataType))).toBeFalsy()
-  expect(is.Scalar(make.struct(types.struct))).toBeFalsy()
-  expect(is.Scalar(make.structLiteral(types.structLiteral, makeDataType))).toBeFalsy()
+test('is.scalar should return true for all scalar types and false for all others', () => {
+  expect(is.scalar(make.timestamp)).toBeTruthy()
+  expect(is.scalar(make.int8)).toBeTruthy()
+  expect(is.scalar(make.uint8)).toBeTruthy()
+  expect(is.scalar(make.int16)).toBeTruthy()
+  expect(is.scalar(make.uint16)).toBeTruthy()
+  expect(is.scalar(make.int32)).toBeTruthy()
+  expect(is.scalar(make.uint32)).toBeTruthy()
+  expect(is.scalar(make.int64)).toBeTruthy()
+  expect(is.scalar(make.uint64)).toBeTruthy()
+  expect(is.scalar(make.float32)).toBeTruthy()
+  expect(is.scalar(make.float64)).toBeTruthy()
+  expect(is.scalar(make.str)).toBeTruthy()
+  expect(is.scalar(make.blob)).toBeTruthy()
+  expect(is.scalar(make.dyn)).toBeTruthy()
+  expect(is.scalar(make.unit)).toBeTruthy()
+  expect(is.scalar(make.nil)).toBeTruthy()
+  expect(is.scalar(make.list(types.list, makeDataType))).toBeFalsy()
+  expect(is.scalar(make.map(types.dict, makeDataType))).toBeFalsy()
+  expect(is.scalar(make.tuple(types.tuple2, makeDataType))).toBeFalsy()
+  expect(is.scalar(make.struct(types.struct))).toBeFalsy()
+  expect(is.scalar(make.structLiteral(types.structLiteral, makeDataType))).toBeFalsy()
 })

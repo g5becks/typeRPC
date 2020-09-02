@@ -1,3 +1,4 @@
+/* eslint-disable radix */
 import {MethodSignature, ParameterDeclaration, SourceFile, TypeAliasDeclaration} from 'ts-morph'
 import {
   HTTPErrCode,
@@ -42,7 +43,7 @@ export const buildParams = (params: ParameterDeclaration[]): Param[] => {
 const getMethodName = (method: MethodSignature): string => method.getNameNode().getText().trim()
 
 export const hasCborParams = (params: ReadonlyArray<Param>, method: MethodSignature, isCborSvc: boolean): boolean =>  {
-  return ([...params].some(param => is.Struct(param.type) && param.type.useCbor)) || isCborSvc || useCbor(method)
+  return ([...params].some(param => is.struct(param.type) && param.type.useCbor)) || isCborSvc || useCbor(method)
 }
 
 export const buildMethod = (method: MethodSignature, isCborSvc: boolean): Method => {
@@ -57,7 +58,7 @@ export const buildMethod = (method: MethodSignature, isCborSvc: boolean): Method
       return make.unit === this.returnType
     },
     get hasCborReturn(): boolean {
-      return (is.Struct(this.returnType) && this.returnType.useCbor) || isCborSvc || useCbor(method)
+      return (is.struct(this.returnType) && this.returnType.useCbor) || isCborSvc || useCbor(method)
     },
     get hasParams(): boolean {
       return this.params.length > 0

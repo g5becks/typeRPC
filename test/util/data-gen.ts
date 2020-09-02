@@ -2,6 +2,7 @@ import {queryParamables} from '../../src/schema/types'
 import faker from 'faker'
 
 export function randomNumber(min: number, max: number) {
+  // eslint-disable-next-line no-mixed-operators
   return Math.floor(Math.random() * (max - min) + min)
 }
 
@@ -16,17 +17,17 @@ export const genRandomQueryParamableScalar = () => queryParamables.filter(val =>
 
 export const genRandomQueryParamableList = () => `$.List<${genRandomQueryParamableScalar()}>`
 
-// a list of @typerpc/type => rpc.Container strings with rpc.Comparables
+// a list of @typerpc/type => rpc.container strings with rpc.Comparables
 // as key type
 const containers = [`$.Dict<${genRandomComparable()}, ${genRandomComparable()}>`, `$.List<${genRandomComparable()}>`, `$.Tuple2<${genRandomComparable()}, ${genRandomComparable()}>`, `$.Tuple3<${genRandomComparable()}, ${genRandomComparable()}, ${genRandomComparable()}>`, `$.Tuple4<${genRandomComparable()}, ${genRandomComparable()}, ${genRandomComparable()}, ${genRandomComparable()}>`, `$.Tuple5<${genRandomComparable()},${genRandomComparable()}, ${genRandomComparable()}, ${genRandomComparable()}, ${genRandomComparable()}>`]
 
-// returns a random @typerpc rpc.Container string that always has a scalar
+// returns a random @typerpc rpc.container string that always has a scalar
 const genRandomScalarContainer = (): string => containers[randomNumber(0, containers.length - 1)]
 
 //
 const paramables = [genRandomComparable, genRandomScalarContainer]
 
-// returns a random rpc.Paramable DataType
+// returns a random rpc.Paramable dataType
 // THIS FUNCTION AND EVERY FUNCTION THAT CALLS IS TAKES A msgNames PARAM
 // BECAUSE THE SCHEMA VALIDATOR WILL THROW AN ERROR IF IT FINDS A TYPE THAT
 // IS USED AND NOT DEFINED IN THE SAME FILE OR IMPORTED IN THE FILE, SO
