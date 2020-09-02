@@ -112,7 +112,7 @@ export const hasCborParamsTestData = `
 /** @kind cbor */
 type CborParam = rpc.Msg<{}>
 type TestService1 = rpc.MutationSvc<{
-  method1(param: CborParam, param2: $.str): $.List<$.int8>;
+  method1(param: CborParam, param2: $.str): $.list<$.int8>;
   method2(param: $.int8): CborParam;
 }>
 
@@ -161,12 +161,12 @@ import {SomeStruct} from './somewhere'
 type CborType = rpc.Msg<{name: $.str}>
 
 type TestType = rpc.Msg<{
-  dict: $.Dict<$.int8, $.int8>
-  tuple2: $.Tuple2<$.int8, $.int8>
-  tuple3: $.Tuple3<$.int8, $.int16, $.uint16>
-  tuple4: $.Tuple4<$.int8, $.str, $.bool, $.timestamp>
-  tuple5: $.Tuple5<$.str, $.err, $.dyn, $.blob, $.float32>
-  list: $.List<$.bool>
+  dict: $.map<$.int8, $.int8>
+  tuple2: $.tuple2<$.int8, $.int8>
+  tuple3: $.tuple3<$.int8, $.int16, $.uint16>
+  tuple4: $.tuple4<$.int8, $.str, $.bool, $.timestamp>
+  tuple5: $.tuple5<$.str, $.err, $.dyn, $.blob, $.float32>
+  list: $.list<$.bool>
   struct: SomeStruct
   structLiteral: rpc.Msg<{
     name: $.str,
@@ -193,23 +193,23 @@ type TestType = rpc.Msg<{
   dyn: $.dyn
 	unit: $.unit
   nil: $.nil
-  nestedDict: $.Dict<$.int8, $.List<$.Dict<$.bool, $.List<$.str>>>>
-  nestedList: $.List<$.Tuple4<$.Tuple2<$.int64, $.List<$.blob>>, $.str, $.bool, $.Dict<$.str, $.timestamp>>>
+  nestedDict: $.map<$.int8, $.list<$.map<$.bool, $.list<$.str>>>>
+  nestedList: $.list<$.tuple4<$.tuple2<$.int64, $.list<$.blob>>, $.str, $.bool, $.map<$.str, $.timestamp>>>
 	nestedMsg: rpc.Msg<{
   	    name: $.str
-		data: $.Dict<$.int8, $.List<$.Dict<$.bool, $.List<$.str>>>>
+		data: $.map<$.int8, $.list<$.map<$.bool, $.list<$.str>>>>
 	}>
-	nestedTuple: $.Tuple3<$.List<$.Tuple2<$.float32, $.float64>>, $.err, $.dyn>
+	nestedTuple: $.tuple3<$.list<$.tuple2<$.float32, $.float64>>, $.err, $.dyn>
 }>
 `
 export const dataTypeTestsSource = `
 type TestType = rpc.Msg<{
-  dict: $.Dict<$.int8, $.int8>
-  tuple2: $.Tuple2<$.int8, $.int8>
-  tuple3: $.Tuple3<$.int8, $.int16, $.uint16>
-  tuple4: $.Tuple4<$.int8, $.str, $.bool, $.timestamp>
-  tuple5: $.Tuple5<$.str, $.err, $.dyn, $.blob, $.float32>
-  list: $.List<$.bool>
+  dict: $.map<$.str, $.int8>
+  tuple2: $.tuple2<$.int8, $.int8>
+  tuple3: $.tuple3<$.int8, $.int16, $.uint16>
+  tuple4: $.tuple4<$.int8, $.str, $.bool, $.timestamp>
+  tuple5: $.tuple5<$.str, $.err, $.dyn, $.blob, $.float32>
+  list: $.list<$.bool>
   structLiteral: rpc.Msg<{
     name: $.str,
     age: $.int8,
@@ -232,10 +232,10 @@ type TestType = rpc.Msg<{
   timestamp: $.timestamp
   blob: $.blob
   dyn: $.dyn
-  nestedDict: $.Dict<$.int8, $.List<$.Dict<$.bool, $.List<$.str>>>>
-  nestedList: $.List<$.Tuple4<$.Tuple2<$.int64, $.List<$.blob>>, $.bool, $.err, $.dyn>>
-  queryParamList: $.List<$.int8>
+  nestedDict: $.map<$.str, $.list<$.map<$.str, $.list<$.str>>>>
+  nestedList: $.list<$.tuple4<$.tuple2<$.int64, $.list<$.blob>>, $.bool, $.err, $.dyn>>
+  queryParamList: $.list<$.int8>
 }>`
 
-export const expectedTsDataTypes = ['Map<number, number>', '[number, number]', '[number, number, number]', '[number, string, boolean, number]', '[string, Error, any, Uint8Array, number]', 'Array<boolean>', '{name: string; age: number; birthDate: number; weight: number; }', 'boolean', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'string', 'Error', 'number', 'Uint8Array', 'any', 'Map<number, Array<Map<boolean, Array<string>>>>', 'Array<[[number, Array<Uint8Array>], boolean, Error, any]>', 'Array<number>']
+export const expectedTsDataTypes = ['{[key: string]: number}', '[number, number]', '[number, number, number]', '[number, string, boolean, number]', '[string, Error, any, Uint8Array, number]', 'Array<boolean>', '{name: string; age: number; birthDate: number; weight: number; }', 'boolean', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'string', 'Error', 'number', 'Uint8Array', 'any', '{[key: string]: Array<{[key: string]: Array<string>}>}', 'Array<[[number, Array<Uint8Array>], boolean, Error, any]>', 'Array<number>']
 

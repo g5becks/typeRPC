@@ -32,7 +32,6 @@ test('makeDataType() should return correct dataType for type prop', () => {
   const types: TypeAliasDeclaration[] = sources.flatMap(source => source.getTypeAliases())
   const propTypes = types.flatMap(type => parseMsgProps(type)).flatMap(prop => prop.getTypeNodeOrThrow())
   for (const type of propTypes) {
-    // eslint-disable-next-line new-cap
     expect(is.dataType(makeDataType(type))).toBeTruthy()
   }
 })

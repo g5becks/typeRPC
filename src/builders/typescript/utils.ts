@@ -51,7 +51,7 @@ export const dataType = (type: DataType): string => {
   }
 
   if (is.map(type)) {
-    return `Map<${dataType(type.keyType)}, ${dataType(type.valType)}>`
+    return `{[key: string]: ${dataType(type.valType)}}`
   }
 
   if (is.list(type)) {

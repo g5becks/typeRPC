@@ -25,6 +25,7 @@ const validateClasses = (file: SourceFile): Error[] => validate(file.getClasses(
 
 const validateImports = (file: SourceFile, projectFiles: SourceFile[]): Error[] => {
   const imports = file.getImportDeclarations()
+  // eslint-disable-next-line no-useless-concat
   const err = (i: ImportDeclaration, msg: string) => singleValidationErr(i, 'invalid import declaration : ' + i.getText() + '\n' + ` reason: ${msg}`)
   let errs: Error[] = []
   for (const imp of imports) {
@@ -34,6 +35,7 @@ const validateImports = (file: SourceFile, projectFiles: SourceFile[]): Error[] 
       errs = errs.concat(err(imp, `${imp.getModuleSpecifierSourceFile()?.getFilePath().toString()} is not a part of this project`))
     } else if (typeof imp.getImportClause() === 'undefined') {
       errs = errs.concat(err(imp, 'import clause is undefined'))
+      // eslint-disable-next-line brace-style
     }
     // validate node default or namespace import
     else if (typeof imp.getDefaultImport() !== 'undefined' || typeof imp.getNamespaceImport() !== 'undefined') {
@@ -149,6 +151,7 @@ const validateJsDoc = (type: TypeAliasDeclaration): Error[] => {
   if (tags.length > 0 && tags.length !== 1) {
     return [singleValidationErr(tags[0], 'A message or service can only have a single @kind tag')]
   }
+  // eslint-disable-next-line no-negated-condition
   return tags[0].getComment() !== 'cbor' ? [singleValidationErr(tags[0], `there is only one valid comment for the @kind tag (cbor), found ${tags[0].getComment()}`)] : []
 }
 
@@ -211,3 +214,4 @@ export const internal = {
   validateMessages,
 
 }
+

@@ -20,7 +20,7 @@ test('validateMessage() should not return an error when message has nested rpc.M
   type MyMsg = rpc.Msg<{
     names: rpc.Msg<{
       people: rpc.Msg<{
-        moreNames: $.List<rpc.Msg<{names: $.List<$.str>}>>
+        moreNames: $.list<rpc.Msg<{names: $.list<$.str>}>>
       }>
       }>
     }>`

@@ -15,11 +15,11 @@ const genRandomComparable = () => comparables[randomNumber(0, comparables.length
 
 export const genRandomQueryParamableScalar = () => queryParamables.filter(val => val !== '$.list')[randomNumber(0, queryParamables.length - 1)]
 
-export const genRandomQueryParamableList = () => `$.List<${genRandomQueryParamableScalar()}>`
+export const genRandomQueryParamableList = () => `$.list<${genRandomQueryParamableScalar()}>`
 
 // a list of @typerpc/type => rpc.container strings with rpc.Comparables
 // as key type
-const containers = [`$.Dict<${genRandomComparable()}, ${genRandomComparable()}>`, `$.List<${genRandomComparable()}>`, `$.Tuple2<${genRandomComparable()}, ${genRandomComparable()}>`, `$.Tuple3<${genRandomComparable()}, ${genRandomComparable()}, ${genRandomComparable()}>`, `$.Tuple4<${genRandomComparable()}, ${genRandomComparable()}, ${genRandomComparable()}, ${genRandomComparable()}>`, `$.Tuple5<${genRandomComparable()},${genRandomComparable()}, ${genRandomComparable()}, ${genRandomComparable()}, ${genRandomComparable()}>`]
+const containers = [`$.map<${genRandomComparable()}, ${genRandomComparable()}>`, `$.list<${genRandomComparable()}>`, `$.tuple2<${genRandomComparable()}, ${genRandomComparable()}>`, `$.tuple3<${genRandomComparable()}, ${genRandomComparable()}, ${genRandomComparable()}>`, `$.tuple4<${genRandomComparable()}, ${genRandomComparable()}, ${genRandomComparable()}, ${genRandomComparable()}>`, `$.tuple5<${genRandomComparable()},${genRandomComparable()}, ${genRandomComparable()}, ${genRandomComparable()}, ${genRandomComparable()}>`]
 
 // returns a random @typerpc rpc.container string that always has a scalar
 const genRandomScalarContainer = (): string => containers[randomNumber(0, containers.length - 1)]
@@ -37,17 +37,17 @@ const genRandomParamableType = (msgNames: string[]) => {
   return funcs[randomNumber(0, funcs.length)]()
 }
 
-const genDict = (msgNames: string[]) => `$.Dict<${genRandomComparable()}, ${genRandomParamableType(msgNames)}>`
+const genDict = (msgNames: string[]) => `$.map<${genRandomComparable()}, ${genRandomParamableType(msgNames)}>`
 
-const genList = (msgNames: string[]) => `$.List<${genRandomParamableType(msgNames)}>`
+const genList = (msgNames: string[]) => `$.list<${genRandomParamableType(msgNames)}>`
 
-const genTuple2 = (msgNames: string[]) => `$.Tuple2<${genRandomParamableType(msgNames)}, ${genRandomParamableType(msgNames)}>`
+const genTuple2 = (msgNames: string[]) => `$.tuple2<${genRandomParamableType(msgNames)}, ${genRandomParamableType(msgNames)}>`
 
-const genTuple3 = (msgNames: string[]) => `$.Tuple3<${genRandomParamableType(msgNames)}, ${genRandomParamableType(msgNames)}, ${genRandomParamableType(msgNames)}>`
+const genTuple3 = (msgNames: string[]) => `$.tuple3<${genRandomParamableType(msgNames)}, ${genRandomParamableType(msgNames)}, ${genRandomParamableType(msgNames)}>`
 
-const genTuple4 = (msgNames: string[]) => `$.Tuple4<${genRandomParamableType(msgNames)}, ${genRandomParamableType(msgNames)}, ${genRandomParamableType(msgNames)}, ${genRandomParamableType(msgNames)}>`
+const genTuple4 = (msgNames: string[]) => `$.tuple4<${genRandomParamableType(msgNames)}, ${genRandomParamableType(msgNames)}, ${genRandomParamableType(msgNames)}, ${genRandomParamableType(msgNames)}>`
 
-const genTuple5 = (msgNames: string[]) => `$.Tuple5<${genRandomParamableType(msgNames)}, ${genRandomParamableType(msgNames)}, ${genRandomParamableType(msgNames)}, ${genRandomParamableType(msgNames)}, ${genRandomParamableType(msgNames)}>`
+const genTuple5 = (msgNames: string[]) => `$.tuple5<${genRandomParamableType(msgNames)}, ${genRandomParamableType(msgNames)}, ${genRandomParamableType(msgNames)}, ${genRandomParamableType(msgNames)}, ${genRandomParamableType(msgNames)}>`
 
 // creates a random name for a Msg
 export const genRandomName = (): string => {

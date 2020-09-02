@@ -1,6 +1,5 @@
 import {Project} from 'ts-morph'
 import {testing} from '../../../src/schema'
-// @ts-ignore
 import {genMsgNames, genServices, genSourceFile} from '../../util'
 
 let project: Project
@@ -69,7 +68,7 @@ test('validateMethodJsDoc() should return an error when @throws tag has invalid 
 test('validateMethodNotGeneric() should return an error when method is generic', () => {
   const source = `
   type SomeSvc = rpc.MutationSvc<{
-    getNames<T extends $.int8>(namesSlot: T): $.List<$.str>;
+    getNames<T extends $.int8>(namesSlot: T): $.list<$.str>;
   }>`
   const method = parseServiceMethods(genSourceFile(source, project).getTypeAlias('SomeSvc')!)[0]
   expect(validateNotGeneric(method).length).toEqual(1)
@@ -79,7 +78,7 @@ test('validateReturnType() should return an error when return type is not valid'
   const source =
     `type SomeSvc = rpc.MutationSvc<{
     getNames<T extends $.int8>(namesSlot: T): string[];
-    getNames<T extends $.int8>(namesSlot: T): $.List<$.str>;
+    getNames<T extends $.int8>(namesSlot: T): $.list<$.str>;
   }>
   `
   const methods =  parseServiceMethods(genSourceFile(source, project).getTypeAlias('SomeSvc')!)
@@ -90,8 +89,8 @@ test('validateReturnType() should return an error when return type is not valid'
 test('validateQueryMethodParams() should return an error when an invalid type is used', () => {
   const source = `
   type SomeSvc = rpc.QuerySvc<{
-    testMethod(names: $.Dict<$.int8, $.bool>):$.unit;
-    testMethod(names: $.List<$.int8>): $.unit;
+    testMethod(names: $.map<$.int8, $.bool>):$.unit;
+    testMethod(names: $.list<$.int8>): $.unit;
   }>`
   const methods = parseServiceMethods(genSourceFile(source, project).getTypeAlias('SomeSvc')!)
   expect(validateQueryMethodParams(methods[0]).length).toEqual(1)

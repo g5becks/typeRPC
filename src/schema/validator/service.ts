@@ -1,7 +1,7 @@
 import {HTTPErrCode, HTTPResponseCode} from '../schema'
 import {MethodSignature, ParameterDeclaration, SourceFile, TypeAliasDeclaration} from 'ts-morph'
 import {isValidDataType, singleValidationErr, validateNotGeneric} from './utils'
-import {parseJsDocComment, parseServiceMethods, parseQueryServices} from '../parser'
+import {parseQueryServices, parseServiceMethods} from '../parser'
 import {queryParamables} from '../types'
 
 // Valid HTTP error codes
@@ -28,6 +28,7 @@ const validateMethodJsDoc = (method: MethodSignature): Error[] => {
     if (tagName === 'throws') {
       const err = singleValidationErr(tag, `${comment} is not a valid HTTP error response code. Valid error response codes are : ${errCodes}`)
       try {
+        // eslint-disable-next-line radix
         if (!isErrCode(parseInt((comment)))) {
           errs.push(err)
         }
@@ -41,6 +42,7 @@ const validateMethodJsDoc = (method: MethodSignature): Error[] => {
     if (tagName === 'returns') {
       const err = singleValidationErr(tag, `${tag.getComment()} is not a valid HTTP success response code. Valid success response codes are : ${responseCodes}`)
       try {
+        // eslint-disable-next-line radix
         if (!isResponseCode(parseInt(comment))) {
           errs.push(err)
         }
@@ -74,6 +76,7 @@ const validateReturnType = (method: MethodSignature): Error[] =>  isValidDataTyp
 // Ensure type of method params is either a typerpc type or a type
 // declared in the same source project.
 const validateParams = (method: MethodSignature): Error[] =>
+  // eslint-disable-next-line no-negated-condition
   !method.getParameters() ? [] :
     method.getParameters().map(param => param.getTypeNode()).flatMap(type => isValidDataType(type) ? [] : singleValidationErr(type, `method parameter type '${type?.getText().trim()}', is either not a valid typerpc type or a type alias that is not defined in this file`))
 
