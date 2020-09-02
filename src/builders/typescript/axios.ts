@@ -21,6 +21,7 @@ const buildImports = (schema: Schema): string => {
   return `
 import axios, {AxiosInstance, AxiosRequestConfig, AxiosResponse} from 'axios'
 import {URL} from 'url'
+${schema.hasCbor ? 'import {encodeAsync,decodeAll} from \'cbor\'' : ''}
 ${buildMsgImports(schema.imports)}
 `
 }
