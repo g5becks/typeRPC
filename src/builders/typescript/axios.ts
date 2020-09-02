@@ -38,7 +38,7 @@ const buildRequestData = (method: QueryMethod | MutationMethod): string =>
 const buildMethod = (method: MutationMethod| QueryMethod): string => {
   const returnType = dataType(method.returnType)
   return `${method.name}(${buildParamsWithTypes(method.params)} ${method.hasParams ? ', ' : ''} cfg?:RpcConfig): Promise<AxiosResponse<${returnType}>> {
-    return this.#client.request<${returnType}>({...cfg, ${buildRequestHeaders(method)}${buildResponseType(method)} url: '/${method.name}', method: '${method.httpMethod}', ${method.hasParams ? buildRequestData(method) : ''}})
+    return this.client.request<${returnType}>({...cfg, ${buildRequestHeaders(method)}${buildResponseType(method)} url: '/${method.name}', method: '${method.httpMethod}', ${method.hasParams ? buildRequestData(method) : ''}})
 }
 `
 }
@@ -53,10 +53,10 @@ const buildMethods = (svc: MutationService| QueryService): string => {
 const buildService = (svc: MutationService| QueryService): string => {
   return `
 export class ${capitalize(svc.name)} {
-	readonly #client: AxiosInstance
-	private constructor(protected readonly host: string, cfg?: RpcConfig) {
-	      this.#client = axios.create({...cfg, baseURL: \`\${host}/${lowerCase(svc.name)}\`})
-        this.#client.interceptors.response.use(async response => {
+	private readonly client: AxiosInstance
+	private constructor(private readonly host: string, cfg?: RpcConfig) {
+	      this.client = axios.create({...cfg, baseURL: \`\${host}/${lowerCase(svc.name)}\`})
+        this.client.interceptors.response.use(async response => {
           if (response.headers['content-type'] === 'application/cbor') {
             const [data] = await decodeAll(Buffer.from( response.data));
             return {...response, data: data.data}
@@ -64,7 +64,7 @@ export class ${capitalize(svc.name)} {
           return {...response, data: response.data?.data}
         })
 
-        this.#client.interceptors.request.use(async request => {
+        this.client.interceptors.request.use(async request => {
           if (request.headers['content-type'] === 'application/cbor') {
             request.data = await encodeAsync(request.data)
             return request
