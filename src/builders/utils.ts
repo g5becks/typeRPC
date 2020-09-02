@@ -1,5 +1,5 @@
 import {MutationMethod} from '../schema'
-import {QueryMethod} from '../schema/schema'
+import {isQueryMethod, QueryMethod} from '../schema/schema'
 
 export const capitalize = (text: string): string => text.replace(/^\w/, c => c.toUpperCase())
 
@@ -22,4 +22,4 @@ export const fileHeader = () => `
 export const serverResponseContentType = (method: MutationMethod | QueryMethod) => method.hasCborReturn ? "'application/cbor'" : "'application/json'"
 
 // returns the correct content-type for a client request
-export const clientRequestContentType = (method: MutationMethod) => method.hasCborParams ? "'application/cbor'" : "'application/json'"
+export const clientRequestContentType = (method: MutationMethod | QueryMethod) => isQueryMethod(method) ? '' :  method.hasCborParams ? "'application/cbor'" : "'application/json'"

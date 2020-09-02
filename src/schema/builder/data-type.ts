@@ -15,19 +15,19 @@ export const makeDataType = (type: TypeNode | Node): DataType => {
     return prim
   }
   if (isMsgLiteral(type)) {
-    return make.StructLiteral(type, makeDataType)
+    return make.structLiteral(type, makeDataType)
   }
   if (!isContainer(type)) {
-    return make.Struct(type)
+    return make.struct(type)
   }
-  if (isType(type, '$.List')) {
-    return make.List(type, makeDataType)
+  if (isType(type, '$.list')) {
+    return make.list(type, makeDataType)
   }
-  if (isType(type, '$.Dict')) {
-    return make.Dict(type, makeDataType)
+  if (isType(type, '$.map')) {
+    return make.map(type, makeDataType)
   }
-  if (isType(type, '$.Tuple')) {
-    return make.Tuple(type, makeDataType)
+  if (isType(type, '$.tuple')) {
+    return make.tuple(type, makeDataType)
   }
 
   return make.dyn

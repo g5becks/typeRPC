@@ -18,21 +18,21 @@ beforeAll(() => {
   })
 })
 
-test('make.Struct should return struct with correct name and useCbor values', () => {
-  expect(make.Struct(types.struct).name).toEqual('SomeStruct')
-  expect(make.Struct(types.cborType).useCbor).toBeTruthy()
+test('make.struct should return struct with correct name and useCbor values', () => {
+  expect(make.struct(types.struct).name).toEqual('SomeStruct')
+  expect(make.struct(types.cborType).useCbor).toBeTruthy()
 })
 
-test('make.StructLiteral should return struct with correct number of properties', () => {
-  const literal = make.StructLiteral(types.structLiteral, makeDataType) as StructLiteral
+test('make.structLiteral should return struct with correct number of properties', () => {
+  const literal = make.structLiteral(types.structLiteral, makeDataType) as StructLiteral
   expect(literal.properties.length).toEqual(4)
 })
 
-test('make.Tuple should return tuples with correct DataTypes', () => {
-  const tuple2 = make.Tuple(types.tuple2, makeDataType) as $.Tuple2<any, any>
-  const tuple3 = make.Tuple(types.tuple3, makeDataType) as $.Tuple3<any, any, any>
-  const tuple4 = make.Tuple(types.tuple4, makeDataType) as $.Tuple4<any, any, any, any>
-  const tuple5 = make.Tuple(types.tuple5, makeDataType) as $.Tuple5<any, any, any, any, any>
+test('make.tuple should return tuples with correct DataTypes', () => {
+  const tuple2 = make.tuple(types.tuple2, makeDataType) as $.Tuple2<any, any>
+  const tuple3 = make.tuple(types.tuple3, makeDataType) as $.Tuple3<any, any, any>
+  const tuple4 = make.tuple(types.tuple4, makeDataType) as $.Tuple4<any, any, any, any>
+  const tuple5 = make.tuple(types.tuple5, makeDataType) as $.Tuple5<any, any, any, any, any>
   expect(tuple2.item1.type).toEqual(make.int8.type)
   expect(tuple2.item2.type).toEqual(make.int8.type)
   expect(tuple3.item1.type).toEqual(make.int8.type)
@@ -70,14 +70,14 @@ test('make.scalar should return the correct scalar type', () => {
   expectScalar(types.nil, make.nil)
 })
 
-test('make.Dict should return $.Dict with correct keyType and valType', () => {
-  const dict = make.Dict(types.dict, makeDataType) as $.Dict<any, any>
+test('make.map should return $.map with correct keyType and valType', () => {
+  const dict = make.map(types.dict, makeDataType) as $.Dict<any, any>
   expect(dict.keyType.toString()).toEqual('$.int8')
   expect(dict.valType.toString()).toEqual('$.int8')
 })
 
-test('make.List should return $.List with correct tsDataType', () => {
-  const list = make.List(types.list, makeDataType) as $.List<any>
+test('make.list should return $.list with correct tsDataType', () => {
+  const list = make.list(types.list, makeDataType) as $.List<any>
   expect(list.dataType.toString()).toEqual('$.bool')
 })
 

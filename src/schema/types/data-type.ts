@@ -10,7 +10,7 @@ export type Struct = Readonly<{
   toString(): string;
 }> & { readonly brand: unique symbol }
 
-// A Property of a StructLiteral
+// A Property of a structLiteral
 export type StructLiteralProp = Readonly<{
   name: string;
   type: DataType;
@@ -43,8 +43,9 @@ export const scalars = ['$.blob', '$.unit', '$.timestamp', '$.dyn', '$.err', '$.
 
 export const scalarsMap = new Map<string, _.Scalar>(scalars.map((prim, i) => [prim, builtScalars[i]]))
 
-export const containers = ['$.Dict', '$.Tuple2', '$.Tuple3', '$.Tuple4', '$.Tuple5', '$.List']
+export const containers = ['$.map', '$.tuple2', '$.tuple3', '$.tuple4', '$.tuple5', '$.list']
 
 // types that are valid to use a query param in a get request
-export const queryParamables = ['$.bool', '$.timestamp', '$.int8', '$.uint8', '$.int16', '$.uint16', '$.int32', '$.uint32', '$.uint64', '$.int64', '$.float32', '$.float64', '$.str', '$.List']
+export const queryParamables = ['$.bool', '$.timestamp', '$.int8', '$.uint8', '$.int16', '$.uint16', '$.int32', '$.uint32', '$.uint64', '$.int64', '$.float32', '$.float64', '$.str', '$.list']
+
 export type DataType = _.RpcType | Struct | StructLiteral

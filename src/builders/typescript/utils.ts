@@ -118,7 +118,7 @@ const scalarFromQueryParam = (paramName: string, type: DataType): string => {
 }
 
 // returns a string representation of a function call used to
-// convert parsed querystring param List to correct ts type
+// convert parsed querystring param list to correct ts type
 export const fromQueryString  = (paramName: string, type: DataType): string => {
   if (is.Scalar(type)) {
     return scalarFromQueryParam(paramName, type)

@@ -12,7 +12,7 @@ const makeStructLiteralProps = (props: PropertySignature[], makeDataType: (type:
   props.map(prop => structLiteralProp(prop.getName(), makeDataType(prop.getTypeNodeOrThrow()),
     isOptionalProp(prop)))
 export const make = {
-  Struct: (type: Node | TypeNode): Struct => {
+  struct: (type: Node | TypeNode): Struct => {
     // get the text of the Type field
     const name = type.getText()?.trim()
     const alias = type.getSourceFile().getTypeAlias(name)
@@ -26,7 +26,7 @@ export const make = {
     } as Struct
   },
 
-  StructLiteral: (type: TypeNode | Node, makeDataType: (type: TypeNode | Node) => DataType): DataType => {
+  structLiteral: (type: TypeNode | Node, makeDataType: (type: TypeNode | Node) => DataType): DataType => {
     const properties = makeStructLiteralProps(parseMsgProps(type), makeDataType)
     return {
       properties, toString(): string {
@@ -38,7 +38,7 @@ export const make = {
       },
     }
   },
-  Dict: (type: TypeNode | Node, makeDataType: (type: TypeNode | Node) => DataType): DataType => {
+  map: (type: TypeNode | Node, makeDataType: (type: TypeNode | Node) => DataType): DataType => {
     const params = parseTypeParams(type)
     const keyType = make.scalar(params[0])
     const valType = makeDataType(params[1])
@@ -47,11 +47,11 @@ export const make = {
     }
     return {
       keyType, valType, toString() {
-        return `$.Dict<${keyType.toString()}, ${valType.toString()}>`
+        return `$.map<${keyType.toString()}, ${valType.toString()}>`
       },
     } as unknown as DataType
   },
-  Tuple: (type: TypeNode | Node, makeDataType: (type: TypeNode | Node) => DataType): DataType => {
+  tuple: (type: TypeNode | Node, makeDataType: (type: TypeNode | Node) => DataType): DataType => {
     const params = parseTypeParams(type)
     const item1 = makeDataType(params[0])
     const item2 = makeDataType(params[1])
@@ -59,7 +59,7 @@ export const make = {
     case 2:
       return {
         item1, item2, toString() {
-          return `$.Tuple2<${item1.toString()}, ${item2.toString()}>`
+          return `$.tuple2<${item1.toString()}, ${item2.toString()}>`
         },
       } as unknown as DataType
 
@@ -67,7 +67,7 @@ export const make = {
       const item3 = makeDataType(params[2])
       return {
         item1, item2, item3, toString() {
-          return `$.Tuple3<${item1.toString()}, ${item2.toString()}, ${item3.toString()}>`
+          return `$.tuple3<${item1.toString()}, ${item2.toString()}, ${item3.toString()}>`
         },
       } as unknown as DataType
     }
@@ -76,7 +76,7 @@ export const make = {
       const item4 = makeDataType(params[3])
       return {
         item1, item2, item3, item4, toString() {
-          return `$.Tuple4<${item1.toString()}, ${item2.toString()}, ${item3.toString()}, ${item4.toString()}>`
+          return `$.tuple4<${item1.toString()}, ${item2.toString()}, ${item3.toString()}, ${item4.toString()}>`
         },
       } as unknown as DataType
     }
@@ -86,7 +86,7 @@ export const make = {
       const item5 = makeDataType(params[4])
       return {
         item1, item2, item3, item4, item5, toString() {
-          return `$.Tuple5<${item1.toString()}, ${item2.toString()}, ${item3.toString()}, ${item4.toString()}, ${item5.toString()}>`
+          return `$.tuple5<${item1.toString()}, ${item2.toString()}, ${item3.toString()}, ${item4.toString()}, ${item5.toString()}>`
         },
       } as unknown as DataType
     }
@@ -96,11 +96,11 @@ export const make = {
     }
   },
 
-  List: (type: TypeNode | Node, makeDataType: (type: TypeNode | Node) => DataType): DataType => {
+  list: (type: TypeNode | Node, makeDataType: (type: TypeNode | Node) => DataType): DataType => {
     const dataType = makeDataType(parseTypeParams(type)[0])
     return {
       dataType, toString() {
-        return `$.List<${dataType.toString()}>`
+        return `$.list<${dataType.toString()}>`
       },
     } as unknown as DataType
   },

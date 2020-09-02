@@ -1,7 +1,7 @@
 import {Code, CodeBuilder} from '..'
 import {buildMsgImports, buildParamsWithTypes, buildTypes, dataType, format, paramNames} from './utils'
 import {MutationMethod, QueryService, Schema} from '../../schema'
-import {capitalize, fileHeader, lowerCase} from '../utils'
+import {capitalize, clientRequestContentType, fileHeader, lowerCase} from '../utils'
 import {isQueryMethod, MutationService, QueryMethod} from '../../schema/schema'
 
 const rpcConfig = `
@@ -23,10 +23,15 @@ import axios, {AxiosInstance, AxiosRequestConfig, AxiosResponse} from 'axios'
 import {URL} from 'url'
 ${buildMsgImports(schema.imports)}
 
-${rpcConfig}
 `
 }
 
+const buildResponseType = (method: QueryMethod| MutationMethod): string => method.hasCborReturn ? 'responseType: \'arraybuffer\', ' : ''
+
+const buildRequestHeaders = (method: QueryMethod | MutationMethod): string => isQueryMethod(method) ? '' : `headers : {
+        ...cfg?.headers,
+        'content-type': ${clientRequestContentType(method)}
+      }, `
 const buildRequestData = (method: QueryMethod | MutationMethod): string =>
   isQueryMethod(method) ?
     `params: {${paramNames(method.params)}}` : `data: {${paramNames(method.params)}}`
@@ -34,7 +39,7 @@ const buildRequestData = (method: QueryMethod | MutationMethod): string =>
 const buildMethod = (method: MutationMethod| QueryMethod): string => {
   const returnType = dataType(method.returnType)
   return `${method.name}(${buildParamsWithTypes(method.params)} ${method.hasParams ? ', ' : ''} cfg?:RpcConfig): Promise<AxiosResponse<${returnType}>> {
-    return this.#client.request<${returnType}>({...cfg, url: '/${method.name}', method: '${method.httpMethod}', ${method.hasParams ? buildRequestData(method) : ''}})
+    return this.#client.request<${returnType}>({...cfg, ${buildRequestHeaders(method)}${buildResponseType(method)} url: '/${method.name}', method: '${method.httpMethod}', ${method.hasParams ? buildRequestData(method) : ''}})
 }
 `
 }
@@ -50,18 +55,18 @@ const buildService = (svc: MutationService| QueryService): string => {
   return `
 export class ${capitalize(svc.name)} {
 	readonly #client: AxiosInstance
-	private constructor(protected readonly host: string) {
-	      this.#client = axios.create({baseURL: \`\${host}/${lowerCase(svc.name)}\`})
-		this.#client.interceptors.response.use(response => response?.data?.data)
+	private constructor(protected readonly host: string, cfg?: RpcConfig) {
+	      this.#client = axios.create({...cfg, baseURL: \`\${host}/${lowerCase(svc.name)}\`})
+		this.#client.interceptors.response.use(response => {return {...response, data: response?.data?.data}})
 	}
-	public static use(host: string): ${capitalize(svc.name)} | Error {
+	public static use(host: string, cfg?: RpcConfig): ${capitalize(svc.name)} | Error {
 		let url: URL
 		try {
 			url = new URL(host)
 		} catch (_) {
 			return new Error(\`\${host} is not a valid http(s) url\`)
 		}
-		return url.protocol === 'http:' || url.protocol === 'https:' ? new ${capitalize(svc.name)}(host) : new Error(\`\${host} is not a valid http(s) url\`)
+		return url.protocol === 'http:' || url.protocol === 'https:' ? new ${capitalize(svc.name)}(host, cfg) : new Error(\`\${host} is not a valid http(s) url\`)
 	}
 
 	${buildMethods(svc)}
@@ -84,6 +89,7 @@ const buildFile = (schema: Schema): Code => {
   const source = `
 ${buildImports(schema)}
 ${fileHeader()}
+${rpcConfig}
 ${buildTypes(schema)}
 ${buildServices(schema)}
 `
