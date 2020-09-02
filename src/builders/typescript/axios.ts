@@ -17,6 +17,31 @@ type Excluded =
 
 type RpcConfig = Omit<AxiosRequestConfig, Excluded>
 `
+
+const interceptor = (schema: Schema) => schema.hasCbor ? `
+const addInterceptors = (client: AxiosInstance) => {
+  client.interceptors.response.use(async (response) => {
+      if (response.headers['content-type'] === 'application/cbor') {
+        const [data] = await decodeAll(Buffer.from(response.data))
+        return { ...response, data: data?.data }
+      }
+      return { ...response, data: response.data?.data }
+    })
+  client.interceptors.request.use(async (request) => {
+      if (request.headers['content-type'] === 'application/cbor') {
+        request.data = await encodeAsync(request.data)
+        return request
+      }
+      return request
+    })
+}
+` : `
+const addInterceptors = (client: AxiosInstance) => {
+  client.interceptors.response.use(async (response) => {
+      return { ...response, data: response.data?.data }
+    })
+}
+`
 const buildImports = (schema: Schema): string => {
   return `
 import axios, {AxiosInstance, AxiosRequestConfig, AxiosResponse} from 'axios'
@@ -57,21 +82,7 @@ export class ${capitalize(svc.name)} {
 	private readonly client: AxiosInstance
 	private constructor(private readonly host: string, cfg?: RpcConfig) {
 	      this.client = axios.create({...cfg, baseURL: \`\${host}/${lowerCase(svc.name)}\`})
-        this.client.interceptors.response.use(async response => {
-          if (response.headers['content-type'] === 'application/cbor') {
-            const [data] = await decodeAll(Buffer.from( response.data));
-            return {...response, data: data.data}
-          }
-          return {...response, data: response.data?.data}
-        })
-
-        this.client.interceptors.request.use(async request => {
-          if (request.headers['content-type'] === 'application/cbor') {
-            request.data = await encodeAsync(request.data)
-            return request
-          }
-          return request
-        })
+        addInterceptors(this.client)
 	}
 	public static use(host: string, cfg?: RpcConfig): ${capitalize(svc.name)} | Error {
 		let url: URL
@@ -104,6 +115,7 @@ const buildFile = (schema: Schema): Code => {
 ${buildImports(schema)}
 ${fileHeader()}
 ${rpcConfig}
+${interceptor(schema)}
 ${buildTypes(schema)}
 ${buildServices(schema)}
 `
