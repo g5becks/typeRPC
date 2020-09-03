@@ -128,11 +128,6 @@ export type Property = Readonly<{
 export type Message = Readonly<{
   /** The name of the type */
   name: string;
-  /**
-   * Determines if the type should be exported or types publicly visible
-   * in the generated code.
-   */
-  isExported: boolean;
   properties: ReadonlyArray<Property>;
 }>
 

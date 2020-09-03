@@ -22,7 +22,6 @@ export const buildMessages = (file: SourceFile): Message[] => {
 
   return [...new Set(messages.map(msg => {
     return {
-      isExported: msg.isExported(),
       name: msg.getNameNode().getText().trim(),
       properties: [...new Set(buildProps(parseMsgProps(msg)))],
     }

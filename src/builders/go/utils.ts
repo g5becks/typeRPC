@@ -83,7 +83,7 @@ const buildProps = (props: ReadonlyArray<Property>): string => {
 }
 const buildType = (type: Message): string => {
   return `
-type ${type.isExported ? capitalize(type.name) : lowerCase(type.name)} struct {
+type ${capitalize(type.name)} struct {
     ${buildProps(type.properties)}
 }
 `
@@ -143,7 +143,7 @@ const buildInterface = (service: MutationService| QueryService): string => {
 }
 
 export const buildFileName = (fileName: string): string =>
-  fileName.includes('-') ? fileName.replace('/-/g', '_') + '.go' : fileName + '.go'
+  fileName.includes('-') ? fileName.split('-').join('_') + '.go' : fileName + '.go'
 
 export const buildInterfaces = (schema: Schema): string => {
   let interfaces = ''
@@ -156,7 +156,7 @@ export const buildInterfaces = (schema: Schema): string => {
   return interfaces
 }
 
-export const format = (path: string): ChildProcess => exec(`gofmt -r -w ${path}`, (error, stdout, stderr) => {
+export const format = (path: string): ChildProcess => exec(`gofmt -w ${path}`, (error, stdout, stderr) => {
   if (error) {
     // eslint-disable-next-line no-console
     console.log(`error: ${error.message}`)

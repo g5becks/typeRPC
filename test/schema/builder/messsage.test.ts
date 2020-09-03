@@ -29,13 +29,6 @@ test('buildMessages() should return all messages with correct number of properti
   }
 })
 
-test('buildMessages() should return messages with correct isExported value for exported types', () => {
-  const file = genSourceFile(exportTestMessages, project)
-  const messages = buildMessages(file)
-  expect(messages[0].isExported).toBeTruthy()
-  expect(messages[1].isExported).toBeFalsy()
-})
-
 test('buildMessages() should return messages with correct isOptional value for all properties', () => {
   for (const file of files) {
     const messages = buildMessages(file)
