@@ -52,6 +52,7 @@ type Ctx = {
   outputPath: string;
   lang: string;
   framework: string;
+  packageName: string;
 }
 
 type BuildCtx = {builder?: CodeBuilder} & Ctx
@@ -100,9 +101,10 @@ class Build extends Command {
     framework: '',
     outputPath: '',
     tsConfigFilePath: '',
+    packageName: '',
   }
 
-  #buildCtx: BuildCtx = this.#validationCtx
+  #buildCtx: BuildCtx =  {...this.#validationCtx}
 
   #code: Code[] = []
 
@@ -182,9 +184,9 @@ class Build extends Command {
           throw  new TypeError('builder not found')
         }
         const proj = new Project({tsConfigFilePath: ctx.tsConfigFilePath, skipFileDependencyResolution: true})
-        const schemas = buildSchemas(proj.getSourceFiles())
+        const schemas = buildSchemas(proj.getSourceFiles(), ctx.packageName)
         this.schemas = schemas
-        this.#code = typeof ctx.builder.format === 'undefined' ? ctx.builder.build(schemas) : ctx.builder.format(ctx.builder.build(schemas))
+        this.#code = ctx.builder.build(schemas)
       },
     },
   ], {exitOnError: true})
@@ -195,9 +197,10 @@ class Build extends Command {
     const tsConfigFilePath = flags.tsConfig?.trim() ?? ''
     const outputPath = flags.output?.trim() ?? ''
     const lang = flags.lang?.trim() ?? ''
+    const packageName = flags.packageName?.trim() ?? ''
     const framework = flags.framework?.trim() ?? ''
     const jobId = nanoid().toLowerCase()
-    this.#validationCtx = {target, tsConfigFilePath, outputPath, framework, lang}
+    this.#validationCtx = {target, tsConfigFilePath, outputPath, framework, lang, packageName}
     this.log('Beginning input validation...')
     await this.#validateInputs.run(this.#validationCtx)
     await this.#build.run(this.#buildCtx)
@@ -205,6 +208,10 @@ class Build extends Command {
       this.error('no code found to save, exiting')
     } else {
       await this.writeOutput(outputPath, this.#code)
+    }
+    if (this.#buildCtx.builder?.format !== null && typeof this.#buildCtx.builder?.format !== 'undefined') {
+      this.log('running code formatter')
+      this.#buildCtx.builder.format(outputPath)
     }
     this.log(`JobId: ${jobId} complete, check ${outputPath} for generated ${target} code.`)
   }
