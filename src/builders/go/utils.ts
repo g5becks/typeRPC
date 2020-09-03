@@ -1,4 +1,4 @@
-import {DataType, is, make, Message, MutationMethod, Param, Property, QueryService} from '../../schema'
+import {DataType, is, make, Message, MutationMethod, Param, Property, QueryService, Schema} from '../../schema'
 import {MutationService, QueryMethod} from '../../schema/schema'
 import {capitalize, lowerCase} from '../utils'
 
@@ -141,9 +141,15 @@ const buildInterface = (service: MutationService| QueryService): string => {
  }`
 }
 
-export const buildInterfaces = (services: ReadonlyArray<MutationService> | ReadonlyArray<QueryService>): string => {
+export const buildFileName = (fileName: string): string =>
+  fileName.includes('-') ? fileName.replace('/-/g', '_') + '.go' : fileName + '.go'
+
+export const buildInterfaces = (schema: Schema): string => {
   let interfaces = ''
-  for (const svc of services) {
+  for (const svc of schema.queryServices) {
+    interfaces = interfaces.concat(buildInterface(svc))
+  }
+  for (const svc of schema.mutationServices) {
     interfaces = interfaces.concat(buildInterface(svc))
   }
   return interfaces
