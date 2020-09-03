@@ -3,6 +3,7 @@ import {capitalize, lowerCase} from '../utils'
 import {Method, MutationService} from '../../schema/schema'
 import {Code} from '..'
 import {format as prettier} from 'prettier'
+import {ChildProcess, exec} from 'child_process'
 // Maps typerpc messages to typescript data-messages
 export const typeMap: Map<string, string> = new Map<string, string>(
   [
@@ -41,7 +42,7 @@ const typeLiteral = (props: ReadonlyArray<StructLiteralProp>): string => {
 
 // Converts the input dataType into a typescript representation
 export const dataType = (type: DataType): string => {
-  if (!is.container(type) && !is.scalar(type)) {
+  if (is.dataType(type) !== true) {
     throw new TypeError(`invalid data type: ${type.toString()}`)
   }
 
@@ -231,6 +232,17 @@ export const buildMsgImports = (imports: ReadonlyArray<Import>): string => {
   return importsStr
 }
 
-export const format = (code: Code[]): Code[] => code.map(c => {
-  return {...c, source: prettier(c.source, {semi: false, singleQuote: true, trailingComma: 'es5', parser: 'typescript'})}
+export const format = (path: string): ChildProcess => exec(`prettier --single-quote --trailing-comma --no-semi --parser typescript --write "${path}/**/*.ts"`, (error, stdout, stderr) => {
+  if (error) {
+    // eslint-disable-next-line no-console
+    console.log(`error: ${error.message}`)
+    return
+  }
+  if (stderr) {
+    // eslint-disable-next-line no-console
+    console.log(`stderr: ${stderr}`)
+    return
+  }
+  // eslint-disable-next-line no-console
+  console.log(`formatting complete: ${stdout}`)
 })

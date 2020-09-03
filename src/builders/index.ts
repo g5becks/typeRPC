@@ -19,7 +19,7 @@ export type CodeBuilder = {
   readonly target: Target;
   readonly framework: string;
   readonly build: (schemas: Schema[]) => Code[];
-  readonly format?: (code: Code[]) => Code[];
+  readonly format?: (path: string) => void;
 }
 
 export const builders: CodeBuilder[] = [

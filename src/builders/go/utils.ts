@@ -1,5 +1,5 @@
-import {DataType, is, make, Message, MutationMethod, Property, QueryService} from '../../schema'
-import {MutationService, QueryMethod, Schema} from '../../schema/schema'
+import {DataType, is, make, Message, MutationMethod, Param, Property, QueryService} from '../../schema'
+import {MutationService, QueryMethod} from '../../schema/schema'
 import {capitalize, lowerCase} from '../utils'
 
 export const typeMap: Map<string, string> = new Map<string, string>(
@@ -19,7 +19,7 @@ export const typeMap: Map<string, string> = new Map<string, string>(
     [make.str.type, 'string'],
     [make.dyn.type, 'interface{}'],
     [make.timestamp.type, 'time.Time'],
-    [make.unit.type, ''],
+    [make.unit.type, 'error'],
     [make.blob.type, 'byte'],
 
   ]
@@ -53,27 +53,30 @@ export const dataType = (type: DataType): string => {
   }
 
   if (is.tuple2(type)) {
-    return `(${dataType(type.item1)}, ${dataType(type.item2)})`
+    return `(error, ${dataType(type.item1)}, ${dataType(type.item2)})`
   }
 
   if (is.tuple3(type)) {
-    return `(${dataType(type.item1)}, ${dataType(type.item2)}, ${dataType(type.item3)})`
+    return `(error, ${dataType(type.item1)}, ${dataType(type.item2)}, ${dataType(type.item3)})`
   }
 
   if (is.tuple4(type)) {
-    return `(${dataType(type.item1)}, ${dataType(type.item2)}, ${dataType(type.item3)}, ${dataType(type.item4)})`
+    return `(error, ${dataType(type.item1)}, ${dataType(type.item2)}, ${dataType(type.item3)}, ${dataType(type.item4)})`
   }
 
   if (is.tuple5(type)) {
-    return `(${dataType(type.item1)}, ${dataType(type.item2)}, ${dataType(type.item3)}, ${dataType(type.item4)}, ${dataType(type.item5)})`
+    return `(error, ${dataType(type.item1)}, ${dataType(type.item2)}, ${dataType(type.item3)}, ${dataType(type.item4)}, ${dataType(type.item5)})`
   }
 
   return 'interface{}'
 }
+
+const handleOptional = (isOptional: boolean): string => isOptional ? '*' : ''
+
 const buildProps = (props: ReadonlyArray<Property>): string => {
   let properties = ''
   for (const prop of props) {
-    properties = properties.concat(`${capitalize(prop.name)}  ${prop.isOptional ? '*' : ''}${dataType(prop.type)}\n`)
+    properties = properties.concat(`${capitalize(prop.name)}  ${handleOptional(prop.isOptional)}${dataType(prop.type)}\n`)
   }
   return properties
 }
@@ -84,19 +87,65 @@ type ${type.isExported ? capitalize(type.name) : lowerCase(type.name)} struct {
 }
 `
 }
-const buildTypes = (schema: Schema): string => {
+
+export const buildTypes = (messages: ReadonlyArray<Message>): string => {
   let types = ''
-  for (const type of schema.messages) {
-    types  = types.concat(buildType(type))
+  for (const msg of messages) {
+    types  = types.concat(buildType(msg))
   }
   return types
 }
 
-const buildMethod = (srvcName: string, method: MutationMethod | QueryMethod): string => {
+const buildMethodParams = (params: ReadonlyArray<Param>): string => {
+  let parameters = ''
+  let i = 0
+  while (i < params.length) {
+    const useComma = i === params.length - 1 ? '' : ', '
+    parameters = parameters.concat(`${lowerCase(params[i].name)} ${handleOptional(params[i].isOptional)}${dataType(params[i].type)}${useComma}`)
+    i++
+  }
+  return parameters
+}
+
+const buildReturnType = (type: DataType): string => {
+  if (is.dataType(type) !== true) {
+    throw new TypeError(`invalid data type: ${type.toString()}`)
+  }
+  if (is.scalar(type) && type.type === 'unit') {
+    return 'error'
+  }
+  if (is.tuple2(type) || is.tuple3(type) || is.tuple4(type) || is.tuple5(type)) {
+    return dataType(type)
+  }
+  return `(error, ${dataType(type)})`
+}
+
+const buildMethodSignature = (method: MutationMethod | QueryMethod): string => {
   return `
-type ${capitalize(srvcName)} struct {}
+  ${capitalize(method.name)}(${buildMethodParams(method.params)}) ${buildReturnType(method.returnType)}
   `
 }
-const buildInterface = (service: MutationService| QueryService): string => {
 
+const buildInterfaceMethods = (methods: ReadonlyArray<MutationMethod| QueryMethod>): string => {
+  let signatures = ''
+  for (const method of methods) {
+    signatures = signatures.concat(buildMethodSignature(method))
+  }
+  return signatures
 }
+
+const buildInterface = (service: MutationService| QueryService): string => {
+  return `
+ type ${capitalize(service.name)} interface {
+    ${buildInterfaceMethods(service.methods)}
+ }`
+}
+
+export const buildInterfaces = (services: ReadonlyArray<MutationService> | ReadonlyArray<QueryService>): string => {
+  let interfaces = ''
+  for (const svc of services) {
+    interfaces = interfaces.concat(buildInterface(svc))
+  }
+  return interfaces
+}
+

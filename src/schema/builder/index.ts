@@ -23,8 +23,9 @@ const buildImports = (file: SourceFile): ReadonlyArray<Import> =>
     }
   })
 
-const buildSchema = (file: SourceFile): Schema => {
+const buildSchema = (file: SourceFile, packageName: string): Schema => {
   return {
+    packageName,
     imports: buildImports(file),
     fileName: file.getBaseNameWithoutExtension(),
     messages: buildMessages(file),
@@ -35,8 +36,8 @@ const buildSchema = (file: SourceFile): Schema => {
     },
   }
 }
-export const buildSchemas = (sourceFiles: SourceFile[]): Schema[] =>
-  [...new Set<Schema>(sourceFiles.map(file => buildSchema(file)))]
+export const buildSchemas = (sourceFiles: SourceFile[], packageName: string): Schema[] =>
+  [...new Set<Schema>(sourceFiles.map(file => buildSchema(file, packageName)))]
 
 export const internalTesting = {
   useCbor,

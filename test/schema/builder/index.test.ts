@@ -11,7 +11,7 @@ const {
 } = testing
 test('buildSchema() should return schema with correct number of messages and services', () => {
   const file = genSourceFile(genTestFile(), new Project())
-  const schema = buildSchema(file)
+  const schema = buildSchema(file, '')
   expect(parseMessages(file).length).toEqual(schema.messages.length)
   expect(parseQueryServices(file).length).toEqual(schema.queryServices.length)
   expect(parseMutationServices(file).length).toEqual(schema.mutationServices.length)

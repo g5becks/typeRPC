@@ -146,6 +146,8 @@ export type Import = Readonly<{
 
 /** A Schema used to generate server and client code */
 export type Schema = Readonly<{
+  /** name of the package to use when generating code **/
+  packageName: string;
   /** Name of the file this schema was generated from without extension.  */
   fileName: string;
   /** All of the imports found in the file */

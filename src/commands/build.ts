@@ -66,6 +66,7 @@ class Build extends Command {
     output: flags.string({char: 'o', name: 'output', description: 'path to a directory to place generated code', required: true}),
     lang: flags.string({char: 'l', name: 'lang', description: 'the programming language to use for generating code', required: true}),
     framework: flags.string({char: 'f', name: 'framework', description: 'the framework to use for generating code', required: true}),
+    packageName: flags.string({char: 'p', name: 'package', description: 'package name to use when generating code'}),
   }
 
   static args = [
