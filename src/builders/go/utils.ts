@@ -54,19 +54,19 @@ export const dataType = (type: DataType): string => {
   }
 
   if (is.tuple2(type)) {
-    return `(error, ${dataType(type.item1)}, ${dataType(type.item2)})`
+    return `(${dataType(type.item1)}, ${dataType(type.item2)}, error)`
   }
 
   if (is.tuple3(type)) {
-    return `(error, ${dataType(type.item1)}, ${dataType(type.item2)}, ${dataType(type.item3)})`
+    return `(${dataType(type.item1)}, ${dataType(type.item2)}, ${dataType(type.item3)}, error)`
   }
 
   if (is.tuple4(type)) {
-    return `(error, ${dataType(type.item1)}, ${dataType(type.item2)}, ${dataType(type.item3)}, ${dataType(type.item4)})`
+    return `(${dataType(type.item1)}, ${dataType(type.item2)}, ${dataType(type.item3)}, ${dataType(type.item4)}, error)`
   }
 
   if (is.tuple5(type)) {
-    return `(error, ${dataType(type.item1)}, ${dataType(type.item2)}, ${dataType(type.item3)}, ${dataType(type.item4)}, ${dataType(type.item5)})`
+    return `(${dataType(type.item1)}, ${dataType(type.item2)}, ${dataType(type.item3)}, ${dataType(type.item4)}, ${dataType(type.item5)}, error)`
   }
 
   return 'interface{}'
@@ -77,7 +77,7 @@ const handleOptional = (isOptional: boolean): string => isOptional ? '*' : ''
 const buildProps = (props: ReadonlyArray<Property>): string => {
   let properties = ''
   for (const prop of props) {
-    properties = properties.concat(`${capitalize(prop.name)}  ${handleOptional(prop.isOptional)}${dataType(prop.type)}\n`)
+    properties = properties.concat(`${capitalize(prop.name)}  ${handleOptional(prop.isOptional)}${dataType(prop.type)} \`json:"${lowerCase(prop.name)}"\``)
   }
   return properties
 }
@@ -118,12 +118,12 @@ const buildReturnType = (type: DataType): string => {
   if (is.tuple2(type) || is.tuple3(type) || is.tuple4(type) || is.tuple5(type)) {
     return dataType(type)
   }
-  return `(error, ${dataType(type)})`
+  return `(${dataType(type)}, error)`
 }
 
 const buildMethodSignature = (method: MutationMethod | QueryMethod): string => {
   return `
-  ${capitalize(method.name)}(${buildMethodParams(method.params)}) ${buildReturnType(method.returnType)}
+  ${capitalize(method.name)}(ctx context.Context${method.hasParams ? ', ' : ''}${buildMethodParams(method.params)}) ${buildReturnType(method.returnType)}
   `
 }
 
