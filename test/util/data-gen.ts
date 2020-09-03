@@ -7,7 +7,7 @@ export function randomNumber(min: number, max: number) {
 }
 
 // typerpc comparable (dict keys)
-const comparables = ['$.bool', '$.int8', '$.uint8', '$.uint16', '$.int16', '$.int32', '$.uint32', '$.int64', '$.uint64', '$.float32', '$.float64', '$.str', '$.timestamp', '$.err', '$.dyn']
+const comparables = ['$.bool', '$.int8', '$.uint8', '$.uint16', '$.int16', '$.int32', '$.uint32', '$.int64', '$.uint64', '$.float32', '$.float64', '$.str', '$.timestamp', '$.dyn']
 
 // creates a random @typerpc rpc.Comparable
 const genRandomComparable = () => comparables[randomNumber(0, comparables.length)]

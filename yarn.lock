@@ -648,9 +648,9 @@
     typescript "~3.9.7"
 
 "@typerpc/types@^1.0.1":
-  version "1.1.18"
-  resolved "https://registry.yarnpkg.com/@typerpc/types/-/types-1.1.18.tgz#66a86c2597b91ecf713f7d1162f27828e00b2baf"
-  integrity sha512-Q+rAqmzc0QlIV/A793qnAlo5yddvBQuWx885UIoMKsUkNkWlxBgb0GZYCWfL6ysM86VwRd+Cb5wUFeYghgHSyA==
+  version "1.1.19"
+  resolved "https://registry.yarnpkg.com/@typerpc/types/-/types-1.1.19.tgz#d343f008bfb5d48aa57932dab25021cb4cea2033"
+  integrity sha512-hRednbtj+0T/TNz2mJRJ12d4bFgNgGjoKAJsxFx6JbWrMBrOW2xe9DbHRw+wrkeXjYkBmvoeJdLsc64KyMCnLw==
 
 "@types/babel__core@^7.0.0", "@types/babel__core@^7.1.7":
   version "7.1.9"

@@ -165,7 +165,7 @@ type TestType = rpc.Msg<{
   tuple2: $.tuple2<$.int8, $.int8>
   tuple3: $.tuple3<$.int8, $.int16, $.uint16>
   tuple4: $.tuple4<$.int8, $.str, $.bool, $.timestamp>
-  tuple5: $.tuple5<$.str, $.err, $.dyn, $.blob, $.float32>
+  tuple5: $.tuple5<$.str, $.str, $.dyn, $.blob, $.float32>
   list: $.list<$.bool>
   struct: SomeStruct
   structLiteral: rpc.Msg<{
@@ -187,7 +187,6 @@ type TestType = rpc.Msg<{
   float32: $.float32
   float64: $.float64
   str: $.str
-  err: $.err
   timestamp: $.timestamp
   blob: $.blob
   dyn: $.dyn
@@ -199,7 +198,7 @@ type TestType = rpc.Msg<{
   	    name: $.str
 		data: $.map<$.int8, $.list<$.map<$.bool, $.list<$.str>>>>
 	}>
-	nestedTuple: $.tuple3<$.list<$.tuple2<$.float32, $.float64>>, $.err, $.dyn>
+	nestedTuple: $.tuple3<$.list<$.tuple2<$.float32, $.float64>>, $.str, $.dyn>
 }>
 `
 export const dataTypeTestsSource = `
@@ -208,7 +207,7 @@ type TestType = rpc.Msg<{
   tuple2: $.tuple2<$.int8, $.int8>
   tuple3: $.tuple3<$.int8, $.int16, $.uint16>
   tuple4: $.tuple4<$.int8, $.str, $.bool, $.timestamp>
-  tuple5: $.tuple5<$.str, $.err, $.dyn, $.blob, $.float32>
+  tuple5: $.tuple5<$.str, $.str, $.dyn, $.blob, $.float32>
   list: $.list<$.bool>
   structLiteral: rpc.Msg<{
     name: $.str,
@@ -228,14 +227,13 @@ type TestType = rpc.Msg<{
   float32: $.float32
   float64: $.float64
   str: $.str
-  err: $.err
   timestamp: $.timestamp
   blob: $.blob
   dyn: $.dyn
   nestedDict: $.map<$.str, $.list<$.map<$.str, $.list<$.str>>>>
-  nestedList: $.list<$.tuple4<$.tuple2<$.int64, $.list<$.blob>>, $.bool, $.err, $.dyn>>
+  nestedList: $.list<$.tuple4<$.tuple2<$.int64, $.list<$.blob>>, $.bool, $.str, $.dyn>>
   queryParamList: $.list<$.int8>
 }>`
 
-export const expectedTsDataTypes = ['{[key: string]: number}', '[number, number]', '[number, number, number]', '[number, string, boolean, number]', '[string, Error, any, Uint8Array, number]', 'Array<boolean>', '{name: string; age: number; birthDate: number; weight: number; }', 'boolean', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'string', 'Error', 'number', 'Uint8Array', 'any', '{[key: string]: Array<{[key: string]: Array<string>}>}', 'Array<[[number, Array<Uint8Array>], boolean, Error, any]>', 'Array<number>']
+export const expectedTsDataTypes = ['{[key: string]: number}', '[number, number]', '[number, number, number]', '[number, string, boolean, number]', '[string, string, any, Uint8Array, number]', 'Array<boolean>', '{name: string; age: number; birthDate: number; weight: number; }', 'boolean', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'string', 'number', 'Uint8Array', 'any', '{[key: string]: Array<{[key: string]: Array<string>}>}', 'Array<[[number, Array<Uint8Array>], boolean, string, any]>', 'Array<number>']
 

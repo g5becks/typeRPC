@@ -19,7 +19,6 @@ export const typeMap: Map<string, string> = new Map<string, string>(
     [make.float64.type, 'number'],
     [make.nil.type, 'null'],
     [make.str.type, 'string'],
-    [make.err.type, 'Error'],
     [make.dyn.type, 'any'],
     [make.timestamp.type, 'number'],
     [make.unit.type, 'void'],

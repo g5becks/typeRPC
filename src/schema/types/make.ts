@@ -144,9 +144,6 @@ export const make = {
   get str(): _.Scalar {
     return {type: 'str', toString: () => '$.str'} as unknown as _.Scalar
   },
-  get err(): _.Scalar {
-    return {type: 'err', toString: () => '$.err'} as unknown as _.Scalar
-  },
   get dyn(): _.Scalar {
     return {type: 'dyn', toString: () => '$.dyn'} as unknown as _.Scalar
   },

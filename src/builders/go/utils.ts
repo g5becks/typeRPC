@@ -1,5 +1,5 @@
-import {DataType, is, make, Message, Property} from '../../schema'
-import {Schema} from '../../schema/schema'
+import {DataType, is, make, Message, MutationMethod, Property, QueryService} from '../../schema'
+import {MutationService, QueryMethod, Schema} from '../../schema/schema'
 import {capitalize, lowerCase} from '../utils'
 
 export const typeMap: Map<string, string> = new Map<string, string>(
@@ -17,7 +17,6 @@ export const typeMap: Map<string, string> = new Map<string, string>(
     [make.float64.type, 'float64'],
     [make.nil.type, 'struct{}'],
     [make.str.type, 'string'],
-    [make.err.type, 'error'],
     [make.dyn.type, 'interface{}'],
     [make.timestamp.type, 'time.Time'],
     [make.unit.type, ''],
@@ -91,4 +90,13 @@ const buildTypes = (schema: Schema): string => {
     types  = types.concat(buildType(type))
   }
   return types
+}
+
+const buildMethod = (srvcName: string, method: MutationMethod | QueryMethod): string => {
+  return `
+type ${capitalize(srvcName)} struct {}
+  `
+}
+const buildInterface = (service: MutationService| QueryService): string => {
+
 }
