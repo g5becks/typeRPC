@@ -1,6 +1,7 @@
 import {DataType, is, make, Message, MutationMethod, Param, Property, QueryService, Schema} from '../../schema'
 import {MutationService, QueryMethod} from '../../schema/schema'
 import {capitalize, lowerCase} from '../utils'
+import {ChildProcess, exec} from 'child_process'
 
 export const typeMap: Map<string, string> = new Map<string, string>(
   [
@@ -154,4 +155,19 @@ export const buildInterfaces = (schema: Schema): string => {
   }
   return interfaces
 }
+
+export const format = (path: string): ChildProcess => exec(`gofmt -r -w ${path}`, (error, stdout, stderr) => {
+  if (error) {
+    // eslint-disable-next-line no-console
+    console.log(`error: ${error.message}`)
+    return
+  }
+  if (stderr) {
+    // eslint-disable-next-line no-console
+    console.log(`stderr: ${stderr}`)
+    return
+  }
+  // eslint-disable-next-line no-console
+  console.log(`formatting complete: ${stdout}`)
+})
 
