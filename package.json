@@ -71,6 +71,7 @@
   "oclif": {
     "commands": "./lib/commands",
     "bin": "typerpc",
+    "scope": "typerpc",
     "plugins": [
       "@oclif/plugin-help",
       "@oclif/plugin-not-found"

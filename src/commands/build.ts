@@ -1,4 +1,4 @@
-import {builders, Code, CodeBuilder, isValidLang, languages, ProgrammingLanguage, Target} from '../builders'
+import {builders, Code, CodeBuilderPlugin, isValidLang, languages, ProgrammingLanguage, Target} from '../builders'
 import {Command, flags} from '@oclif/command'
 import {outputFile, pathExists} from 'fs-extra'
 import {nanoid} from 'nanoid'
@@ -30,19 +30,19 @@ const validateTsConfigFile = async (tsConfigFile: string): Promise<void> => {
 }
 
 // get all builders that match the target and programming language
-const getBuilders = (target: Target, lang: ProgrammingLanguage): CodeBuilder[] => {
+const getBuilders = (target: Target, lang: ProgrammingLanguage): CodeBuilderPlugin[] => {
   return builders.filter(builder =>
     builder.lang === lang && builder.target
   )
 }
 
 // find a build that matches the framework
-const filterBuilderByFramework = (framework: string, builders: CodeBuilder[]): CodeBuilder[] => {
+const filterBuilderByFramework = (framework: string, builders: CodeBuilderPlugin[]): CodeBuilderPlugin[] => {
   return builders.filter(builder => builder.framework === framework)
 }
 
 // report available frameworks for target language
-const reportAvailableFrameworks =  (builders: CodeBuilder[]): string[] => {
+const reportAvailableFrameworks =  (builders: CodeBuilderPlugin[]): string[] => {
   return builders.map(builder => builder.framework)
 }
 
@@ -55,7 +55,7 @@ type Ctx = {
   packageName: string;
 }
 
-type BuildCtx = {builder?: CodeBuilder} & Ctx
+type BuildCtx = {builder?: CodeBuilderPlugin} & Ctx
 
 class Build extends Command {
   static description = 'describe command here'
