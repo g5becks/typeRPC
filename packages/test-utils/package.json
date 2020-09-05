@@ -1,0 +1,29 @@
+{
+  "name": "@typerpc/test-utils",
+  "version": "0.1.1",
+  "description": "typerpc test utilities",
+  "keywords": [
+    "typerpc"
+  ],
+  "author": "Gary Becks <techstar.dev@hotmail.com>",
+  "homepage": "https://github.com/typerpc/typerpc",
+  "license": "ISC",
+  "main": "dist/index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/typerpc/typerpc.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  },
+  "bugs": {
+    "url": "https://github.com/typerpc/typerpc/issues"
+  }
+}

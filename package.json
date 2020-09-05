@@ -1,89 +1,14 @@
 {
-  "name": "@typerpc/cli",
-  "description": "Cross Language Rpc Framework",
-  "version": "1.0.1",
-  "author": "Gary Becks techstar.dev@hotmail.com",
-  "bin": {
-    "typerpc": "./bin/run"
-  },
-  "bugs": "https://github.com/typerpc/cli/issues",
-  "dependencies": {
-    "@oclif/command": "^1",
-    "@oclif/config": "^1",
-    "@oclif/plugin-help": "^3",
-    "@oclif/plugin-not-found": "^1.2.4",
-    "@typerpc/types": "^1.0.1",
-    "cli-ux": "^5.4.9",
-    "fs-extra": "^9.0.1",
-    "listr2": "^2.6.2",
-    "nanoid": "^3.1.10",
-    "ts-json-schema-generator": "^0.70.2",
-    "ts-morph": "^7.1.2",
-    "tslib": "^1"
-  },
+  "name": "root",
+  "private": true,
   "devDependencies": {
-    "@oclif/dev-cli": "^1",
-    "@types/cli-progress": "^3.7.0",
-    "@types/faker": "^4.1.12",
-    "@types/fs-extra": "^9.0.1",
-    "@types/jest": "^26.0.9",
-    "@types/node": "^14.0.23",
-    "eslint": "^5.13",
-    "eslint-config-oclif": "^3.1",
-    "eslint-config-oclif-typescript": "^0.1",
-    "faker": "^4.1.0",
-    "globby": "^10",
-    "jest": "^26.4.0",
-    "ts-jest": "^26.2.0",
-    "ts-node": "^8",
-    "typescript": "^3.3"
-  },
-  "jest": {
-    "transform": {
-      ".(ts|tsx)": "ts-jest"
-    },
-    "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js)$",
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js"
-    ]
-  },
-  "engines": {
-    "node": ">=8.4.0"
-  },
-  "files": [
-    "/bin",
-    "/lib",
-    "/npm-shrinkwrap.json",
-    "/oclif.manifest.json"
-  ],
-  "homepage": "https://github.com/typerpc/cli",
-  "keywords": [
-    "typescript",
-    "go",
-    "rpc",
-    "framework",
-    "rest"
-  ],
-  "license": "MIT",
-  "main": "lib/index.js",
-  "oclif": {
-    "commands": "./lib/commands",
-    "bin": "typerpc",
-    "scope": "typerpc",
-    "plugins": [
-      "@oclif/plugin-help",
-      "@oclif/plugin-not-found"
-    ]
-  },
-  "repository": "typerpc/cli",
-  "scripts": {
-    "postpack": "rm -f oclif.manifest.json",
-    "posttest1": "eslint . --ext .ts --config .eslintrc",
-    "prepack": "rm -rf lib && tsc -b && oclif-dev manifest && oclif-dev readme",
-    "test": "jest",
-    "version": "oclif-dev readme && git add README.md"
-  },
-  "types": "lib/index.d.ts"
+    "@typescript-eslint/eslint-plugin": "^4.0.1",
+    "@typescript-eslint/parser": "^4.0.1",
+    "eslint": "^7.8.1",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-plugin-prettier": "^3.1.4",
+    "lerna": "^3.22.1",
+    "prettier": "^2.1.1",
+    "typescript": "^4.0.2"
+  }
 }

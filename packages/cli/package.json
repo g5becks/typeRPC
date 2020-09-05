@@ -1,0 +1,34 @@
+{
+  "name": "@typerpc/cli",
+  "version": "0.1.1",
+  "description": "typerpc command line tooling",
+  "keywords": [
+    "typerpc",
+    "rpc",
+    "json",
+    "graphql",
+    "typescript",
+    "generator"
+  ],
+  "author": "Gary Becks <techstar.dev@hotmail.com>",
+  "homepage": "https://github.com/typerpc/typerpc",
+  "license": "ISC",
+  "main": "src/cli.js",
+  "directories": {
+    "lib": "src",
+    "test": "__tests__"
+  },
+  "files": [
+    "src"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/typerpc/typerpc.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  },
+  "bugs": {
+    "url": "https://github.com/typerpc/typerpc/issues"
+  }
+}
