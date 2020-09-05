@@ -1,6 +1,6 @@
-'use strict';
+'use strict'
 
-module.exports = website;
+module.exports = website
 
 function website() {
     // TODO

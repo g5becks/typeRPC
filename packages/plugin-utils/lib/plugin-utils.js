@@ -1,6 +1,6 @@
-'use strict';
+'use strict'
 
-module.exports = pluginUtils;
+module.exports = pluginUtils
 
 function pluginUtils() {
     // TODO

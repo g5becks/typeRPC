@@ -1,6 +1,6 @@
-'use strict';
+'use strict'
 
-module.exports = validators;
+module.exports = validators
 
 function validators() {
     // TODO

@@ -1,6 +1,6 @@
-'use strict';
+'use strict'
 
-module.exports = goChi;
+module.exports = goChi
 
 function goChi() {
     // TODO

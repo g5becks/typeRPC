@@ -1,6 +1,6 @@
-'use strict';
+'use strict'
 
-module.exports = goPluginUtils;
+module.exports = goPluginUtils
 
 function goPluginUtils() {
     // TODO

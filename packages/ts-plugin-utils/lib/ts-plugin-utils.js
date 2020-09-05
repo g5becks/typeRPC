@@ -1,6 +1,6 @@
-'use strict';
+'use strict'
 
-module.exports = tsPluginUtils;
+module.exports = tsPluginUtils
 
 function tsPluginUtils() {
     // TODO

@@ -1,9 +1,9 @@
-import {Project, SourceFile} from 'ts-morph'
-import {randomNumber} from './data-gen'
-import {genMsgNames, genRpcMessages, genTestMessageFiles} from './message-gen'
-import {genServices} from './service-gen'
+import { Project, SourceFile } from 'ts-morph'
+import { randomNumber } from './data-gen'
+import { genMsgNames, genRpcMessages, genTestMessageFiles } from './message-gen'
+import { genServices } from './service-gen'
 
-export {genTestMessageFiles, genMsgNames, genRpcMessages, genServices}
+export { genTestMessageFiles, genMsgNames, genRpcMessages, genServices }
 
 export const testQuerySvc = `
 type TestQuerySvc = rpc.QuerySvc<{
@@ -49,13 +49,13 @@ type TestQuerySvc = rpc.QuerySvc<{
 }`
 
 export const genSourceFile = (source: string, project: Project, name = 'test.ts'): SourceFile =>
-  project.createSourceFile(name, source, {overwrite: true})
+    project.createSourceFile(name, source, { overwrite: true })
 
 export const genSourceFiles = (sources: [string, string][], project: Project): SourceFile[] => {
-  for (const [name, source] of sources) {
-    project.createSourceFile(name, source)
-  }
-  return project.getSourceFiles()
+    for (const [name, source] of sources) {
+        project.createSourceFile(name, source)
+    }
+    return project.getSourceFiles()
 }
 export const makeStructTestSource = `
   /** @kind cbor */
@@ -80,12 +80,15 @@ type TestType2 = {
   prop2: MoreNoCbor;
 }
 `
-export const optional = () => randomNumber(0, 4) === 1 ? '?' : ''
-export const useCbor = () => randomNumber(0, 5) === 1 ? `
+export const optional = () => (randomNumber(0, 4) === 1 ? '?' : '')
+export const useCbor = () =>
+    randomNumber(0, 5) === 1
+        ? `
   /**
  * @kind cbor
  */
- ` : ''
+ `
+        : ''
 
 export const exportTestMessages = `
 export type ExportedType = rpc.Msg<{
@@ -97,14 +100,14 @@ type NonExportedType = rpc.Msg<{
 }>
 `
 export const genImports = (msgNames: string[]): string => {
-  let imports = ''
-  let i = 0
-  while (i < msgNames.length) {
-    const useComma = i === msgNames.length - 1 ? '' : ', '
-    imports = imports.concat(msgNames[i] + useComma)
-    i++
-  }
-  return `import {${imports}} from './dummy-file'\n`
+    let imports = ''
+    let i = 0
+    while (i < msgNames.length) {
+        const useComma = i === msgNames.length - 1 ? '' : ', '
+        imports = imports.concat(msgNames[i] + useComma)
+        i++
+    }
+    return `import {${imports}} from './dummy-file'\n`
 }
 
 export const hasCborParamsTestData = `
@@ -128,16 +131,16 @@ type TestService3 = rpc.MutationSvc<{
 `
 
 export const genTestFile = () => {
-  const names = genMsgNames()
-  const names2 = genMsgNames()
-  const messages = genRpcMessages(names, names2)
-  const queryServices = genServices('Query', names)
-  const mutationServices = genServices('Mutation', names)
-  const imports = genImports(names2)
-  return imports.concat(messages).concat(queryServices).concat(mutationServices)
+    const names = genMsgNames()
+    const names2 = genMsgNames()
+    const messages = genRpcMessages(names, names2)
+    const queryServices = genServices('Query', names)
+    const mutationServices = genServices('Mutation', names)
+    const imports = genImports(names2)
+    return imports.concat(messages).concat(queryServices).concat(mutationServices)
 }
 
-export const  isValidDataTypeTestSource = `
+export const isValidDataTypeTestSource = `
   type Valid = rpc.Msg<{
       dummy: $.str
   }>
@@ -235,5 +238,30 @@ type TestType = rpc.Msg<{
   queryParamList: $.list<$.int8>
 }>`
 
-export const expectedTsDataTypes = ['{[key: string]: number}', '[number, number]', '[number, number, number]', '[number, string, boolean, number]', '[string, string, any, Uint8Array, number]', 'Array<boolean>', '{name: string; age: number; birthDate: number; weight: number; }', 'boolean', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'string', 'number', 'Uint8Array', 'any', '{[key: string]: Array<{[key: string]: Array<string>}>}', 'Array<[[number, Array<Uint8Array>], boolean, string, any]>', 'Array<number>']
-
+export const expectedTsDataTypes = [
+    '{[key: string]: number}',
+    '[number, number]',
+    '[number, number, number]',
+    '[number, string, boolean, number]',
+    '[string, string, any, Uint8Array, number]',
+    'Array<boolean>',
+    '{name: string; age: number; birthDate: number; weight: number; }',
+    'boolean',
+    'number',
+    'number',
+    'number',
+    'number',
+    'number',
+    'number',
+    'number',
+    'number',
+    'number',
+    'number',
+    'string',
+    'number',
+    'Uint8Array',
+    'any',
+    '{[key: string]: Array<{[key: string]: Array<string>}>}',
+    'Array<[[number, Array<Uint8Array>], boolean, string, any]>',
+    'Array<number>',
+]

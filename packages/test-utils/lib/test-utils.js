@@ -1,6 +1,6 @@
-'use strict';
+'use strict'
 
-module.exports = testUtils;
+module.exports = testUtils
 
 function testUtils() {
     // TODO

@@ -1,13 +1,13 @@
-import {MutationMethod} from '../schema'
-import {isQueryMethod, QueryMethod} from '../../schema/lib/schema'
+import { MutationMethod } from '../schema'
+import { isQueryMethod, QueryMethod } from '../../schema/lib/schema'
 
-export const capitalize = (text: string): string => text.replace(/^\w/, c => c.toUpperCase())
+export const capitalize = (text: string): string => text.replace(/^\w/, (c) => c.toUpperCase())
 
-export const lowerCase = (text: string): string => text.replace(/^\w/, c => c.toLowerCase())
+export const lowerCase = (text: string): string => text.replace(/^\w/, (c) => c.toLowerCase())
 
 export const currentTime = () => {
-  const now = new Date()
-  return `${now.getFullYear()}/${now.getMonth()}/${now.getDate()} at ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`
+    const now = new Date()
+    return `${now.getFullYear()}/${now.getMonth()}/${now.getDate()} at ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`
 }
 
 export const fileHeader = () => `
@@ -19,7 +19,9 @@ export const fileHeader = () => `
 \n`
 
 // returns the correct content-type for a server response
-export const serverResponseContentType = (method: MutationMethod | QueryMethod) => method.hasCborReturn ? "'application/cbor'" : "'application/json'"
+export const serverResponseContentType = (method: MutationMethod | QueryMethod) =>
+    method.hasCborReturn ? "'application/cbor'" : "'application/json'"
 
 // returns the correct content-type for a client request
-export const clientRequestContentType = (method: MutationMethod | QueryMethod) => isQueryMethod(method) ? '' :  method.hasCborParams ? "'application/cbor'" : "'application/json'"
+export const clientRequestContentType = (method: MutationMethod | QueryMethod) =>
+    isQueryMethod(method) ? '' : method.hasCborParams ? "'application/cbor'" : "'application/json'"

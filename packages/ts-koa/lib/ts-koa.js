@@ -1,6 +1,6 @@
-'use strict';
+'use strict'
 
-module.exports = tsKoa;
+module.exports = tsKoa
 
 function tsKoa() {
     // TODO

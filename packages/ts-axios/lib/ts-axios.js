@@ -1,6 +1,6 @@
-'use strict';
+'use strict'
 
-module.exports = tsAxios;
+module.exports = tsAxios
 
 function tsAxios() {
     // TODO
