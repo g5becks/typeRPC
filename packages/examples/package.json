@@ -16,7 +16,7 @@
   "main": "lib/examples.js",
   "directories": {
     "lib": "lib",
-    "test": "__tests__"
+    "test": "tests"
   },
   "files": [
     "lib"

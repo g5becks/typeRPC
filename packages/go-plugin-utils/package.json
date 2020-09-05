@@ -14,13 +14,13 @@
   "author": "Gary Becks <techstar.dev@hotmail.com>",
   "homepage": "https://github.com/typerpc/typerpc",
   "license": "ISC",
-  "main": "dist/index.js",
+  "main": "./lib/index.js",
   "directories": {
-    "lib": "lib",
-    "test": "__tests__"
+    "lib": "src",
+    "test": "tests"
   },
   "files": [
-    "lib"
+    "src"
   ],
   "repository": {
     "type": "git",
@@ -30,7 +30,7 @@
     "access": "public"
   },
   "scripts": {
-    "lint-fix": "eslint --fix ./lib/**",
+    "lint-fix": "eslint --fix src/**",
     "build": "yarn run clean && yarn run tsc",
     "clean": "rm -rf ./dist && rm -rf tsconfig.build.tsbuildinfo",
     "tsc": "tsc -b tscconfig.build.json",
