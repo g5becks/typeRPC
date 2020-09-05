@@ -1,3 +1,5 @@
+/** @typedef {import('ts-jest')} */
+/** @type {import('@jest/types').Config.InitialOptions} */
 const { pathsToModuleNameMapper } = require('ts-jest/utils');
 // Load the config which holds the path aliases.
 const { compilerOptions } = require('./tsconfig.json');
