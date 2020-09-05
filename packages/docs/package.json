@@ -1,11 +1,11 @@
 {
-  "name": "@typerpc/website",
+  "name": "@typerpc/docs",
   "version": "0.1.1",
   "description": "typerpc website",
   "author": "Gary Becks <techstar.dev@hotmail.com>",
   "homepage": "https://typerpc.run",
   "license": "ISC",
-  "main": "lib/website.js",
+  "main": "",
   "directories": {
     "lib": "lib",
     "test": "__tests__"
