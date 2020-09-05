@@ -1,6 +1,9 @@
 {
   "name": "root",
   "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "publish": "lerna run build && lerna publish"
   },
@@ -19,5 +22,23 @@
     "ts-node": "^9.0.0",
     "tsconfig-paths": "^3.9.0",
     "typescript": "^4.0.2"
+  },
+  "dependencies": {
+    "@typerpc/cli": "file:packages/cli",
+    "@typerpc/docs": "file:packages/docs",
+    "@typerpc/examples": "file:packages/examples",
+    "@typerpc/go-chi": "file:packages/go-chi",
+    "@typerpc/go-plugin-utils": "file:packages/go-plugin-utils",
+    "@typerpc/parser": "file:packages/parser",
+    "@typerpc/plugin": "file:packages/plugin",
+    "@typerpc/plugin-utils": "file:packages/plugin-utils",
+    "@typerpc/schema": "file:packages/schema",
+    "@typerpc/schema-builder": "file:packages/schema-builder",
+    "@typerpc/test-utils": "file:packages/test-utils",
+    "@typerpc/ts-axios": "file:packages/ts-axios",
+    "@typerpc/ts-koa": "file:packages/ts-koa",
+    "@typerpc/ts-plugin-utils": "file:packages/ts-plugin-utils",
+    "@typerpc/types": "file:packages/types",
+    "@typerpc/validators": "file:packages/validators"
   }
 }
