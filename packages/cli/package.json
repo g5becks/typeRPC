@@ -13,7 +13,7 @@
   "author": "Gary Becks <techstar.dev@hotmail.com>",
   "homepage": "https://github.com/typerpc/typerpc",
   "license": "ISC",
-  "main": "src/cli.js",
+  "main": "lib/index.js",
   "directories": {
     "lib": "src",
     "test": "__tests__"

@@ -1,4 +1,5 @@
 {
+  "extends": "./tsconfig.build.json",
   "compilerOptions": {
     "declaration": true,
     "importHelpers": true,
@@ -9,7 +10,17 @@
     "target": "es2017",
     "esModuleInterop": true,
     "lib": ["ESNext"],
-    "sourceMap": true
+    "sourceMap": true,
+    "baseUrl": "./packages",
+    "paths": {
+      "@typerpc/parser": ["parser/lib"],
+      "@typerpc/plugin": ["types/plugin"],
+      "@typerpc/schema": ["schema/lib"],
+      "@typerpc/schema-builder": ["schema-builder/lib"],
+      "@typerpc/test-utils": ["test-utils/lib"],
+      "@typerpc/types": ["types/lib"],
+      "@typerpc/validators": ["validators/lib"]
+    }
   },
   "exclude": [
     "node_modules",
