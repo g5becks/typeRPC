@@ -31,7 +31,9 @@
     "url": "git+https://github.com/typerpc/typerpc.git"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "yarn run clean && yarn run tsc",
+    "clean": "rm -rf ./dist && rm -rf tsconfig.build.tsbuildinfo",
+    "tsc": "tsc -b tscconfig.build.json",
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
   "bugs": {
