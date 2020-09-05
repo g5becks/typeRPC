@@ -4,8 +4,15 @@
     "composite": true,
     "declaration": true,
     "declarationMap": true,
-    "outDir": "./lib"
+    "outDir": "./lib",
+    "rootDir": "./src"
   },
+  "references": [
+    {"path": "../plugin/tsconfig.build.json"},
+    {"path": "../schema-builder/tsconfig.build.json"},
+    {"path": "../schema/tsconfig.build.json"},
+    {"path": "../validators/tsconfig.build.json"}
+  ],
   "include": [
     "src/**/*"
   ]

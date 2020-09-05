@@ -5,21 +5,20 @@
     "importHelpers": true,
     "module": "commonjs",
     "outDir": "lib",
-    "rootDir": "src",
+    "rootDir": ".",
     "strict": true,
     "target": "es2017",
     "esModuleInterop": true,
     "lib": ["ESNext"],
-    "sourceMap": true,
     "baseUrl": "./packages",
     "paths": {
-      "@typerpc/parser": ["parser/lib"],
-      "@typerpc/plugin": ["types/plugin"],
-      "@typerpc/schema": ["schema/lib"],
-      "@typerpc/schema-builder": ["schema-builder/lib"],
-      "@typerpc/test-utils": ["test-utils/lib"],
-      "@typerpc/types": ["types/lib"],
-      "@typerpc/validators": ["validators/lib"]
+      "@typerpc/parser": ["parser/src"],
+      "@typerpc/plugin": ["plugin/src"],
+      "@typerpc/schema": ["schema/src"],
+      "@typerpc/schema-builder": ["schema-builder/src"],
+      "@typerpc/test-utils": ["test-utils/src"],
+      "@typerpc/types": ["types/src"],
+      "@typerpc/validators": ["validators/src"]
     }
   },
   "exclude": [

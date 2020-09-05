@@ -1,6 +1,6 @@
-import { Code, CodeBuilderPlugin } from '../../plugin/src'
-import { Param, QueryService, Schema } from '../../schema'
-import { buildFileName, buildInterfaces, buildTypes, format } from '../../go-plugin-utils/src/utils'
+import { Code, CodeBuilderPlugin } from '@typerpc/plugin'
+import { Param, QueryService, Schema } from '@typerpc/schema'
+import { buildFileName, buildInterfaces, buildTypes, format } from '@typerpc/go-plugin-utils/'
 import { MutationService, QueryMethod } from '../../schema/src/schema'
 import { capitalize, lowerCase } from '../../plugin-utils/src/utils'
 

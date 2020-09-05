@@ -1,18 +1,11 @@
-import {
-    builders,
-    Code,
-    CodeBuilderPlugin,
-    isValidLang,
-    languages,
-    ProgrammingLanguage,
-    Target,
-} from '../../../plugin/src'
+import { Code, CodeBuilderPlugin, isValidLang, languages, ProgrammingLanguage, Target } from '@typerpc/plugin'
 import { Command, flags } from '@oclif/command'
 import { outputFile, pathExists } from 'fs-extra'
-import { nanoid } from 'nanoid'
 import path from 'path'
 import { Listr } from 'listr2'
-import { buildSchemas, Schema, validateSchemas } from '../../../../src/schema'
+import { buildSchemas } from '@typerpc/schema-builder'
+import { Schema } from '@typerpc/schema'
+import { validateSchemas } from '@typerpc/validators'
 import { Project } from 'ts-morph'
 
 const isTarget = (target: string): target is Target => ['client', 'server'].includes(target)

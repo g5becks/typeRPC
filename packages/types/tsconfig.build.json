@@ -4,8 +4,8 @@
     "composite": true,
     "declaration": true,
     "declarationMap": true,
-    "outDir": "./dist",
-    "rootDir": "./lib"
+    "outDir": "./lib",
+    "rootDir": "./src"
   },
   "include": [
     "src/**/*"

@@ -1,11 +1,4 @@
 import { Schema } from '../schema'
-import {
-    AxiosBuilder,
-    dataType as tsDataType,
-    fromQueryString as tsFromQueryString,
-    KoaBuilder,
-} from '../../../src/builders/typescript'
-import { FiberBuilder } from './go'
 
 export type Code = {
     readonly fileName: string
@@ -125,11 +118,4 @@ export type CodeBuilderPlugin = {
     readonly framework: string
     readonly build: (schemas: Schema[]) => Code[]
     readonly format?: (path: string) => void
-}
-
-export const builders: CodeBuilderPlugin[] = [KoaBuilder, AxiosBuilder, FiberBuilder]
-
-export const _testing = {
-    tsDataType,
-    tsFromQueryString,
 }
