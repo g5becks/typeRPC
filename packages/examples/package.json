@@ -1,0 +1,34 @@
+{
+  "name": "@typerpc/examples",
+  "version": "0.1.1",
+  "description": "examples of using typerpc",
+  "keywords": [
+    "typerpc",
+    "examples",
+    "graphql",
+    "json",
+    "rpc",
+    "typescript"
+  ],
+  "author": "Gary Becks <techstar.dev@hotmail.com>",
+  "homepage": "http://  \"files\": [",
+  "license": "ISC",
+  "main": "lib/examples.js",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/typerpc/typerpc.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  },
+  "bugs": {
+    "url": "https://github.com/typerpc/typerpc/issues"
+  }
+}
