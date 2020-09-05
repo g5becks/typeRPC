@@ -7,6 +7,12 @@
     "outDir": "./lib",
     "rootDir": "./src"
   },
+  "references": [
+    {"path": "../plugin/tsconfig.build.json"},
+    {"path": "../go-plugin-utils/tsconfig.build.json"},
+    {"path": "../schema/tsconfig.build.json"},
+    {"path": "../plugin-utils/tsconfig.build.json"}
+  ],
   "include": [
     "src/**/*"
   ]

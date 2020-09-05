@@ -1,8 +1,7 @@
 import { Code, CodeBuilderPlugin } from '@typerpc/plugin'
-import { Param, QueryService, Schema } from '@typerpc/schema'
-import { buildFileName, buildInterfaces, buildTypes, format } from '@typerpc/go-plugin-utils/'
-import { MutationService, QueryMethod } from '../../schema/src/schema'
-import { capitalize, lowerCase } from '../../plugin-utils/src/utils'
+import { Param, QueryService, Schema, MutationService, QueryMethod } from '@typerpc/schema'
+import { buildFileName, buildInterfaces, buildTypes, format } from '@typerpc/go-plugin-utils'
+import { capitalize, lowerCase } from '@typerpc/plugin-utils'
 
 const parseUrlParams = (params: ReadonlyArray<Param>): string => {
     let parsed = `q := req.URL.Query()

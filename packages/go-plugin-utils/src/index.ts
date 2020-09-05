@@ -1,6 +1,6 @@
 import { DataType, is, make, Message, MutationMethod, Param, Property, QueryService, Schema } from '../../schema'
 import { MutationService, QueryMethod } from '../../schema/src/schema'
-import { capitalize, lowerCase } from '../../plugin-utils/src/utils'
+import { capitalize, lowerCase } from '@typerpc/plugin-utils'
 import { ChildProcess, exec } from 'child_process'
 
 export const typeMap: Map<string, string> = new Map<string, string>([
@@ -73,7 +73,7 @@ export const dataType = (type: DataType): string => {
     return 'interface{}'
 }
 
-const scalarFromQueryParam = (paramName: string, type: DataType): string => {
+export const scalarFromQueryParam = (paramName: string, type: DataType): string => {
     if (is.scalar(type) !== true) {
         throw new TypeError('invalid type used in get request')
     }
@@ -112,9 +112,9 @@ const scalarFromQueryParam = (paramName: string, type: DataType): string => {
     return ''
 }
 
-const handleOptional = (isOptional: boolean): string => (isOptional ? '*' : '')
+export const handleOptional = (isOptional: boolean): string => (isOptional ? '*' : '')
 
-const buildProps = (props: ReadonlyArray<Property>): string => {
+export const buildProps = (props: ReadonlyArray<Property>): string => {
     let properties = ''
     for (const prop of props) {
         properties = properties.concat(
@@ -125,7 +125,8 @@ const buildProps = (props: ReadonlyArray<Property>): string => {
     }
     return properties
 }
-const buildType = (type: Message): string => {
+
+export const buildType = (type: Message): string => {
     return `
 type ${capitalize(type.name)} struct {
     ${buildProps(type.properties)}
@@ -141,7 +142,7 @@ export const buildTypes = (messages: ReadonlyArray<Message>): string => {
     return types
 }
 
-const buildMethodParams = (params: ReadonlyArray<Param>): string => {
+export const buildMethodParams = (params: ReadonlyArray<Param>): string => {
     let parameters = ''
     let i = 0
     while (i < params.length) {
@@ -156,7 +157,7 @@ const buildMethodParams = (params: ReadonlyArray<Param>): string => {
     return parameters
 }
 
-const buildReturnType = (type: DataType): string => {
+export const buildReturnType = (type: DataType): string => {
     if (is.dataType(type) !== true) {
         throw new TypeError(`invalid data type: ${type.toString()}`)
     }
@@ -169,7 +170,7 @@ const buildReturnType = (type: DataType): string => {
     return `(${dataType(type)}, error)`
 }
 
-const buildMethodSignature = (method: MutationMethod | QueryMethod): string => {
+export const buildMethodSignature = (method: MutationMethod | QueryMethod): string => {
     return `
   ${capitalize(method.name)}(ctx context.Context${method.hasParams ? ', ' : ''}${buildMethodParams(
         method.params,
@@ -177,7 +178,7 @@ const buildMethodSignature = (method: MutationMethod | QueryMethod): string => {
   `
 }
 
-const buildInterfaceMethods = (methods: ReadonlyArray<MutationMethod | QueryMethod>): string => {
+export const buildInterfaceMethods = (methods: ReadonlyArray<MutationMethod | QueryMethod>): string => {
     let signatures = ''
     for (const method of methods) {
         signatures = signatures.concat(buildMethodSignature(method))
@@ -185,7 +186,7 @@ const buildInterfaceMethods = (methods: ReadonlyArray<MutationMethod | QueryMeth
     return signatures
 }
 
-const buildInterface = (service: MutationService | QueryService): string => {
+export const buildInterface = (service: MutationService | QueryService): string => {
     return `
  type ${capitalize(service.name)} interface {
     ${buildInterfaceMethods(service.methods)}

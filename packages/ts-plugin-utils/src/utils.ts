@@ -1,5 +1,5 @@
 import { DataType, Import, is, make, Message, Param, QueryService, Schema, StructLiteralProp } from '../../schema'
-import { capitalize, lowerCase } from '../../plugin-utils/src/utils'
+import { capitalize, lowerCase } from '@typerpc/plugin-utils'
 import { Method, MutationService } from '../../schema/src/schema'
 import { Code } from '../../../src/builders'
 import { format as prettier } from 'prettier'

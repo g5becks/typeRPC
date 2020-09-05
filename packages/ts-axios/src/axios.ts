@@ -8,7 +8,7 @@ import {
     paramNames,
 } from '../../ts-plugin-utils/src/utils'
 import { MutationMethod, QueryService, Schema } from '../../schema'
-import { capitalize, clientRequestContentType, fileHeader, lowerCase } from '../../plugin-utils/src/utils'
+import { capitalize, clientRequestContentType, fileHeader, lowerCase } from '@typerpc/plugin-utils'
 import { isQueryMethod, MutationService, QueryMethod } from '../../schema/src/schema'
 
 const rpcConfig = `

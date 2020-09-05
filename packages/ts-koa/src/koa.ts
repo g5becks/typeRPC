@@ -1,6 +1,6 @@
 import { Code, CodeBuilderPlugin } from '../../../src/builders'
 import { MutationMethod, Param, QueryService, Schema } from '../../schema'
-import { capitalize, fileHeader, lowerCase, serverResponseContentType } from '../../plugin-utils/src/utils'
+import { capitalize, fileHeader, lowerCase, serverResponseContentType } from '@typerpc/plugin-utils'
 import {
     buildInterfaces,
     buildMsgImports,
