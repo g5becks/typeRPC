@@ -4,14 +4,8 @@
     "composite": true,
     "declaration": true,
     "declarationMap": true,
-    "outDir": "./lib",
-    "rootDir": "./src"
+    "outDir": "./lib"
   },
-  "references": [
-    {
-      "path": "../schema/tsconfig.build.json"
-    }
-  ],
   "include": [
     "src/**/*"
   ]

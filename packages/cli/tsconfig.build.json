@@ -9,9 +9,7 @@
   },
   "references": [
     {"path": "../plugin/tsconfig.build.json"},
-    {"path": "../schema-builder/tsconfig.build.json"},
-    {"path": "../schema/tsconfig.build.json"},
-    {"path": "../validators/tsconfig.build.json"}
+    {"path": "../schema/tsconfig.build.json"}
   ],
   "include": [
     "src/**/*"

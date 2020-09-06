@@ -1,10 +1,26 @@
-import { queryParamables } from '@typerpc/schema'
 import faker from 'faker'
 
 export function randomNumber(min: number, max: number) {
     // eslint-disable-next-line no-mixed-operators
     return Math.floor(Math.random() * (max - min) + min)
 }
+
+const queryParamables = [
+    '$.bool',
+    '$.timestamp',
+    '$.int8',
+    '$.uint8',
+    '$.int16',
+    '$.uint16',
+    '$.int32',
+    '$.uint32',
+    '$.uint64',
+    '$.int64',
+    '$.float32',
+    '$.float64',
+    '$.str',
+    '$.list',
+]
 
 // typerpc comparable (dict keys)
 const comparables = [

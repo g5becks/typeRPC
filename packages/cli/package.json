@@ -48,11 +48,11 @@
   "scripts": {
     "lint-fix": "eslint --fix src/**",
     "build": "yarn run clean && yarn run tsc",
-    "clean": "rm -rf ./dist && rm -rf tsconfig.build.tsbuildinfo",
+    "clean": "rm -rf ./lib && rm -rf tsconfig.build.tsbuildinfo",
     "tsc": "tsc -b tscconfig.build.json",
     "postpack": "rm -f oclif.manifest.json",
     "posttest1": "eslint . --ext .ts --config .eslintrc",
-    "prepack": "rm -rf src && tsc -b && oclif-dev manifest && oclif-dev readme",
+    "prepack": "yarn run build && oclif-dev manifest && oclif-dev readme",
     "test": "jest",
     "version": "oclif-dev readme && git add README.md"
   },
@@ -62,7 +62,6 @@
   },
   "devDependencies": {
     "@oclif/dev-cli": "^1.22.2",
-    "@types/cli-progress": "^3.8.0",
     "@types/fs-extra": "^9.0.1",
     "eslint-config-oclif": "^3.1.0",
     "eslint-config-oclif-typescript": "^0.2.0",
@@ -75,8 +74,6 @@
     "@oclif/plugin-not-found": "^1.2.4",
     "@typerpc/plugin": "^0.1.1",
     "@typerpc/schema": "^0.1.1",
-    "@typerpc/schema-builder": "^0.1.1",
-    "@typerpc/validators": "^0.1.1",
     "fs-extra": "^9.0.1",
     "listr2": "^3.0.0",
     "live-plugin-manager": "^0.15.1",

@@ -29,6 +29,7 @@
     "lint-fix": "eslint --fix ./lib/**",
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
+
   "bugs": {
     "url": "https://github.com/typerpc/typerpc/issues"
   }

@@ -1,44 +1,17 @@
 {
-  "name": "root",
+  "name": "typerpc",
   "private": true,
   "workspaces": [
     "packages/*"
   ],
   "scripts": {
-    "publish": "lerna run build && lerna publish"
+    "publish": "lerna run build && lerna publish",
+    "build": "lerna run build",
+    "clean": "lerna run clean",
+    "test": "lerna run test",
+    "lint-fix": "lerna run lint-fix"
   },
   "devDependencies": {
-    "@types/jest": "^26.0.13",
-    "@types/node": "^14.6.4",
-    "@typescript-eslint/eslint-plugin": "^4.0.1",
-    "@typescript-eslint/parser": "^4.0.1",
-    "eslint": "^7.8.1",
-    "eslint-config-prettier": "^6.11.0",
-    "eslint-plugin-prettier": "^3.1.4",
-    "jest": "^26.4.2",
-    "lerna": "^3.22.1",
-    "prettier": "^2.1.1",
-    "ts-jest": "^26.3.0",
-    "ts-node": "^9.0.0",
-    "tsconfig-paths": "^3.9.0",
-    "typescript": "^4.0.2"
-  },
-  "dependencies": {
-    "@typerpc/cli": "file:packages/cli",
-    "@typerpc/docs": "file:packages/docs",
-    "@typerpc/examples": "file:packages/examples",
-    "@typerpc/go-chi": "file:packages/go-chi",
-    "@typerpc/go-plugin-utils": "file:packages/go-plugin-utils",
-    "@typerpc/parser": "file:packages/parser",
-    "@typerpc/plugin": "file:packages/plugin",
-    "@typerpc/plugin-utils": "file:packages/plugin-utils",
-    "@typerpc/schema": "file:packages/schema",
-    "@typerpc/schema-builder": "file:packages/schema-builder",
-    "@typerpc/test-utils": "file:packages/test-utils",
-    "@typerpc/ts-axios": "file:packages/ts-axios",
-    "@typerpc/ts-koa": "file:packages/ts-koa",
-    "@typerpc/ts-plugin-utils": "file:packages/ts-plugin-utils",
-    "@typerpc/types": "file:packages/types",
-    "@typerpc/validators": "file:packages/validators"
+    "lerna": "^3.22.1"
   }
 }

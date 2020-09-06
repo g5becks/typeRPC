@@ -1,27 +1,22 @@
 {
-  "name": "@typerpc/docs",
-  "version": "0.1.1",
-  "description": "typerpc website",
-  "author": "Gary Becks <techstar.dev@hotmail.com>",
-  "homepage": "https://typerpc.run",
-  "license": "ISC",
-  "main": "",
-  "directories": {
-    "lib": "lib",
-    "test": "tests"
-  },
-  "files": [
-    "lib"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/typerpc/typerpc.git"
-  },
+  "name": "docz-example-basic",
+  "version": "2.0.0",
+  "license": "MIT",
   "scripts": {
-    "lint-fix": "eslint --fix ./lib/**",
-    "test": "echo \"Error: run tests from root\" && exit 1"
+    "dev": "docz dev",
+    "build": "docz build",
+    "serve": "docz serve"
   },
-  "bugs": {
-    "url": "https://github.com/typerpc/typerpc/issues"
+  "dependencies": {
+    "docz": "latest",
+    "prop-types": "^15.7.2",
+    "react": "^16.11.0",
+    "react-dom": "^16.11.0"
+  },
+  "devDependencies": {
+    "eslint": "^7.8.1",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-plugin-prettier": "^3.1.4",
+    "prettier": "^2.1.1"
   }
 }
