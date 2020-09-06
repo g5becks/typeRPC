@@ -1,4 +1,4 @@
-import { Code, CodeBuilderPlugin } from '@typerpc/plugin'
+import { Code, TypeRpcPlugin } from '@typerpc/plugin'
 import {
     MutationMethod,
     Param,
@@ -214,7 +214,7 @@ export const runServer = (opts: ServerOptions): http.Server => {
 // builds all schemas and server file
 const build = (schemas: Schema[]): Code[] => [...schemas.map((schema) => buildFile(schema)), buildServer(schemas)]
 
-export const KoaBuilder: CodeBuilderPlugin = {
+export const KoaBuilder: TypeRpcPlugin = {
     lang: 'ts',
     target: 'server',
     framework: 'koa',

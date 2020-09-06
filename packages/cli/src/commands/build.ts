@@ -1,10 +1,11 @@
-import { Code, CodeBuilderPlugin, isValidLang, languages, ProgrammingLanguage, Target } from '@typerpc/plugin'
+import { isValidPlugin, Code, TypeRpcPlugin } from '@typerpc/plugin'
 import { Command, flags } from '@oclif/command'
 import { outputFile, pathExists } from 'fs-extra'
 import path from 'path'
 import { Listr } from 'listr2'
 import { Schema, validateSchemas, buildSchemas } from '@typerpc/schema'
-import { Project } from 'ts-morph'
+import { Project, SourceFile } from 'ts-morph'
+import { PluginManager } from 'live-plugin-manager'
 
 const isTarget = (target: string): target is Target => ['client', 'server'].includes(target)
 
@@ -28,31 +29,27 @@ const validateTsConfigFile = async (tsConfigFile: string): Promise<void> => {
     }
 }
 
-// get all builders that match the target and programming language
-const getBuilders = (target: Target, lang: ProgrammingLanguage): CodeBuilderPlugin[] => {
-    return builders.filter((builder) => builder.lang === lang && builder.target)
-}
+// get the rpc.config.ts file
+const getConfigFile = (proj: Project): SourceFile | undefined =>
+    proj.getSourceFile((file) => file.getBaseName().toLowerCase() === '.rpc.config.ts')
 
 // find a build that matches the framework
-const filterBuilderByFramework = (framework: string, builders: CodeBuilderPlugin[]): CodeBuilderPlugin[] => {
+const filterBuilderByFramework = (framework: string, builders: TypeRpcPlugin[]): TypeRpcPlugin[] => {
     return builders.filter((builder) => builder.framework === framework)
 }
 
 // report available frameworks for target language
-const reportAvailableFrameworks = (builders: CodeBuilderPlugin[]): string[] => {
+const reportAvailableFrameworks = (builders: TypeRpcPlugin[]): string[] => {
     return builders.map((builder) => builder.framework)
 }
 
 type Ctx = {
-    target: string
     tsConfigFilePath: string
     outputPath: string
-    lang: string
-    framework: string
     packageName: string
 }
 
-type BuildCtx = { builder?: CodeBuilderPlugin } & Ctx
+type BuildCtx = { builder?: TypeRpcPlugin } & Ctx
 
 class Build extends Command {
     static description = 'describe command here'
@@ -115,7 +112,8 @@ class Build extends Command {
             throw error
         }
     }
-
+    #configFile: SourceFile | undefined
+    #pluginManager: PluginManager = new PluginManager({ pluginsPath, ignoredDependencies: [new RegExp('[sS]*')] })
     #validationCtx: Ctx = {
         target: '',
         lang: '',

@@ -1,4 +1,4 @@
-import { Code, CodeBuilderPlugin } from '@typerpc/plugin'
+import { Code, TypeRpcPlugin } from '@typerpc/plugin'
 import { Param, QueryService, Schema, MutationService, QueryMethod } from '@typerpc/schema'
 import { buildFileName, buildInterfaces, buildTypes, format } from '@typerpc/go-plugin-utils'
 import { capitalize, lowerCase } from '@typerpc/plugin-utils'
@@ -52,7 +52,7 @@ ${buildInterfaces(schema)}
     }
 }
 const build = (schemas: Schema[]): Code[] => schemas.map((schema) => buildFile(schema))
-export const FiberBuilder: CodeBuilderPlugin = {
+export const FiberBuilder: TypeRpcPlugin = {
     build,
     format,
     framework: 'chi',

@@ -1,4 +1,4 @@
-import { Code, CodeBuilderPlugin } from '@typerpc/plugin'
+import { Code, TypeRpcPlugin } from '@typerpc/plugin'
 import {
     buildMsgImports,
     buildParamsWithTypes,
@@ -142,7 +142,7 @@ ${buildServices(schema)}
 
 const build = (schemas: Schema[]): Code[] => schemas.map((schema) => buildFile(schema))
 
-export const AxiosBuilder: CodeBuilderPlugin = {
+export const AxiosBuilder: TypeRpcPlugin = {
     lang: 'ts',
     framework: 'axios',
     target: 'client',

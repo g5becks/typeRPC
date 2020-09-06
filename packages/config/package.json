@@ -1,0 +1,33 @@
+{
+  "name": "@typerpc/config",
+  "version": "0.1.1",
+  "description": "typerpc config types",
+  "keywords": [
+    "typerpc",
+    "config",
+    "typescript"
+  ],
+  "author": "Gary Becks <techstar.dev@hotmail.com>",
+  "homepage": "https://github.com/typerpc/typerpc",
+  "license": "BSD-2-Clause",
+  "directories": {
+    "lib": "src",
+    "test": "test"
+  },
+  "files": [
+    "src"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/typerpc/typerpc.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  },
+  "dependencies": {
+    "@typerpc/plugin": "^0.1.1"
+  },
+  "bugs": {
+    "url": "https://github.com/typerpc/typerpc/issues"
+  }
+}
