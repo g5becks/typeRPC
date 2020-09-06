@@ -1,8 +1,7 @@
-import { HTTPErrCode, HTTPResponseCode } from '../../schema/src/schema'
 import { MethodSignature, ParameterDeclaration, SourceFile, TypeAliasDeclaration } from 'ts-morph'
 import { isValidDataType, singleValidationErr, validateNotGeneric } from './utils'
-import { parseQueryServices, parseServiceMethods } from '../../parser/src/parser'
-import { queryParamables } from '@typerpc/schema'
+import { parseQueryServices, parseServiceMethods } from '@typerpc/parser'
+import { queryParamables, HTTPErrCode, HTTPResponseCode } from '@typerpc/schema'
 
 // Valid HTTP error codes
 export const errCodes = [

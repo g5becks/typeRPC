@@ -2,7 +2,7 @@
 import { MethodSignature, Node, TypeAliasDeclaration, TypeNode } from 'ts-morph'
 import { DataType, make, typeError } from '@typerpc/schema'
 import { isContainer, isMsgLiteral, isValidDataType } from '@typerpc/validators'
-import { parseJsDocComment } from '../../parser/src/parser'
+import { parseJsDocComment } from '@typerpc/parser'
 
 export const isType = (type: TypeNode | Node, typeText: string): boolean => type.getText().trim().startsWith(typeText)
 

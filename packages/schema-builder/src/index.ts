@@ -1,5 +1,5 @@
 import { SourceFile } from 'ts-morph'
-import { Import, Schema } from '../../schema/src/schema'
+import { Import, Schema } from '@typerpc/schema'
 import { buildMessages } from './message'
 import {
     buildErrCode,

@@ -33,5 +33,12 @@
   },
   "bugs": {
     "url": "https://github.com/typerpc/typerpc/issues"
+  },
+  "dependencies": {
+    "faker": "^5.1.0",
+    "@typerpc/schema": "^0.1.1"
+  },
+  "devDependencies": {
+    "@types/faker": "^4.1.12"
   }
 }

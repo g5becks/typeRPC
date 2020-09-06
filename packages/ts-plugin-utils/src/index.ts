@@ -1,10 +1,20 @@
-import { DataType, Import, is, make, Message, Param, QueryService, Schema, StructLiteralProp } from '../../schema'
+import {
+    DataType,
+    Import,
+    is,
+    make,
+    Message,
+    Param,
+    QueryService,
+    Schema,
+    StructLiteralProp,
+    Method,
+    MutationService,
+} from '@typerpc/schema'
 import { capitalize, lowerCase } from '@typerpc/plugin-utils'
-import { Method, MutationService } from '../../schema/src/schema'
-import { Code } from '../../../src/builders'
-import { format as prettier } from 'prettier'
+
 import { ChildProcess, exec } from 'child_process'
-// Maps typerpc messages to typescript data-messages
+
 export const typeMap: Map<string, string> = new Map<string, string>([
     [make.bool.type, 'boolean'],
     [make.int8.type, 'number'],
@@ -26,8 +36,7 @@ export const typeMap: Map<string, string> = new Map<string, string>([
     [make.blob.type, 'Uint8Array'],
 ])
 
-const typeLiteral = (props: ReadonlyArray<StructLiteralProp>): string => {
-    const now = Math.round(Date.now() / 1000)
+export const typeLiteral = (props: ReadonlyArray<StructLiteralProp>): string => {
     let properties = ''
     let i = 0
     while (i < props.length) {
@@ -90,7 +99,7 @@ export const dataType = (type: DataType): string => {
 
 // returns a string representation of a function call used to
 // convert parsed querystring scalar to correct ts type
-const scalarFromQueryParam = (paramName: string, type: DataType): string => {
+export const scalarFromQueryParam = (paramName: string, type: DataType): string => {
     // eslint-disable-next-line no-negated-condition
     if (!is.scalar(type)) {
         throw new Error(`${type.toString()} is not a valid QuerySvc parameter type`)
@@ -132,7 +141,7 @@ export const fromQueryString = (paramName: string, type: DataType): string => {
 export const handleOptional = (isOptional: boolean): string => (isOptional ? '?' : '')
 
 // builds a type alias from an rpc.Msg
-const buildType = (msg: Message): string => {
+export const buildType = (msg: Message): string => {
     return `
 export type ${capitalize(msg.name)} = ${typeLiteral(msg.properties)}
 `
@@ -148,7 +157,7 @@ export const buildTypes = (schema: Schema): string => {
 }
 
 // builds all of the parameters of a method
-const buildParams = (params: ReadonlyArray<Param>): string => {
+export const buildParams = (params: ReadonlyArray<Param>): string => {
     let paramsString = ''
     for (let i = 0; i < params.length; i++) {
         const useComma = i === params.length - 1 ? '' : ','
@@ -160,13 +169,13 @@ const buildParams = (params: ReadonlyArray<Param>): string => {
 }
 
 // builds a single method signature for an interface
-const buildMethodSignature = (method: Method): string => {
+export const buildMethodSignature = (method: Method): string => {
     return `${lowerCase(method.name)}(${buildParams(method.params)}): Promise<${dataType(method.returnType)}>;
 `
 }
 
 // builds an interface definition from a Schema Service
-const buildInterface = (svc: QueryService | MutationService): string => {
+export const buildInterface = (svc: QueryService | MutationService): string => {
     let methodsString = ''
     for (const method of svc.methods) {
         methodsString = methodsString.concat(buildMethodSignature(method))

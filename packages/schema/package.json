@@ -37,6 +37,12 @@
     "tsc": "tsc -b tscconfig.build.json",
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
+  "dependencies": {
+    "@typerpc/parser": "^0.1.1",
+    "@typerpc/schema-builder": "^0.1.1",
+    "@typerpc/validators": "^0.1.1",
+    "@typerpc/types": "^0.1.1"
+  },
   "bugs": {
     "url": "https://github.com/typerpc/typerpc/issues"
   }

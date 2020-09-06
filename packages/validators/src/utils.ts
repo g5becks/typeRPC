@@ -8,7 +8,7 @@ import {
     TypeNode,
 } from 'ts-morph'
 import { containers, make } from '@typerpc/schema'
-import { parseNamedImports } from '../../parser/src/parser'
+import { parseNamedImports } from '@typerpc/parser'
 
 // is the type found is a typerpc scalar type?
 export const isScalar = (type: TypeNode | Node): boolean => Boolean(make.scalar(type))

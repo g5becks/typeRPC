@@ -1,5 +1,13 @@
-import { Code, CodeBuilderPlugin } from '../../../src/builders'
-import { MutationMethod, Param, QueryService, Schema } from '../../schema'
+import { Code, CodeBuilderPlugin } from '@typerpc/plugin'
+import {
+    MutationMethod,
+    Param,
+    QueryService,
+    Schema,
+    isQueryMethod,
+    MutationService,
+    QueryMethod,
+} from '@typerpc/schema'
 import { capitalize, fileHeader, lowerCase, serverResponseContentType } from '@typerpc/plugin-utils'
 import {
     buildInterfaces,
@@ -10,8 +18,7 @@ import {
     fromQueryString,
     buildParamsVar,
     paramNames,
-} from '../../ts-plugin-utils/src/utils'
-import { isQueryMethod, MutationService, QueryMethod } from '../../schema/src/schema'
+} from '@typerpc/ts-plugin-utils'
 
 const logger = `
 interface ErrLogger {

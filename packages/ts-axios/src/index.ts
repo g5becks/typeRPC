@@ -1,4 +1,4 @@
-import { Code, CodeBuilderPlugin } from '../../../src/builders'
+import { Code, CodeBuilderPlugin } from '@typerpc/plugin'
 import {
     buildMsgImports,
     buildParamsWithTypes,
@@ -6,10 +6,9 @@ import {
     dataType,
     format,
     paramNames,
-} from '../../ts-plugin-utils/src/utils'
-import { MutationMethod, QueryService, Schema } from '../../schema'
+} from '@typerpc/ts-plugin-utils'
+import { MutationMethod, QueryService, Schema, isQueryMethod, MutationService, QueryMethod } from '@typerpc/schema'
 import { capitalize, clientRequestContentType, fileHeader, lowerCase } from '@typerpc/plugin-utils'
-import { isQueryMethod, MutationService, QueryMethod } from '../../schema/src/schema'
 
 const rpcConfig = `
 type Excluded =

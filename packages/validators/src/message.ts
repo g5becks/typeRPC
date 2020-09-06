@@ -1,6 +1,6 @@
 import { PropertySignature, SourceFile, TypeAliasDeclaration, TypeNode } from 'ts-morph'
 import { isMsgLiteral, isValidDataType, singleValidationErr } from './utils'
-import { parseMessages, parseMsgProps } from '../../parser/src/parser'
+import { parseMessages, parseMsgProps } from '@typerpc/parser'
 
 const validateProp = (prop: PropertySignature): Error[] =>
     isValidDataType(prop.getTypeNode())

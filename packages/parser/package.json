@@ -37,6 +37,9 @@
     "tsc": "tsc -b tscconfig.build.json",
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
+  "dependencies": {
+    "@typerpc/validators": "^0.1.1"
+  },
   "bugs": {
     "url": "https://github.com/typerpc/typerpc/issues"
   }

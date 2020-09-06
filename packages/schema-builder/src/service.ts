@@ -11,12 +11,7 @@ import {
     QueryService,
 } from '../../schema/src/schema'
 import { makeDataType, useCbor } from './data-type'
-import {
-    parseJsDocComment,
-    parseMutationServices,
-    parseQueryServices,
-    parseServiceMethods,
-} from '../../parser/src/parser'
+import { parseJsDocComment, parseMutationServices, parseQueryServices, parseServiceMethods } from '@typerpc/parser'
 import { isErrCode, isResponseCode } from '@typerpc/validators'
 import { is, make } from '@typerpc/schema'
 

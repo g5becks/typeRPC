@@ -1,4 +1,4 @@
-import { Schema } from '../schema'
+import { Schema } from '@typerpc/schema'
 
 export type Code = {
     readonly fileName: string

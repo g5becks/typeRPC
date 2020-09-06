@@ -14,6 +14,7 @@
     "paths": {
       "@typerpc/plugin-utils": ["plugin-utils/src"],
       "@typerpc/go-plugin-utils": ["go-plugin-utils/src"],
+      "@typerpc/ts-plugin-utils": ["ts-plugin-utils/src"],
       "@typerpc/parser": ["parser/src"],
       "@typerpc/plugin": ["plugin/src"],
       "@typerpc/schema": ["schema/src"],

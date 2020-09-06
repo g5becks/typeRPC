@@ -7,6 +7,10 @@
     "outDir": "./lib",
     "rootDir": "./src"
   },
+  "references": [
+    {"path": "../plugin-utils/tsconfig.build.json"},
+    {"path": "../schema/tsconfig.build.json"}
+  ],
   "include": [
     "src/**/*"
   ]

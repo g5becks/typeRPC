@@ -1,9 +1,10 @@
 import { Node, PropertySignature, TypeNode } from 'ts-morph'
 import { DataType, scalarsMap, Struct, structLiteralProp, StructLiteralProp } from './data-type'
-import { isOptionalProp, parseMsgProps, parseTypeParams } from '../../parser/src/parser'
+import { isOptionalProp, parseMsgProps, parseTypeParams } from '@typerpc/parser'
 import { useCbor } from '@typerpc/schema-builder'
 import { isValidMsg } from '@typerpc/validators'
 import { internal as _ } from '@typerpc/types'
+
 export const typeError = (type: TypeNode | Node) =>
     new TypeError(`error in file ${type.getSourceFile().getFilePath()}
     at line number: ${type.getStartLineNumber()}

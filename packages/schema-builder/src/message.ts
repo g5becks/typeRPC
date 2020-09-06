@@ -1,7 +1,7 @@
 // builds all properties of an rpc.Msg
 import { PropertySignature, SourceFile } from 'ts-morph'
 import { Message, Property } from '../../schema/src/schema'
-import { isOptionalProp, parseMessages, parseMsgProps } from '../../parser/src/parser'
+import { isOptionalProp, parseMessages, parseMsgProps } from '@typerpc/parser'
 import { makeDataType } from './data-type'
 
 const buildProps = (properties: PropertySignature[]): Property[] =>

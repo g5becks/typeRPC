@@ -1,5 +1,4 @@
-import { MutationMethod } from '../schema'
-import { isQueryMethod, QueryMethod } from '../../schema/src/schema'
+import { MutationMethod, isQueryMethod, QueryMethod } from '@typerpc/schema'
 
 export const capitalize = (text: string): string => text.replace(/^\w/, (c) => c.toUpperCase())
 

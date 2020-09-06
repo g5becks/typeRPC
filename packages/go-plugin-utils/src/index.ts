@@ -1,5 +1,16 @@
-import { DataType, is, make, Message, MutationMethod, Param, Property, QueryService, Schema } from '../../schema'
-import { MutationService, QueryMethod } from '../../schema/src/schema'
+import {
+    DataType,
+    is,
+    make,
+    Message,
+    MutationMethod,
+    Param,
+    Property,
+    QueryService,
+    Schema,
+    MutationService,
+    QueryMethod,
+} from '@typerpc/schema'
 import { capitalize, lowerCase } from '@typerpc/plugin-utils'
 import { ChildProcess, exec } from 'child_process'
 

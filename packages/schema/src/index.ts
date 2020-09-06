@@ -2,10 +2,17 @@ import { containers, DataType, queryParamables, scalars, Struct, StructLiteral, 
 import { make, typeError } from './make'
 import { is } from './is'
 import {
-    MutationService,
-    MutationMethod,
     HTTPErrCode,
     HTTPResponseCode,
+    Import,
+    isMutationMethod,
+    isMutationSvc,
+    isQueryMethod,
+    isQuerySvc,
+    Message,
+    Method,
+    MutationMethod,
+    MutationService,
     Param,
     Property,
     QueryMethod,
@@ -14,6 +21,13 @@ import {
 } from './schema'
 
 export {
+    Import,
+    isMutationSvc,
+    isMutationMethod,
+    isQueryMethod,
+    isQuerySvc,
+    Message,
+    Method,
     MutationMethod,
     MutationService,
     Param,

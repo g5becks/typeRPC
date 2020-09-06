@@ -7,6 +7,9 @@
     "outDir": "./lib",
     "rootDir": "./src"
   },
+  "references": [
+    {"path": "../validators/tsconfig.build.json"}
+  ],
   "include": [
     "src/**/*"
   ]

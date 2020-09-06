@@ -29,6 +29,10 @@
   "publishConfig": {
     "access": "public"
   },
+  "dependencies": {
+    "@typerpc/schema": "^0.1.1",
+    "@typerpc/plugin-utils": "^0.1.1"
+  },
   "scripts": {
     "lint-fix": "eslint --fix src/**",
     "build": "yarn run clean && yarn run tsc",
