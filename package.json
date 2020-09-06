@@ -1,5 +1,6 @@
 {
   "name": "typerpc",
+  "license": "BSD-2-Clause",
   "private": true,
   "workspaces": [
     "packages/*"
@@ -12,6 +13,20 @@
     "lint-fix": "lerna run lint-fix"
   },
   "devDependencies": {
-    "lerna": "^3.22.1"
+    "lerna": "^3.22.1",
+    "@types/jest": "^26.0.13",
+    "@types/node": "^14.6.4",
+    "@typescript-eslint/eslint-plugin": "^4.0.1",
+    "@typescript-eslint/parser": "^4.0.1",
+    "eslint": "^7.8.1",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-plugin-prettier": "^3.1.4",
+    "jest": "^26.4.2",
+    "prettier": "^2.1.1",
+    "ts-jest": "^26.3.0",
+    "ts-node": "^9.0.0",
+    "tsconfig-paths": "^3.9.0",
+    "typescript": "^4.0.2",
+    "@typerpc/test-utils": "^0.1.1"
   }
 }

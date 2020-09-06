@@ -12,7 +12,7 @@
   ],
   "author": "Gary Becks <techstar.dev@hotmail.com>",
   "homepage": "https://typerpc.run",
-  "license": "ISC",
+  "license": "BSD-2-Clause",
   "bin": {
     "typerpc": "./bin/run"
   },

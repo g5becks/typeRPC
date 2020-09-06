@@ -14,7 +14,7 @@
   ],
   "author": "Gary Becks <techstar.dev@hotmail.com>",
   "homepage": "https://github.com/typerpc/typerpc",
-  "license": "ISC",
+  "license": "BSD-2-Clause",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "directories": {

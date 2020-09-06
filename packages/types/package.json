@@ -9,7 +9,7 @@
   ],
   "author": "Gary Becks <techstar.dev@hotmail.com>",
   "homepage": "https://github.com/typerpc/typerpc",
-  "license": "ISC",
+  "license": "BSD-2-Clause",
   "directories": {
     "lib": "src",
     "test": "tests"
