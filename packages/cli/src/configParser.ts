@@ -1,4 +1,5 @@
 import { ObjectLiteralExpression, Project, SyntaxKind } from 'ts-morph'
+import { GeneratorConfig } from '@typerpc/config'
 
 const getConfigFile = (project: Project) =>
     project.getSourceFile((file) => file.getBaseName().toLowerCase() === '.rpc.config.ts')

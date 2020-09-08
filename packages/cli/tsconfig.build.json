@@ -9,7 +9,8 @@
   },
   "references": [
     {"path": "../plugin/tsconfig.build.json"},
-    {"path": "../schema/tsconfig.build.json"}
+    {"path": "../schema/tsconfig.build.json"},
+    {"path": "../config/tsconfig.build.json"}
   ],
   "include": [
     "src/**/*"

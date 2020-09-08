@@ -12,6 +12,7 @@
     "lib": ["ESNext"],
     "baseUrl": "./packages",
     "paths": {
+      "@typerpc/config": ["config/src"],
       "@typerpc/plugin-utils": ["plugin-utils/src"],
       "@typerpc/go-plugin-utils": ["go-plugin-utils/src"],
       "@typerpc/ts-plugin-utils": ["ts-plugin-utils/src"],
