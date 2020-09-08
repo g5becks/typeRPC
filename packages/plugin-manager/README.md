@@ -5,7 +5,7 @@
 ## Usage
 
 ```
-const pluginManager = require('plugin-manager');
+const index = require('plugin-manager');
 
 // TODO: DEMONSTRATE API
 ```

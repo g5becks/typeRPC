@@ -7,7 +7,6 @@ import { buildSchemas, Schema, validateSchemas } from '@typerpc/schema'
 import { Project, SourceFile } from 'ts-morph'
 import { PluginManager } from 'live-plugin-manager'
 import { getConfigFile, parseConfig, ParsedConfig } from '../configParser'
-import { GeneratorConfig } from '@typerpc/config'
 
 // validate the output path is not empty
 const validateOutputPath = (outputPath: string, cfgName: string): void => {

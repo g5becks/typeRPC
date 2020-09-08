@@ -12,13 +12,13 @@
   "author": "Gary Becks <techstar.dev@hotmail.com>",
   "homepage": "https://github.com/typerpc/typerpc",
   "license": "BSD-2-Clause",
-  "main": "lib/index.js",
+  "main": "src/index.js",
   "directories": {
-    "lib": "lib",
+    "lib": "src",
     "test": "tests"
   },
   "files": [
-    "lib"
+    "src"
   ],
   "repository": {
     "type": "git",
@@ -29,5 +29,9 @@
   },
   "bugs": {
     "url": "https://github.com/typerpc/typerpc/issues"
+  },
+  "dependencies": {
+    "live-plugin-manager": "^0.15.1",
+    "ts-morph": "^8.1.0"
   }
 }
