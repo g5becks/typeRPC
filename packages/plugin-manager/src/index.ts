@@ -11,7 +11,7 @@ const isValidPlugin = (plugin: any) =>
     typeof plugin.scaffold === 'function' &&
     typeof 'generate' === 'function'
 
-class PluginManager {
+export class PluginManager {
     readonly #manager: Manager
     readonly #pluginsPath: string
 

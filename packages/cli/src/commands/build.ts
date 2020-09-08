@@ -5,7 +5,7 @@ import path from 'path'
 import { Listr } from 'listr2'
 import { buildSchemas, Schema, validateSchemas } from '@typerpc/schema'
 import { Project, SourceFile } from 'ts-morph'
-import { PluginManager } from 'live-plugin-manager'
+import { PluginManager } from '@typerpc/plugin-manager'
 import { getConfigFile, parseConfig, ParsedConfig } from '../configParser'
 
 // validate the output path is not empty
@@ -113,7 +113,18 @@ class Build extends Command {
             },
             {
                 title: 'Validating Plugin(s)',
-                task: (ctx) => {},
+                task: async (ctx) => {
+                    let invalids: string[] = []
+                    for (const cfg of ctx.configs) {
+                        if (!cfg.plugin.startsWith('@typerpc/') && !cfg.plugin.startsWith('typerpc-plugin-')) {
+                            invalids = [...invalids, cfg.plugin]
+                        }
+                    }
+                    if (invalids.length !== 0) {
+                        throw new Error(`the following plugin names are not valid typerpc plugins ${invalids}`)
+                    }
+                    return true
+                },
             },
             {
                 title: 'Validating Schema Files',
