@@ -1,0 +1,33 @@
+{
+  "name": "@typerpc/plugin-manager",
+  "version": "0.1.1",
+  "description": "typerpc plugin manager",
+  "keywords": [
+    "typerpc",
+    "plugin",
+    "manager",
+    "typescript",
+    "rpc"
+  ],
+  "author": "Gary Becks <techstar.dev@hotmail.com>",
+  "homepage": "https://github.com/typerpc/typerpc",
+  "license": "BSD-2-Clause",
+  "main": "lib/index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "tests"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/typerpc/typerpc.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  },
+  "bugs": {
+    "url": "https://github.com/typerpc/typerpc/issues"
+  }
+}
