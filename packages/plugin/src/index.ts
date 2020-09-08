@@ -7,5 +7,5 @@ export type Code = {
 
 export type TypeRpcPlugin = {
     scaffold: (outputPath: string) => Code[]
-    build: (schemas: Schema[]) => Code[]
+    generate: (schemas: Schema[]) => Code[]
 }
