@@ -5,7 +5,6 @@ import path from 'path'
 import { Listr } from 'listr2'
 import { buildSchemas, Schema, validateSchemas } from '@typerpc/schema'
 import { Project, SourceFile } from 'ts-morph'
-import { PluginManager } from '@typerpc/plugin-manager'
 import { getConfigFile, parseConfig, ParsedConfig } from '../configParser'
 
 // validate the output path is not empty
@@ -84,8 +83,6 @@ class Build extends Command {
             throw error
         }
     }
-    #configFile: SourceFile | undefined
-    #pluginManager: PluginManager = new PluginManager({ pluginsPath, ignoredDependencies: [new RegExp('[sS]*')] })
     #validationCtx: Ctx = {
         configs: [],
         schemaFiles: [],
@@ -106,13 +103,13 @@ class Build extends Command {
     #validateInputs = new Listr<Ctx>(
         [
             {
-                title: 'Validating Output Path(s)',
+                title: 'Output Path(s) Validation',
                 task: async (ctx) => {
                     return Promise.all(ctx.configs.map((cfg) => validateOutputPath(cfg.outputPath, cfg.configName)))
                 },
             },
             {
-                title: 'Validating Plugin(s)',
+                title: 'Plugin(s) Validation',
                 task: async (ctx) => {
                     let invalids: string[] = []
                     for (const cfg of ctx.configs) {
@@ -127,7 +124,7 @@ class Build extends Command {
                 },
             },
             {
-                title: 'Validating Schema Files',
+                title: 'Schema File(s) Validation',
                 task: async (ctx) => {
                     const errs = validateSchemas(ctx.schemaFiles)
                     if (errs.length === 0) {
