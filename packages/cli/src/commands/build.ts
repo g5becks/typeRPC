@@ -1,16 +1,18 @@
-import { isValidPlugin, Code, TypeRpcPlugin } from '@typerpc/plugin'
+import { Code, TypeRpcPlugin } from '@typerpc/plugin'
 import { Command, flags } from '@oclif/command'
 import { outputFile, pathExists } from 'fs-extra'
 import path from 'path'
 import { Listr } from 'listr2'
-import { Schema, validateSchemas, buildSchemas } from '@typerpc/schema'
+import { buildSchemas, Schema, validateSchemas } from '@typerpc/schema'
 import { Project, SourceFile } from 'ts-morph'
 import { PluginManager } from 'live-plugin-manager'
+import { getConfigFile, parseConfig, ParsedConfig } from '../configParser'
+import { GeneratorConfig } from '@typerpc/config'
 
 // validate the output path is not empty
-const validateOutputPath = (outputPath: string): void => {
+const validateOutputPath = (outputPath: string, cfgName: string): void => {
     if (outputPath === '') {
-        throw new Error('error: no output path provided')
+        throw new Error(`error: no output path provided for cfg: ${cfgName}`)
     }
 }
 
@@ -27,14 +29,9 @@ const validateTsConfigFile = async (tsConfigFile: string): Promise<void> => {
     }
 }
 
-// get the rpc.config.ts file
-const getConfigFile = (proj: Project): SourceFile | undefined =>
-    proj.getSourceFile((file) => file.getBaseName().toLowerCase() === '.rpc.config.ts')
-
 type Ctx = {
-    tsConfigFilePath: string
-    outputPath: string
-    packageName: string
+    schemaFiles: SourceFile[]
+    configs: ParsedConfig[]
 }
 
 type BuildCtx = { builder?: TypeRpcPlugin } & Ctx
@@ -55,19 +52,16 @@ class Build extends Command {
             char: 'o',
             name: 'output',
             description: 'path to a directory to place generated code',
-            required: true,
         }),
-        lang: flags.string({
-            char: 'l',
-            name: 'lang',
-            description: 'the programming language to use for generating code',
-            required: true,
+        plugin: flags.string({
+            char: 'p',
+            name: 'plugin',
+            description: 'name of the typerpc plugin to use for code generation',
         }),
-        framework: flags.string({
+        formatter: flags.string({
             char: 'f',
-            name: 'framework',
-            description: 'the framework to use for generating code',
-            required: true,
+            name: 'formatter',
+            description: 'a command that will be executed on generated code for formatting',
         }),
         packageName: flags.string({
             char: 'p',
@@ -75,15 +69,6 @@ class Build extends Command {
             description: 'package name to use when generating code',
         }),
     }
-
-    static args = [
-        {
-            name: 'target',
-            required: true,
-            description: 'target platform for code generation',
-            options: ['client', 'server'],
-        },
-    ]
 
     async writeOutput(outputPath: string, code: Code[]): Promise<void> {
         const results = []
@@ -103,77 +88,38 @@ class Build extends Command {
     #configFile: SourceFile | undefined
     #pluginManager: PluginManager = new PluginManager({ pluginsPath, ignoredDependencies: [new RegExp('[sS]*')] })
     #validationCtx: Ctx = {
-        target: '',
-        lang: '',
-        framework: '',
-        outputPath: '',
-        tsConfigFilePath: '',
-        packageName: '',
+        configs: [],
+        schemaFiles: [],
     }
 
     #buildCtx: BuildCtx = { ...this.#validationCtx }
 
     #code: Code[] = []
 
+    #validateTsConfig = new Listr<{ tsConfigFilePath: string }>(
+        {
+            title: 'Validating tsconfig.json file',
+            task: async (ctx) => validateTsConfigFile(ctx.tsConfigFilePath),
+        },
+        { exitOnError: true },
+    )
+
     #validateInputs = new Listr<Ctx>(
         [
             {
-                title: 'Validating tsconfig.json',
-                task: async (ctx) => validateTsConfigFile(ctx.tsConfigFilePath),
-            },
-            {
-                title: 'Validating Target',
+                title: 'Validating Output Path(s)',
                 task: async (ctx) => {
-                    if (isTarget(ctx.target)) {
-                        return true
-                    }
-                    throw new Error(`invalid target: ${ctx.target}.
-          valid targets are: [client, server]`)
+                    return Promise.all(ctx.configs.map((cfg) => validateOutputPath(cfg.outputPath, cfg.configName)))
                 },
             },
             {
-                title: 'Validating Programming Language',
-                task: async (ctx) => {
-                    if (!isValidLang(ctx.lang)) {
-                        throw new Error(`${ctx.lang} is not a valid programming language selection
-        valid languages are ${languages}`)
-                    }
-                },
-            },
-            {
-                title: 'Validating Output Path',
-                task: async (ctx) => validateOutputPath(ctx.outputPath),
-            },
-            {
-                title: 'Validating Framework',
-                task: (ctx) => {
-                    const builders = getBuilders(ctx.target as Target, ctx.lang as ProgrammingLanguage)
-                    if (builders.length === 0) {
-                        this.error(`no ${ctx.target} builders were found for ${ctx.lang}`)
-                    }
-                    const filtered = filterBuilderByFramework(ctx.framework, builders)
-                    if (filtered.length === 0) {
-                        this.error(
-                            `no ${ctx.target} builder found for ${ctx.lang} using ${ctx.framework}. Available ${
-                                ctx.target
-                            } builders for ${ctx.lang} are ${reportAvailableFrameworks(builders)}`,
-                        )
-                    } else {
-                        this.#buildCtx = {
-                            ...ctx,
-                            builder: filtered[0],
-                        }
-                    }
-                },
+                title: 'Validating Plugin(s)',
+                task: (ctx) => {},
             },
             {
                 title: 'Validating Schema Files',
                 task: async (ctx) => {
-                    const project = new Project({
-                        tsConfigFilePath: ctx.tsConfigFilePath,
-                        skipFileDependencyResolution: true,
-                    })
-                    const errs = validateSchemas(project.getSourceFiles())
+                    const errs = validateSchemas(ctx.schemaFiles)
                     if (errs.length === 0) {
                         return true
                     }
@@ -215,15 +161,26 @@ class Build extends Command {
     )
 
     async run() {
-        const { args, flags } = this.parse(Build)
-        const target = args.target.trim()
+        const { flags } = this.parse(Build)
         const tsConfigFilePath = flags.tsConfig?.trim() ?? ''
-        const outputPath = flags.output?.trim() ?? ''
-        const lang = flags.lang?.trim() ?? ''
-        const packageName = flags.packageName?.trim() ?? ''
-        const framework = flags.framework?.trim() ?? ''
-        const jobId = nanoid().toLowerCase()
-        this.#validationCtx = { target, tsConfigFilePath, outputPath, framework, lang, packageName }
+        await this.#validateTsConfig.run({ tsConfigFilePath })
+        const project = new Project({ tsConfigFilePath, skipFileDependencyResolution: true })
+        const configFile = getConfigFile(project)
+        let configs: ParsedConfig[] = typeof configFile !== 'undefined' ? parseConfig(configFile) : []
+        const schemaFiles = project
+            .getSourceFiles()
+            .filter((file) => file.getBaseName().toLowerCase() !== '.rpc.config.ts')
+        const plugin = flags.plugin?.trim()
+        const outputPath = flags.output?.trim()
+        const packageName = flags.packageName?.trim()
+        const formatter = flags.formatter?.trim()
+        // if user provides command line arguments the config file will
+        // be overridden - Be sure to document this behaviour
+        if (plugin && outputPath && packageName) {
+            configs = [{ configName: 'flags', plugin, outputPath, packageName, formatter }]
+        }
+
+        this.#validationCtx = { schemaFiles, configs }
         this.log('Beginning input validation...')
         await this.#validateInputs.run(this.#validationCtx)
         await this.#build.run(this.#buildCtx)
