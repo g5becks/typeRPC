@@ -7,8 +7,6 @@ import { Schema, validateSchemas, buildSchemas } from '@typerpc/schema'
 import { Project, SourceFile } from 'ts-morph'
 import { PluginManager } from 'live-plugin-manager'
 
-const isTarget = (target: string): target is Target => ['client', 'server'].includes(target)
-
 // validate the output path is not empty
 const validateOutputPath = (outputPath: string): void => {
     if (outputPath === '') {
@@ -32,16 +30,6 @@ const validateTsConfigFile = async (tsConfigFile: string): Promise<void> => {
 // get the rpc.config.ts file
 const getConfigFile = (proj: Project): SourceFile | undefined =>
     proj.getSourceFile((file) => file.getBaseName().toLowerCase() === '.rpc.config.ts')
-
-// find a build that matches the framework
-const filterBuilderByFramework = (framework: string, builders: TypeRpcPlugin[]): TypeRpcPlugin[] => {
-    return builders.filter((builder) => builder.framework === framework)
-}
-
-// report available frameworks for target language
-const reportAvailableFrameworks = (builders: TypeRpcPlugin[]): string[] => {
-    return builders.map((builder) => builder.framework)
-}
 
 type Ctx = {
     tsConfigFilePath: string

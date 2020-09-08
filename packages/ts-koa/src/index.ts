@@ -214,10 +214,4 @@ export const runServer = (opts: ServerOptions): http.Server => {
 // builds all schemas and server file
 const build = (schemas: Schema[]): Code[] => [...schemas.map((schema) => buildFile(schema)), buildServer(schemas)]
 
-export const KoaBuilder: TypeRpcPlugin = {
-    lang: 'ts',
-    target: 'server',
-    framework: 'koa',
-    build,
-    format,
-}
+export const KoaBuilder: TypeRpcPlugin = build
