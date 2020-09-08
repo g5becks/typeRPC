@@ -7,21 +7,16 @@ import { buildSchemas, Schema, validateSchemas } from '@typerpc/schema'
 import { Project, SourceFile } from 'ts-morph'
 import { getConfigFile, parseConfig, ParsedConfig } from '../configParser'
 
-// validate the output path is not empty
+// ensure the output path is not empty
 const validateOutputPath = (outputPath: string, cfgName: string): void => {
     if (outputPath === '') {
         throw new Error(`error: no output path provided for cfg: ${cfgName}`)
     }
 }
 
-// validate the tsConfig file exists
-const tsconfigFileExists = (filePath: string): Promise<boolean> => {
-    return pathExists(filePath)
-}
-
 // ensure that the path to tsconfig.json actually exists
 const validateTsConfigFile = async (tsConfigFile: string): Promise<void> => {
-    const exists = await tsconfigFileExists(tsConfigFile)
+    const exists = await pathExists(tsConfigFile)
     if (tsConfigFile === '' || !exists) {
         throw new Error(`No tsConfig.json file found at ${tsConfigFile}`)
     }
