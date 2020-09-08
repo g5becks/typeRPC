@@ -162,6 +162,7 @@ class Build extends Command {
     async run() {
         const { flags } = this.parse(Build)
         const tsConfigFilePath = flags.tsConfig?.trim() ?? ''
+        // validate tsconfig before proceeding
         await this.#validateTsConfig.run({ tsConfigFilePath })
         const project = new Project({ tsConfigFilePath, skipFileDependencyResolution: true })
         const configFile = getConfigFile(project)

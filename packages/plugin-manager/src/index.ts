@@ -40,7 +40,7 @@ class PluginManager {
             log.onInstalled(plugin)
             await this.#manager.installFromPath(this.pluginPath(plugin))
         } else {
-            log.onInstalling(`installing plugin ${plugin}`)
+            log.onInstalling(plugin)
             await this.#manager.install(sanitize(plugin))
         }
     }

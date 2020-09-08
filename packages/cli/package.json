@@ -63,6 +63,7 @@
   "devDependencies": {
     "@oclif/dev-cli": "^1.22.2",
     "@types/fs-extra": "^9.0.1",
+    "@types/pino": "^6.3.0",
     "eslint-config-oclif": "^3.1.0",
     "eslint-config-oclif-typescript": "^0.2.0",
     "globby": "^11.0.1"
@@ -72,12 +73,13 @@
     "@oclif/config": "^1.17.0",
     "@oclif/plugin-help": "^3.2.0",
     "@oclif/plugin-not-found": "^1.2.4",
-    "@typerpc/plugin": "^0.1.1",
-    "@typerpc/schema": "^0.1.1",
     "@typerpc/config": "^0.1.1",
+    "@typerpc/plugin": "^0.1.1",
     "@typerpc/plugin-manager": "^0.1.1",
+    "@typerpc/schema": "^0.1.1",
     "fs-extra": "^9.0.1",
     "listr2": "^3.0.0",
+    "pino": "^6.6.0",
     "ts-morph": "^8.1.0",
     "tslib": "^2.0.1"
   }
