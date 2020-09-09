@@ -1,7 +1,7 @@
 import { Node, PropertySignature, TypeNode } from 'ts-morph'
 import { DataType, scalarsMap, Struct, structLiteralProp, StructLiteralProp } from './data-type'
 import { isOptionalProp, parseMsgProps, parseTypeParams } from './parser'
-import { useCbor } from '@typerpc/schema-builder'
+import { useCbor } from './builder'
 import { isValidMsg } from './validator'
 import { internal as _ } from '@typerpc/types'
 
