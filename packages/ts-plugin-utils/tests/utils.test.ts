@@ -1,9 +1,8 @@
-import { _testing } from '../../plugin/src'
+import { dataType, fromQueryString } from '../src'
 import { Project, PropertySignature } from 'ts-morph'
 import { _testing as _schemaTesting } from '@typerpc/schema'
 import { dataTypeTestsSource, expectedTsDataTypes, genSourceFile } from '@typerpc/test-utils'
 
-const { tsDataType, tsFromQueryString } = _testing
 const { parseMsgProps, makeDataType } = _schemaTesting
 let project: Project
 let props: PropertySignature[]
@@ -16,7 +15,7 @@ test('tsDataType() should produce the correct output', () => {
     const types = props.map((prop) => makeDataType(prop.getTypeNodeOrThrow()))
     let i = 0
     while (i < types.length) {
-        expect(tsDataType(types[i])).toEqual(expectedTsDataTypes[i])
+        expect(dataType(types[i])).toEqual(expectedTsDataTypes[i])
         i++
     }
 })
@@ -43,7 +42,7 @@ test('tsFromQueryString() should produce the correct output', () => {
     let i = 0
     while (i < types.length) {
         const name = filteredProps[i].getName()
-        expect(tsFromQueryString(name, types[i])).toEqual(propsMap[name])
+        expect(fromQueryString(name, types[i])).toEqual(propsMap[name])
         i++
     }
 })
