@@ -237,31 +237,3 @@ type TestType = rpc.Msg<{
   nestedList: $.list<$.tuple4<$.tuple2<$.int64, $.list<$.blob>>, $.bool, $.str, $.dyn>>
   queryParamList: $.list<$.int8>
 }>`
-
-export const expectedTsDataTypes = [
-    '{[key: string]: number}',
-    '[number, number]',
-    '[number, number, number]',
-    '[number, string, boolean, number]',
-    '[string, string, any, Uint8Array, number]',
-    'Array<boolean>',
-    '{name: string; age: number; birthDate: number; weight: number; }',
-    'boolean',
-    'number',
-    'number',
-    'number',
-    'number',
-    'number',
-    'number',
-    'number',
-    'number',
-    'number',
-    'number',
-    'string',
-    'number',
-    'Uint8Array',
-    'any',
-    '{[key: string]: Array<{[key: string]: Array<string>}>}',
-    'Array<[[number, Array<Uint8Array>], boolean, string, any]>',
-    'Array<number>',
-]

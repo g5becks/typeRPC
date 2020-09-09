@@ -1,9 +1,37 @@
 import { dataType, fromQueryString } from '../src'
 import { Project, PropertySignature } from 'ts-morph'
 import { _testing as _schemaTesting } from '@typerpc/schema'
-import { dataTypeTestsSource, expectedTsDataTypes, genSourceFile } from '@typerpc/test-utils'
+import { dataTypeTestsSource, genSourceFile } from '@typerpc/test-utils'
 
 const { parseMsgProps, makeDataType } = _schemaTesting
+const expected = [
+    '{[key: string]: number}',
+    '[number, number]',
+    '[number, number, number]',
+    '[number, string, boolean, number]',
+    '[string, string, any, Uint8Array, number]',
+    'Array<boolean>',
+    '{name: string; age: number; birthDate: number; weight: number; }',
+    'boolean',
+    'number',
+    'number',
+    'number',
+    'number',
+    'number',
+    'number',
+    'number',
+    'number',
+    'number',
+    'number',
+    'string',
+    'number',
+    'Uint8Array',
+    'any',
+    '{[key: string]: Array<{[key: string]: Array<string>}>}',
+    'Array<[[number, Array<Uint8Array>], boolean, string, any]>',
+    'Array<number>',
+]
+
 let project: Project
 let props: PropertySignature[]
 beforeAll(() => {
@@ -15,7 +43,7 @@ test('tsDataType() should produce the correct output', () => {
     const types = props.map((prop) => makeDataType(prop.getTypeNodeOrThrow()))
     let i = 0
     while (i < types.length) {
-        expect(dataType(types[i])).toEqual(expectedTsDataTypes[i])
+        expect(dataType(types[i])).toEqual(expected[i])
         i++
     }
 })
