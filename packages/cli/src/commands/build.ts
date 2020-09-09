@@ -1,4 +1,4 @@
-/* eslint-disable @typescript/eslint/explicit-function-return-type */
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { Code } from '@typerpc/plugin'
 import { Command, flags } from '@oclif/command'
 import { outputFile, pathExists } from 'fs-extra'
@@ -209,6 +209,7 @@ class Build extends Command {
             {
                 title: 'Formatting Generated Code',
                 task: async (ctx) => {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     const onError = (error: any) => {
                         ctx.logger?.error(error)
                         this.error(error)

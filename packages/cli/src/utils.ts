@@ -3,7 +3,7 @@ import { GeneratorConfig } from '@typerpc/config'
 import pino from 'pino'
 import { ChildProcess, exec } from 'child_process'
 
-export const getConfigFile = (project: Project) =>
+export const getConfigFile = (project: Project): SourceFile | undefined =>
     project.getSourceFile((file) => file.getBaseName().toLowerCase() === '.rpc.config.ts')
 const parseGeneratorConfig = (obj: ObjectLiteralExpression): GeneratorConfig => {
     const outputPath = obj
@@ -54,7 +54,7 @@ export const parseConfig = (file: SourceFile | undefined): ParsedConfig[] => {
     return configs
 }
 
-export const logger = (project: Project) =>
+export const logger = (project: Project): pino.Logger =>
     pino(
         { level: 'error', prettyPrint: true },
         pino.destination({ dest: project.getRootDirectories()[0].getPath() + '/.typerpc/error.log', sync: false }),
@@ -63,6 +63,7 @@ export const logger = (project: Project) =>
 export const format = (
     path: string,
     formatter: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (error: any) => void,
     onComplete: (msg: string) => void,
 ): ChildProcess =>
