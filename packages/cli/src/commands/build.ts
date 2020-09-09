@@ -7,20 +7,26 @@ import { buildSchemas, Schema, validateSchemas } from '@typerpc/schema'
 import { Project, SourceFile } from 'ts-morph'
 import { isValidPlugin, PluginManager } from '@typerpc/plugin-manager'
 import { BaseLogger } from 'pino'
-import { getConfigFile, logger, parseConfig, ParsedConfig } from '../utils'
+import { format, getConfigFile, logger, parseConfig, ParsedConfig } from '../utils'
 
 type ValidateCtx = {
     sourceFiles: SourceFile[]
     configs: ParsedConfig[]
 }
 
-type BuildCtx = { manager?: PluginManager; logger?: BaseLogger } & ValidateCtx
+type BuildCtx = { manager: PluginManager; logger: BaseLogger } & ValidateCtx
 
 type GeneratedCode = { code: Code[]; outputPath: string }
 
 type WriteCtx = GeneratedCode[]
 
-type TaskCtx = ValidateCtx | BuildCtx | WriteCtx
+type FormatConfig = {
+    formatter?: string
+    outputPath: string
+}
+type FormatCtx = { logger: BaseLogger; formatters: FormatConfig[] }
+
+type TaskCtx = ValidateCtx | BuildCtx | WriteCtx | FormatCtx
 
 type BuildStep = {
     task: Listr
@@ -185,15 +191,41 @@ class Build extends Command {
         { exitOnError: true },
     )
 
-    #write = new Listr<WriteCtx>([
-        {
-            title: 'Saving generated code to provided output path(s)',
-            task: async (ctx) => {
-                await Promise.all(ctx.map((generated) => this.writeOutput(generated.outputPath, generated.code)))
+    #write = new Listr<WriteCtx>(
+        [
+            {
+                title: 'Saving generated code to provided output path(s)',
+                task: async (ctx) => {
+                    await Promise.all(ctx.map((generated) => this.writeOutput(generated.outputPath, generated.code)))
+                },
             },
-        },
-    ])
+        ],
+        { exitOnError: true },
+    )
 
+    #format = new Listr<FormatCtx>(
+        [
+            {
+                title: 'Formatting Generated Code',
+                task: async (ctx) => {
+                    const onError = (error: any) => {
+                        ctx.logger?.error(error)
+                        this.error(error)
+                    }
+                    const onComplete = (msg: string) => this.log(msg)
+                    await Promise.all(
+                        ctx.formatters.map((fmt) =>
+                            fmt.formatter
+                                ? format(fmt.outputPath, fmt.formatter, onError, onComplete)
+                                : async () =>
+                                      this.log(`no formatter provided for formatting code in ${fmt.outputPath}`),
+                        ),
+                    )
+                },
+            },
+        ],
+        { exitOnError: true },
+    )
     async run() {
         const { flags } = this.parse(Build)
         const tsConfigFilePath = flags.tsConfig?.trim() ?? ''

@@ -63,7 +63,7 @@ export const logger = (project: Project) =>
 export const format = (
     path: string,
     formatter: string,
-    onError: (error: Error | string) => void,
+    onError: (error: any) => void,
     onComplete: (msg: string) => void,
 ): ChildProcess =>
     exec(`${formatter} ${path}`, (error, stdout, stderr) => {
