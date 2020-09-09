@@ -1,10 +1,10 @@
 import { _testing } from '../../plugin/src'
 import { Project, PropertySignature } from 'ts-morph'
-import { testing } from '../../../src/schema'
-import { dataTypeTestsSource, expectedTsDataTypes, genSourceFile } from '../../test-utils/src'
+import { _testing as _schemaTesting } from '@typerpc/schema'
+import { dataTypeTestsSource, expectedTsDataTypes, genSourceFile } from '@typerpc/test-utils'
 
 const { tsDataType, tsFromQueryString } = _testing
-const { parseMsgProps, makeDataType } = testing
+const { parseMsgProps, makeDataType } = _schemaTesting
 let project: Project
 let props: PropertySignature[]
 beforeAll(() => {

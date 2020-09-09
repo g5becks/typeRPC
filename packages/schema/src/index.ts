@@ -1,25 +1,26 @@
-import {containers, DataType, queryParamables, scalars, Struct, StructLiteral, StructLiteralProp} from './data-type'
-import {make, typeError} from './make'
-import {is} from './is'
-import {buildSchemas} from './builder'
-import {validateSchemas} from './validator'
+import { containers, DataType, queryParamables, scalars, Struct, StructLiteral, StructLiteralProp } from './data-type'
+import { make, typeError } from './make'
+import { is } from './is'
+import { buildSchemas, internalTesting } from './builder'
+import { validateSchemas } from './validator'
+import { parseMsgProps } from './parser'
 import {
-  HTTPErrCode,
-  HTTPResponseCode,
-  Import,
-  isMutationMethod,
-  isMutationSvc,
-  isQueryMethod,
-  isQuerySvc,
-  Message,
-  Method,
-  MutationMethod,
-  MutationService,
-  Param,
-  Property,
-  QueryMethod,
-  QueryService,
-  Schema,
+    HTTPErrCode,
+    HTTPResponseCode,
+    Import,
+    isMutationMethod,
+    isMutationSvc,
+    isQueryMethod,
+    isQuerySvc,
+    Message,
+    Method,
+    MutationMethod,
+    MutationService,
+    Param,
+    Property,
+    QueryMethod,
+    QueryService,
+    Schema,
 } from './schema'
 
 export {
@@ -51,4 +52,9 @@ export {
     queryParamables,
     scalars,
     containers,
+}
+
+export const _testing = {
+    ...internalTesting,
+    parseMsgProps,
 }

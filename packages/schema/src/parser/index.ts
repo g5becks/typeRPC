@@ -8,7 +8,7 @@ import {
     TypeNode,
     TypeReferenceNode,
 } from 'ts-morph'
-import { isMsg, isMsgLiteral, isQuerySvc, isMutationSvc } from '@typerpc/validators'
+import { isMsg, isMsgLiteral, isQuerySvc, isMutationSvc } from '../validator'
 
 const isTypeAlias = (type: any): type is TypeAliasDeclaration => 'getName' in type
 const isTypeNode = (type: any): type is TypeNode => !('getName' in type)
