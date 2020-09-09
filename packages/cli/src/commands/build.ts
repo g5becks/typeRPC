@@ -1,23 +1,23 @@
-import {Code} from '@typerpc/plugin'
-import {Command, flags} from '@oclif/command'
-import {outputFile, pathExists} from 'fs-extra'
+import { Code } from '@typerpc/plugin'
+import { Command, flags } from '@oclif/command'
+import { outputFile, pathExists } from 'fs-extra'
 import path from 'path'
-import {Listr} from 'listr2'
-import {buildSchemas, Schema, validateSchemas} from '@typerpc/schema'
-import {Project, SourceFile} from 'ts-morph'
-import {getConfigFile, parseConfig, ParsedConfig} from '../configParser'
-import {isValidPlugin, PluginManager} from '@typerpc/plugin-manager'
-import {BaseLogger} from 'pino'
-import {logger} from '../logger'
+import { Listr } from 'listr2'
+import { buildSchemas, Schema, validateSchemas } from '@typerpc/schema'
+import { Project, SourceFile } from 'ts-morph'
+import { getConfigFile, parseConfig, ParsedConfig } from '../configParser'
+import { isValidPlugin, PluginManager } from '@typerpc/plugin-manager'
+import { BaseLogger } from 'pino'
+import { logger } from '../logger'
 
 type Ctx = {
-    schemaFiles: SourceFile[]
+    sourceFiles: SourceFile[]
     configs: ParsedConfig[]
 }
 
 type BuildCtx = { manager?: PluginManager; logger?: BaseLogger } & Ctx
 
-type GeneratedCode = Code & {outputPath: string}
+type GeneratedCode = { code: Code[]; outputPath: string }
 
 type OutputCtx = GeneratedCode[]
 
@@ -85,12 +85,14 @@ class Build extends Command {
     }
     #validationCtx: Ctx = {
         configs: [],
-        schemaFiles: [],
+        sourceFiles: [],
     }
 
-    #buildCtx: BuildCtx = { ...this.#validationCtx }
+    #buildCtx: BuildCtx = {
+        ...this.#validationCtx,
+    }
 
-    #outputCtx:  = []
+    #outputCtx: OutputCtx = []
 
     #validateTsConfig = new Listr<{ tsConfigFilePath: string }>(
         {
@@ -128,7 +130,7 @@ class Build extends Command {
             {
                 title: 'Schema File(s) Validation',
                 task: async (ctx) => {
-                    const errs = validateSchemas(ctx.schemaFiles)
+                    const errs = validateSchemas(ctx.sourceFiles)
                     if (errs.length === 0) {
                         return true
                     }
@@ -146,8 +148,6 @@ class Build extends Command {
         { exitOnError: true },
     )
 
-    schemas: ReadonlyArray<Schema> = []
-
     #build = new Listr<BuildCtx>(
         [
             {
@@ -164,21 +164,20 @@ class Build extends Command {
                     await ctx.manager?.install(plugins, onError, onInstalled, onInstalling)
                 },
             },
-          {
-            title: `Parsing Schema(s)`,
-            task: async ctx => {
-              for (const cfg of ctx.configs) {
-                buildSchemas(ctx.schemaFiles, cfg.packageName)
-              }
-            }
-          },
             {
-                title: `Running Code generator(s)`,
+                title: `Running code generator(s)`,
                 task: async (ctx) => {
                     for (const cfg of ctx.configs) {
+                        const schemas = buildSchemas(ctx.sourceFiles, cfg.packageName)
                         const plugin = ctx.manager?.require(cfg.plugin)
                         if (isValidPlugin(plugin)) {
-                            this.#outputCtx = [...this.#outputCtx, {...plugin.generate(ctx.schemaFiles), outputPath: }]
+                            this.#outputCtx = [
+                                ...this.#outputCtx,
+                                { code: plugin.generate(schemas), outputPath: cfg.outputPath },
+                            ]
+                        } else {
+                            ctx.logger?.error(`${cfg.plugin} is not a valid typerpc plugin`)
+                            this.error(`${cfg.plugin} is not a valid typerpc plugin`)
                         }
                     }
                 },
@@ -198,7 +197,7 @@ class Build extends Command {
         // parse config objects
         let configs: ParsedConfig[] = typeof configFile !== 'undefined' ? parseConfig(configFile) : []
         // filter out .rpc.config.ts file from project source files
-        const schemaFiles = project
+        const sourceFiles = project
             .getSourceFiles()
             .filter((file) => file.getBaseName().toLowerCase() !== '.rpc.config.ts')
         // parse command line flags
@@ -212,21 +211,22 @@ class Build extends Command {
             configs = [{ configName: 'flags', plugin, outputPath, packageName, formatter }]
         }
 
-        this.#validationCtx = { schemaFiles, configs }
+        this.#validationCtx = { sourceFiles, configs }
         const log = logger(project)
         this.#buildCtx = { ...this.#validationCtx, manager: PluginManager.create(project), logger: log }
         this.log('Beginning input validation...')
         // run validation
         await this.#validateInputs.run(this.#validationCtx)
         await this.#build.run(this.#buildCtx)
+
         if (this.#code.length === 0) {
             this.error('no code found to save, exiting')
         } else {
             await this.writeOutput(outputPath, this.#code)
         }
-        if (this.#buildCtx.builder?.format !== null && typeof this.#buildCtx.builder?.format !== 'undefined') {
+        if (this.#preBuildCtx.builder?.format !== null && typeof this.#preBuildCtx.builder?.format !== 'undefined') {
             this.log('running code formatter')
-            this.#buildCtx.builder.format(outputPath)
+            this.#preBuildCtx.builder.format(outputPath)
         }
         this.log(`JobId: ${jobId} complete, check ${outputPath} for generated ${target} code.`)
     }
