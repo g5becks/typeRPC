@@ -40,7 +40,11 @@ export const dataType = (type: DataType): string => {
     }
 
     if (is.scalar(type)) {
-        return typeMap.get(type.type)!
+        const ret = typeMap.get(type.type)
+        if (ret) {
+            return ret
+        }
+        throw new TypeError(`invalid data type ${type}`)
     }
 
     if (is.map(type)) {
@@ -83,44 +87,31 @@ export const dataType = (type: DataType): string => {
     return 'interface{}'
 }
 
+export const helpers = `
+func StringToTimestamp(t string) (time.Time, error) {
+  parsed, err := strconv.ParseInt(t, 0, 64)
+  return time.Unix(parsed, 0), err
+}
+`
 export const scalarFromQueryParam = (paramName: string, type: DataType): string => {
     if (is.scalar(type) !== true) {
         throw new TypeError('invalid type used in get request')
     }
     if (is.scalar(type)) {
         switch (type.type) {
-            case 'bool':
-                return `strconv.ParseBool(${paramName})`
             case 'blob':
-                return `[]byte(${paramName})`
-            case 'float32':
-                return `strconv.ParseFloat(${paramName}, 32)`
-            case 'float64':
-                return `strconv.ParseFloat(${paramName}, 64)`
-            case 'int8':
-                return `strconv.ParseInt(${paramName}, 0, 8)`
-            case 'uint8':
-                return `strconv.ParseUint(${paramName}, 0, 8)`
-            case 'int16':
-                return `strconv.ParseInt(${paramName}, 0, 16)`
-            case 'uint16':
-                return `strconv.ParseUint(${paramName}, 0, 16)`
-            case 'int32':
-                return `strconv.ParseInt(${paramName}, 0, 32)`
-            case 'uint32':
-                return `strconv.ParseUint(${paramName}, 0, 32)`
-            case 'int64':
-                return `strconv.ParseInt(${paramName}, 0, 64)`
-            case 'uint64':
-                return `strconv.ParseUint(${paramName}, 0, 64)`
+                return `StringToBytes(${paramName})`
             case 'str':
                 return `${paramName}`
-            case 'timestamp':
-                return `strconv.ParseUint(${paramName}, 0, 64)`
+            default:
+                // delegate all other types to helper functions
+                return `StringTo${capitalize(dataType(type))}`
         }
     }
     return ''
 }
+
+export const fromQueryString = (paramName: string, type: DataType): string => {}
 
 export const handleOptional = (property: Property): string =>
     is.scalar(property.type) || is.struct(property.type) || (is.structLiteral(property.type) && property.isOptional)
@@ -161,9 +152,7 @@ export const buildMethodParams = (params: ReadonlyArray<Param>): string => {
     while (i < params.length) {
         const useComma = i === params.length - 1 ? '' : ', '
         parameters = parameters.concat(
-            `${lowerCase(params[i].name)} ${handleOptional(params[i].isOptional)}${dataType(
-                params[i].type,
-            )}${useComma}`,
+            `${lowerCase(params[i].name)} ${handleOptional(params[i])}${dataType(params[i].type)}${useComma}`,
         )
         i++
     }
