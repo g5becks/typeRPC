@@ -5,7 +5,7 @@ import { TypeRpcPlugin } from '@typerpc/plugin'
 
 const sanitize = (plugin: string): string => (plugin.startsWith('/') ? plugin.substring(1).trim() : plugin.trim())
 
-const isValidPlugin = (plugin: any) =>
+export const isValidPlugin = (plugin: any): plugin is TypeRpcPlugin =>
     'scaffold' in plugin &&
     'generate' in plugin &&
     typeof plugin.scaffold === 'function' &&
@@ -24,11 +24,11 @@ export class PluginManager {
         return new PluginManager(project.getRootDirectories()[0].getPath() + '/.typerpc/plugins')
     }
 
-    pluginPath(plugin: string): string {
+    private pluginPath(plugin: string): string {
         return `${this.#pluginsPath}/${sanitize(plugin)}`
     }
 
-    pluginIsInstalled(plugin: string): boolean {
+    private pluginIsInstalled(plugin: string): boolean {
         return fs.existsSync(this.pluginPath(plugin))
     }
 
@@ -48,10 +48,11 @@ export class PluginManager {
     async install(
         plugins: string[],
         onError: (error: Error) => void,
-        log: { onInstalled: (plugin: string) => void; onInstalling: (plugin: string) => void },
+        onInstalled: (plugin: string) => void,
+        onInstalling: (plugin: string) => void,
     ): Promise<void> {
         try {
-            await Promise.all(plugins.map((plugin) => this.installPlugin(plugin, log)))
+            await Promise.all(plugins.map((plugin) => this.installPlugin(plugin, { onInstalling, onInstalled })))
         } catch (error) {
             onError(error)
         }

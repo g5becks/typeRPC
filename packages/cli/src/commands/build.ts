@@ -1,33 +1,25 @@
-import { Code, TypeRpcPlugin } from '@typerpc/plugin'
-import { Command, flags } from '@oclif/command'
-import { outputFile, pathExists } from 'fs-extra'
+import {Code} from '@typerpc/plugin'
+import {Command, flags} from '@oclif/command'
+import {outputFile, pathExists} from 'fs-extra'
 import path from 'path'
-import { Listr } from 'listr2'
-import { buildSchemas, Schema, validateSchemas } from '@typerpc/schema'
-import { Project, SourceFile } from 'ts-morph'
-import { getConfigFile, parseConfig, ParsedConfig } from '../configParser'
-
-// ensure the output path is not empty
-const validateOutputPath = (outputPath: string, cfgName: string): void => {
-    if (outputPath === '') {
-        throw new Error(`error: no output path provided for cfg: ${cfgName}`)
-    }
-}
-
-// ensure that the path to tsconfig.json actually exists
-const validateTsConfigFile = async (tsConfigFile: string): Promise<void> => {
-    const exists = await pathExists(tsConfigFile)
-    if (tsConfigFile === '' || !exists) {
-        throw new Error(`No tsConfig.json file found at ${tsConfigFile}`)
-    }
-}
+import {Listr} from 'listr2'
+import {buildSchemas, Schema, validateSchemas} from '@typerpc/schema'
+import {Project, SourceFile} from 'ts-morph'
+import {getConfigFile, parseConfig, ParsedConfig} from '../configParser'
+import {isValidPlugin, PluginManager} from '@typerpc/plugin-manager'
+import {BaseLogger} from 'pino'
+import {logger} from '../logger'
 
 type Ctx = {
     schemaFiles: SourceFile[]
     configs: ParsedConfig[]
 }
 
-type BuildCtx = { builder?: TypeRpcPlugin } & Ctx
+type BuildCtx = { manager?: PluginManager; logger?: BaseLogger } & Ctx
+
+type GeneratedCode = Code & {outputPath: string}
+
+type OutputCtx = GeneratedCode[]
 
 class Build extends Command {
     static description = 'describe command here'
@@ -57,8 +49,7 @@ class Build extends Command {
             description: 'a command that will be executed on generated code for formatting',
         }),
         packageName: flags.string({
-            char: 'p',
-            name: 'package',
+            name: 'pkg',
             description: 'package name to use when generating code',
         }),
     }
@@ -74,8 +65,22 @@ class Build extends Command {
             this.log(`saving generated code to ${outputPath}`)
             await Promise.all(results)
         } catch (error) {
-            this.log(`error occurred writing files: ${error}`)
-            throw error
+            this.error(`error occurred writing files: ${error}`)
+        }
+    }
+
+    // ensure the output path is not empty
+    validateOutputPath(outputPath: string, cfgName: string): void {
+        if (outputPath === '') {
+            this.error(`error: no output path provided for cfg: ${cfgName}`)
+        }
+    }
+
+    // ensure that the path to tsconfig.json actually exists
+    async validateTsConfigFile(tsConfigFile: string): Promise<void> {
+        const exists = await pathExists(tsConfigFile)
+        if (tsConfigFile === '' || !exists) {
+            this.error(`No tsConfig.json file found at ${tsConfigFile}`)
         }
     }
     #validationCtx: Ctx = {
@@ -85,12 +90,12 @@ class Build extends Command {
 
     #buildCtx: BuildCtx = { ...this.#validationCtx }
 
-    #code: Code[] = []
+    #outputCtx:  = []
 
     #validateTsConfig = new Listr<{ tsConfigFilePath: string }>(
         {
-            title: 'Validating tsconfig.json file',
-            task: async (ctx) => validateTsConfigFile(ctx.tsConfigFilePath),
+            title: 'tsconfig.json Validation',
+            task: async (ctx) => this.validateTsConfigFile(ctx.tsConfigFilePath),
         },
         { exitOnError: true },
     )
@@ -100,7 +105,9 @@ class Build extends Command {
             {
                 title: 'Output Path(s) Validation',
                 task: async (ctx) => {
-                    return Promise.all(ctx.configs.map((cfg) => validateOutputPath(cfg.outputPath, cfg.configName)))
+                    return Promise.all(
+                        ctx.configs.map((cfg) => this.validateOutputPath(cfg.outputPath, cfg.configName)),
+                    )
                 },
             },
             {
@@ -113,7 +120,7 @@ class Build extends Command {
                         }
                     }
                     if (invalids.length !== 0) {
-                        throw new Error(`the following plugin names are not valid typerpc plugins ${invalids}`)
+                        this.error(`the following plugin names are not valid typerpc plugins ${invalids}`)
                     }
                     return true
                 },
@@ -125,12 +132,14 @@ class Build extends Command {
                     if (errs.length === 0) {
                         return true
                     }
-                    throw errs.reduce((err, val) => {
-                        err.name.concat(val.name + '\n')
-                        err.message.concat(val.message + '\n')
-                        err.stack?.concat(val.stack + '\n')
-                        return err
-                    })
+                    this.error(
+                        errs.reduce((err, val) => {
+                            err.name.concat(val.name + '\n')
+                            err.message.concat(val.message + '\n')
+                            err.stack?.concat(val.stack + '\n')
+                            return err
+                        }),
+                    )
                 },
             },
         ],
@@ -142,20 +151,36 @@ class Build extends Command {
     #build = new Listr<BuildCtx>(
         [
             {
-                title: `Attempting to generate ${this.#buildCtx.lang} ${this.#buildCtx.target} code using ${
-                    this.#buildCtx.framework
-                } framework`,
+                title: `Installing required plugin(s)`,
                 task: async (ctx) => {
-                    if (typeof ctx.builder === 'undefined') {
-                        throw new TypeError('builder not found')
+                    const onError = (error: Error) => {
+                        ctx.logger?.error(error)
+                        this.error(error)
                     }
-                    const proj = new Project({
-                        tsConfigFilePath: ctx.tsConfigFilePath,
-                        skipFileDependencyResolution: true,
-                    })
-                    const schemas = buildSchemas(proj.getSourceFiles(), ctx.packageName)
-                    this.schemas = schemas
-                    this.#code = ctx.builder.build(schemas)
+                    const onInstalled = (plugin: string) => this.log(`${plugin} already installed, fetching from cache`)
+                    const onInstalling = (plugin: string) =>
+                        this.log(`attempting to install ${plugin} from https://registry.npmjs.org`)
+                    const plugins = ctx.configs.map((cfg) => cfg.plugin)
+                    await ctx.manager?.install(plugins, onError, onInstalled, onInstalling)
+                },
+            },
+          {
+            title: `Parsing Schema(s)`,
+            task: async ctx => {
+              for (const cfg of ctx.configs) {
+                buildSchemas(ctx.schemaFiles, cfg.packageName)
+              }
+            }
+          },
+            {
+                title: `Running Code generator(s)`,
+                task: async (ctx) => {
+                    for (const cfg of ctx.configs) {
+                        const plugin = ctx.manager?.require(cfg.plugin)
+                        if (isValidPlugin(plugin)) {
+                            this.#outputCtx = [...this.#outputCtx, {...plugin.generate(ctx.schemaFiles), outputPath: }]
+                        }
+                    }
                 },
             },
         ],
@@ -168,11 +193,15 @@ class Build extends Command {
         // validate tsconfig before proceeding
         await this.#validateTsConfig.run({ tsConfigFilePath })
         const project = new Project({ tsConfigFilePath, skipFileDependencyResolution: true })
+        // get .rpc.config.ts file
         const configFile = getConfigFile(project)
+        // parse config objects
         let configs: ParsedConfig[] = typeof configFile !== 'undefined' ? parseConfig(configFile) : []
+        // filter out .rpc.config.ts file from project source files
         const schemaFiles = project
             .getSourceFiles()
             .filter((file) => file.getBaseName().toLowerCase() !== '.rpc.config.ts')
+        // parse command line flags
         const plugin = flags.plugin?.trim()
         const outputPath = flags.output?.trim()
         const packageName = flags.packageName?.trim()
@@ -184,7 +213,10 @@ class Build extends Command {
         }
 
         this.#validationCtx = { schemaFiles, configs }
+        const log = logger(project)
+        this.#buildCtx = { ...this.#validationCtx, manager: PluginManager.create(project), logger: log }
         this.log('Beginning input validation...')
+        // run validation
         await this.#validateInputs.run(this.#validationCtx)
         await this.#build.run(this.#buildCtx)
         if (this.#code.length === 0) {
