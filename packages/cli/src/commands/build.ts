@@ -28,8 +28,9 @@ type BuildStep = {
     ctx: TaskCtx
     msg: string
 }
+
 class Build extends Command {
-    static description = 'describe command here'
+    static description = 'build generates rpc code using provided plugin(s)'
 
     static flags = {
         help: flags.help({ char: 'h' }),
