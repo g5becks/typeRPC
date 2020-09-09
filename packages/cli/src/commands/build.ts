@@ -1,9 +1,10 @@
+/* eslint-disable @typescript/eslint/explicit-function-return-type */
 import { Code } from '@typerpc/plugin'
 import { Command, flags } from '@oclif/command'
 import { outputFile, pathExists } from 'fs-extra'
 import path from 'path'
 import { Listr } from 'listr2'
-import { buildSchemas, Schema, validateSchemas } from '@typerpc/schema'
+import { buildSchemas, validateSchemas } from '@typerpc/schema'
 import { Project, SourceFile } from 'ts-morph'
 import { isValidPlugin, PluginManager } from '@typerpc/plugin-manager'
 import { BaseLogger } from 'pino'
@@ -214,11 +215,10 @@ class Build extends Command {
                     }
                     const onComplete = (msg: string) => this.log(msg)
                     await Promise.all(
-                        ctx.formatters.map((fmt) =>
+                        ctx.formatters.map(async (fmt) =>
                             fmt.formatter
                                 ? format(fmt.outputPath, fmt.formatter, onError, onComplete)
-                                : async () =>
-                                      this.log(`no formatter provided for formatting code in ${fmt.outputPath}`),
+                                : this.log(`no formatter provided for formatting code in ${fmt.outputPath}`),
                         ),
                     )
                 },
@@ -257,9 +257,19 @@ class Build extends Command {
             {
                 task: this.#build,
                 ctx: { sourceFiles, configs, manager: PluginManager.create(project), logger: log },
-                msg: 'Beginning build process',
+                msg: 'Initializing build process',
             },
             { task: this.#write, ctx: this.#writeCtx, msg: 'Saving generated code to disk' },
+            {
+                task: this.#format,
+                ctx: {
+                    logger: log,
+                    formatters: configs.map((cfg) => {
+                        return { outputPath: cfg.outputPath, formatter: cfg.formatter }
+                    }),
+                },
+                msg: 'Invoking Formatter(s)',
+            },
         ]
         for (const step of steps) {
             this.log(step.msg)
