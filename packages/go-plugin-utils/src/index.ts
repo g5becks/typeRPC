@@ -87,31 +87,46 @@ export const dataType = (type: DataType): string => {
     return 'interface{}'
 }
 
-export const helpers = `
-func StringToTimestamp(t string) (time.Time, error) {
-  parsed, err := strconv.ParseInt(t, 0, 64)
-  return time.Unix(parsed, 0), err
-}
-`
 export const scalarFromQueryParam = (paramName: string, type: DataType): string => {
     if (is.scalar(type) !== true) {
-        throw new TypeError('invalid type used in get request')
+        throw new TypeError('invalid type used in QuerySvc')
     }
     if (is.scalar(type)) {
         switch (type.type) {
             case 'blob':
                 return `StringToBytes(${paramName})`
             case 'str':
-                return `${paramName}`
+                return paramName
             default:
                 // delegate all other types to helper functions
-                return `StringTo${capitalize(dataType(type))}`
+                return `StringTo${capitalize(dataType(type))}(${paramName})`
         }
     }
     return ''
 }
 
-export const fromQueryString = (paramName: string, type: DataType): string => {}
+export const fromQueryString = (paramName: string, type: DataType): string => {
+    if (is.scalar(type)) {
+        return scalarFromQueryParam(paramName, type)
+    }
+    if (!is.list(type)) {
+        throw new TypeError('invalid type used in QuerySvc')
+    }
+    if (is.list(type)) {
+        if (is.scalar(type.dataType)) {
+            switch (type.dataType.type) {
+                case 'blob':
+                    return `StringsToBytes(${paramName})`
+                case 'str':
+                    return paramName
+                default:
+                    // delegate all other types to helper functions
+                    return `StringsTo${capitalize(dataType(type))}s(${paramName})`
+            }
+        }
+    }
+    return ''
+}
 
 export const handleOptional = (property: Property): string =>
     is.scalar(property.type) || is.struct(property.type) || (is.structLiteral(property.type) && property.isOptional)
@@ -209,3 +224,257 @@ export const buildInterfaces = (schema: Schema): string => {
     }
     return interfaces
 }
+
+export const helpers = `
+func StringToTimestamp(t string) (time.Time, error) {
+	parsed, err := strconv.ParseInt(t, 0, 64)
+	if err != nil {
+		return time.Time{}, err
+	}
+	return time.Unix(parsed, 0), nil
+}
+
+func StringToBool(param string) (bool, error) {
+	i, err := strconv.ParseBool(param)
+	if err != nil {
+		return false, err
+	}
+	return i, nil
+}
+
+func StringToBytes(param string) ([]byte, error) {
+	return []byte(param), nil
+}
+
+func StringToFloat32(param string) (float32, error) {
+	i, err := strconv.ParseFloat(param, 32)
+	if err != nil {
+		return 0, err
+	}
+	return float32(i), nil
+}
+
+func StringToFloat64(param string) (float64, error) {
+	i, err := strconv.ParseFloat(param, 64)
+	if err != nil {
+		return 0, err
+	}
+	return i, nil
+}
+
+func StringToInt8(param string) (int8, error) {
+	i, err := strconv.ParseInt(param, 0, 8)
+	if err != nil {
+		return 0, err
+	}
+	return int8(i), nil
+}
+
+func StringToUint8(param string) (uint8, error) {
+	i, err := strconv.ParseUint(param, 0, 8)
+	if err != nil {
+		return 0, err
+	}
+	return uint8(i), nil
+}
+
+func StringToInt16(param string) (int16, error) {
+	i, err := strconv.ParseInt(param, 0, 16)
+	if err != nil {
+		return 0, err
+	}
+	return int16(i), nil
+}
+
+func StringToUint16(param string) (uint16, error) {
+	i, err := strconv.ParseUint(param, 0, 16)
+	if err != nil {
+		return 0, err
+	}
+	return uint16(i), nil
+}
+
+func StringToInt32(param string) (int32, error) {
+	i, err := strconv.ParseInt(param, 0, 32)
+	if err != nil {
+		return 0, err
+	}
+	return int32(i), nil
+}
+
+func StringToUint32(param string) (uint32, error) {
+	i, err := strconv.ParseUint(param, 0, 32)
+	if err != nil {
+		return 0, err
+	}
+	return uint32(i), nil
+}
+
+func StringToInt64(param string) (int64, error) {
+	i, err := strconv.ParseInt(param, 0, 64)
+	if err != nil {
+		return 0, err
+	}
+	return i, nil
+}
+
+func StringToUint64(param string) (uint64, error) {
+	i, err := strconv.ParseUint(param, 0, 64)
+	if err != nil {
+		return 0, err
+	}
+	return i, nil
+}
+
+func StringsToTimeStamps(params []string) ([]time.Time, error) {
+	l := make([]time.Time, len(params))
+	for i, str := range params {
+		f, err := StringToTimestamp(str)
+		if err != nil {
+			return l, err
+		}
+		l[i] = f
+	}
+	return l, nil
+}
+
+func StringsToBools(params []string) ([]bool, error) {
+	l := make([]bool, len(params))
+	for i, str := range params {
+		f, err := StringToBool(str)
+		if err != nil {
+			return l, err
+		}
+		l[i] = f
+	}
+	return l, nil
+}
+
+func StringsToBytes(params []string) ([][]byte, error) {
+	l := make([][]byte, len(params))
+	for i, str := range params {
+		l[i] = []byte(str)
+	}
+	return l, nil
+}
+
+func StringsToFloat32s(params []string) ([]float32, error) {
+	l := make([]float32, len(params))
+	for i, str := range params {
+		f, err := StringToFloat32(str)
+		if err != nil {
+			return l, err
+		}
+		l[i] = f
+	}
+	return l, nil
+}
+
+func StringsToFloat64s(params []string) ([]float64, error) {
+	l := make([]float64, len(params))
+	for i, str := range params {
+		f, err := StringToFloat64(str)
+		if err != nil {
+			return l, err
+		}
+		l[i] = f
+	}
+	return l, nil
+}
+
+func StringsToInt8s(params []string) ([]int8, error) {
+	l := make([]int8, len(params))
+	for i, str := range params {
+		f, err := StringToInt8(str)
+		if err != nil {
+			return l, err
+		}
+		l[i] = f
+	}
+	return l, nil
+}
+
+func StringsToUint8s(params []string) ([]uint8, error) {
+	l := make([]uint8, len(params))
+	for i, str := range params {
+		f, err := StringToUint8(str)
+		if err != nil {
+			return l, err
+		}
+		l[i] = f
+	}
+	return l, nil
+}
+
+func StringsToInt16s(params []string) ([]int16, error) {
+	l := make([]int16, len(params))
+	for i, str := range params {
+		f, err := StringToInt16(str)
+		if err != nil {
+			return l, err
+		}
+		l[i] = f
+	}
+	return l, nil
+}
+
+func StringsToUint16s(params []string) ([]uint16, error) {
+	l := make([]uint16, len(params))
+	for i, str := range params {
+		f, err := StringToUint16(str)
+		if err != nil {
+			return l, err
+		}
+		l[i] = f
+	}
+	return l, nil
+}
+
+func StringsToInt32s(params []string) ([]int32, error) {
+	l := make([]int32, len(params))
+	for i, str := range params {
+		f, err := StringToInt32(str)
+		if err != nil {
+			return l, err
+		}
+		l[i] = f
+	}
+	return l, nil
+}
+
+func StringsToUint32s(params []string) ([]uint32, error) {
+	l := make([]uint32, len(params))
+	for i, str := range params {
+		f, err := StringToUint32(str)
+		if err != nil {
+			return l, err
+		}
+		l[i] = f
+	}
+	return l, nil
+}
+
+func StringsToInt64s(params []string) ([]int64, error) {
+	l := make([]int64, len(params))
+	for i, str := range params {
+		f, err := StringToInt64(str)
+		if err != nil {
+			return l, err
+		}
+		l[i] = f
+	}
+	return l, nil
+}
+
+func StringsToUint64s(params []string) ([]uint64, error) {
+	l := make([]uint64, len(params))
+	for i, str := range params {
+		f, err := StringToUint64(str)
+		if err != nil {
+			return l, err
+		}
+		l[i] = f
+	}
+	return l, nil
+}
+`
