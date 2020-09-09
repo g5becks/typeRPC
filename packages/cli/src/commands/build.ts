@@ -160,14 +160,14 @@ class Build extends Command {
                 title: `Installing required plugin(s)`,
                 task: async (ctx) => {
                     const onError = (error: Error) => {
-                        ctx.logger?.error(error)
+                        ctx.logger.error(error)
                         this.error(error)
                     }
                     const onInstalled = (plugin: string) => this.log(`${plugin} already installed, fetching from cache`)
                     const onInstalling = (plugin: string) =>
                         this.log(`attempting to install ${plugin} from https://registry.npmjs.org`)
                     const plugins = ctx.configs.map((cfg) => cfg.plugin)
-                    await ctx.manager?.install(plugins, onError, onInstalled, onInstalling)
+                    await ctx.manager.install(plugins, onError, onInstalled, onInstalling)
                 },
             },
             {
@@ -175,14 +175,14 @@ class Build extends Command {
                 task: async (ctx) => {
                     for (const cfg of ctx.configs) {
                         const schemas = buildSchemas(ctx.sourceFiles, cfg.packageName)
-                        const plugin = ctx.manager?.require(cfg.plugin)
+                        const plugin = ctx.manager.require(cfg.plugin)
                         if (isValidPlugin(plugin)) {
                             this.#writeCtx = [
                                 ...this.#writeCtx,
                                 { code: plugin.generate(schemas), outputPath: cfg.outputPath },
                             ]
                         } else {
-                            ctx.logger?.error(`${cfg.plugin} is not a valid typerpc plugin`)
+                            ctx.logger.error(`${cfg.plugin} is not a valid typerpc plugin`)
                             this.error(`${cfg.plugin} is not a valid typerpc plugin`)
                         }
                     }
