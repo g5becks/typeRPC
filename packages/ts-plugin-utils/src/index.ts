@@ -4,16 +4,14 @@ import {
     is,
     make,
     Message,
+    Method,
+    MutationService,
     Param,
     QueryService,
     Schema,
     StructLiteralProp,
-    Method,
-    MutationService,
 } from '@typerpc/schema'
 import { capitalize, lowerCase } from '@typerpc/plugin-utils'
-
-import { ChildProcess, exec } from 'child_process'
 
 export const typeMap: Map<string, string> = new Map<string, string>([
     [make.bool.type, 'boolean'],
@@ -57,7 +55,11 @@ export const dataType = (type: DataType): string => {
     }
 
     if (is.scalar(type)) {
-        return typeMap.get(type.type)!
+        const res = typeMap.get(type.type)
+        if (!res) {
+            throw new TypeError('invalid data type')
+        }
+        return res
     }
 
     if (is.map(type)) {
@@ -200,7 +202,7 @@ export const buildInterfaces = (schema: Schema): string => {
 
 // builds the param names list for a method E.G.
 // name, age, gender
-export const paramNames = (params: ReadonlyArray<Param>) => {
+export const paramNames = (params: ReadonlyArray<Param>): string => {
     if (params.length === 0) {
         return ''
     }
