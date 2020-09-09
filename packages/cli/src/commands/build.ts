@@ -175,12 +175,9 @@ class Build extends Command {
                 task: async (ctx) => {
                     for (const cfg of ctx.configs) {
                         const schemas = buildSchemas(ctx.sourceFiles, cfg.packageName)
-                        const plugin = ctx.manager.require(cfg.plugin)
-                        if (isValidPlugin(plugin)) {
-                            this.#writeCtx = [
-                                ...this.#writeCtx,
-                                { code: plugin.generate(schemas), outputPath: cfg.outputPath },
-                            ]
+                        const gen = ctx.manager.require(cfg.plugin)
+                        if (isValidPlugin(gen)) {
+                            this.#writeCtx = [...this.#writeCtx, { code: gen(schemas), outputPath: cfg.outputPath }]
                         } else {
                             ctx.logger.error(`${cfg.plugin} is not a valid typerpc plugin`)
                             this.error(`${cfg.plugin} is not a valid typerpc plugin`)
