@@ -10,18 +10,18 @@ import { isValidPlugin, PluginManager } from '@typerpc/plugin-manager'
 import { BaseLogger } from 'pino'
 import { logger } from '../logger'
 
-type Ctx = {
+type ValidateCtx = {
     sourceFiles: SourceFile[]
     configs: ParsedConfig[]
 }
 
-type BuildCtx = { manager?: PluginManager; logger?: BaseLogger } & Ctx
+type BuildCtx = { manager?: PluginManager; logger?: BaseLogger } & ValidateCtx
 
 type GeneratedCode = { code: Code[]; outputPath: string }
 
-type OutputCtx = GeneratedCode[]
+type WriteCtx = GeneratedCode[]
 
-type TaskCtx = Ctx | BuildCtx | OutputCtx
+type TaskCtx = ValidateCtx | BuildCtx | WriteCtx
 
 type BuildStep = {
     task: Listr
@@ -90,7 +90,7 @@ class Build extends Command {
             this.error(`No tsConfig.json file found at ${tsConfigFile}`)
         }
     }
-    #validationCtx: Ctx = {
+    #validationCtx: ValidateCtx = {
         configs: [],
         sourceFiles: [],
     }
@@ -99,7 +99,7 @@ class Build extends Command {
         ...this.#validationCtx,
     }
 
-    #outputCtx: OutputCtx = []
+    #outputCtx: WriteCtx = []
 
     #validateTsConfig = new Listr<{ tsConfigFilePath: string }>(
         {
@@ -109,7 +109,7 @@ class Build extends Command {
         { exitOnError: true },
     )
 
-    #validateInputs = new Listr<Ctx>(
+    #validate = new Listr<ValidateCtx>(
         [
             {
                 title: 'Output Path(s) Validation',
@@ -193,6 +193,8 @@ class Build extends Command {
         { exitOnError: true },
     )
 
+    #write = new Listr()
+
     async run() {
         const { flags } = this.parse(Build)
         const tsConfigFilePath = flags.tsConfig?.trim() ?? ''
@@ -222,7 +224,7 @@ class Build extends Command {
         const log = logger(project)
         this.#buildCtx = { ...this.#validationCtx, manager: PluginManager.create(project), logger: log }
         const steps: BuildStep[] = [
-            { task: this.#validateInputs, ctx: this.#validationCtx, msg: 'Triggering input validation' },
+            { task: this.#validate, ctx: this.#validationCtx, msg: 'Triggering input validation' },
             { task: this.#build, ctx: this.#buildCtx, msg: 'Beginning build process' },
         ]
         for (const step of steps) {
