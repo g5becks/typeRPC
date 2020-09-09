@@ -21,6 +21,13 @@ type GeneratedCode = { code: Code[]; outputPath: string }
 
 type OutputCtx = GeneratedCode[]
 
+type TaskCtx = Ctx | BuildCtx | OutputCtx
+
+type BuildStep = {
+    task: Listr
+    ctx: TaskCtx
+    msg: string
+}
 class Build extends Command {
     static description = 'describe command here'
 
@@ -214,21 +221,14 @@ class Build extends Command {
         this.#validationCtx = { sourceFiles, configs }
         const log = logger(project)
         this.#buildCtx = { ...this.#validationCtx, manager: PluginManager.create(project), logger: log }
-        this.log('Beginning input validation...')
-        // run validation
-        await this.#validateInputs.run(this.#validationCtx)
-        await this.#build.run(this.#buildCtx)
-
-        if (this.#code.length === 0) {
-            this.error('no code found to save, exiting')
-        } else {
-            await this.writeOutput(outputPath, this.#code)
+        const steps: BuildStep[] = [
+            { task: this.#validateInputs, ctx: this.#validationCtx, msg: 'Triggering input validation' },
+            { task: this.#build, ctx: this.#buildCtx, msg: 'Beginning build process' },
+        ]
+        for (const step of steps) {
+            this.log(step.msg)
+            await step.task.run(step.ctx)
         }
-        if (this.#preBuildCtx.builder?.format !== null && typeof this.#preBuildCtx.builder?.format !== 'undefined') {
-            this.log('running code formatter')
-            this.#preBuildCtx.builder.format(outputPath)
-        }
-        this.log(`JobId: ${jobId} complete, check ${outputPath} for generated ${target} code.`)
     }
 }
 
