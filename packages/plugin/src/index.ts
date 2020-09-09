@@ -5,7 +5,4 @@ export type Code = {
     readonly source: string
 }
 
-export type TypeRpcPlugin = {
-    scaffold: (outputPath: string) => Code[]
-    generate: (schemas: Schema[]) => Code[]
-}
+export type TypeRpcPlugin = (schemas: Schema[]) => Code[]
