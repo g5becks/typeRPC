@@ -121,7 +121,7 @@ export const fromQueryString = (paramName: string, type: DataType): string => {
                     return paramName
                 default:
                     // delegate all other types to helper functions
-                    return `StringsTo${capitalize(dataType(type))}s(${paramName})`
+                    return `StringsTo${capitalize(dataType(type.dataType))}s(${paramName})`
             }
         }
     }
