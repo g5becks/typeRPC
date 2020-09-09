@@ -91,16 +91,8 @@ class Build extends Command {
             this.error(`No tsConfig.json file found at ${tsConfigFile}`)
         }
     }
-    #validationCtx: ValidateCtx = {
-        configs: [],
-        sourceFiles: [],
-    }
 
-    #buildCtx: BuildCtx = {
-        ...this.#validationCtx,
-    }
-
-    #outputCtx: WriteCtx = []
+    #writeCtx: WriteCtx = []
 
     #validateTsConfig = new Listr<{ tsConfigFilePath: string }>(
         {
@@ -179,8 +171,8 @@ class Build extends Command {
                         const schemas = buildSchemas(ctx.sourceFiles, cfg.packageName)
                         const plugin = ctx.manager?.require(cfg.plugin)
                         if (isValidPlugin(plugin)) {
-                            this.#outputCtx = [
-                                ...this.#outputCtx,
+                            this.#writeCtx = [
+                                ...this.#writeCtx,
                                 { code: plugin.generate(schemas), outputPath: cfg.outputPath },
                             ]
                         } else {
@@ -194,7 +186,12 @@ class Build extends Command {
         { exitOnError: true },
     )
 
-    #write = new Listr()
+    #write = new Listr<WriteCtx>([
+        {
+            title: 'Saving generated code to provided output path(s)',
+            task: async (ctx) => {},
+        },
+    ])
 
     async run() {
         const { flags } = this.parse(Build)
@@ -221,12 +218,15 @@ class Build extends Command {
             configs = [{ configName: 'flags', plugin, outputPath, packageName, formatter }]
         }
 
-        this.#validationCtx = { sourceFiles, configs }
         const log = logger(project)
-        this.#buildCtx = { ...this.#validationCtx, manager: PluginManager.create(project), logger: log }
         const steps: BuildStep[] = [
-            { task: this.#validate, ctx: this.#validationCtx, msg: 'Triggering input validation' },
-            { task: this.#build, ctx: this.#buildCtx, msg: 'Beginning build process' },
+            { task: this.#validate, ctx: { sourceFiles, configs }, msg: 'Triggering input validation' },
+            {
+                task: this.#build,
+                ctx: { sourceFiles, configs, manager: PluginManager.create(project), logger: log },
+                msg: 'Beginning build process',
+            },
+            { task: this.#write, ctx: this.#writeCtx, msg: 'Saving generated code to disk' },
         ]
         for (const step of steps) {
             this.log(step.msg)
