@@ -189,7 +189,9 @@ class Build extends Command {
     #write = new Listr<WriteCtx>([
         {
             title: 'Saving generated code to provided output path(s)',
-            task: async (ctx) => {},
+            task: async (ctx) => {
+                await Promise.all(ctx.map((generated) => this.writeOutput(generated.outputPath, generated.code)))
+            },
         },
     ])
 
