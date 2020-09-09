@@ -11,9 +11,9 @@
   "homepage": "https://github.com/typerpc/typerpc",
   "license": "BSD-2-Clause",
   "directories": {
-    "lib": "src",
-    "test": "test"
+    "lib": "src"
   },
+  "types": "./lib/index",
   "files": [
     "src"
   ],

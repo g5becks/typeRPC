@@ -31,7 +31,7 @@ yarn dev # npm run dev
 ## Build
 
 ```sh
-yarn build # npm run build
+yarn generate # npm run generate
 ```
 
 ## Serve built app

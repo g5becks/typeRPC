@@ -37,7 +37,7 @@ bower_components
 .lock-wscript
 
 # Compiled binary addons (https://nodejs.org/api/addons.html)
-build/Release
+generate/Release
 
 # Dependency directories
 node_modules/
@@ -78,11 +78,11 @@ web_modules/
 .cache
 .parcel-cache
 
-# Next.js build output
+# Next.js generate output
 .next
 out
 
-# Nuxt.js build / generate output
+# Nuxt.js generate / generate output
 .nuxt
 dist
 
@@ -92,7 +92,7 @@ dist
 # https://nextjs.org/blog/next-9-1#public-directory-support
 # public
 
-# vuepress build output
+# vuepress generate output
 .vuepress/dist
 
 # Serverless directories
@@ -113,7 +113,7 @@ dist
 # yarn v2
 .yarn/cache
 .yarn/unplugged
-.yarn/build-state.yml
+.yarn/generate-state.yml
 .yarn/install-state.gz
 .pnp.*
 

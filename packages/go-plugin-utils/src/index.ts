@@ -12,7 +12,6 @@ import {
     QueryMethod,
 } from '@typerpc/schema'
 import { capitalize, lowerCase } from '@typerpc/plugin-utils'
-import { ChildProcess, exec } from 'child_process'
 
 export const typeMap: Map<string, string> = new Map<string, string>([
     [make.bool.type, 'bool'],
@@ -123,13 +122,16 @@ export const scalarFromQueryParam = (paramName: string, type: DataType): string 
     return ''
 }
 
-export const handleOptional = (isOptional: boolean): string => (isOptional ? '*' : '')
+export const handleOptional = (property: Property): string =>
+    is.scalar(property.type) || is.struct(property.type) || (is.structLiteral(property.type) && property.isOptional)
+        ? '*'
+        : ''
 
 export const buildProps = (props: ReadonlyArray<Property>): string => {
     let properties = ''
     for (const prop of props) {
         properties = properties.concat(
-            `${capitalize(prop.name)}  ${handleOptional(prop.isOptional)}${dataType(prop.type)} \`json:"${lowerCase(
+            `${capitalize(prop.name)}  ${handleOptional(prop)}${dataType(prop.type)} \`json:"${lowerCase(
                 prop.name,
             )}"\`\n`,
         )
@@ -218,19 +220,3 @@ export const buildInterfaces = (schema: Schema): string => {
     }
     return interfaces
 }
-
-export const format = (path: string): ChildProcess =>
-    exec(`gofmt -w ${path}`, (error, stdout, stderr) => {
-        if (error) {
-            // eslint-disable-next-line no-console
-            console.log(`error: ${error.message}`)
-            return
-        }
-        if (stderr) {
-            // eslint-disable-next-line no-console
-            console.log(`stderr: ${stderr}`)
-            return
-        }
-        // eslint-disable-next-line no-console
-        console.log(`formatting complete: ${stdout}`)
-    })
