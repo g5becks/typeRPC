@@ -248,22 +248,3 @@ export const buildMsgImports = (imports: ReadonlyArray<Import>): string => {
     }
     return importsStr
 }
-
-export const format = (path: string): ChildProcess =>
-    exec(
-        `prettier --single-quote --trailing-comma es5 --no-semi --parser typescript --write "${path}/**/*.ts"`,
-        (error, stdout, stderr) => {
-            if (error) {
-                // eslint-disable-next-line no-console
-                console.log(`error: ${error.message}`)
-                return
-            }
-            if (stderr) {
-                // eslint-disable-next-line no-console
-                console.log(`stderr: ${stderr}`)
-                return
-            }
-            // eslint-disable-next-line no-console
-            console.log(`prettier formatted following files: ${stdout}`)
-        },
-    )

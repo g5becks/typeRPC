@@ -1,9 +1,10 @@
 import { ObjectLiteralExpression, Project, SourceFile, SyntaxKind } from 'ts-morph'
 import { GeneratorConfig } from '@typerpc/config'
+import pino from 'pino'
+import { ChildProcess, exec } from 'child_process'
 
 export const getConfigFile = (project: Project) =>
     project.getSourceFile((file) => file.getBaseName().toLowerCase() === '.rpc.config.ts')
-
 const parseGeneratorConfig = (obj: ObjectLiteralExpression): GeneratorConfig => {
     const outputPath = obj
         .getProperty('outputPath')
@@ -30,9 +31,7 @@ const parseGeneratorConfig = (obj: ObjectLiteralExpression): GeneratorConfig => 
 
     return { outputPath, plugin, packageName, formatter }
 }
-
 export type ParsedConfig = GeneratorConfig & { configName: string }
-
 export const parseConfig = (file: SourceFile | undefined): ParsedConfig[] => {
     // parse object literal from the config var then get all properties
     const conf = file?.getVariableDeclaration('config')
@@ -54,3 +53,28 @@ export const parseConfig = (file: SourceFile | undefined): ParsedConfig[] => {
     }
     return configs
 }
+
+export const logger = (project: Project) =>
+    pino(
+        { level: 'error', prettyPrint: true },
+        pino.destination({ dest: project.getRootDirectories()[0].getPath() + '/.typerpc/error.log', sync: false }),
+    )
+
+export const format = (
+    path: string,
+    formatter: string,
+    onError: (error: Error | string) => void,
+    onComplete: (msg: string) => void,
+): ChildProcess =>
+    exec(`${formatter} ${path}`, (error, stdout, stderr) => {
+        if (error) {
+            onError(error)
+            return
+        }
+        if (stderr) {
+            onError(stderr)
+            return
+        }
+
+        onComplete(`code formatting succeeded using formatter: ${formatter}, msg: ${stdout}`)
+    })

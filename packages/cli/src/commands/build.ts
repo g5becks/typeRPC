@@ -5,10 +5,9 @@ import path from 'path'
 import { Listr } from 'listr2'
 import { buildSchemas, Schema, validateSchemas } from '@typerpc/schema'
 import { Project, SourceFile } from 'ts-morph'
-import { getConfigFile, parseConfig, ParsedConfig } from '../configParser'
 import { isValidPlugin, PluginManager } from '@typerpc/plugin-manager'
 import { BaseLogger } from 'pino'
-import { logger } from '../logger'
+import { getConfigFile, logger, parseConfig, ParsedConfig } from '../utils'
 
 type ValidateCtx = {
     sourceFiles: SourceFile[]
