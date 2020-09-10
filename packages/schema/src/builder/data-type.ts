@@ -39,6 +39,6 @@ export const useCbor = (type: TypeAliasDeclaration | MethodSignature | undefined
     if (typeof type === 'undefined') {
         return false
     }
-    const comment = parseJsDocComment(type, 'kind')?.trim().toLowerCase() ?? ''
+    const comment = parseJsDocComment(type, 'kind')?.trim()?.toLowerCase() ?? ''
     return comment.includes('cbor')
 }

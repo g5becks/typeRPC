@@ -7,8 +7,13 @@
     "strict": true,
     "target": "es2017",
     "esModuleInterop": true,
-    "lib": ["ESNext"],
-    "sourceMap": true
+    "lib": ["ESNext", "dom"],
+    "sourceMap": true,
+    "moduleResolution": "node",
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "pretty": true
   },
   "exclude": [
     "node_modules",
