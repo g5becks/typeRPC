@@ -26,7 +26,7 @@
   "files": [
     "/bin",
     "/packages/cli/bin",
-    "/lib",
+    "/dist",
     "/npm-shrinkwrap.json",
     "/oclif.manifest.json"
   ],
@@ -48,7 +48,7 @@
   "scripts": {
     "lint-fix": "eslint --fix src/**",
     "build": "yarn run clean && yarn run tsc",
-    "clean": "rm -rf ./lib && rm -rf tsconfig.build.tsbuildinfo",
+    "clean": "rm -rf ./dist && rm -rf tsconfig.build.tsbuildinfo",
     "tsc": "tsc -b tsconfig.build.json",
     "postpack": "rm -f oclif.manifest.json",
     "posttest1": "eslint . --ext .ts --config .eslintrc",

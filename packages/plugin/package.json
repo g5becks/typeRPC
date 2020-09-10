@@ -13,8 +13,8 @@
   "author": "Gary Becks <techstar.dev@hotmail.com>",
   "homepage": "https://github.com/typerpc/typerpc",
   "license": "BSD-2-Clause",
-  "main": "./lib/index.js",
-  "types": "./lib/index.d.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "directories": {
     "lib": "src",
     "test": "tests"
@@ -31,10 +31,10 @@
   },
   "scripts": {
     "lint-fix": "eslint --fix src/**",
-    "build": "yarn run clean && yarn run tsc",
-    "clean": "rm -rf ./lib && rm -rf tsconfig.build.tsbuildinfo",
+    "build": "yarn run clean && yarn run tsc && eslint --fix dist/**",
+    "clean": "rm -rf ./dist && rm -rf tsconfig.build.tsbuildinfo",
     "tsc": "tsc -b tsconfig.build.json",
-    "test": "echo \"Error: run tests from root\" && exit 1"
+    "test": "jest"
   },
   "dependencies": {
     "@typerpc/schema": "^0.1.1"
