@@ -1,15 +1,9 @@
  {
   "extends": "./tsconfig.build.json",
   "compilerOptions": {
-    "declaration": true,
-    "importHelpers": true,
-    "module": "commonjs",
-    "outDir": "lib",
+    "composite": false,
     "rootDir": ".",
-    "strict": true,
-    "target": "es2017",
-    "esModuleInterop": true,
-    "lib": ["ESNext"],
+    "noEmit": true,
     "baseUrl": "./packages",
     "paths": {
       "@typerpc/plugin-manager": ["plugin-manager/src"],
@@ -25,12 +19,5 @@
       "@typerpc/types": ["types/src"],
       "@typerpc/validators": ["validators/src"]
     }
-  },
-  "exclude": [
-    "node_modules",
-    "**/*.test.ts"
-  ],
-  "include": [
-    "src/**/*"
-  ]
+  }
 }
