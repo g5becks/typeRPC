@@ -17,8 +17,8 @@
   "files": [
     "src"
   ],
-  "main": "./lib/index.js",
-  "types": "./lib/index.d.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/typerpc/typerpc.git"
@@ -29,7 +29,7 @@
   "scripts": {
     "lint-fix": "eslint --fix src/**",
     "build": "yarn run clean && yarn run tsc",
-    "clean": "rm -rf ./lib && rm -rf tsconfig.build.tsbuildinfo",
+    "clean": "rm -rf ./dist && rm -rf tsconfig.build.tsbuildinfo",
     "tsc": "tsc -b tsconfig.build.json"
   },
   "bugs": {
