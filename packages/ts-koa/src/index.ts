@@ -1,22 +1,21 @@
-import { Code, TypeRpcPlugin } from '@typerpc/plugin'
+import { Code } from '@typerpc/plugin'
 import {
+    isQueryMethod,
     MutationMethod,
+    MutationService,
     Param,
+    QueryMethod,
     QueryService,
     Schema,
-    isQueryMethod,
-    MutationService,
-    QueryMethod,
 } from '@typerpc/schema'
 import { capitalize, fileHeader, lowerCase, serverResponseContentType } from '@typerpc/plugin-utils'
 import {
     buildInterfaces,
     buildMsgImports,
+    buildParamsVar,
     buildTypes,
     dataType,
-    format,
     fromQueryString,
-    buildParamsVar,
     paramNames,
 } from '@typerpc/ts-plugin-utils'
 
@@ -214,4 +213,4 @@ export const runServer = (opts: ServerOptions): http.Server => {
 // builds all schemas and server file
 const build = (schemas: Schema[]): Code[] => [...schemas.map((schema) => buildFile(schema)), buildServer(schemas)]
 
-export const KoaBuilder: TypeRpcPlugin = build
+export default build

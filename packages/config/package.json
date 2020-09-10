@@ -13,7 +13,7 @@
   "directories": {
     "lib": "src"
   },
-  "types": "./lib/index",
+  "types": "./lib/index.d.ts",
   "files": [
     "src"
   ],
@@ -22,7 +22,10 @@
     "url": "git+https://github.com/typerpc/typerpc.git"
   },
   "scripts": {
-    "test": "echo \"Error: run tests from root\" && exit 1"
+    "lint-fix": "eslint --fix src/**",
+    "build": "yarn run clean && yarn run tsc",
+    "clean": "rm -rf ./lib && rm -rf tsconfig.build.tsbuildinfo",
+    "tsc": "tsc -b tsconfig.build.json"
   },
   "dependencies": {
     "@typerpc/plugin": "^0.1.1"

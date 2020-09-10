@@ -4,7 +4,7 @@
     "composite": true,
     "declaration": true,
     "declarationMap": true,
-    "outDir": "./src",
+    "outDir": "./lib",
     "rootDir": "./src"
   },
   "references": [

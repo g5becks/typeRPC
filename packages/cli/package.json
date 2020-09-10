@@ -49,14 +49,13 @@
     "lint-fix": "eslint --fix src/**",
     "build": "yarn run clean && yarn run tsc",
     "clean": "rm -rf ./lib && rm -rf tsconfig.build.tsbuildinfo",
-    "tsc": "tsc -b tscconfig.build.json",
+    "tsc": "tsc -b tsconfig.build.json",
     "postpack": "rm -f oclif.manifest.json",
     "posttest1": "eslint . --ext .ts --config .eslintrc",
     "prepack": "yarn run build && oclif-dev manifest && oclif-dev readme",
     "test": "jest",
     "version": "oclif-dev readme && git add README.md"
   },
-  "types": "lib/index.d.ts",
   "bugs": {
     "url": "https://github.com/typerpc/typerpc/issues"
   },

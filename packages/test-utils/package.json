@@ -27,9 +27,9 @@
   "scripts": {
     "lint-fix": "eslint --fix src/**",
     "build": "yarn run clean && yarn run tsc",
-    "clean": "rm -rf ./dist && rm -rf tsconfig.build.tsbuildinfo",
+    "clean": "rm -rf ./lib && rm -rf tsconfig.build.tsbuildinfo",
     "tsc": "tsc -b tscconfig.build.json",
-    "test": "echo \"Error: run tests from root\" && exit 1"
+    "test": "jest"
   },
   "bugs": {
     "url": "https://github.com/typerpc/typerpc/issues"
