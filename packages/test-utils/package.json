@@ -28,7 +28,7 @@
     "lint-fix": "eslint --fix src/**",
     "build": "yarn run clean && yarn run tsc",
     "clean": "rm -rf ./lib && rm -rf tsconfig.build.tsbuildinfo",
-    "tsc": "tsc -b tscconfig.build.json",
+    "tsc": "tsc -b tsconfig.build.json",
     "test": "jest"
   },
   "bugs": {
