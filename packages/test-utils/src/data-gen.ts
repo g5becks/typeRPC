@@ -131,3 +131,4 @@ export const genRandomDataType = (msgNames: string[]) => {
     const generated = [genRandomContainer(msgNames), ...comparables, '$.nil', '$.unit']
     return generated[randomNumber(0, generated.length)]
 }
+

@@ -236,7 +236,7 @@ class Build extends Command {
         ],
         { exitOnError: true },
     )
-    async run() {
+    async run(): Promise<void> {
         const { flags } = this.parse(Build)
         const tsConfigFilePath = flags.tsConfig?.trim() ?? ''
         // validate tsconfig before proceeding

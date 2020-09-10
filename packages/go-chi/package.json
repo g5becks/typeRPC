@@ -33,7 +33,7 @@
   },
   "scripts": {
     "lint-fix": "eslint --fix src/**",
-    "build": "yarn run clean && yarn run tsc",
+    "build1": "yarn run clean && yarn run tsc",
     "clean": "rm -rf ./dist && rm -rf tsconfig.build.tsbuildinfo",
     "tsc": "tsc -b tsconfig.build.json",
     "test": "jest"

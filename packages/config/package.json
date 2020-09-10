@@ -13,7 +13,7 @@
   "directories": {
     "lib": "src"
   },
-  "types": "./lib/index.d.ts",
+  "types": "./dist/index.d.ts",
   "files": [
     "src"
   ],

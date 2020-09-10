@@ -24,6 +24,7 @@ const parseUrlParams = (params: ReadonlyArray<Param>): string => {
     }
     return parsed
 }
+
 const buildGetHandler = (method: QueryMethod) => {
     return `
    r.Get("/${method.name}", func(res http.ResponseWriter, req *http.Request) {

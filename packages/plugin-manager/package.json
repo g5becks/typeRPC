@@ -36,6 +36,7 @@
     "url": "https://github.com/typerpc/typerpc/issues"
   },
   "dependencies": {
+    "@typerpc/plugin": "^0.1.1",
     "live-plugin-manager": "^0.15.1",
     "ts-morph": "^8.1.0"
   }

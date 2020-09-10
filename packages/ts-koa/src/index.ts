@@ -225,4 +225,7 @@ export const runServer = (opts: ServerOptions): http.Server => {
 // builds all schemas and server file
 const build = (schemas: Schema[]): Code[] => [...schemas.map((schema) => buildFile(schema)), buildServer(schemas)]
 
+export const testing = {
+    buildDestructuredParams,
+}
 export default build

@@ -55,3 +55,4 @@ export const genTestMessageFiles = (msgNames: string[]): [string, string][] => {
     }
     return files
 }
+
