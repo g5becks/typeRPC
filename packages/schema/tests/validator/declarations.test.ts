@@ -206,22 +206,21 @@ test('validateImports() should return an error when import is default', () => {
 
 test('validateImports() should NOT return an error when import is valid', () => {
     const proj = new Project({
-        tsConfigFilePath: './test/schema/validator/tsconfig.json',
+        tsConfigFilePath: './tests/validator/tsconfig.json',
         skipFileDependencyResolution: true,
     })
-
-    const file = proj.createSourceFile('./test/schema/validator/test.ts', "import {B} from './declarations.test'")
+    const file = proj.createSourceFile('./tests/validator/test.ts', "import {B} from './declarations.test'")
 
     expect(validateImports(file, proj.getSourceFiles()).length).toEqual(0)
 })
 
 test('validateImports() should fail when it finds an aliased import', () => {
     const proj = new Project({
-        tsConfigFilePath: './test/schema/validator/tsconfig.json',
+        tsConfigFilePath: './tests/validator/tsconfig.json',
         skipFileDependencyResolution: true,
     })
 
-    const file = proj.createSourceFile('./test/schema/validator/test.ts', "import {B as C} from './declarations.test'")
+    const file = proj.createSourceFile('./tests/validator/test.ts', "import {B as C} from './declarations.test'")
 
     expect(validateImports(file, proj.getSourceFiles()).length).toEqual(1)
 })
