@@ -189,6 +189,7 @@ class Build extends Command {
                         const schemas = buildSchemas(ctx.sourceFiles, cfg.packageName)
                         const gen = ctx.manager.require(cfg.plugin)
                         if (isValidPlugin(gen)) {
+                            // pass the generated code to the writeCtx for write task
                             this.#writeCtx = [...this.#writeCtx, { code: gen(schemas), outputPath: cfg.outputPath }]
                         } else {
                             ctx.logger.error(`${cfg.plugin} is not a valid typerpc plugin`)
