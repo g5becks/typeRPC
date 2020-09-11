@@ -140,22 +140,6 @@ export const fromQueryString = (param: string, type: DataType): string => {
     return ''
 }
 
-const parseParam = (param: Param): string => (is.list(param.type) ? `q["${param.name}"]` : `q.Get("${param.name}")`)
-
-// builds a string representation of go code
-// that parses all of the query params from an *http.Request struct
-export const parseQueryParams = (params: ReadonlyArray<Param>): string => {
-    let parsed = `q := req.URL.Query()
-  \n`
-    for (const param of params) {
-        parsed = parsed.concat(`${param.name} := ${fromQueryString(parseParam(param), param.type)}
-        `)
-    }
-    return parsed
-}
-
-export const parseReqBody = (method: MutationMethod | QueryMethod): string => {}
-
 export const handleOptional = (property: Property): string =>
     // if type is a scalar, make it a pointer (optional)
     is.scalar(property.type) && property.isOptional ? '*' : ''
@@ -235,6 +219,38 @@ export const buildInterface = (service: MutationService | QueryService): string 
  }
  `
 }
+
+const parseParam = (param: Param): string => (is.list(param.type) ? `q["${param.name}"]` : `q.Get("${param.name}")`)
+
+// builds a string representation of go code
+// that parses all of the query params from an *http.Request struct
+export const parseQueryParams = (params: ReadonlyArray<Param>): string => {
+    let parsed = `q := req.URL.Query()
+  \n`
+    for (const param of params) {
+        parsed = parsed.concat(`${param.name} := ${fromQueryString(parseParam(param), param.type)}
+        `)
+    }
+    return parsed
+}
+
+export const parseReqBody = (method: MutationMethod | QueryMethod): string => {
+    let props = ''
+    for (const param of method.params) {
+        props = props.concat(`${capitalize(param.name)} ${dataType(param.type)} \`json:"${lowerCase(param.name)}"\`
+      `)
+    }
+    return `rCont := struct {
+        ${props}
+    }{}
+
+    rBody, err := ioutil.ReadAll(r.Body)
+    if err != nil {
+      RespondWithErr(w, NewRpcErr(http.StatusInternalServerError, "failed to read request", err))
+      return
+    }`
+}
+
 // builds the names of params to use for calling a method
 export const buildParamNames = (method: QueryMethod | MutationMethod): string => {
     const params = method.params
@@ -244,7 +260,7 @@ export const buildParamNames = (method: QueryMethod | MutationMethod): string =>
         const useComma = i === params.length - 1 ? '' : ', '
         paramString = isQueryMethod(method)
             ? paramString.concat(`${params[i].name}${useComma}`)
-            : paramString.concat(`reqCont.${capitalize(params[i].name)}${useComma}`)
+            : paramString.concat(`rCont.${capitalize(params[i].name)}${useComma}`)
         i++
     }
     return paramString
@@ -279,7 +295,7 @@ export const buildMethodReturnVar = (method: QueryMethod | MutationMethod): stri
     }
     return `var ${dataType(method.returnType)}`
 }
-export const buildMethodInvocationResultVar = (method: QueryMethod | MutationMethod): string => {
+export const buildMethodCallResultVar = (method: QueryMethod | MutationMethod): string => {
     if (is.tuple2(method.returnType)) {
         return `res1, res2, err`
     }
