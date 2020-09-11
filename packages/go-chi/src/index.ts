@@ -15,17 +15,14 @@ import { capitalize, lowerCase } from '@typerpc/plugin-utils'
 import { Code } from '@typerpc/plugin'
 import { buildFileName, buildInterfaces, buildTypes, fromQueryString } from '@typerpc/go-plugin-utils'
 
-const parseParam = (param: Param): string => {
-    if (param.type.toString().startsWith('$.list<')) {
-        return `q["${param.name}"]`
-    }
-}
+const isListParam = (param: Param): boolean => param.type.toString().startsWith('$.list<')
+const parseParam = (param: Param): string => (isListParam(param) ? `q["${param.name}"]` : `q.Get("${param.name}")`)
+
 const parseUrlParams = (params: ReadonlyArray<Param>): string => {
     let parsed = `q := req.URL.Query()
   `
     for (const param of params) {
-        parsed = parsed.concat(`${param.name} := q.Get("${param.name}")
-    `)
+        parsed = parsed.concat(`${param.name} := ${fromQueryString(parseParam(param), param.type)}`)
     }
     return parsed
 }
