@@ -77,23 +77,21 @@ export const dataType = (type: DataType): string => {
     }
 
     if (is.tuple2(type)) {
-        return `(${dataType(type.item1)}, ${dataType(type.item2)}, error)`
+        return `${dataType(type.item1)}, ${dataType(type.item2)}`
     }
 
     if (is.tuple3(type)) {
-        return `(${dataType(type.item1)}, ${dataType(type.item2)}, ${dataType(type.item3)}, error)`
+        return `${dataType(type.item1)}, ${dataType(type.item2)}, ${dataType(type.item3)}`
     }
 
     if (is.tuple4(type)) {
-        return `(${dataType(type.item1)}, ${dataType(type.item2)}, ${dataType(type.item3)}, ${dataType(
-            type.item4,
-        )}, error)`
+        return `${dataType(type.item1)}, ${dataType(type.item2)}, ${dataType(type.item3)}, ${dataType(type.item4)}`
     }
 
     if (is.tuple5(type)) {
-        return `(${dataType(type.item1)}, ${dataType(type.item2)}, ${dataType(type.item3)}, ${dataType(
+        return `${dataType(type.item1)}, ${dataType(type.item2)}, ${dataType(type.item3)}, ${dataType(
             type.item4,
-        )}, ${dataType(type.item5)}, error)`
+        )}, ${dataType(type.item5)}`
     }
 
     return 'interface{}'
@@ -210,9 +208,7 @@ export const buildReturnType = (type: DataType): string => {
     if (is.scalar(type) && type.type === 'unit') {
         return 'error'
     }
-    if (is.tuple2(type) || is.tuple3(type) || is.tuple4(type) || is.tuple5(type)) {
-        return dataType(type)
-    }
+
     return `(${dataType(type)}, error)`
 }
 
