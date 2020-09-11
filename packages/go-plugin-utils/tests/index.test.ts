@@ -18,10 +18,10 @@ import { dataTypeTestsSource, genSourceFile } from '@typerpc/test-utils'
 const { parseMsgProps, makeDataType } = _schemaTesting
 const expected = [
     'map[string]int8',
-    '(int8, int8, error)',
-    '(int8, int16, uint16, error)',
-    '(int8, string, bool, time.Time, error)',
-    '(string, string, interface{}, []byte, float32, error)',
+    'int8, int8',
+    'int8, int16, uint16',
+    'int8, string, bool, time.Time',
+    'string, string, interface{}, []byte, float32',
     '[]bool',
     `struct{Name  string \`json:"name"\`
 Age  int8 \`json:"age"\`
