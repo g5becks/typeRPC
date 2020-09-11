@@ -68,12 +68,13 @@ export const dataType = (type: DataType): string => {
     }
 
     if (is.struct(type)) {
-        return type.name
+        // default structs to being pointers
+        return '*' + type.name
     }
 
     if (is.structLiteral(type)) {
         // eslint-disable-next-line @typescript-eslint/no-use-before-define
-        return `struct{${buildProps(type.properties)}}`
+        return `*struct{${buildProps(type.properties)}}`
     }
 
     if (is.tuple2(type)) {
@@ -153,12 +154,8 @@ export const parseQueryParams = (params: ReadonlyArray<Param>): string => {
 }
 
 export const handleOptional = (property: Property): string =>
-    // if type is stack allocated go type and is optional, make it a pointer (optional)
-    property.isOptional
-        ? is.scalar(property.type) || is.struct(property.type) || is.structLiteral(property.type)
-            ? '*'
-            : ''
-        : ''
+    // if type is a scalar, make it a pointer (optional)
+    is.scalar(property.type) && property.isOptional ? '*' : ''
 
 export const buildProps = (props: ReadonlyArray<Property>): string => {
     let properties = ''
@@ -245,6 +242,51 @@ export const buildMethodParamNames = (params: ReadonlyArray<Param>): string => {
         i++
     }
     return paramString
+}
+
+export const buildMethodReturnVar = (method: QueryMethod | MutationMethod): string => {
+    if (is.tuple2(method.returnType)) {
+        return `var res1 ${dataType(method.returnType)}
+              var res2 ${dataType(method.returnType)}
+              `
+    }
+    if (is.tuple3(method.returnType)) {
+        return `var res1 ${dataType(method.returnType)}
+              var res2 ${dataType(method.returnType)}
+              var res3 ${dataType(method.returnType)}
+              `
+    }
+    if (is.tuple4(method.returnType)) {
+        return `var res1 ${dataType(method.returnType)}
+              var res2 ${dataType(method.returnType)}
+              var res3 ${dataType(method.returnType)}
+              var res4 ${dataType(method.returnType)}
+              `
+    }
+    if (is.tuple5(method.returnType)) {
+        return `var res1 ${dataType(method.returnType)}
+              var res2 ${dataType(method.returnType)}
+              var res3 ${dataType(method.returnType)}
+              var res4 ${dataType(method.returnType)}
+              var res5 ${dataType(method.returnType)}
+              `
+    }
+    return `var ${dataType(method.returnType)}`
+}
+export const buildMethodInvocationResultVar = (method: QueryMethod | MutationMethod): string => {
+    if (is.tuple2(method.returnType)) {
+        return `res1, res2, err`
+    }
+    if (is.tuple3(method.returnType)) {
+        return `res1, res2, res3, err`
+    }
+    if (is.tuple4(method.returnType)) {
+        return `res1, res2, res3, res4, err`
+    }
+    if (is.tuple5(method.returnType)) {
+        return `res1, res2, res3, res4, res5, err`
+    }
+    return `res, err`
 }
 export const buildFileName = (fileName: string): string =>
     fileName.includes('-') ? fileName.split('-').join('_') + '.go' : fileName + '.go'
