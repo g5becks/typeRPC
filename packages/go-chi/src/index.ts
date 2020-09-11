@@ -13,8 +13,13 @@
 import { MutationService, Param, QueryMethod, QueryService, Schema } from '@typerpc/schema'
 import { capitalize, lowerCase } from '@typerpc/plugin-utils'
 import { Code } from '@typerpc/plugin'
-import { buildFileName, buildInterfaces, buildTypes } from '@typerpc/go-plugin-utils'
+import { buildFileName, buildInterfaces, buildTypes, fromQueryString } from '@typerpc/go-plugin-utils'
 
+const parseParam = (param: Param): string => {
+    if (param.type.toString().startsWith('$.list<')) {
+        return `q["${param.name}"]`
+    }
+}
 const parseUrlParams = (params: ReadonlyArray<Param>): string => {
     let parsed = `q := req.URL.Query()
   `

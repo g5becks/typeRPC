@@ -241,6 +241,95 @@ export const buildInterfaces = (schema: Schema): string => {
 }
 
 export const helpers = `
+type ErrorPayload struct {
+	Code  int    \`json:"code"\`
+	Cause string \`json:"cause,omitempty"\`
+	Msg   string \`json:"msg"\`
+	Error string \`json:"error"\`
+}
+
+type RpcError interface {
+	// Code is of the valid error codes
+	Code() int
+
+	// Msg returns a human-readable, unstructured messages describing the error
+	Msg() string
+
+	// Cause is reason for the error
+	Cause() error
+
+	// RpcError returns a string of the form "typerpc error <Code>: <Msg>"
+	Error() string
+
+	// RpcError response payload
+	Payload() ErrorPayload
+}
+
+type rpcErr struct {
+	code  int
+	msg   string
+	cause error
+}
+
+func NewRpcError(code int, msg string, cause error) *rpcErr {
+	return &rpcErr{code: code, msg: msg, cause: cause}
+}
+func (e *rpcErr) Code() int {
+	return e.code
+}
+
+func (e *rpcErr) Msg() string {
+	return e.msg
+}
+
+func (e *rpcErr) Cause() error {
+	return e.cause
+}
+
+func (e *rpcErr) Error() string {
+	if e.cause != nil && e.cause.Error() != "" {
+		if e.msg != "" {
+			return fmt.Sprintf("typerpc %d error: %s -- %s", e.code, e.cause.Error(), e.msg)
+		} else {
+			return fmt.Sprintf("typerpc %d error: %s", e.code, e.cause.Error())
+		}
+	} else {
+		return fmt.Sprintf("typerpc %d error: %s", e.code, e.msg)
+	}
+}
+
+func (e *rpcErr) Payload() ErrorPayload {
+	errPayload := ErrorPayload{
+		Code:  e.Code(),
+		Msg:   e.Msg(),
+		Error: e.Error(),
+	}
+	if e.Cause() != nil {
+		errPayload.Cause = e.Cause().Error()
+	}
+	return errPayload
+}
+
+func RespondWithError(w http.ResponseWriter, err error, isCbor bool) {
+	var e *rpcErr
+	if !errors.As(err, &e) {
+		e = WrapError(http.StatusInternalServerError, err, "webrpc error")
+	}
+	w.WriteHeader(e.code)
+	var respBody []byte
+	if isCbor {
+			w.Header().Set("Content-Type", "application/cbor")
+		body, _ := cbor.Marshal(e.Payload())
+		respBody = body
+
+	} else {
+		w.Header().Set("Content-Type", "application/json")
+		body, _ := json.Marshal(e.Payload())
+		respBody = body
+	}
+	w.Write(respBody)
+}
+
 func StringToTimestamp(t string) (time.Time, error) {
 	parsed, err := strconv.ParseInt(t, 0, 64)
 	if err != nil {
