@@ -10,28 +10,37 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { MutationMethod, MutationService, QueryMethod, QueryService, Schema } from '@typerpc/schema'
+import {isQueryMethod, MutationMethod, MutationService, QueryMethod, QueryService, Schema} from '@typerpc/schema'
 import { capitalize, lowerCase } from '@typerpc/plugin-utils'
 import { Code } from '@typerpc/plugin'
 import {
     buildFileName,
     buildInterfaces,
     buildMethodInvocationResultVar,
-    buildMethodParamNames,
+    buildParamNames,
+    buildMethodReturnVar,
     buildTypes,
     parseQueryParams,
 } from '@typerpc/go-plugin-utils'
 
 const invokeMethod = (svcName: string, method: QueryMethod | MutationMethod): string => {
-    ;`${buildMethodInvocationResultVar(method)} = ${lowerCase(svcName)}.${capitalize(
-        method.name,
-    )}(ctx, ${buildMethodParamNames(method.params)})`
-}
-const buildGetHandler = (svcName: string, method: QueryMethod) => {
     return `
-   r.Get("/${lowerCase(method.name)}", func(res http.ResponseWriter, req *http.Request) {
+    ${buildMethodReturnVar(method)}
+    func() {
+    defer handlePanic(res, ${method.hasCborReturn ? 'true' : 'false'})
+    ${buildMethodInvocationResultVar(method)} = ${lowerCase(svcName)}.${capitalize(
+        method.name,
+    )}(ctx, ${isQueryMethod(method) ?  buildParamNames(method.params) : })
+    }()`
+}
+const buildHandler = (svcName: string, method: QueryMethod | MutationMethod) => {
+    return `
+   r.${capitalize(method.httpMethod.toLowerCase())}("/${lowerCase(
+        method.name,
+    )}", func(res http.ResponseWriter, req *http.Request) {
+    var err error
     ctx := context.WithValue(r.Context(), handlerKey, "${capitalize(svcName)}Routes/${lowerCase(method.name)}")
-    ${parseQueryParams(method.params)}
+    ${isQueryMethod(method) ? parseQueryParams(method.params) : }
     ${invokeMethod(svcName, method)}
 	})`
 }

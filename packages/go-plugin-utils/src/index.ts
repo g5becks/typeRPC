@@ -13,6 +13,7 @@
 import {
     DataType,
     is,
+    isQueryMethod,
     make,
     Message,
     MutationMethod,
@@ -145,13 +146,15 @@ const parseParam = (param: Param): string => (is.list(param.type) ? `q["${param.
 // that parses all of the query params from an *http.Request struct
 export const parseQueryParams = (params: ReadonlyArray<Param>): string => {
     let parsed = `q := req.URL.Query()
-  `
+  \n`
     for (const param of params) {
         parsed = parsed.concat(`${param.name} := ${fromQueryString(parseParam(param), param.type)}
         `)
     }
     return parsed
 }
+
+export const parseReqBody = (method: MutationMethod | QueryMethod): string => {}
 
 export const handleOptional = (property: Property): string =>
     // if type is a scalar, make it a pointer (optional)
@@ -233,12 +236,15 @@ export const buildInterface = (service: MutationService | QueryService): string 
  `
 }
 // builds the names of params to use for calling a method
-export const buildMethodParamNames = (params: ReadonlyArray<Param>): string => {
+export const buildParamNames = (method: QueryMethod | MutationMethod): string => {
+    const params = method.params
     let paramString = ''
     let i = 0
     while (i < params.length - 1) {
         const useComma = i === params.length - 1 ? '' : ', '
-        paramString = paramString.concat(`${params[i].name}${useComma}`)
+        paramString = isQueryMethod(method)
+            ? paramString.concat(`${params[i].name}${useComma}`)
+            : paramString.concat(`reqCont.${capitalize(params[i].name)}${useComma}`)
         i++
     }
     return paramString
@@ -303,6 +309,30 @@ export const buildInterfaces = (schema: Schema): string => {
 }
 
 export const helpers = `
+func handlePanic(w http.ResponseWriter, isCbor bool) {
+
+	// In case of a panic, serve a 500 error and then panic.
+	if rr := recover(); rr != nil {
+		RespondWithErr(w, errors.New("internal"), isCbor)
+		panic(rr)
+	}
+
+}
+
+type ctxKey struct {
+	kind string
+}
+
+func (k *ctxKey) String() string {
+	return "typerpc context value " + k.kind
+}
+
+var handlerKey = &ctxKey{"HTTPHandler"}
+
+func HTTPHandlerName(ctx context.Context) string {
+	return ctx.Value(handlerKey).(string)
+}
+
 type ErrorPayload struct {
 	Code  int    \`json:"code"\`
 	Cause string \`json:"cause,omitempty"\`
@@ -372,10 +402,10 @@ func (e *rpcErr) Payload() ErrorPayload {
 	return errPayload
 }
 
-func RespondWithError(w http.ResponseWriter, err error, isCbor bool) {
+func RespondWithErr(w http.ResponseWriter, err error, isCbor bool) {
 	var e *rpcErr
 	if !errors.As(err, &e) {
-		e = WrapError(http.StatusInternalServerError, err, "webrpc error")
+		e = NewRpcError(http.StatusInternalServerError, "typerpc error", err)
 	}
 	w.WriteHeader(e.code)
 	var respBody []byte
