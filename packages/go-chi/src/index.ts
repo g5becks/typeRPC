@@ -10,27 +10,15 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { MutationService, Param, QueryMethod, QueryService, Schema } from '@typerpc/schema'
+import { MutationService, QueryMethod, QueryService, Schema } from '@typerpc/schema'
 import { capitalize, lowerCase } from '@typerpc/plugin-utils'
 import { Code } from '@typerpc/plugin'
-import { buildFileName, buildInterfaces, buildTypes, fromQueryString } from '@typerpc/go-plugin-utils'
-
-const isListParam = (param: Param): boolean => param.type.toString().startsWith('$.list<')
-const parseParam = (param: Param): string => (isListParam(param) ? `q["${param.name}"]` : `q.Get("${param.name}")`)
-
-const parseUrlParams = (params: ReadonlyArray<Param>): string => {
-    let parsed = `q := req.URL.Query()
-  `
-    for (const param of params) {
-        parsed = parsed.concat(`${param.name} := ${fromQueryString(parseParam(param), param.type)}`)
-    }
-    return parsed
-}
+import { buildFileName, buildInterfaces, buildTypes, parseQueryParams } from '@typerpc/go-plugin-utils'
 
 const buildGetHandler = (method: QueryMethod) => {
     return `
    r.Get("/${method.name}", func(res http.ResponseWriter, req *http.Request) {
-    ${parseUrlParams(method.params)}
+    ${parseQueryParams(method.params)}
 	})`
 }
 const buildRoutes = (svc: QueryService | MutationService): string => {

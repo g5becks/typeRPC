@@ -16,12 +16,12 @@ import {
     make,
     Message,
     MutationMethod,
+    MutationService,
     Param,
     Property,
+    QueryMethod,
     QueryService,
     Schema,
-    MutationService,
-    QueryMethod,
 } from '@typerpc/schema'
 import { capitalize, lowerCase } from '@typerpc/plugin-utils'
 
@@ -99,27 +99,27 @@ export const dataType = (type: DataType): string => {
     return 'interface{}'
 }
 
-export const scalarFromQueryParam = (paramName: string, type: DataType): string => {
+export const scalarFromQueryParam = (param: string, type: DataType): string => {
     if (is.scalar(type) !== true) {
         throw new TypeError('invalid type used in QuerySvc')
     }
     if (is.scalar(type)) {
         switch (type.type) {
             case 'blob':
-                return `StringToBytes(${paramName})`
+                return `StringToBytes(${param})`
             case 'str':
-                return paramName
+                return param
             default:
                 // delegate all other types to helper functions
-                return `StringTo${capitalize(dataType(type))}(${paramName})`
+                return `StringTo${capitalize(dataType(type))}(${param})`
         }
     }
     return ''
 }
 
-export const fromQueryString = (paramName: string, type: DataType): string => {
+export const fromQueryString = (param: string, type: DataType): string => {
     if (is.scalar(type)) {
-        return scalarFromQueryParam(paramName, type)
+        return scalarFromQueryParam(param, type)
     }
     if (!is.list(type)) {
         throw new TypeError('invalid type used in QuerySvc')
@@ -128,16 +128,30 @@ export const fromQueryString = (paramName: string, type: DataType): string => {
         if (is.scalar(type.dataType)) {
             switch (type.dataType.type) {
                 case 'blob':
-                    return `StringsToBytes(${paramName})`
+                    return `StringsToBytes(${param})`
                 case 'str':
-                    return paramName
+                    return param
                 default:
                     // delegate all other types to helper functions
-                    return `StringsTo${capitalize(dataType(type.dataType))}s(${paramName})`
+                    return `StringsTo${capitalize(dataType(type.dataType))}s(${param})`
             }
         }
     }
     return ''
+}
+
+const parseParam = (param: Param): string => (is.list(param.type) ? `q["${param.name}"]` : `q.Get("${param.name}")`)
+
+// builds a string representation of go code
+// that parses all of the query params from an *http.Request struct
+export const parseQueryParams = (params: ReadonlyArray<Param>): string => {
+    let parsed = `q := req.URL.Query()
+  `
+    for (const param of params) {
+        parsed = parsed.concat(`${param.name} := ${fromQueryString(parseParam(param), param.type)}
+        `)
+    }
+    return parsed
 }
 
 export const handleOptional = (property: Property): string =>
