@@ -11,17 +11,17 @@
  */
 
 /* eslint-disable new-cap */
-import { genSourceFile, typesTestData } from '../../test-utils/src'
-import { make, StructLiteral, testing } from '../../../src/schema'
+import { genSourceFile, typesTestData } from '@typerpc/test-utils'
+import { make, StructLiteral, _testing } from '../src'
 import { Node, Project, TypeNode } from 'ts-morph'
 import { $, internal as _ } from '@typerpc/types'
 
 export const types: { [key: string]: Node | TypeNode } = {}
 
-export const { makeDataType } = testing
+export const { makeDataType } = _testing
 
 beforeAll(() => {
-    const { parseMsgProps } = testing
+    const { parseMsgProps } = _testing
     const file = genSourceFile(typesTestData, new Project())
     const type = file.getTypeAliasOrThrow('TestType')
     const props = parseMsgProps(type)

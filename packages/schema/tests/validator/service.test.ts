@@ -11,8 +11,8 @@
  */
 
 import { Project } from 'ts-morph'
-import { testing } from '../../../src/schema'
-import { genMsgNames, genServices, genSourceFile } from '../../../test-utils/src'
+import { _testing } from '../../src'
+import { genMsgNames, genServices, genSourceFile } from '@typerpc/test-utils'
 
 let project: Project
 
@@ -28,7 +28,7 @@ const {
     validateQueryMethodParams,
     parseQueryServices,
     parseServiceMethods,
-} = testing
+} = _testing
 
 test('validateService() should not return error when service is valid', () => {
     const services = parseQueryServices(genSourceFile(genServices('Query', genMsgNames()), project))

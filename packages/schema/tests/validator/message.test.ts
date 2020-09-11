@@ -11,10 +11,10 @@
  */
 
 import { Project } from 'ts-morph'
-import { genMsgNames, genSourceFile, genSourceFiles, genTestMessageFiles } from '../../../test-utils/src'
-import { testing } from '../../../src/schema'
+import { genMsgNames, genSourceFile, genSourceFiles, genTestMessageFiles } from '@typerpc/test-utils'
+import { _testing } from '../../src'
 
-const { validateMessages, validateMessage } = testing
+const { validateMessages, validateMessage } = _testing
 let project: Project
 beforeEach(() => {
     project = new Project()

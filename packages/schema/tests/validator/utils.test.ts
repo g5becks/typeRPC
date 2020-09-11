@@ -11,15 +11,15 @@
  */
 
 import { Project } from 'ts-morph'
-import { testing } from '../../../src/schema'
-import { genSourceFile, isValidDataTypeTestSource } from '../../../test-utils/src'
+import { _testing } from '../../src'
+import { genSourceFile, isValidDataTypeTestSource } from '@typerpc/test-utils'
 
 let project: Project
 beforeEach(() => {
     project = new Project()
 })
 
-const { isValidMsg, isValidDataType, isScalar, parseMsgProps } = testing
+const { isValidMsg, isValidDataType, isScalar, parseMsgProps } = _testing
 
 test('isValidDataType() should return the correct boolean value', () => {
     const props = parseMsgProps(genSourceFile(isValidDataTypeTestSource, project).getTypeAlias('SomeSvc')!)

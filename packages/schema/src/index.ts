@@ -14,8 +14,15 @@ import { containers, DataType, queryParamables, scalars, Struct, StructLiteral, 
 import { make, typeError } from './make'
 import { is } from './is'
 import { buildSchemas, internalTesting } from './builder'
-import { validateSchemas } from './validator'
-import { parseMsgProps } from './parser'
+import { internal, validateSchemas } from './validator'
+import {
+    isOptionalProp,
+    parseMessages,
+    parseMsgProps,
+    parseMutationServices,
+    parseQueryServices,
+    parseServiceMethods,
+} from './parser'
 import {
     HTTPErrCode,
     HTTPResponseCode,
@@ -68,5 +75,11 @@ export {
 
 export const _testing = {
     ...internalTesting,
+    ...internal,
     parseMsgProps,
+    parseMessages,
+    parseMutationServices,
+    parseQueryServices,
+    isOptionalProp,
+    parseServiceMethods,
 }

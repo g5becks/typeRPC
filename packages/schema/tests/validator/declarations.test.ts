@@ -11,8 +11,8 @@
  */
 
 import { Project, SourceFile } from 'ts-morph'
-import { testing } from '../../../src/schema'
-import { genSourceFile } from '../../../test-utils/src'
+import { _testing } from '../../src'
+import { genSourceFile } from '@typerpc/test-utils'
 
 let project: Project
 
@@ -30,7 +30,7 @@ const {
     validateVariables,
     validateInterfaces,
     validateFunctions,
-} = testing
+} = _testing
 
 const testName = (type: string) => `validate ${type}s should return an error for each ${type} found in a schema file`
 

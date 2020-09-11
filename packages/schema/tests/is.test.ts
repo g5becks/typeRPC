@@ -12,13 +12,13 @@
 
 /* eslint-disable new-cap */
 import { Node, Project, TypeNode } from 'ts-morph'
-import { is, make, testing } from '../../../src/schema'
-import { genSourceFile, typesTestData } from '../../test-utils/src'
+import { is, make, _testing } from '../src'
+import { genSourceFile, typesTestData } from '@typerpc/test-utils'
 
 const types: { [key: string]: Node | TypeNode } = {}
-const { makeDataType } = testing
+const { makeDataType } = _testing
 beforeAll(() => {
-    const { parseMsgProps } = testing
+    const { parseMsgProps } = _testing
     const file = genSourceFile(typesTestData, new Project())
     const type = file.getTypeAliasOrThrow('TestType')
     const props = parseMsgProps(type)
