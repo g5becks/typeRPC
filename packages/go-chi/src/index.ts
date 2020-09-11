@@ -30,7 +30,7 @@ const invokeMethod = (svcName: string, method: QueryMethod | MutationMethod): st
     defer handlePanic(res, ${method.hasCborReturn ? 'true' : 'false'})
     ${buildMethodInvocationResultVar(method)} = ${lowerCase(svcName)}.${capitalize(
         method.name,
-    )}(ctx, ${isQueryMethod(method) ?  buildParamNames(method.params) : })
+    )}(ctx, ${buildParamNames(method)})
     }()`
 }
 const buildHandler = (svcName: string, method: QueryMethod | MutationMethod) => {
