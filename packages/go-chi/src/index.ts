@@ -29,8 +29,8 @@ const invokeMethod = (svcName: string, method: QueryMethod | MutationMethod): st
 }
 const buildGetHandler = (svcName: string, method: QueryMethod) => {
     return `
-   r.Get("/${method.name}", func(res http.ResponseWriter, req *http.Request) {
-    ctx := r.Context()
+   r.Get("/${lowerCase(method.name)}", func(res http.ResponseWriter, req *http.Request) {
+    ctx := context.WithValue(r.Context(), handlerKey, "${capitalize(svcName)}Routes/${lowerCase(method.name)}")
     ${parseQueryParams(method.params)}
     ${invokeMethod(svcName, method)}
 	})`
