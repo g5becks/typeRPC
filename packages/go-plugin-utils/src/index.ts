@@ -235,7 +235,17 @@ export const buildInterface = (service: MutationService | QueryService): string 
  }
  `
 }
-
+// builds the names of params to use for calling a method
+export const buildMethodParamNames = (params: ReadonlyArray<Param>): string => {
+    let paramString = ''
+    let i = 0
+    while (i < params.length - 1) {
+        const useComma = i === params.length - 1 ? '' : ', '
+        paramString = paramString.concat(`${params[i].name}${useComma}`)
+        i++
+    }
+    return paramString
+}
 export const buildFileName = (fileName: string): string =>
     fileName.includes('-') ? fileName.split('-').join('_') + '.go' : fileName + '.go'
 

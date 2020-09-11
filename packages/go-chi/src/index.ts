@@ -10,15 +10,22 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { MutationService, QueryMethod, QueryService, Schema } from '@typerpc/schema'
+import { isQueryMethod, MutationMethod, MutationService, QueryMethod, QueryService, Schema } from '@typerpc/schema'
 import { capitalize, lowerCase } from '@typerpc/plugin-utils'
 import { Code } from '@typerpc/plugin'
 import { buildFileName, buildInterfaces, buildTypes, parseQueryParams } from '@typerpc/go-plugin-utils'
 
+const invokeMethod = (svcName: string, method: QueryMethod | MutationMethod): string => {
+    if (isQueryMethod(method)) {
+        return
+    }
+}
 const buildGetHandler = (method: QueryMethod) => {
     return `
    r.Get("/${method.name}", func(res http.ResponseWriter, req *http.Request) {
+    ctx := r.Context()
     ${parseQueryParams(method.params)}
+
 	})`
 }
 const buildRoutes = (svc: QueryService | MutationService): string => {
