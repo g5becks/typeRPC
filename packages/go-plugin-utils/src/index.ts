@@ -141,8 +141,11 @@ export const fromQueryString = (paramName: string, type: DataType): string => {
 }
 
 export const handleOptional = (property: Property): string =>
-    is.scalar(property.type) || is.struct(property.type) || (is.structLiteral(property.type) && property.isOptional)
-        ? '*'
+    // if type is stack allocated go type and is optional, make it a pointer (optional)
+    property.isOptional
+        ? is.scalar(property.type) || is.struct(property.type) || is.structLiteral(property.type)
+            ? '*'
+            : ''
         : ''
 
 export const buildProps = (props: ReadonlyArray<Property>): string => {

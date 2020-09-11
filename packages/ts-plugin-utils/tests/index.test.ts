@@ -50,7 +50,7 @@ beforeAll(() => {
     props = parseMsgProps(genSourceFile(dataTypeTestsSource, project).getTypeAliasOrThrow('TestType'))
 })
 
-test('tsDataType() should produce the correct output', () => {
+test('dataType() should produce the correct output', () => {
     const types = props.map((prop) => makeDataType(prop.getTypeNodeOrThrow()))
     let i = 0
     while (i < types.length) {
@@ -59,7 +59,7 @@ test('tsDataType() should produce the correct output', () => {
     }
 })
 
-test('tsFromQueryString() should produce the correct output', () => {
+test('fromQueryString() should produce the correct output', () => {
     const propsMap: { [key: string]: string } = {
         bool: 'Boolean(bool)',
         int8: 'parseInt(int8)',

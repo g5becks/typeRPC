@@ -23,7 +23,11 @@ const expected = [
     '(int8, string, bool, time.Time, error)',
     '(string, string, interface{}, []byte, float32, error)',
     '[]bool',
-    'struct{name string' + ' age int8' + ' birthDate time.Time' + ' weight float32}',
+    `struct{Name  string \`json:"name"\`
+Age  int8 \`json:"age"\`
+BirthDate  time.Time \`json:"birthDate"\`
+Weight  float32 \`json:"weight"\`
+}`,
     'bool',
     'int8',
     'uint8',
@@ -39,8 +43,7 @@ const expected = [
     'time.Time',
     '[]byte',
     'interface{}',
-    'map[string][]map[][]string',
-    'Array<[[number, Array<Uint8Array>], boolean, string, any]>',
+    'map[string][]map[string][]string',
     '[]int8',
 ]
 
@@ -51,7 +54,7 @@ beforeAll(() => {
     props = parseMsgProps(genSourceFile(dataTypeTestsSource, project).getTypeAliasOrThrow('TestType'))
 })
 
-test('tsDataType() should produce the correct output', () => {
+test('dataType() should produce the correct output', () => {
     const types = props.map((prop) => makeDataType(prop.getTypeNodeOrThrow()))
     let i = 0
     while (i < types.length) {
@@ -60,21 +63,21 @@ test('tsDataType() should produce the correct output', () => {
     }
 })
 
-test('tsFromQueryString() should produce the correct output', () => {
+test('fromQueryString() should produce the correct output', () => {
     const propsMap: { [key: string]: string } = {
-        bool: 'Boolean(bool)',
-        int8: 'parseInt(int8)',
-        uint8: 'parseInt(uint8)',
-        int16: 'parseInt(int16)',
-        uint16: 'parseInt(uint16)',
-        int32: 'parseInt(int32)',
-        uint32: 'parseInt(uint32)',
-        int64: 'parseInt(int64)',
-        uint64: 'parseInt(uint64)',
-        float32: 'parseFloat(float32)',
-        float64: 'parseFloat(float64)',
-        list: 'list.map(val => Boolean(val))',
-        queryParamList: 'queryParamList.map(val => parseInt(val))',
+        bool: 'StringToBool(bool)',
+        int8: 'StringToInt8(int8)',
+        uint8: 'StringToUint8(uint8)',
+        int16: 'StringToInt16(int16)',
+        uint16: 'StringToUint16(uint16)',
+        int32: 'StringToInt32(int32)',
+        uint32: 'StringToUint32(uint32)',
+        int64: 'StringToInt64(int64)',
+        uint64: 'StringToUint64(uint64)',
+        float32: 'StringToFloat32(float32)',
+        float64: 'StringToFloat64(float64)',
+        list: 'StringsToBools(list)',
+        queryParamList: 'StringsToInt8s(queryParamList)',
     }
 
     const filteredProps = props.filter((prop) => Object.keys(propsMap).includes(prop.getName()))
