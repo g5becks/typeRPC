@@ -40,7 +40,6 @@ const expected = [
     'Uint8Array',
     'any',
     '{[key: string]: Array<{[key: string]: Array<string>}>}',
-    'Array<[[number, Array<Uint8Array>], boolean, string, any]>',
     'Array<number>',
 ]
 

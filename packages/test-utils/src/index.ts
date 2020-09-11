@@ -246,6 +246,5 @@ type TestType = rpc.Msg<{
   blob: $.blob
   dyn: $.dyn
   nestedDict: $.map<$.str, $.list<$.map<$.str, $.list<$.str>>>>
-  nestedList: $.list<$.tuple4<$.tuple2<$.int64, $.list<$.blob>>, $.bool, $.str, $.dyn>>
   queryParamList: $.list<$.int8>
 }>`
