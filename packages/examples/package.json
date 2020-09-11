@@ -26,7 +26,7 @@
     "url": "git+https://github.com/typerpc/typerpc.git"
   },
   "scripts": {
-    "lint-fix": "eslint --fix ./lib/**"
+    "lint:fix": "eslint --fix ./lib/**"
   },
 
   "bugs": {

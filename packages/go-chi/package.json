@@ -32,7 +32,7 @@
     "url": "git+https://github.com/typerpc/typerpc.git"
   },
   "scripts": {
-    "lint-fix": "eslint --fix src/**",
+    "lint:fix": "eslint --fix src/**",
     "build1": "yarn run clean && yarn run tsc",
     "clean": "rm -rf ./dist && rm -rf tsconfig.build.tsbuildinfo",
     "tsc": "tsc -b tsconfig.build.json",

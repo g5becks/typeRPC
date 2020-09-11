@@ -40,7 +40,7 @@
     "@typerpc/test-utils": "^0.1.1"
   },
   "scripts": {
-    "lint-fix": "eslint --fix src/**",
+    "lint:fix": "eslint --fix src/**",
     "build": "yarn run clean && yarn run tsc",
     "clean": "rm -rf ./dist && rm -rf tsconfig.build.tsbuildinfo",
     "tsc": "tsc -b tsconfig.build.json"
