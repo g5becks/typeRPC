@@ -21,6 +21,7 @@ import {
     buildResultDeclarations,
     buildResultInitializers,
     buildTypes,
+    helpers,
     parseReqBody,
 } from '@typerpc/go-plugin-utils'
 
@@ -116,4 +117,6 @@ ${buildRoutes(schema)}
 `,
     }
 }
-export default (schemas: Schema[]): Code[] => schemas.map((schema) => buildFile(schema))
+
+export default (schemas: Schema[]): Code[] =>
+    schemas.map((schema) => buildFile(schema)).concat({ fileName: 'chi.helpers.rpc.go', source: helpers })
