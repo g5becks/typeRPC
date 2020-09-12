@@ -19,7 +19,7 @@
     "test": "tests"
   },
   "files": [
-    "lib"
+    "dist"
   ],
   "repository": {
     "type": "git",

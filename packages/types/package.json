@@ -15,7 +15,7 @@
     "test": "tests"
   },
   "files": [
-    "src"
+    "dist"
   ],
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
