@@ -17,13 +17,13 @@ const tslib_1 = require("tslib");
 const live_plugin_manager_1 = require("live-plugin-manager");
 const fs = tslib_1.__importStar(require("fs"));
 const sanitize = (plugin) => (plugin.startsWith('/') ? plugin.substring(1).trim() : plugin.trim());
-exports.isValidPlugin = (plugin) => typeof plugin === 'function';
+exports.isValidPlugin = (plugin) => typeof plugin === 'function' || typeof plugin === 'object';
 class PluginManager {
     constructor(pluginsPath) {
         _manager.set(this, void 0);
         _pluginsPath.set(this, void 0);
         tslib_1.__classPrivateFieldSet(this, _pluginsPath, pluginsPath);
-        tslib_1.__classPrivateFieldSet(this, _manager, new live_plugin_manager_1.PluginManager({ pluginsPath, ignoredDependencies: [new RegExp('[sS]*')] }));
+        tslib_1.__classPrivateFieldSet(this, _manager, new live_plugin_manager_1.PluginManager({ pluginsPath }));
     }
     static create(project) {
         return new PluginManager(project.getRootDirectories()[0].getPath() + '/.typerpc/plugins');

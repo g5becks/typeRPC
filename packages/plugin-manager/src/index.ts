@@ -25,7 +25,7 @@ export class PluginManager {
 
     private constructor(pluginsPath: string) {
         this.#pluginsPath = pluginsPath
-        this.#manager = new Manager({ pluginsPath, ignoredDependencies: [new RegExp('[sS]*')] })
+        this.#manager = new Manager({ pluginsPath })
     }
 
     static create(project: Project): PluginManager {

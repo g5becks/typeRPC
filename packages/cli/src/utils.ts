@@ -12,9 +12,12 @@
 
 import { ObjectLiteralExpression, Project, SourceFile, SyntaxKind } from 'ts-morph'
 import { GeneratorConfig } from '@typerpc/config'
-import pino from 'pino'
 import { ChildProcess, exec } from 'child_process'
 import * as fs from 'fs-extra'
+import { ILogObject, Logger } from 'tslog'
+import { appendFile } from 'fs-extra'
+import { render } from 'prettyjson'
+
 export const getConfigFile = (project: Project): SourceFile | undefined =>
     project.getSourceFile((file) => file.getBaseName().toLowerCase() === '.rpc.config.ts')
 const parseGeneratorConfig = (obj: ObjectLiteralExpression): GeneratorConfig => {
@@ -34,6 +37,7 @@ const parseGeneratorConfig = (obj: ObjectLiteralExpression): GeneratorConfig => 
         ?.getChildrenOfKind(SyntaxKind.StringLiteral)[0]
         ?.getLiteralValue()
         ?.trim()
+    console.log(`outputpath = ${outputPath}, plugin = ${plugin}, package = ${packageName}`)
     if (!outputPath || !plugin || !packageName) {
         throw new Error(`
         error in config file: ${obj.getSourceFile().getFilePath()},
@@ -66,10 +70,26 @@ export const parseConfig = (file: SourceFile | undefined): ParsedConfig[] => {
     return configs
 }
 
-export const createLogger = async (project: Project): Promise<pino.Logger> => {
+export const createLogger = async (project: Project): Promise<Logger> => {
     const dest = project.getRootDirectories()[0].getPath() + '/.typerpc/error.log'
     await fs.ensureFile(dest)
-    return pino({ level: 'error', prettyPrint: true }, pino.destination({ dest, sync: false }))
+    const logToTransport = (logObject: ILogObject) => {
+        appendFile(dest, render(logObject, { noColor: true }) + '\n\n')
+    }
+    const logger = new Logger()
+    logger.attachTransport(
+        {
+            silly: logToTransport,
+            debug: logToTransport,
+            trace: logToTransport,
+            info: logToTransport,
+            warn: logToTransport,
+            error: logToTransport,
+            fatal: logToTransport,
+        },
+        'error',
+    )
+    return logger
 }
 
 export const format = (

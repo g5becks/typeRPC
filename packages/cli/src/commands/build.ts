@@ -19,15 +19,15 @@ import { Listr } from 'listr2'
 import { buildSchemas, validateSchemas } from '@typerpc/schema'
 import { Project, SourceFile } from 'ts-morph'
 import { isValidPlugin, PluginManager } from '@typerpc/plugin-manager'
-import { BaseLogger } from 'pino'
 import { format, getConfigFile, createLogger, parseConfig, ParsedConfig } from '../utils'
+import { Logger } from 'tslog'
 
 type ValidateCtx = {
     sourceFiles: SourceFile[]
     configs: ParsedConfig[]
 }
 
-type BuildCtx = { manager: PluginManager; logger: BaseLogger } & ValidateCtx
+type BuildCtx = { manager: PluginManager; logger: Logger } & ValidateCtx
 
 type GeneratedCode = { code: Code[]; outputPath: string }
 
@@ -37,7 +37,7 @@ type FormatConfig = {
     formatter?: string
     outputPath: string
 }
-type FormatCtx = { logger: BaseLogger; formatters: FormatConfig[] }
+type FormatCtx = { logger: Logger; formatters: FormatConfig[] }
 
 type TaskCtx = ValidateCtx | BuildCtx | WriteCtx | FormatCtx
 
@@ -192,8 +192,11 @@ class Build extends Command {
                             // pass the generated code to the writeCtx for write task
                             this.#writeCtx = [...this.#writeCtx, { code: gen(schemas), outputPath: cfg.outputPath }]
                         } else {
-                            ctx.logger.error(`${cfg.plugin} is not a valid typerpc plugin`)
-                            this.error(`${cfg.plugin} is not a valid typerpc plugin`)
+                            this.error(
+                                `${cfg.plugin} is not a valid typerpc plugin. Plugins must be functions, typeof ${
+                                    cfg.plugin
+                                } = ${typeof gen}`,
+                            )
                         }
                     }
                 },
@@ -243,52 +246,71 @@ class Build extends Command {
         // validate tsconfig before proceeding
         await this.#validateTsConfig.run({ tsConfigFilePath })
         const project = new Project({ tsConfigFilePath, skipFileDependencyResolution: true })
-        // get .rpc.config.ts file
-        const configFile = getConfigFile(project)
-        // parse config objects
-        let configs: ParsedConfig[] = typeof configFile !== 'undefined' ? parseConfig(configFile) : []
-        // filter out .rpc.config.ts file from project source files
-        const sourceFiles = project
-            .getSourceFiles()
-            .filter((file) => file.getBaseName().toLowerCase() !== '.rpc.config.ts')
-        // parse command line flags
-        const plugin = flags.plugin?.trim()
-        const outputPath = flags.output?.trim()
-        const packageName = flags.packageName?.trim()
-        const formatter = flags.formatter?.trim()
-        // if user provides command line arguments the config file will
-        // be overridden - Be sure to document this behaviour
-        if (plugin && outputPath && packageName) {
-            configs = [{ configName: 'flags', plugin, outputPath, packageName, formatter }]
+        project.getSourceFiles().forEach((file) => this.log(file.getBaseName()))
+        let log = new Logger()
+        try {
+            log = await createLogger(project)
+        } catch (error) {
+            this.log(`this is the error: ${error}`)
         }
 
-        const log = await createLogger(project)
-        const steps: BuildStep[] = [
-            { task: this.#validate, ctx: { sourceFiles, configs }, msg: 'Triggering input validation' },
-            {
-                task: this.#build,
-                ctx: { sourceFiles, configs, manager: PluginManager.create(project), logger: log },
-                msg: 'Initializing build process',
-            },
-            { task: this.#write, ctx: this.#writeCtx, msg: 'Saving generated code to disk' },
-            {
-                task: this.#format,
-                ctx: {
-                    logger: log,
-                    formatters: configs.map((cfg) => {
-                        return { outputPath: cfg.outputPath, formatter: cfg.formatter }
-                    }),
-                },
-                msg: 'Invoking Formatter(s)',
-            },
-        ]
-        for (const step of steps) {
-            try {
-                this.log(step.msg)
-                await step.task.run(step.ctx)
-            } catch (error) {
-                log.error(error)
+        try {
+            // get .rpc.config.ts file
+            const configFile = getConfigFile(project)
+            this.log(configFile?.getText())
+            // parse config objects
+            let configs: ParsedConfig[] = []
+            if (typeof configFile !== 'undefined') {
+                configs = parseConfig(configFile)
             }
+            // filter out .rpc.config.ts file from project source files
+            const sourceFiles = project
+                .getSourceFiles()
+                .filter((file) => file.getBaseName().toLowerCase() !== '.rpc.config.ts')
+            // parse command line flags
+            const plugin = flags.plugin?.trim()
+            const outputPath = flags.output?.trim()
+            const packageName = flags.packageName?.trim()
+            const formatter = flags.formatter?.trim()
+            // if user provides command line arguments the config file will
+            // be overridden - Be sure to document this behaviour
+            if (plugin && outputPath && packageName) {
+                configs = [{ configName: 'flags', plugin, outputPath, packageName, formatter }]
+            }
+            // no configs in file or command line opts
+            if (configs.length === 0) {
+                this.error(`no configs found in .rpc.config.ts and not enough arguments passed`)
+            }
+
+            const steps: BuildStep[] = [
+                { task: this.#validate, ctx: { sourceFiles, configs }, msg: 'Triggering input validation' },
+                {
+                    task: this.#build,
+                    ctx: { sourceFiles, configs, manager: PluginManager.create(project), logger: log },
+                    msg: 'Initializing build process',
+                },
+                { task: this.#write, ctx: this.#writeCtx, msg: 'Saving generated code to disk' },
+                {
+                    task: this.#format,
+                    ctx: {
+                        logger: log,
+                        formatters: configs.map((cfg) => {
+                            return { outputPath: cfg.outputPath, formatter: cfg.formatter }
+                        }),
+                    },
+                    msg: 'Invoking Formatter(s)',
+                },
+            ]
+            for (const step of steps) {
+                try {
+                    this.log(step.msg)
+                    await step.task.run(step.ctx)
+                } catch (error) {
+                    log.error(error)
+                }
+            }
+        } catch (error) {
+            log.error(error)
         }
     }
 }

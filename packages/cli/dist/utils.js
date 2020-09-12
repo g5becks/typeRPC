@@ -11,11 +11,14 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.format = exports.logger = exports.parseConfig = exports.getConfigFile = void 0;
+exports.format = exports.createLogger = exports.parseConfig = exports.getConfigFile = void 0;
 const tslib_1 = require("tslib");
 const ts_morph_1 = require("ts-morph");
-const pino_1 = tslib_1.__importDefault(require("pino"));
 const child_process_1 = require("child_process");
+const fs = tslib_1.__importStar(require("fs-extra"));
+const tslog_1 = require("tslog");
+const fs_extra_1 = require("fs-extra");
+const prettyjson_1 = require("prettyjson");
 exports.getConfigFile = (project) => project.getSourceFile((file) => file.getBaseName().toLowerCase() === '.rpc.config.ts');
 const parseGeneratorConfig = (obj) => {
     var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
@@ -26,6 +29,7 @@ const parseGeneratorConfig = (obj) => {
         .getProperty('packageName')) === null || _g === void 0 ? void 0 : _g.getChildrenOfKind(ts_morph_1.SyntaxKind.StringLiteral)[0]) === null || _h === void 0 ? void 0 : _h.getLiteralValue()) === null || _j === void 0 ? void 0 : _j.trim();
     const formatter = (_m = (_l = (_k = obj
         .getProperty('formatter')) === null || _k === void 0 ? void 0 : _k.getChildrenOfKind(ts_morph_1.SyntaxKind.StringLiteral)[0]) === null || _l === void 0 ? void 0 : _l.getLiteralValue()) === null || _m === void 0 ? void 0 : _m.trim();
+    console.log(`outputpath = ${outputPath}, plugin = ${plugin}, package = ${packageName}`);
     if (!outputPath || !plugin || !packageName) {
         throw new Error(`
         error in config file: ${obj.getSourceFile().getFilePath()},
@@ -51,7 +55,24 @@ exports.parseConfig = (file) => {
     }
     return configs;
 };
-exports.logger = (project) => pino_1.default({ level: 'error', prettyPrint: true }, pino_1.default.destination({ dest: project.getRootDirectories()[0].getPath() + '/.typerpc/error.log', sync: false }));
+exports.createLogger = async (project) => {
+    const dest = project.getRootDirectories()[0].getPath() + '/.typerpc/error.log';
+    await fs.ensureFile(dest);
+    const logToTransport = (logObject) => {
+        fs_extra_1.appendFile(dest, prettyjson_1.render(logObject, { noColor: true }) + '\n\n');
+    };
+    const logger = new tslog_1.Logger();
+    logger.attachTransport({
+        silly: logToTransport,
+        debug: logToTransport,
+        trace: logToTransport,
+        info: logToTransport,
+        warn: logToTransport,
+        error: logToTransport,
+        fatal: logToTransport,
+    }, 'error');
+    return logger;
+};
 exports.format = (path, formatter, 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 onError, onComplete) => child_process_1.exec(`${formatter} ${path}`, (error, stdout, stderr) => {

@@ -20,6 +20,7 @@ const schema_1 = require("@typerpc/schema");
 const ts_morph_1 = require("ts-morph");
 const plugin_manager_1 = require("@typerpc/plugin-manager");
 const utils_1 = require("../utils");
+const tslog_1 = require("tslog");
 class Build extends command_1.Command {
     constructor() {
         super(...arguments);
@@ -92,8 +93,7 @@ class Build extends command_1.Command {
                             tslib_1.__classPrivateFieldSet(this, _writeCtx, [...tslib_1.__classPrivateFieldGet(this, _writeCtx), { code: gen(schemas), outputPath: cfg.outputPath }]);
                         }
                         else {
-                            ctx.logger.error(`${cfg.plugin} is not a valid typerpc plugin`);
-                            this.error(`${cfg.plugin} is not a valid typerpc plugin`);
+                            this.error(`${cfg.plugin} is not a valid typerpc plugin. Plugins must be functions, typeof ${cfg.plugin} = ${typeof gen}`);
                         }
                     }
                 },
@@ -159,52 +159,72 @@ class Build extends command_1.Command {
         // validate tsconfig before proceeding
         await tslib_1.__classPrivateFieldGet(this, _validateTsConfig).run({ tsConfigFilePath });
         const project = new ts_morph_1.Project({ tsConfigFilePath, skipFileDependencyResolution: true });
-        // get .rpc.config.ts file
-        const configFile = utils_1.getConfigFile(project);
-        // parse config objects
-        let configs = typeof configFile !== 'undefined' ? utils_1.parseConfig(configFile) : [];
-        // filter out .rpc.config.ts file from project source files
-        const sourceFiles = project
-            .getSourceFiles()
-            .filter((file) => file.getBaseName().toLowerCase() !== '.rpc.config.ts');
-        // parse command line flags
-        const plugin = (_c = flags.plugin) === null || _c === void 0 ? void 0 : _c.trim();
-        const outputPath = (_d = flags.output) === null || _d === void 0 ? void 0 : _d.trim();
-        const packageName = (_e = flags.packageName) === null || _e === void 0 ? void 0 : _e.trim();
-        const formatter = (_f = flags.formatter) === null || _f === void 0 ? void 0 : _f.trim();
-        // if user provides command line arguments the config file will
-        // be overridden - Be sure to document this behaviour
-        if (plugin && outputPath && packageName) {
-            configs = [{ configName: 'flags', plugin, outputPath, packageName, formatter }];
+        project.getSourceFiles().forEach((file) => this.log(file.getBaseName()));
+        let log = new tslog_1.Logger();
+        try {
+            log = await utils_1.createLogger(project);
         }
-        const log = utils_1.logger(project);
-        const steps = [
-            { task: tslib_1.__classPrivateFieldGet(this, _validate), ctx: { sourceFiles, configs }, msg: 'Triggering input validation' },
-            {
-                task: tslib_1.__classPrivateFieldGet(this, _build),
-                ctx: { sourceFiles, configs, manager: plugin_manager_1.PluginManager.create(project), logger: log },
-                msg: 'Initializing build process',
-            },
-            { task: tslib_1.__classPrivateFieldGet(this, _write), ctx: tslib_1.__classPrivateFieldGet(this, _writeCtx), msg: 'Saving generated code to disk' },
-            {
-                task: tslib_1.__classPrivateFieldGet(this, _format),
-                ctx: {
-                    logger: log,
-                    formatters: configs.map((cfg) => {
-                        return { outputPath: cfg.outputPath, formatter: cfg.formatter };
-                    }),
+        catch (error) {
+            this.log(`this is the error: ${error}`);
+        }
+        try {
+            // get .rpc.config.ts file
+            const configFile = utils_1.getConfigFile(project);
+            this.log(configFile === null || configFile === void 0 ? void 0 : configFile.getText());
+            // parse config objects
+            let configs = [];
+            if (typeof configFile !== 'undefined') {
+                configs = utils_1.parseConfig(configFile);
+            }
+            // filter out .rpc.config.ts file from project source files
+            const sourceFiles = project
+                .getSourceFiles()
+                .filter((file) => file.getBaseName().toLowerCase() !== '.rpc.config.ts');
+            // parse command line flags
+            const plugin = (_c = flags.plugin) === null || _c === void 0 ? void 0 : _c.trim();
+            const outputPath = (_d = flags.output) === null || _d === void 0 ? void 0 : _d.trim();
+            const packageName = (_e = flags.packageName) === null || _e === void 0 ? void 0 : _e.trim();
+            const formatter = (_f = flags.formatter) === null || _f === void 0 ? void 0 : _f.trim();
+            // if user provides command line arguments the config file will
+            // be overridden - Be sure to document this behaviour
+            if (plugin && outputPath && packageName) {
+                configs = [{ configName: 'flags', plugin, outputPath, packageName, formatter }];
+            }
+            // no configs in file or command line opts
+            if (configs.length === 0) {
+                this.error(`no configs found in .rpc.config.ts and not enough arguments passed`);
+            }
+            const steps = [
+                { task: tslib_1.__classPrivateFieldGet(this, _validate), ctx: { sourceFiles, configs }, msg: 'Triggering input validation' },
+                {
+                    task: tslib_1.__classPrivateFieldGet(this, _build),
+                    ctx: { sourceFiles, configs, manager: plugin_manager_1.PluginManager.create(project), logger: log },
+                    msg: 'Initializing build process',
                 },
-                msg: 'Invoking Formatter(s)',
-            },
-        ];
-        for (const step of steps) {
-            try {
-                this.log(step.msg);
-                await step.task.run(step.ctx);
+                { task: tslib_1.__classPrivateFieldGet(this, _write), ctx: tslib_1.__classPrivateFieldGet(this, _writeCtx), msg: 'Saving generated code to disk' },
+                {
+                    task: tslib_1.__classPrivateFieldGet(this, _format),
+                    ctx: {
+                        logger: log,
+                        formatters: configs.map((cfg) => {
+                            return { outputPath: cfg.outputPath, formatter: cfg.formatter };
+                        }),
+                    },
+                    msg: 'Invoking Formatter(s)',
+                },
+            ];
+            for (const step of steps) {
+                try {
+                    this.log(step.msg);
+                    await step.task.run(step.ctx);
+                }
+                catch (error) {
+                    log.error(error);
+                }
             }
-            catch (error) {
-                log.error(error);
-            }
+        }
+        catch (error) {
+            log.error(error);
         }
     }
 }
