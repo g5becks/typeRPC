@@ -33,6 +33,15 @@ const invokeMethod = (svcName: string, method: QueryMethod | MutationMethod): st
     } ${buildParamNames(method)})
     }()`
 }
+
+const sendResponse = (method: MutationMethod | QueryMethod): string => {
+    const response = `response := struct {}`
+    const checkErr = `	if err != nil {
+		RespondWithErr(w, err, ${method.hasCborReturn ? 'true' : 'false'})
+		return
+	}
+	`
+}
 const buildHandler = (svcName: string, method: QueryMethod | MutationMethod) => {
     return `
    r.${capitalize(method.httpMethod.toLowerCase())}("/${lowerCase(
