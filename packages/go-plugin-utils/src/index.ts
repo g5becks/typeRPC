@@ -321,16 +321,19 @@ export const buildResultInitializers = (type: DataType): string => {
 
 export const buildResponseStruct = (type: DataType): string => {
     let responseType = ''
-    const response = buildResultInitializer
+    let response = buildResultInitializers(type).replace(', err', '')
+
     if (is.tuple2(type) || is.tuple3(type) || is.tuple4(type) || is.tuple5(type)) {
         responseType = '[]interface{}'
+        response = `[]interface{}{${response}}`
     } else {
         responseType = dataType(type)
     }
     return `response := struct {
       Data ${responseType}  \`json:"data"\`
-  }{}`
+  }{${response}}`
 }
+
 export const buildFileName = (fileName: string): string =>
     fileName.includes('-') ? fileName.split('-').join('_') + '.go' : fileName + '.go'
 
