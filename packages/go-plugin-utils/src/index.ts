@@ -249,12 +249,11 @@ export const parseReqBody = (method: MutationMethod | QueryMethod): string => {
     return `rCont := struct {
         ${props}
     }{}
-
-    rBody, err := ioutil.ReadAll(r.Body)
-    if err != nil {
-      RespondWithErr(w, NewRpcErr(http.StatusInternalServerError, "failed to read request", err))
-      return
-    }`
+    err = parseReqBody(r, &rCont, ${method.hasCborParams ? 'true' : 'false'} )
+		if err != nil {
+			RespondWithErr(w, err, ${method.hasCborReturn ? 'true' : 'false'})
+		}
+`
 }
 
 // builds the names of params to use for calling a method
@@ -333,6 +332,7 @@ export const buildInterfaces = (schema: Schema): string => {
 export const helpers = `
 func parseReqBody(r *http.Request, v interface{}, isCbor bool) error {
 	reqBody, err := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
 	if err != nil {
 		return NewRpcError(http.StatusInternalServerError, "failed to read request body",  err)
 	}
