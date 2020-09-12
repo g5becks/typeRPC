@@ -1,6 +1,6 @@
 {
   "name": "@typerpc/examples",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "examples of using typerpc",
   "keywords": [
     "typerpc",
@@ -28,7 +28,6 @@
   "scripts": {
     "lint:fix": "eslint --fix ./lib/**"
   },
-
   "bugs": {
     "url": "https://github.com/typerpc/typerpc/issues"
   }
