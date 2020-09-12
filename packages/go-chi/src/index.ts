@@ -52,7 +52,7 @@ const sendResponse = (method: MutationMethod | QueryMethod): string => {
    w.Write(respData)
 	`
 }
-const buildHandler = (svcName: string, method: QueryMethod | MutationMethod) => {
+const buildHandler = (svcName: string, method: QueryMethod | MutationMethod): string => {
     return `
    r.${capitalize(method.httpMethod.toLowerCase())}("/${lowerCase(
         method.name,
@@ -62,9 +62,19 @@ const buildHandler = (svcName: string, method: QueryMethod | MutationMethod) => 
     ${parseReqBody(method)}
     ${invokeMethod(svcName, method)}
     ${sendResponse(method)}
-	})`
+	})
+	`
 }
-const buildRoutes = (svc: QueryService | MutationService): string => {
+
+const buildHandlers = (svc: QueryService | MutationService): string => {
+    let handlers = ''
+    for (const method of svc.methods) {
+        handlers = handlers.concat(buildHandler(svc.name, method) + '\n')
+    }
+    return handlers
+}
+
+const buildSvcRoutes = (svc: QueryService | MutationService): string => {
     return `
 func ${capitalize(svc.name)}Routes(${lowerCase(svc.name)} ${capitalize(
         svc.name,
@@ -73,10 +83,21 @@ func ${capitalize(svc.name)}Routes(${lowerCase(svc.name)} ${capitalize(
     for _, x := range middlewares {
       r.Use(x)
     }
-
+    ${buildHandlers(svc)}
     return r
 }
 `
+}
+
+const buildRoutes = (schema: Schema): string => {
+    let routes = ''
+    for (const svc of schema.queryServices) {
+        routes = routes.concat(buildSvcRoutes(svc))
+    }
+    for (const svc of schema.mutationServices) {
+        routes = routes.concat(buildSvcRoutes(svc))
+    }
+    return routes
 }
 const buildFile = (schema: Schema): Code => {
     return {
@@ -91,6 +112,7 @@ import (
 
 ${buildTypes(schema.messages)}
 ${buildInterfaces(schema)}
+${buildRoutes(schema)}
 `,
     }
 }
