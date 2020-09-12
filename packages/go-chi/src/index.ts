@@ -16,30 +16,40 @@ import { Code } from '@typerpc/plugin'
 import {
     buildFileName,
     buildInterfaces,
-    buildResultInitializers,
-    buildResultDeclarations,
     buildParamNames,
+    buildResponseStruct,
+    buildResultDeclarations,
+    buildResultInitializers,
     buildTypes,
     parseReqBody,
 } from '@typerpc/go-plugin-utils'
 
 const invokeMethod = (svcName: string, method: QueryMethod | MutationMethod): string => {
     return `
-    ${buildResultDeclarations(method)}
+    ${buildResultDeclarations(method.returnType)}
     func() {
     defer handlePanic(w, ${method.hasCborReturn ? 'true' : 'false'})
-    ${buildResultInitializers(method)} = ${lowerCase(svcName)}.${capitalize(method.name)}(ctx${
+    ${buildResultInitializers(method.returnType)} = ${lowerCase(svcName)}.${capitalize(method.name)}(ctx${
         method.hasParams ? ', ' : ''
     } ${buildParamNames(method)})
     }()`
 }
 
 const sendResponse = (method: MutationMethod | QueryMethod): string => {
-    const response = `response := struct {}`
-    const checkErr = `	if err != nil {
+    return `
+  if err != nil {
 		RespondWithErr(w, err, ${method.hasCborReturn ? 'true' : 'false'})
 		return
 	}
+	 ${buildResponseStruct(method.returnType)}
+   respData, err := marshalResponse(response, ${method.hasCborReturn ? 'true' : 'false'})
+   if err != nil {
+    		RespondWithErr(w, err, ${method.hasCborReturn ? 'true' : 'false'})
+		    return
+   }
+   w.Header().Set("Content-Type", "application/${method.hasCborReturn ? 'cbor' : 'json'}")
+   w.WriteHeader(${method.responseCode})
+   w.Write(respData)
 	`
 }
 const buildHandler = (svcName: string, method: QueryMethod | MutationMethod) => {
@@ -51,6 +61,7 @@ const buildHandler = (svcName: string, method: QueryMethod | MutationMethod) => 
     ctx := context.WithValue(r.Context(), handlerKey, "${capitalize(svcName)}Routes/${lowerCase(method.name)}")
     ${parseReqBody(method)}
     ${invokeMethod(svcName, method)}
+    ${sendResponse(method)}
 	})`
 }
 const buildRoutes = (svc: QueryService | MutationService): string => {

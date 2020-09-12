@@ -252,6 +252,7 @@ export const parseReqBody = (method: MutationMethod | QueryMethod): string => {
     err = parseReqBody(r, &rCont, ${method.hasCborParams ? 'true' : 'false'} )
 		if err != nil {
 			RespondWithErr(w, err, ${method.hasCborReturn ? 'true' : 'false'})
+			return
 		}
 `
 }
@@ -349,6 +350,20 @@ export const buildInterfaces = (schema: Schema): string => {
 }
 
 export const helpers = `
+func marshalResponse(v interface{}, isCbor bool) ([]byte, error) {
+	if isCbor {
+		data, err := cbor.Marshal(v)
+		if err != nil {
+			return data,NewRpcError(http.StatusInternalServerError, "failed to marshal cbor response", err)
+		}
+	}
+	data, err := json.Marshal(v)
+	if err != nil {
+		return data, NewRpcError(http.StatusInternalServerError, "failed to marshal json response", err)
+	}
+	return data, nil
+}
+
 func parseReqBody(r *http.Request, v interface{}, isCbor bool) error {
 	reqBody, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
