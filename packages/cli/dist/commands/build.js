@@ -198,8 +198,13 @@ class Build extends command_1.Command {
             },
         ];
         for (const step of steps) {
-            this.log(step.msg);
-            await step.task.run(step.ctx);
+            try {
+                this.log(step.msg);
+                await step.task.run(step.ctx);
+            }
+            catch (error) {
+                log.error(error);
+            }
         }
     }
 }

@@ -20,7 +20,7 @@ import { buildSchemas, validateSchemas } from '@typerpc/schema'
 import { Project, SourceFile } from 'ts-morph'
 import { isValidPlugin, PluginManager } from '@typerpc/plugin-manager'
 import { BaseLogger } from 'pino'
-import { format, getConfigFile, logger, parseConfig, ParsedConfig } from '../utils'
+import { format, getConfigFile, createLogger, parseConfig, ParsedConfig } from '../utils'
 
 type ValidateCtx = {
     sourceFiles: SourceFile[]
@@ -262,7 +262,7 @@ class Build extends Command {
             configs = [{ configName: 'flags', plugin, outputPath, packageName, formatter }]
         }
 
-        const log = logger(project)
+        const log = await createLogger(project)
         const steps: BuildStep[] = [
             { task: this.#validate, ctx: { sourceFiles, configs }, msg: 'Triggering input validation' },
             {
@@ -283,8 +283,12 @@ class Build extends Command {
             },
         ]
         for (const step of steps) {
-            this.log(step.msg)
-            await step.task.run(step.ctx)
+            try {
+                this.log(step.msg)
+                await step.task.run(step.ctx)
+            } catch (error) {
+                log.error(error)
+            }
         }
     }
 }
