@@ -235,6 +235,12 @@ export const parseQueryParams = (params: ReadonlyArray<Param>): string => {
 }
 
 export const parseReqBody = (method: MutationMethod | QueryMethod): string => {
+    if (method.params.length === 0) {
+        return ''
+    }
+    if (isQueryMethod(method)) {
+        return parseQueryParams(method.params)
+    }
     let props = ''
     for (const param of method.params) {
         props = props.concat(`${capitalize(param.name)} ${dataType(param.type)} \`json:"${lowerCase(param.name)}"\`
@@ -325,9 +331,27 @@ export const buildInterfaces = (schema: Schema): string => {
 }
 
 export const helpers = `
+func parseReqBody(r *http.Request, v interface{}, isCbor bool) error {
+	reqBody, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		return NewRpcError(http.StatusInternalServerError, "failed to read request body",  err)
+	}
+	if isCbor {
+		err := cbor.Unmarshal(reqBody, v)
+		if err != nil {
+			return  NewRpcError(http.StatusBadRequest, "failed unmarshall cbor request data", err)
+		}
+	}
+	err = json.Unmarshal(reqBody, v)
+	if err != nil {
+		return NewRpcError(http.StatusBadRequest, "failed unmarshall json request data", err)
+	}
+	return nil
+}
+
 func handlePanic(w http.ResponseWriter, isCbor bool) {
 
-	// In case of a panic, serve a 500 error and then panic.
+	// If panic occurs, serve a 500 error and then panic.
 	if rr := recover(); rr != nil {
 		RespondWithErr(w, errors.New("internal"), isCbor)
 		panic(rr)
