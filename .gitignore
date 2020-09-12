@@ -1,7 +1,6 @@
 *-debug.log
 *-error.log
 /.nyc_output
-/dist
 /lib
 /package-lock.json
 /tmp
@@ -76,7 +75,6 @@ jspm_packages/
 
 .DS_Store
 .idea
-dist
 _ts3.4
 *.tsbuildinfo
 .watchmanconfig

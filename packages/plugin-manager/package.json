@@ -38,5 +38,6 @@
     "@typerpc/plugin": "^0.1.2",
     "live-plugin-manager": "^0.15.1",
     "ts-morph": "^8.1.0"
-  }
+  },
+  "gitHead": "37a00cb44c8260c7984837aeb43f8c193ed34e87"
 }

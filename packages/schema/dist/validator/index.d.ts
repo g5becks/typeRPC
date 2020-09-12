@@ -1,0 +1,30 @@
+import { SourceFile } from 'ts-morph';
+import { validateMessage } from './message';
+import { isErrCode, isResponseCode } from './service';
+import { isContainer, isMsg, isMsgLiteral, isMutationSvc, isQuerySvc, isScalar, isValidDataType, isValidMsg } from './utils';
+export declare const validateSchemas: (schemas: SourceFile[]) => Error[];
+export { isMutationSvc, isMsg, isValidMsg, isMsgLiteral, isQuerySvc, isContainer, isValidDataType, isErrCode, isResponseCode, validateMessage, isScalar, };
+export declare const internal: {
+    validateMessage: (msg: import("ts-morph").TypeAliasDeclaration | import("ts-morph").TypeNode<import("typescript").TypeNode>) => Error[];
+    isValidMsg: (type: import("ts-morph").Node<import("typescript").Node> | import("ts-morph").TypeNode<import("typescript").TypeNode>) => boolean;
+    isValidDataType: (type: import("ts-morph").Node<import("typescript").Node> | import("ts-morph").TypeNode<import("typescript").TypeNode> | undefined) => boolean;
+    isScalar: (type: import("ts-morph").Node<import("typescript").Node> | import("ts-morph").TypeNode<import("typescript").TypeNode>) => boolean;
+    validateService: (service: import("ts-morph").TypeAliasDeclaration) => Error[];
+    validateNotGeneric: (type: import("ts-morph").MethodSignature | import("ts-morph").TypeAliasDeclaration) => Error[];
+    validateReturnType: (method: import("ts-morph").MethodSignature) => Error[];
+    validateMethodJsDoc: (method: import("ts-morph").MethodSignature) => Error[];
+    validateQueryMethodParams: (method: import("ts-morph").MethodSignature) => Error[];
+    validateTypes: (file: SourceFile) => Error[];
+    validateJsDoc: (type: import("ts-morph").TypeAliasDeclaration) => Error[];
+    validateExports: (file: SourceFile) => Error[];
+    validateImports: (file: SourceFile, projectFiles: SourceFile[]) => Error[];
+    validateEnums: (file: SourceFile) => Error[];
+    validateNameSpaces: (file: SourceFile) => Error[];
+    validateClasses: (file: SourceFile) => Error[];
+    validateStatements: (file: SourceFile) => Error[];
+    validateVariables: (file: SourceFile) => Error[];
+    validateInterfaces: (file: SourceFile) => Error[];
+    validateFunctions: (file: SourceFile) => Error[];
+    validateMessages: (file: SourceFile) => Error[];
+};
+//# sourceMappingURL=index.d.ts.map
