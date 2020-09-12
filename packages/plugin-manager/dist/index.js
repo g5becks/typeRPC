@@ -17,7 +17,7 @@ const tslib_1 = require("tslib");
 const live_plugin_manager_1 = require("live-plugin-manager");
 const fs = tslib_1.__importStar(require("fs"));
 const sanitize = (plugin) => (plugin.startsWith('/') ? plugin.substring(1).trim() : plugin.trim());
-exports.isValidPlugin = (plugin) => typeof plugin === 'function' || typeof plugin === 'object';
+exports.isValidPlugin = (plugin) => typeof plugin === 'function';
 class PluginManager {
     constructor(pluginsPath) {
         _manager.set(this, void 0);
