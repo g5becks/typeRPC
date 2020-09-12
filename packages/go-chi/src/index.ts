@@ -16,8 +16,8 @@ import { Code } from '@typerpc/plugin'
 import {
     buildFileName,
     buildInterfaces,
-    buildMethodCallResultVar,
-    buildMethodReturnVar,
+    buildResultInitializers,
+    buildResultDeclarations,
     buildParamNames,
     buildTypes,
     parseReqBody,
@@ -25,12 +25,12 @@ import {
 
 const invokeMethod = (svcName: string, method: QueryMethod | MutationMethod): string => {
     return `
-    ${buildMethodReturnVar(method)}
+    ${buildResultDeclarations(method)}
     func() {
     defer handlePanic(w, ${method.hasCborReturn ? 'true' : 'false'})
-    ${buildMethodCallResultVar(method)} = ${lowerCase(svcName)}.${capitalize(method.name)}(ctx, ${buildParamNames(
-        method,
-    )})
+    ${buildResultInitializers(method)} = ${lowerCase(svcName)}.${capitalize(method.name)}(ctx${
+        method.hasParams ? ', ' : ''
+    } ${buildParamNames(method)})
     }()`
 }
 const buildHandler = (svcName: string, method: QueryMethod | MutationMethod) => {

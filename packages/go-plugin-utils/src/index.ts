@@ -271,50 +271,54 @@ export const buildParamNames = (method: QueryMethod | MutationMethod): string =>
     return paramString
 }
 
-export const buildMethodReturnVar = (method: QueryMethod | MutationMethod): string => {
+// builds the variable declaration(s) to store the return value(s) of a method call
+export const buildResultDeclarations = (method: QueryMethod | MutationMethod): string => {
     if (is.tuple2(method.returnType)) {
-        return `var res1 ${dataType(method.returnType)}
-              var res2 ${dataType(method.returnType)}
+        return `var item1 ${dataType(method.returnType)}
+              var item2 ${dataType(method.returnType)}
               `
     }
     if (is.tuple3(method.returnType)) {
-        return `var res1 ${dataType(method.returnType)}
-              var res2 ${dataType(method.returnType)}
-              var res3 ${dataType(method.returnType)}
+        return `var item1 ${dataType(method.returnType)}
+              var item2 ${dataType(method.returnType)}
+              var item3 ${dataType(method.returnType)}
               `
     }
     if (is.tuple4(method.returnType)) {
-        return `var res1 ${dataType(method.returnType)}
-              var res2 ${dataType(method.returnType)}
-              var res3 ${dataType(method.returnType)}
-              var res4 ${dataType(method.returnType)}
+        return `var item1 ${dataType(method.returnType)}
+              var item2 ${dataType(method.returnType)}
+              var item3 ${dataType(method.returnType)}
+              var item4 ${dataType(method.returnType)}
               `
     }
     if (is.tuple5(method.returnType)) {
-        return `var res1 ${dataType(method.returnType)}
-              var res2 ${dataType(method.returnType)}
-              var res3 ${dataType(method.returnType)}
-              var res4 ${dataType(method.returnType)}
-              var res5 ${dataType(method.returnType)}
+        return `var item1 ${dataType(method.returnType)}
+              var item2 ${dataType(method.returnType)}
+              var item3 ${dataType(method.returnType)}
+              var item4 ${dataType(method.returnType)}
+              var item5 ${dataType(method.returnType)}
               `
     }
-    return `var ${dataType(method.returnType)}`
+    return `var res ${dataType(method.returnType)}`
 }
-export const buildMethodCallResultVar = (method: QueryMethod | MutationMethod): string => {
+
+// builds the variable initializer(s) for a return values of a method call
+export const buildResultInitializers = (method: QueryMethod | MutationMethod): string => {
     if (is.tuple2(method.returnType)) {
-        return `res1, res2, err`
+        return `item1, item2, err`
     }
     if (is.tuple3(method.returnType)) {
-        return `res1, res2, res3, err`
+        return `item1, item2, item3, err`
     }
     if (is.tuple4(method.returnType)) {
-        return `res1, res2, res3, res4, err`
+        return `item1, item2, item3, item4, err`
     }
     if (is.tuple5(method.returnType)) {
-        return `res1, res2, res3, res4, res5, err`
+        return `item1, item2, item3, item4, item5, err`
     }
     return `res, err`
 }
+
 export const buildFileName = (fileName: string): string =>
     fileName.includes('-') ? fileName.split('-').join('_') + '.go' : fileName + '.go'
 
