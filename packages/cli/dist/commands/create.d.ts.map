@@ -1,1 +1,0 @@
-{"version":3,"file":"create.d.ts","sourceRoot":"","sources":["../../src/commands/create.ts"],"names":[],"mappings":"AAYA,OAAO,EAAE,OAAO,EAAE,KAAK,EAAE,MAAM,gBAAgB,CAAA;AAE/C,cAAM,MAAO,SAAQ,OAAO;IACxB,MAAM,CAAC,WAAW,SAA8B;IAEhD,MAAM,CAAC,QAAQ,WAId;IAED,MAAM,CAAC,KAAK;;;;MAMX;IAED,MAAM,CAAC,IAAI;;QAAqB;IAE1B,GAAG;CASZ;AAED,SAAS,MAAM,CAAA"}
