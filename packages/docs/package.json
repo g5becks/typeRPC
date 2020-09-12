@@ -1,13 +1,13 @@
 {
   "name": "@typerpc/docs",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "license": "MIT",
   "scripts": {
     "dev": "docz dev",
     "build": "docz build",
     "serve": "docz serve"
   },
-    "publishConfig": {
+  "publishConfig": {
     "access": "public"
   },
   "dependencies": {
