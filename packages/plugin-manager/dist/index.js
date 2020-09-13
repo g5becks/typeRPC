@@ -44,19 +44,12 @@ class PluginManager {
             await tslib_1.__classPrivateFieldGet(this, _manager).install(sanitize(plugin));
         }
     }
-    async install(plugins, onError, onInstalled, onInstalling) {
-        try {
-            await Promise.all(plugins.map((plugin) => this.installPlugin(plugin, { onInstalling, onInstalled })));
-        }
-        catch (error) {
-            onError(error);
-        }
+    async install(plugins, onInstalled, onInstalling) {
+        await Promise.all(plugins.map((plugin) => this.installPlugin(plugin, { onInstalling, onInstalled })));
     }
     require(plugin) {
         const plug = tslib_1.__classPrivateFieldGet(this, _manager).require(plugin);
-        return exports.isValidPlugin(plug)
-            ? plug
-            : new Error(`${plugin} is either an invalid typerpc plugin name, or has an incorrect implementation`);
+        return exports.isValidPlugin(plug) ? plug : new Error(plug);
     }
 }
 exports.PluginManager = PluginManager;

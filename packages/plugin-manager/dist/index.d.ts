@@ -8,7 +8,7 @@ export declare class PluginManager {
     private pluginPath;
     private pluginIsInstalled;
     private installPlugin;
-    install(plugins: string[], onError: (error: Error) => void, onInstalled: (plugin: string) => void, onInstalling: (plugin: string) => void): Promise<void>;
+    install(plugins: string[], onInstalled: (plugin: string) => void, onInstalling: (plugin: string) => void): Promise<void>;
     require(plugin: string): TypeRpcPlugin | Error;
 }
 //# sourceMappingURL=index.d.ts.map

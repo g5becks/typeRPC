@@ -171,15 +171,11 @@ class Build extends Command {
             {
                 title: `Installing required plugin(s)`,
                 task: async (ctx) => {
-                    const onError = (error: Error) => {
-                        ctx.logger.error(error)
-                        this.error(error)
-                    }
                     const onInstalled = (plugin: string) => this.log(`${plugin} already installed, fetching from cache`)
                     const onInstalling = (plugin: string) =>
                         this.log(`attempting to install ${plugin} from https://registry.npmjs.org`)
                     const plugins = ctx.configs.map((cfg) => cfg.plugin)
-                    await ctx.manager.install(plugins, onError, onInstalled, onInstalling)
+                    await ctx.manager.install(plugins, onInstalled, onInstalling)
                 },
             },
             {
