@@ -1,6 +1,6 @@
 {
   "name": "@typerpc/go-chi",
-  "version": "0.1.3",
+  "version": "0.1.5",
   "description": "typerpc plugin for Golang Chi framework",
   "keywords": [
     "typerpc",

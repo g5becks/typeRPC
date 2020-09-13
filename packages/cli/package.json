@@ -1,6 +1,6 @@
 {
   "name": "@typerpc/cli",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "typerpc command line tooling",
   "keywords": [
     "typerpc",
@@ -72,7 +72,7 @@
     "@oclif/plugin-not-found": "^1.2.4",
     "@typerpc/config": "^0.1.3",
     "@typerpc/plugin": "^0.1.3",
-    "@typerpc/plugin-manager": "^0.1.4",
+    "@typerpc/plugin-manager": "^0.1.5",
     "@typerpc/schema": "^0.1.3",
     "@types/prettyjson": "^0.0.29",
     "fs-extra": "^9.0.1",
