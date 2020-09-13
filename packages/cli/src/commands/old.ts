@@ -18,9 +18,10 @@ import path from 'path'
 import { Listr } from 'listr2'
 import { buildSchemas, validateSchemas } from '@typerpc/schema'
 import { Project, SourceFile } from 'ts-morph'
-import { isValidPlugin, PluginManager } from '@typerpc/plugin-manager'
 import { format, getConfigFile, createLogger, parseConfig, ParsedConfig } from '../utils'
+
 import { Logger } from 'tslog'
+import { isValidPlugin, PluginManager } from '@typerpc/plugin-manager'
 
 type ValidateCtx = {
     sourceFiles: SourceFile[]
@@ -47,7 +48,7 @@ type BuildStep = {
     msg: string
 }
 
-class Build extends Command {
+class Old extends Command {
     static description = 'build generates rpc code using provided plugin(s)'
 
     static flags = {
@@ -110,7 +111,7 @@ class Build extends Command {
         }
     }
 
-    #writeCtx: WriteCtx = []
+    static writeCtx: WriteCtx = []
 
     #validateTsConfig = new Listr<{ tsConfigFilePath: string }>(
         {
@@ -190,7 +191,7 @@ class Build extends Command {
 
                         if (isValidPlugin(gen)) {
                             // pass the generated code to the writeCtx for write task
-                            this.#writeCtx = [...this.#writeCtx, { code: gen(schemas), outputPath: cfg.outputPath }]
+                            Old.writeCtx = [...Old.writeCtx, { code: gen(schemas), outputPath: cfg.outputPath }]
                         } else {
                             this.error(
                                 `${cfg.plugin} is not a valid typerpc plugin. Plugins must be functions, typeof ${
@@ -241,13 +242,13 @@ class Build extends Command {
         { exitOnError: true },
     )
     async run(): Promise<void> {
-        const { flags } = this.parse(Build)
+        const { flags } = this.parse(Old)
         const tsConfigFilePath = flags.tsConfig?.trim() ?? ''
         // validate tsconfig before proceeding
         await this.#validateTsConfig.run({ tsConfigFilePath })
         const project = new Project({ tsConfigFilePath, skipFileDependencyResolution: true })
-        project.getSourceFiles().forEach((file) => this.log(file.getBaseName()))
         let log = new Logger()
+        const manager = PluginManager.create(project)
         try {
             log = await createLogger(project)
         } catch (error) {
@@ -257,7 +258,6 @@ class Build extends Command {
         try {
             // get .rpc.config.ts file
             const configFile = getConfigFile(project)
-            this.log(configFile?.getText())
             // parse config objects
             let configs: ParsedConfig[] = []
             if (typeof configFile !== 'undefined') {
@@ -282,14 +282,18 @@ class Build extends Command {
                 this.error(`no configs found in .rpc.config.ts and not enough arguments passed`)
             }
 
+            const onInstalled = (plugin: string) => console.log(`${plugin} is already installed`)
+            const onInstalling = (plugin: string) => console.log(`installing ${plugin}`)
+            setTimeout(async () => await manager.install(['@typerpc/ts-axios'], onInstalled, onInstalling), 4000)
+
             const steps: BuildStep[] = [
                 { task: this.#validate, ctx: { sourceFiles, configs }, msg: 'Triggering input validation' },
                 {
                     task: this.#build,
-                    ctx: { sourceFiles, configs, manager: PluginManager.create(project), logger: log },
+                    ctx: { sourceFiles, configs, manager, logger: log },
                     msg: 'Initializing build process',
                 },
-                { task: this.#write, ctx: this.#writeCtx, msg: 'Saving generated code to disk' },
+                { task: this.#write, ctx: Old.writeCtx, msg: 'Saving generated code to disk' },
                 {
                     task: this.#format,
                     ctx: {
@@ -302,17 +306,12 @@ class Build extends Command {
                 },
             ]
             for (const step of steps) {
-                try {
-                    this.log(step.msg)
-                    await step.task.run(step.ctx)
-                } catch (error) {
-                    log.error(error)
-                }
+                this.log(step.msg)
             }
         } catch (error) {
-            log.error(error)
+            log.error(`${error} + managerOpts = ${manager.opts()}`)
         }
     }
 }
 
-export = Build
+export = Old

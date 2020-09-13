@@ -13,10 +13,10 @@
 import { ObjectLiteralExpression, Project, SourceFile, SyntaxKind } from 'ts-morph'
 import { GeneratorConfig } from '@typerpc/config'
 import { ChildProcess, exec } from 'child_process'
-import * as fs from 'fs-extra'
-import { ILogObject, Logger } from 'tslog'
 import { appendFile } from 'fs-extra'
+import { ILogObject, Logger } from 'tslog'
 import { render } from 'prettyjson'
+import * as fs from 'fs-extra'
 
 export const getConfigFile = (project: Project): SourceFile | undefined =>
     project.getSourceFile((file) => file.getBaseName().toLowerCase() === '.rpc.config.ts')

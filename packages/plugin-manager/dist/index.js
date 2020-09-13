@@ -19,14 +19,17 @@ const fs = tslib_1.__importStar(require("fs"));
 const sanitize = (plugin) => (plugin.startsWith('/') ? plugin.substring(1).trim() : plugin.trim());
 exports.isValidPlugin = (plugin) => typeof plugin === 'function';
 class PluginManager {
-    constructor(pluginsPath) {
+    constructor(pluginsPath, cwd) {
         _manager.set(this, void 0);
         _pluginsPath.set(this, void 0);
+        this.opts = () => JSON.stringify(tslib_1.__classPrivateFieldGet(this, _manager).options);
+        this.list = () => JSON.stringify(tslib_1.__classPrivateFieldGet(this, _manager).list());
         tslib_1.__classPrivateFieldSet(this, _pluginsPath, pluginsPath);
-        tslib_1.__classPrivateFieldSet(this, _manager, new live_plugin_manager_1.PluginManager({ pluginsPath }));
+        tslib_1.__classPrivateFieldSet(this, _manager, new live_plugin_manager_1.PluginManager({ pluginsPath, cwd }));
     }
     static create(project) {
-        return new PluginManager(project.getRootDirectories()[0].getPath() + '/.typerpc/plugins');
+        const cwd = project.getRootDirectories()[0].getPath();
+        return new PluginManager(cwd + '/.typerpc/plugins', cwd);
     }
     pluginPath(plugin) {
         return `${tslib_1.__classPrivateFieldGet(this, _pluginsPath)}/${sanitize(plugin)}`;
@@ -41,7 +44,7 @@ class PluginManager {
         }
         else {
             log.onInstalling(plugin);
-            await tslib_1.__classPrivateFieldGet(this, _manager).install(sanitize(plugin));
+            await tslib_1.__classPrivateFieldGet(this, _manager).installFromNpm(sanitize(plugin));
         }
     }
     async install(plugins, onInstalled, onInstalling) {
@@ -49,7 +52,13 @@ class PluginManager {
     }
     require(plugin) {
         const plug = tslib_1.__classPrivateFieldGet(this, _manager).require(plugin);
-        return exports.isValidPlugin(plug) ? plug : new Error(plug);
+        if (exports.isValidPlugin(plug)) {
+            return plug;
+        }
+        if (plug instanceof Error) {
+            return plug;
+        }
+        return new Error(plug);
     }
 }
 exports.PluginManager = PluginManager;

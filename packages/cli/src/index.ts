@@ -9,5 +9,41 @@
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+import yargs from 'yargs'
 
-export { run } from '@oclif/command'
+const opts = yargs.options({
+    tsconfig: {
+        alias: 't',
+        type: 'string',
+        demandOption: true,
+        description: 'path to tsconfig.json for project containing your typerpc schema files',
+    },
+    plugin: {
+        alias: 'p',
+        type: 'string',
+        description: 'name of the typerpc plugin to use for code generation',
+    },
+    out: {
+        alias: 'o',
+        type: 'string',
+        description: 'path to a directory to place generated code',
+    },
+    pkg: {
+        type: 'string',
+        description: 'package name to use when generating code',
+    },
+    fmt: {
+        alias: 'f',
+        type: 'string',
+        description: 'package name to use when generating code',
+    },
+})
+
+const check = opts.check((argv, _) => {
+    if (!argv.tsconfig) {
+        throw new Error()
+    } else {
+        return true
+    }
+})
+const args = opts.argv

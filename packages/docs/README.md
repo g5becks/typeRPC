@@ -30,7 +30,7 @@ yarn # npm i
 yarn dev # npm run dev
 ```
 
-## Build
+## Old
 
 ```sh
 yarn generate # npm run generate

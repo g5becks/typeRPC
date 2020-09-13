@@ -14,30 +14,15 @@
   "homepage": "https://typerpc.run",
   "license": "BSD-2-Clause",
   "bin": {
-    "typerpc": "./bin/run"
-  },
-  "directories": {
-    "lib": "src",
-    "test": "tests"
+    "typerpc": "./dist/index.js"
   },
   "engines": {
     "node": ">=8.4.0"
   },
   "files": [
     "/bin",
-    "/packages/cli/bin",
-    "/dist",
-    "/npm-shrinkwrap.json",
-    "/oclif.manifest.json"
+    "/dist"
   ],
-  "oclif": {
-    "commands": "./src/commands",
-    "bin": "typerpc",
-    "plugins": [
-      "@oclif/plugin-help",
-      "@oclif/plugin-not-found"
-    ]
-  },
   "publishConfig": {
     "access": "public"
   },
@@ -51,36 +36,30 @@
     "clean": "rm -rf ./dist && rm -rf tsconfig.build.tsbuildinfo",
     "tsc": "tsc -b tsconfig.build.json",
     "postpack": "rm -f oclif.manifest.json",
-    "posttest1": "eslint . --ext .ts --config .eslintrc",
-    "prepack": "yarn run build && oclif-dev manifest && oclif-dev readme",
-    "version": "oclif-dev readme && git add README.md"
+    "posttest": "eslint . --ext .ts --config .eslintrc",
+    "prepack": "yarn run build",
+    "version": "git add README.md"
   },
   "bugs": {
     "url": "https://github.com/typerpc/typerpc/issues"
   },
   "devDependencies": {
-    "@oclif/dev-cli": "^1.22.2",
+    "@types/figlet": "^1.2.0",
     "@types/fs-extra": "^9.0.1",
-    "eslint-config-oclif": "^3.1.0",
-    "eslint-config-oclif-typescript": "^0.2.0",
-    "globby": "^11.0.1"
+    "@types/yargs": "^15.0.5"
   },
   "dependencies": {
-    "@oclif/command": "^1.8.0",
-    "@oclif/config": "^1.17.0",
-    "@oclif/plugin-help": "^3.2.0",
-    "@oclif/plugin-not-found": "^1.2.4",
     "@typerpc/config": "^0.1.3",
     "@typerpc/plugin": "^0.1.3",
     "@typerpc/plugin-manager": "^0.1.5",
     "@typerpc/schema": "^0.1.3",
     "@types/prettyjson": "^0.0.29",
+    "figlet": "^1.5.0",
     "fs-extra": "^9.0.1",
-    "listr2": "^3.0.0",
     "prettyjson": "^1.2.1",
     "ts-morph": "^8.1.0",
-    "tslib": "^2.0.1",
-    "tslog": "^2.8.0"
+    "tslog": "^2.8.0",
+    "yargs": "^16.0.3"
   },
   "gitHead": "1349ec02ed5ba04bf6ecbe8f564780791e858d9a"
 }

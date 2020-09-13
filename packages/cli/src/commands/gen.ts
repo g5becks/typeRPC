@@ -10,36 +10,39 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { Command, flags } from '@oclif/command'
+import { CommandModule } from 'yargs'
 
-class Create extends Command {
-    static description = 'describe the command here'
-
-    static examples = [
-        `$ typerpc hello
-hello world from ./src/hello.ts!
-`,
-    ]
-
-    static flags = {
-        help: flags.help({ char: 'h' }),
-        // flag with a value (-n, --name=VALUE)
-        name: flags.string({ char: 'n', description: 'name to print' }),
-        // flag with no value (-f, --force)
-        force: flags.boolean({ char: 'f' }),
-    }
-
-    static args = [{ name: 'file' }]
-
-    async run() {
-        const { args, flags } = this.parse(Create)
-
-        const name = flags.name ?? 'world'
-        this.log(`hello ${name} from ./src/commands/hello.ts`)
-        if (args.file && flags.force) {
-            this.log(`you input --force and --file: ${args.file}`)
-        }
-    }
+export const gen: CommandModule = {
+    command: 'build',
+    describe: 'generates rpc code using provided plugin(s)',
+    builder: {
+        tsconfig: {
+            alias: 't',
+            type: 'string',
+            demandOption: true,
+            description: 'path to tsconfig.json for project containing your typerpc schema files',
+        },
+        plugin: {
+            alias: 'p',
+            type: 'string',
+            description: 'name of the typerpc plugin to use for code generation',
+        },
+        out: {
+            alias: 'o',
+            type: 'string',
+            description: 'path to a directory to place generated code',
+        },
+        pkg: {
+            type: 'string',
+            description: 'package name to use when generating code',
+        },
+        fmt: {
+            alias: 'f',
+            type: 'string',
+            description: 'package name to use when generating code',
+        },
+    },
+    handler: (args) => {
+        console.log(args)
+    },
 }
-
-export = Create

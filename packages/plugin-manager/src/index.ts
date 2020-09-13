@@ -23,13 +23,14 @@ export class PluginManager {
     readonly #manager: Manager
     readonly #pluginsPath: string
 
-    private constructor(pluginsPath: string) {
+    private constructor(pluginsPath: string, cwd: string) {
         this.#pluginsPath = pluginsPath
-        this.#manager = new Manager({ pluginsPath })
+        this.#manager = new Manager({ pluginsPath, cwd })
     }
 
     static create(project: Project): PluginManager {
-        return new PluginManager(project.getRootDirectories()[0].getPath() + '/.typerpc/plugins')
+        const cwd = project.getRootDirectories()[0].getPath()
+        return new PluginManager(cwd + '/.typerpc/plugins', cwd)
     }
 
     private pluginPath(plugin: string): string {
@@ -49,10 +50,11 @@ export class PluginManager {
             await this.#manager.installFromPath(this.pluginPath(plugin))
         } else {
             log.onInstalling(plugin)
-            await this.#manager.install(sanitize(plugin))
+            await this.#manager.installFromNpm(sanitize(plugin))
         }
     }
-
+    opts = () => JSON.stringify(this.#manager.options)
+    list = () => JSON.stringify(this.#manager.list())
     async install(
         plugins: string[],
         onInstalled: (plugin: string) => void,
@@ -62,6 +64,12 @@ export class PluginManager {
     }
     require(plugin: string): TypeRpcPlugin | Error {
         const plug = this.#manager.require(plugin)
-        return isValidPlugin(plug) ? plug : new Error(plug)
+        if (isValidPlugin(plug)) {
+            return plug
+        }
+        if (plug instanceof Error) {
+            return plug
+        }
+        return new Error(plug)
     }
 }
