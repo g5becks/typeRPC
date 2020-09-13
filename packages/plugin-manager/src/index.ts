@@ -55,20 +55,13 @@ export class PluginManager {
 
     async install(
         plugins: string[],
-        onError: (error: Error) => void,
         onInstalled: (plugin: string) => void,
         onInstalling: (plugin: string) => void,
     ): Promise<void> {
-        try {
-            await Promise.all(plugins.map((plugin) => this.installPlugin(plugin, { onInstalling, onInstalled })))
-        } catch (error) {
-            onError(error)
-        }
+        await Promise.all(plugins.map((plugin) => this.installPlugin(plugin, { onInstalling, onInstalled })))
     }
     require(plugin: string): TypeRpcPlugin | Error {
         const plug = this.#manager.require(plugin)
-        return isValidPlugin(plug)
-            ? plug
-            : new Error(`${plugin} is either an invalid typerpc plugin name, or has an incorrect implementation`)
+        return isValidPlugin(plug) ? plug : new Error(plug)
     }
 }
