@@ -20,7 +20,7 @@ const gen_1 = require("./commands/gen");
 const chalk_1 = __importDefault(require("chalk"));
 const figlet_1 = __importDefault(require("figlet"));
 const tslog_1 = require("tslog");
-console.log(chalk_1.default.bgBlueBright(figlet_1.default.textSync('typerpc')));
+console.log(chalk_1.default.blue(figlet_1.default.textSync('typerpc')));
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require('yargonaut').help('3D-ASCII').helpStyle('green').errors('Calvin S').errorsStyle('red');
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

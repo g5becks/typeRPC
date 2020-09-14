@@ -207,7 +207,7 @@ const handler = async (args) => {
     }
 };
 exports.gen = {
-    command: 'build',
+    command: 'gen',
     describe: 'generates rpc code using provided plugin(s)',
     builder: {
         tsconfig: {
