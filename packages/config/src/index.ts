@@ -13,18 +13,18 @@
 /**
  * Config options for code generation
  *
- * @property {string} outputPath
+ * @property {string} out
  * @property {string} plugin
- * @property {string} packageName
- * @property {string| undefined} formatter
+ * @property {string} pkg
+ * @property {string| undefined} fmt
  **/
 export type GeneratorConfig = Readonly<{
     /** directory to write generated code **/
-    outputPath: string
+    out: string
     /** name of the typerpc plugin to use **/
     plugin: string
     /** package name to use in generated code **/
-    packageName: string
+    pkg: string
     /**
      * A string that will be used to execute
      * the code formatter of choice.
@@ -33,7 +33,7 @@ export type GeneratorConfig = Readonly<{
      *
      * E.G. 'prettier --single-quote --trailing-comma es5 --no-semi --parser typescript --write'
      * **/
-    formatter?: string
+    fmt?: string
     /** package name to use in generated code **/
 }>
 
