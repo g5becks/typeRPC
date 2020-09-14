@@ -27,8 +27,8 @@ export type GeneratorConfig = Readonly<{
     pkg: string
     /**
      * A string that will be used to execute
-     * the code formatter of choice.
-     * Generated code in outputPath will be passed
+     * the code fmt of choice.
+     * Generated code in out will be passed
      * as an argument this string.
      *
      * E.G. 'prettier --single-quote --trailing-comma es5 --no-semi --parser typescript --write'

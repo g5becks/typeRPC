@@ -25,17 +25,17 @@ type ValidateCtx = {
     sourceFiles: SourceFile[]
     configs: ParsedConfig[]
 }
-type BuildCtx = { manager: PluginManager; logger: Logger } & ValidateCtx
+type BuildCtx = { manager: PluginManager } & ValidateCtx
 
 type GeneratedCode = { code: Code[]; outputPath: string }
 
 type WriteCtx = GeneratedCode[]
 
 type FormatConfig = {
-    formatter?: string
-    outputPath: string
+    fmt?: string
+    out: string
 }
-type FormatCtx = { logger: Logger; formatters: FormatConfig[] }
+type FormatCtx = { formatters: FormatConfig[] }
 
 type TaskCtx = ValidateCtx | BuildCtx | WriteCtx | FormatCtx
 
@@ -54,6 +54,8 @@ type Args = Readonly<
         fmt: string
     }>
 >
+
+let log: Logger = new Logger()
 const writeOutput = async (outputPath: string, code: Code[]): Promise<void> => {
     const results = []
     const filePath = (file: string) => path.join(outputPath, file)
@@ -97,7 +99,7 @@ const validate = new Listr<ValidateCtx>(
         {
             title: 'Output Path(s) Validation',
             task: async (ctx) => {
-                return Promise.all(ctx.configs.map((cfg) => validateOutputPath(cfg.outputPath, cfg.configName)))
+                return Promise.all(ctx.configs.map((cfg) => validateOutputPath(cfg.out, cfg.configName)))
             },
         },
         {
@@ -151,7 +153,7 @@ const build = new Listr<BuildCtx>(
             title: `Running code generator(s)`,
             task: async (ctx) => {
                 for (const cfg of ctx.configs) {
-                    const schemas = buildSchemas(ctx.sourceFiles, cfg.packageName)
+                    const schemas = buildSchemas(ctx.sourceFiles, cfg.pkg)
                     const gen = ctx.manager.require(cfg.plugin)
                     if (gen instanceof Error) {
                         throw gen
@@ -159,7 +161,7 @@ const build = new Listr<BuildCtx>(
 
                     if (isValidPlugin(gen)) {
                         // pass the generated code to the writeCtx for write task
-                        writeCtx = [...writeCtx, { code: gen(schemas), outputPath: cfg.outputPath }]
+                        writeCtx = [...writeCtx, { code: gen(schemas), outputPath: cfg.out }]
                     } else {
                         throw new Error(
                             `${cfg.plugin} is not a valid typerpc plugin. Plugins must be functions, typeof ${
@@ -191,16 +193,11 @@ const format = new Listr<FormatCtx>(
         {
             title: 'Formatting Generated Code',
             task: async (ctx) => {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                const onError = (error: any) => {
-                    ctx.logger?.error(error)
-                }
-                const onComplete = (msg: string) => console.log(msg)
                 await Promise.all(
                     ctx.formatters.map(async (fmt) =>
-                        fmt.formatter
-                            ? formatter(fmt.outputPath, fmt.formatter, onError, onComplete)
-                            : console.log(`no formatter provided for formatting code in ${fmt.outputPath}`),
+                        fmt.fmt
+                            ? formatter(fmt.out, fmt.fmt, log.error, log.info)
+                            : console.log(`no formatter provided for formatting code in ${fmt.out}`),
                     ),
                 )
             },
@@ -214,7 +211,6 @@ const handler = async (args: Args): Promise<void> => {
     // validate tsconfig before proceeding
     await validateTsConfig.run({ tsConfigFilePath })
     const project = new Project({ tsConfigFilePath, skipFileDependencyResolution: true })
-    let log = new Logger()
     const manager = PluginManager.create(project)
     try {
         log = await createLogger(project)
@@ -223,50 +219,45 @@ const handler = async (args: Args): Promise<void> => {
     }
 
     try {
-        // get .rpc.config.ts file
+        // get rpc.config.ts file
         const configFile = getConfigFile(project)
         // parse config objects
         let configs: ParsedConfig[] = []
         if (typeof configFile !== 'undefined') {
             configs = parseConfig(configFile)
         }
-        // filter out .rpc.config.ts file from project source files
+        // filter out rpc.config.ts file from project source files
         const sourceFiles = project
             .getSourceFiles()
-            .filter((file) => file.getBaseName().toLowerCase() !== '.rpc.config.ts')
-        // parse command line flags
-        const plugin = flags.plugin?.trim()
-        const outputPath = flags.output?.trim()
-        const packageName = flags.packageName?.trim()
-        const formatter = flags.formatter?.trim()
+            .filter((file) => file.getBaseName().toLowerCase() !== 'rpc.config.ts')
         // if user provides command line arguments the config file will
         // be overridden - Be sure to document this behaviour
-        if (plugin && outputPath && packageName) {
-            configs = [{ configName: 'flags', plugin, outputPath, packageName, formatter }]
+        if (plugin && out && pkg) {
+            configs = [{ configName: 'flags', plugin, out, pkg, fmt }]
         }
         // no configs in file or command line opts
         if (configs.length === 0) {
-            throw new Error(`no configs found in .rpc.config.ts and not enough arguments passed`)
+            throw new Error(`no configs found in rpc.config.ts and not enough arguments passed`)
         }
-
-        const onInstalled = (plugin: string) => console.log(`${plugin} is already installed`)
-        const onInstalling = (plugin: string) => console.log(`installing ${plugin}`)
+        /*
+        const onInstalled = (plugin: string) => log.info(`${plugin} is already installed`)
+        const onInstalling = (plugin: string) => log.info(`installing ${plugin}`)
         setTimeout(async () => await manager.install(['@typerpc/ts-axios'], onInstalled, onInstalling), 4000)
+         */
 
         const steps: BuildStep[] = [
             { task: validate, ctx: { sourceFiles, configs }, msg: 'Triggering input validation' },
             {
                 task: build,
-                ctx: { sourceFiles, configs, manager, logger: log },
+                ctx: { sourceFiles, configs, manager },
                 msg: 'Initializing build process',
             },
             { task: write, ctx: writeCtx, msg: 'Saving generated code to disk' },
             {
                 task: format,
                 ctx: {
-                    logger: log,
                     formatters: configs.map((cfg) => {
-                        return { outputPath: cfg.outputPath, formatter: cfg.formatter }
+                        return { out: cfg.out, fmt: cfg.fmt }
                     }),
                 },
                 msg: 'Invoking Formatter(s)',
@@ -274,9 +265,11 @@ const handler = async (args: Args): Promise<void> => {
         ]
         for (const step of steps) {
             console.log(step.msg)
+            await step.task.run(step.ctx)
         }
     } catch (error) {
         log.error(`${error} + managerOpts = ${manager.opts()}`)
+        throw error
     }
 }
 
@@ -310,7 +303,5 @@ export const gen: CommandModule<Record<string, unknown>, Args> = {
             description: 'package name to use when generating code',
         },
     },
-    handler: (args) => {
-        console.log(args)
-    },
+    handler,
 }

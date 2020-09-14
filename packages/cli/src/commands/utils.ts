@@ -19,7 +19,7 @@ import { render } from 'prettyjson'
 import * as fs from 'fs-extra'
 
 export const getConfigFile = (project: Project): SourceFile | undefined =>
-    project.getSourceFile((file) => file.getBaseName().toLowerCase() === '.rpc.config.ts')
+    project.getSourceFile((file) => file.getBaseName().toLowerCase() === 'rpc.config.ts')
 const parseGeneratorConfig = (obj: ObjectLiteralExpression): GeneratorConfig => {
     const out = obj.getProperty('out')?.getChildrenOfKind(SyntaxKind.StringLiteral)[0]?.getLiteralValue()?.trim()
 
@@ -63,19 +63,19 @@ export const parseConfig = (file: SourceFile | undefined): ParsedConfig[] => {
 export const createLogger = async (project: Project): Promise<Logger> => {
     const dest = project.getRootDirectories()[0].getPath() + '/.typerpc/error.log'
     await fs.ensureFile(dest)
-    const logToTransport = (logObject: ILogObject) => {
-        appendFile(dest, render(logObject, { noColor: true }) + '\n\n')
+    const logToFile = (logObject: ILogObject) => {
+        appendFile(dest, render(logObject) + '\n\n')
     }
-    const logger = new Logger()
+    const logger = new Logger({ type: 'pretty' })
     logger.attachTransport(
         {
-            silly: logToTransport,
-            debug: logToTransport,
-            trace: logToTransport,
-            info: logToTransport,
-            warn: logToTransport,
-            error: logToTransport,
-            fatal: logToTransport,
+            silly: logger.silly,
+            debug: logger.debug,
+            trace: logger.trace,
+            info: logger.info,
+            warn: logger.warn,
+            error: logToFile,
+            fatal: logToFile,
         },
         'error',
     )

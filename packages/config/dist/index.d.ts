@@ -1,10 +1,10 @@
 /**
  * Config options for code generation
  *
- * @property {string} outputPath
+ * @property {string} out
  * @property {string} plugin
  * @property {string} packageName
- * @property {string| undefined} formatter
+ * @property {string| undefined} fmt
  **/
 export declare type GeneratorConfig = Readonly<{
     /** directory to write generated code **/
@@ -15,8 +15,8 @@ export declare type GeneratorConfig = Readonly<{
     packageName: string;
     /**
      * A string that will be used to execute
-     * the code formatter of choice.
-     * Generated code in outputPath will be passed
+     * the code fmt of choice.
+     * Generated code in out will be passed
      * as an argument this string.
      *
      * E.G. 'prettier --single-quote --trailing-comma es5 --no-semi --parser typescript --write'
