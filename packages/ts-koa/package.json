@@ -1,6 +1,6 @@
 {
   "name": "@typerpc/ts-koa",
-  "version": "0.1.3",
+  "version": "0.1.6",
   "description": "typerpc typescript koa plugin",
   "keywords": [
     "typerpc",
@@ -37,7 +37,7 @@
     "@typerpc/ts-plugin-utils": "^0.1.3"
   },
   "devDependencies": {
-    "@typerpc/test-utils": "^0.1.3"
+    "@typerpc/test-utils": "^0.1.6"
   },
   "scripts": {
     "lint:fix": "eslint --fix src/**",
