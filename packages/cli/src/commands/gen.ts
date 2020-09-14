@@ -25,6 +25,7 @@ type ValidateCtx = {
     sourceFiles: SourceFile[]
     configs: ParsedConfig[]
 }
+
 type BuildCtx = { manager: PluginManager } & ValidateCtx
 
 type GeneratedCode = { code: Code[]; outputPath: string }
@@ -56,6 +57,7 @@ type Args = Readonly<
 >
 
 let log: Logger = new Logger()
+
 const writeOutput = async (outputPath: string, code: Code[]): Promise<void> => {
     const results = []
     const filePath = (file: string) => path.join(outputPath, file)
@@ -64,7 +66,7 @@ const writeOutput = async (outputPath: string, code: Code[]): Promise<void> => {
     }
 
     try {
-        console.log(`saving generated code to ${outputPath}`)
+        log.info(`saving generated code to ${outputPath}`)
         await Promise.all(results)
     } catch (error) {
         throw new Error(`error occurred writing files: ${error}`)
@@ -142,9 +144,9 @@ const build = new Listr<BuildCtx>(
         {
             title: `Installing required plugin(s)`,
             task: async (ctx) => {
-                const onInstalled = (plugin: string) => console.log(`${plugin} already installed, fetching from cache`)
+                const onInstalled = (plugin: string) => log.info(`${plugin} already installed, fetching from cache`)
                 const onInstalling = (plugin: string) =>
-                    console.log(`attempting to install ${plugin} from https://registry.npmjs.org`)
+                    log.info(`attempting to install ${plugin} from https://registry.npmjs.org`)
                 const plugins = ctx.configs.map((cfg) => cfg.plugin)
                 await ctx.manager.install(plugins, onInstalled, onInstalling)
             },
@@ -197,7 +199,7 @@ const format = new Listr<FormatCtx>(
                     ctx.formatters.map(async (fmt) =>
                         fmt.fmt
                             ? formatter(fmt.out, fmt.fmt, log.error, log.info)
-                            : console.log(`no formatter provided for formatting code in ${fmt.out}`),
+                            : log.warn(`no formatter provided for formatting code in ${fmt.out}`),
                     ),
                 )
             },
@@ -212,11 +214,7 @@ const handler = async (args: Args): Promise<void> => {
     await validateTsConfig.run({ tsConfigFilePath })
     const project = new Project({ tsConfigFilePath, skipFileDependencyResolution: true })
     const manager = PluginManager.create(project)
-    try {
-        log = await createLogger(project)
-    } catch (error) {
-        console.log(`this is the error: ${error}`)
-    }
+    log = await createLogger(project)
 
     try {
         // get rpc.config.ts file
@@ -264,7 +262,7 @@ const handler = async (args: Args): Promise<void> => {
             },
         ]
         for (const step of steps) {
-            console.log(step.msg)
+            log.info(step.msg)
             await step.task.run(step.ctx)
         }
     } catch (error) {
