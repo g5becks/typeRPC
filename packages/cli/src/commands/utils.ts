@@ -21,31 +21,21 @@ import * as fs from 'fs-extra'
 export const getConfigFile = (project: Project): SourceFile | undefined =>
     project.getSourceFile((file) => file.getBaseName().toLowerCase() === '.rpc.config.ts')
 const parseGeneratorConfig = (obj: ObjectLiteralExpression): GeneratorConfig => {
-    const outputPath = obj
-        .getProperty('outputPath')
-        ?.getChildrenOfKind(SyntaxKind.StringLiteral)[0]
-        ?.getLiteralValue()
-        ?.trim()
+    const out = obj.getProperty('out')?.getChildrenOfKind(SyntaxKind.StringLiteral)[0]?.getLiteralValue()?.trim()
+
     const plugin = obj.getProperty('plugin')?.getChildrenOfKind(SyntaxKind.StringLiteral)[0]?.getLiteralValue()?.trim()
-    const packageName = obj
-        .getProperty('packageName')
-        ?.getChildrenOfKind(SyntaxKind.StringLiteral)[0]
-        ?.getLiteralValue()
-        ?.trim()
-    const formatter = obj
-        .getProperty('formatter')
-        ?.getChildrenOfKind(SyntaxKind.StringLiteral)[0]
-        ?.getLiteralValue()
-        ?.trim()
-    console.log(`outputpath = ${outputPath}, plugin = ${plugin}, package = ${packageName}`)
-    if (!outputPath || !plugin || !packageName) {
+    const pkg = obj.getProperty('pkg')?.getChildrenOfKind(SyntaxKind.StringLiteral)[0]?.getLiteralValue()?.trim()
+
+    const fmt = obj.getProperty('fmt')?.getChildrenOfKind(SyntaxKind.StringLiteral)[0]?.getLiteralValue()?.trim()
+    console.log(`outputpath = ${out}, plugin = ${plugin}, package = ${pkg}`)
+    if (!out || !plugin || !pkg) {
         throw new Error(`
         error in config file: ${obj.getSourceFile().getFilePath()},
         at line number: ${obj.getStartLineNumber()},
         message: all generator config objects must contain the following properties: [outputPath, plugin, packageName]`)
     }
 
-    return { outputPath, plugin, packageName, formatter }
+    return { out, plugin, pkg, fmt }
 }
 export type ParsedConfig = GeneratorConfig & { configName: string }
 export const parseConfig = (file: SourceFile | undefined): ParsedConfig[] => {
