@@ -64,12 +64,14 @@ export class PluginManager {
     }
     require(plugin: string): TypeRpcPlugin {
         const plug = this.#manager.require(plugin)
+        console.debug('type of plugin = ' + typeof plugin)
+        console.debug(`plugin is valid = ${isValidPlugin(plugin)}`)
         if (isValidPlugin(plug)) {
             return plug
         }
         if (plug instanceof Error) {
             throw new Error(`invalid plugin ${plug.message}`)
         }
-        throw Error(`invalid plugin ${plug.message}`)
+        return plug
     }
 }

@@ -83,13 +83,15 @@ class PluginManager {
     }
     require(plugin) {
         const plug = __classPrivateFieldGet(this, _manager).require(plugin);
+        console.debug('type of plugin = ' + typeof plugin);
+        console.debug(`plugin is valid = ${exports.isValidPlugin(plugin)}`);
         if (exports.isValidPlugin(plug)) {
             return plug;
         }
         if (plug instanceof Error) {
             throw new Error(`invalid plugin ${plug.message}`);
         }
-        throw Error(`invalid plugin ${plug.message}`);
+        return plug;
     }
 }
 exports.PluginManager = PluginManager;
