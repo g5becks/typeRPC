@@ -143,6 +143,7 @@ let writeCtx: WriteCtx = []
 const build = new Listr<BuildCtx>(
     [
         {
+            options: {},
             title: `Installing required plugin(s)`,
             task: async (ctx) => {
                 const onInstalled = (plugin: string) => log.info(`${plugin} already installed, fetching from cache`)
@@ -153,6 +154,7 @@ const build = new Listr<BuildCtx>(
             },
         },
         {
+            options: { persistentOutput: true },
             title: `Running code generator(s)`,
             task: async (ctx) => {
                 for (const cfg of ctx.configs) {
@@ -184,7 +186,10 @@ const write = new Listr<WriteCtx>(
         {
             title: 'Saving generated code to provided output path(s)',
             task: async (ctx) => {
-                await Promise.all(ctx.map((generated) => writeOutput(generated.outputPath, generated.code)))
+                log.info(writeCtx)
+                for (const out of ctx) {
+                    await writeOutput(out.outputPath, out.code)
+                }
             },
         },
     ],
@@ -239,7 +244,7 @@ const handler = async (args: Args): Promise<void> => {
         if (configs.length === 0) {
             throw new Error(`no configs found in rpc.config.ts and not enough arguments passed`)
         }
-
+        /*
         const onInstalled = (plugin: string) => log.info(`${plugin} is already installed`)
         const onInstalling = (plugin: string) => log.info(`installing ${plugin}`)
         setTimeout(async () => {
@@ -247,6 +252,8 @@ const handler = async (args: Args): Promise<void> => {
             const plug = manager.require('@typerpc/ts-axios')
             console.log(typeof plug)
         }, 4000)
+
+         */
         const steps: BuildStep[] = [
             { task: validate, ctx: { sourceFiles, configs }, msg: 'Triggering input validation' },
             {
@@ -265,9 +272,15 @@ const handler = async (args: Args): Promise<void> => {
                 msg: 'Invoking Formatter(s)',
             },
         ]
+        let results: unknown[] = []
         for (const step of steps) {
+            log.info(`writeCtx at step ${step.msg}`)
             log.info(step.msg)
-            // await step.task.run(step.ctx)
+            results = results.concat(await step.task.run(step.ctx))
+        }
+
+        while (results.length < steps.length - 1) {
+            console.log('processing...')
         }
     } catch (error) {
         log.error(`${error} + managerOpts = ${manager.opts()}`)
