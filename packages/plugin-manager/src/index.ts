@@ -62,14 +62,14 @@ export class PluginManager {
     ): Promise<void> {
         await Promise.all(plugins.map((plugin) => this.installPlugin(plugin, { onInstalling, onInstalled })))
     }
-    require(plugin: string): TypeRpcPlugin | Error {
+    require(plugin: string): TypeRpcPlugin {
         const plug = this.#manager.require(plugin)
         if (isValidPlugin(plug)) {
             return plug
         }
         if (plug instanceof Error) {
-            return plug
+            throw new Error(`invalid plugin ${plug.message}`)
         }
-        return new Error(plug)
+        throw Error(`invalid plugin ${plug.message}`)
     }
 }

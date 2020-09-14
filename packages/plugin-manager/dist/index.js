@@ -87,9 +87,9 @@ class PluginManager {
             return plug;
         }
         if (plug instanceof Error) {
-            return plug;
+            throw new Error(`invalid plugin ${plug.message}`);
         }
-        return new Error(plug);
+        throw Error(`invalid plugin ${plug.message}`);
     }
 }
 exports.PluginManager = PluginManager;

@@ -159,7 +159,7 @@ const build = new Listr<BuildCtx>(
                     const schemas = buildSchemas(ctx.sourceFiles, cfg.pkg)
                     const gen = ctx.manager.require(cfg.plugin)
                     if (gen instanceof Error) {
-                        throw gen
+                        throw Error(`error is ${gen.message}`)
                     }
 
                     if (isValidPlugin(gen)) {
@@ -243,8 +243,9 @@ const handler = async (args: Args): Promise<void> => {
         const onInstalled = (plugin: string) => log.info(`${plugin} is already installed`)
         const onInstalling = (plugin: string) => log.info(`installing ${plugin}`)
         setTimeout(async () => await manager.install(['@typerpc/ts-axios'], onInstalled, onInstalling), 4000)
-         */
 
+
+         */
         const steps: BuildStep[] = [
             { task: validate, ctx: { sourceFiles, configs }, msg: 'Triggering input validation' },
             {
