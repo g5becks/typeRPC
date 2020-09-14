@@ -274,7 +274,7 @@ const handler = async (args: Args): Promise<void> => {
 }
 
 export const gen: CommandModule<Record<string, unknown>, Args> = {
-    command: 'build',
+    command: 'gen',
     describe: 'generates rpc code using provided plugin(s)',
     builder: {
         tsconfig: {

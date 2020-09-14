@@ -16,7 +16,7 @@ import chalk from 'chalk'
 import figlet from 'figlet'
 import { Logger } from 'tslog'
 
-console.log(chalk.bgBlueBright(figlet.textSync('typerpc')))
+console.log(chalk.blue(figlet.textSync('typerpc')))
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require('yargonaut').help('3D-ASCII').helpStyle('green').errors('Calvin S').errorsStyle('red')
