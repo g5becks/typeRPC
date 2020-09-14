@@ -11,6 +11,6 @@ export declare class PluginManager {
     opts: () => string;
     list: () => string;
     install(plugins: string[], onInstalled: (plugin: string) => void, onInstalling: (plugin: string) => void): Promise<void>;
-    require(plugin: string): TypeRpcPlugin;
+    require(plugin: string): TypeRpcPlugin | Error;
 }
 //# sourceMappingURL=index.d.ts.map

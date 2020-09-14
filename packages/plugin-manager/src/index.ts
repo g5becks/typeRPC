@@ -18,7 +18,7 @@ import { TypeRpcPlugin } from '@typerpc/plugin'
 const sanitize = (plugin: string): string => (plugin.startsWith('/') ? plugin.substring(1).trim() : plugin.trim())
 
 export const isValidPlugin = (plugin: any): plugin is TypeRpcPlugin =>
-    typeof plugin === 'function' || typeof plugin.default === 'function'
+    typeof plugin === 'function' || ('default' in plugin && typeof plugin.default === 'function')
 
 export class PluginManager {
     readonly #manager: Manager
@@ -63,16 +63,13 @@ export class PluginManager {
     ): Promise<void> {
         await Promise.all(plugins.map((plugin) => this.installPlugin(plugin, { onInstalling, onInstalled })))
     }
-    require(plugin: string): TypeRpcPlugin {
+    require(plugin: string): TypeRpcPlugin | Error {
         const plug = this.#manager.require(plugin)
-        console.debug('type of plugin = ' + typeof plugin)
-        console.debug(`plugin is valid = ${isValidPlugin(plugin)}`)
-        if (isValidPlugin(plug)) {
-            return plug
-        }
-        if (plug instanceof Error) {
-            throw new Error(`invalid plugin ${plug.message}`)
-        }
-        return plug
+        return isValidPlugin(plug)
+            ? typeof plug === 'function'
+                ? plug
+                : plug['default']
+            : // TODO point to a specific doc when available
+              new Error(`${plugin} is not a valid typerpc plugin. Please see https://typerpc.run for more info`)
     }
 }

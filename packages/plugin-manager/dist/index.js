@@ -48,7 +48,7 @@ exports.PluginManager = exports.isValidPlugin = void 0;
 const live_plugin_manager_1 = require("live-plugin-manager");
 const fs = __importStar(require("fs"));
 const sanitize = (plugin) => (plugin.startsWith('/') ? plugin.substring(1).trim() : plugin.trim());
-exports.isValidPlugin = (plugin) => typeof plugin === 'function';
+exports.isValidPlugin = (plugin) => typeof plugin === 'function' || ('default' in plugin && typeof plugin.default === 'function');
 class PluginManager {
     constructor(pluginsPath, cwd) {
         _manager.set(this, void 0);
@@ -83,15 +83,12 @@ class PluginManager {
     }
     require(plugin) {
         const plug = __classPrivateFieldGet(this, _manager).require(plugin);
-        console.debug('type of plugin = ' + typeof plugin);
-        console.debug(`plugin is valid = ${exports.isValidPlugin(plugin)}`);
-        if (exports.isValidPlugin(plug)) {
-            return plug;
-        }
-        if (plug instanceof Error) {
-            throw new Error(`invalid plugin ${plug.message}`);
-        }
-        return plug;
+        return exports.isValidPlugin(plug)
+            ? typeof plug === 'function'
+                ? plug
+                : plug['default']
+            : // TODO point to a specific doc when available
+                new Error(`${plugin} is not a valid typerpc plugin. Please see https://typerpc.run for more info`);
     }
 }
 exports.PluginManager = PluginManager;
