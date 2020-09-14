@@ -139,6 +139,7 @@ const validate = new Listr<ValidateCtx>(
 )
 
 let writeCtx: WriteCtx = []
+
 const build = new Listr<BuildCtx>(
     [
         {
@@ -207,6 +208,7 @@ const format = new Listr<FormatCtx>(
     ],
     { exitOnError: true },
 )
+
 const handler = async (args: Args): Promise<void> => {
     const { tsconfig, plugin, out, pkg, fmt } = args
     const tsConfigFilePath = tsconfig?.trim() ?? ''
