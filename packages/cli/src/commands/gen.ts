@@ -239,13 +239,14 @@ const handler = async (args: Args): Promise<void> => {
         if (configs.length === 0) {
             throw new Error(`no configs found in rpc.config.ts and not enough arguments passed`)
         }
-        /*
+
         const onInstalled = (plugin: string) => log.info(`${plugin} is already installed`)
         const onInstalling = (plugin: string) => log.info(`installing ${plugin}`)
-        setTimeout(async () => await manager.install(['@typerpc/ts-axios'], onInstalled, onInstalling), 4000)
-
-
-         */
+        setTimeout(async () => {
+            await manager.install(['@typerpc/ts-axios'], onInstalled, onInstalling)
+            const plug = manager.require('@typerpc/ts-axios')
+            console.log(typeof plug)
+        }, 4000)
         const steps: BuildStep[] = [
             { task: validate, ctx: { sourceFiles, configs }, msg: 'Triggering input validation' },
             {
@@ -266,7 +267,7 @@ const handler = async (args: Args): Promise<void> => {
         ]
         for (const step of steps) {
             log.info(step.msg)
-            await step.task.run(step.ctx)
+            // await step.task.run(step.ctx)
         }
     } catch (error) {
         log.error(`${error} + managerOpts = ${manager.opts()}`)

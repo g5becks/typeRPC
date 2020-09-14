@@ -17,7 +17,8 @@ import { TypeRpcPlugin } from '@typerpc/plugin'
 
 const sanitize = (plugin: string): string => (plugin.startsWith('/') ? plugin.substring(1).trim() : plugin.trim())
 
-export const isValidPlugin = (plugin: any): plugin is TypeRpcPlugin => typeof plugin === 'function'
+export const isValidPlugin = (plugin: any): plugin is TypeRpcPlugin =>
+    typeof plugin === 'function' || typeof plugin.default === 'function'
 
 export class PluginManager {
     readonly #manager: Manager
