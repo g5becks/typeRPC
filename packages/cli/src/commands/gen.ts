@@ -20,6 +20,7 @@ import { outputFileSync, pathExistsSync } from 'fs-extra'
 import { buildSchemas, validateSchemas } from '@typerpc/schema'
 import path from 'path'
 import ora from 'ora'
+import chalk from 'chalk'
 
 type GeneratedCode = { code: Code[]; outputPath: string }
 
@@ -42,12 +43,17 @@ let log: Logger = new Logger()
 
 // ensure that the path to tsconfig.json actually exists
 const validateTsConfigFile = (tsConfigFile: string): void => {
-    const spinner = ora({ text: "Let's validate tsconfig.json path", color: 'cyan' }).start()
+    const spinner = ora({ text: chalk.magenta("Let's validate tsconfig.json path"), color: 'cyan' }).start()
     const exists = pathExistsSync(tsConfigFile)
     if (tsConfigFile === '' || !exists) {
+        spinner.fail(
+            chalk.bgRed(
+                `Looks like you provided an invalid tsconfig.json file. No sweat, make sure ${tsConfigFile} exists and try again`,
+            ),
+        )
         throw new Error(`No tsConfig.json file found at ${tsConfigFile}`)
     }
-    spinner.succeed('Great, your tsconfig file is legit!')
+    spinner.succeed(chalk.greenBright('Great, your tsconfig file is legit!'))
 }
 
 // ensure the output path is not empty
@@ -62,6 +68,7 @@ const validateOutputPaths = (configs: ParsedConfig[]): void => {
 }
 
 const validatePlugins = (configs: ParsedConfig[]): void => {
+    const spinner = ora({ text: "Afraid I'm gonna have verify those plugins while I'm at it", color: 'yellow' }).start()
     let invalids: string[] = []
     for (const cfg of configs) {
         if (!cfg.plugin.startsWith('@typerpc/') && !cfg.plugin.startsWith('typerpc-plugin-')) {
@@ -71,11 +78,17 @@ const validatePlugins = (configs: ParsedConfig[]): void => {
     if (invalids.length !== 0) {
         throw new Error(`the following plugin names are not valid typerpc plugins ${invalids}`)
     }
+    spinner.succeed("Valid Plugins as well, You're on you're way!")
 }
 
 const validateSchemaFiles = (files: SourceFile[]) => {
+    const spinner = ora({
+        text: "One last check, let make sure you're schema files don't contain any errors",
+        color: 'white',
+    }).start()
     const errs = validateSchemas(files)
     if (errs.length === 0) {
+        spinner.succeed("All systems are go, Let's generate some code!")
         return
     }
     throw errs.reduce((err, val) => {
@@ -87,13 +100,20 @@ const validateSchemaFiles = (files: SourceFile[]) => {
 }
 
 const installPlugins = async (configs: ParsedConfig[], manager: PluginManager) => {
+    const plugins = configs.map((cfg) => cfg.plugin)
+
+    const spinner = ora({
+        text: `Installing the following plugins: ${plugins}, this shouldn't take long`,
+        color: 'blue',
+    }).start()
     const onInstalled = (plugin: string) => log.info(`${plugin} already installed, fetching from cache`)
     const onInstalling = (plugin: string) => log.info(`attempting to install ${plugin} from https://registry.npmjs.org`)
-    const plugins = configs.map((cfg) => cfg.plugin)
     await manager.install(plugins, onInstalled, onInstalling)
+    return spinner
 }
 
 const generateCode = (configs: ParsedConfig[], manager: PluginManager, files: SourceFile[]) => {
+    const spinner = ora({ text: 'Lift Off! Code generation has begun!', color: 'black' })
     let generated: GeneratedCode[] = []
     for (const cfg of configs) {
         const schemas = buildSchemas(files, cfg.pkg)
@@ -111,10 +131,12 @@ const generateCode = (configs: ParsedConfig[], manager: PluginManager, files: So
             )
         }
     }
+    spinner.succeed('Code generation complete. That was fast!')
     return generated
 }
 
 const saveToDisk = (generated: GeneratedCode[]) => {
+    ora
     if (generated.length === 0) {
         return
     }
