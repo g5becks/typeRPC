@@ -14,9 +14,9 @@ import { ObjectLiteralExpression, Project, SourceFile, SyntaxKind } from 'ts-mor
 import { GeneratorConfig } from '@typerpc/config'
 import { ChildProcess, exec } from 'child_process'
 import * as fs from 'fs-extra'
+import { appendFile } from 'fs-extra'
 import { ILogObject, Logger } from 'tslog'
 import { render } from 'prettyjson'
-import { appendFileSync } from 'fs'
 
 export const getConfigFile = (project: Project): SourceFile | undefined =>
     project.getSourceFile((file) => file.getBaseName().toLowerCase() === 'rpc.config.ts')
@@ -62,17 +62,21 @@ export const parseConfig = (file: SourceFile | undefined): ParsedConfig[] => {
 export const createLogger = (project: Project): Logger => {
     const dest = project.getRootDirectories()[0].getPath() + '/.typerpc/error.log'
     fs.ensureFileSync(dest)
-    const logToFile = (logObject: ILogObject) => {
-        appendFileSync(dest, render(logObject) + '\n\n')
+    const logToFile = async (logObject: ILogObject) => {
+        await appendFile(
+            dest,
+            render(logObject, { noColor: true }) +
+                '\n---------------------------------------------------------------------------------------------------------------------------------------\n',
+        )
     }
-    const logger = new Logger({ type: 'pretty' })
+    const logger = new Logger()
     logger.attachTransport(
         {
-            silly: logger.silly,
-            debug: logger.debug,
-            trace: logger.trace,
-            info: logger.info,
-            warn: logger.warn,
+            silly: logToFile,
+            debug: logToFile,
+            trace: logToFile,
+            info: logToFile,
+            warn: logToFile,
             error: logToFile,
             fatal: logToFile,
         },

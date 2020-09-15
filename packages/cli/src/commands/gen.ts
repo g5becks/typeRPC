@@ -16,17 +16,16 @@ import { isValidPlugin, PluginManager } from '@typerpc/plugin-manager'
 import { Code } from '@typerpc/plugin'
 import { Project, SourceFile } from 'ts-morph'
 import { createLogger, format as formatter, getConfigFile, parseConfig, ParsedConfig } from './utils'
-import { outputFileSync, pathExistsSync, readJSONSync } from 'fs-extra'
+import { outputFile, pathExistsSync } from 'fs-extra'
 import { buildSchemas, validateSchemas } from '@typerpc/schema'
 import path from 'path'
 import ora from 'ora'
 import chalk from 'chalk'
-
-let log: Logger = new Logger()
+import { readFileSync } from 'fs'
 
 // ensure that the path to tsconfig.json actually exists
 const validateTsConfigFile = (tsConfigFile: string): void => {
-    const spinner = ora({ text: chalk.magenta("Let's validate tsconfig.json path"), color: 'cyan' }).start()
+    const spinner = ora({ text: chalk.magenta("Let's validate your tsconfig.json path"), color: 'cyan' }).start()
     const exists = pathExistsSync(tsConfigFile)
     if (tsConfigFile === '' || !exists) {
         spinner.fail(
@@ -91,15 +90,11 @@ const validateSchemaFiles = (files: SourceFile[]) => {
     })
 }
 
-const installPlugins = async (configs: ParsedConfig[], manager: PluginManager) => {
+const installPlugins = async (configs: ParsedConfig[], manager: PluginManager, log: Logger) => {
     const plugins = configs.map((cfg) => cfg.plugin)
     const onInstalled = (plugin: string) => log.info(`${plugin} already installed, fetching from cache`)
     const onInstalling = (plugin: string) => log.info(`attempting to install ${plugin} from https://registry.npmjs.org`)
-    ora.promise(manager.install(plugins, onInstalled, onInstalling), {
-        text: chalk.yellow(`Installing the following plugins: ${plugins}, this shouldn't take long`),
-        color: 'blue',
-    })
-    return manager
+    await manager.install(plugins, onInstalled, onInstalling)
 }
 
 type GeneratedCode = { code: Code[]; outputPath: string }
@@ -132,7 +127,7 @@ const generateCode = (configs: ParsedConfig[], manager: PluginManager, files: So
     return generated
 }
 
-const saveToDisk = (generated: GeneratedCode[]) => {
+const saveToDisk = async (generated: GeneratedCode[]) => {
     const spinner = ora({ text: chalk.cyanBright("Let's stash this code somewhere safe."), color: 'magenta' })
     if (generated.length === 0) {
         return
@@ -141,7 +136,7 @@ const saveToDisk = (generated: GeneratedCode[]) => {
     for (const gen of generated) {
         for (const entry of gen.code) {
             try {
-                outputFileSync(filePath(gen.outputPath, entry.fileName), entry.source)
+                await outputFile(filePath(gen.outputPath, entry.fileName), entry.source)
             } catch (error) {
                 spinner.fail(chalk.bgRed(``))
                 throw new Error(`error occurred writing files: ${error}`)
@@ -156,7 +151,7 @@ type FormatConfig = {
     out: string
 }
 
-const format = (formatters: FormatConfig[]) => {
+const format = (formatters: FormatConfig[], log: Logger) => {
     const spinner = ora({
         text: chalk.magentaBright("Let's make that code look good by applying some formatting"),
         color: 'cyan',
@@ -165,7 +160,7 @@ const format = (formatters: FormatConfig[]) => {
         if (fmt.fmt) {
             formatter(fmt.out, fmt.fmt, log.error, log.info)
         } else {
-            log.warn(`No code formatter provided for code saved to ${fmt.out}`)
+            log.warn(`No code formatter provided for code saved to ${fmt.out} your code might not look very good.`)
         }
     }
     spinner.succeed(
@@ -193,26 +188,25 @@ type Args = Readonly<
 >
 
 const createErrorInfo = (pluginManager: PluginManager, rpcConfig: SourceFile | undefined, args: Args): ErrorInfo => {
-    const tsconfigFileData = JSON.stringify(readJSONSync(args.tsconfig ?? ''))
+    const tsconfigFile = readFileSync(args.tsconfig ?? '')
     return {
         cmdLineArgs: JSON.stringify(args),
-        tsconfigFileData,
+        tsconfigFileData: tsconfigFile.toString(),
         rpcConfigData: rpcConfig?.getText(),
         pluginManagerOpts: pluginManager.opts(),
     }
 }
 
 const handler = async (args: Args): Promise<void> => {
+    const { tsconfig, plugin, out, pkg, fmt } = args
+    const tsConfigFilePath = tsconfig?.trim() ?? ''
+    // validate tsconfig before proceeding
+    validateTsConfigFile(tsconfig?.trim() ?? '')
+    // create project
+    const project = new Project({ tsConfigFilePath, skipFileDependencyResolution: true })
     let errorInfo: ErrorInfo | undefined = undefined
+    const log = createLogger(project)
     try {
-        const { tsconfig, plugin, out, pkg, fmt } = args
-        const tsConfigFilePath = tsconfig?.trim() ?? ''
-        // validate tsconfig before proceeding
-        validateTsConfigFile(tsconfig?.trim() ?? '')
-        // create project
-        const project = new Project({ tsConfigFilePath, skipFileDependencyResolution: true })
-
-        log = createLogger(project)
         // get rpc.config.ts file
         const configFile = getConfigFile(project)
         // parse config objects
@@ -240,12 +234,16 @@ const handler = async (args: Args): Promise<void> => {
         validateOutputPaths(configs)
         validatePlugins(configs)
         validateSchemaFiles(sourceFiles)
-        const manager = await installPlugins(configs, pluginManager)
-        const generated = generateCode(configs, manager, sourceFiles)
-        saveToDisk(generated)
-        format(configs.map((cfg) => ({ fmt: cfg.fmt, out: cfg.out })))
+        await installPlugins(configs, pluginManager, log)
+        const generated = generateCode(configs, pluginManager, sourceFiles)
+        // noinspection JSDeepBugsSwappedArgs
+        format(
+            configs.map((cfg) => ({ fmt: cfg.fmt, out: cfg.out })),
+            log,
+        )
+        await saveToDisk(generated)
     } catch (error) {
-        log.error(`error occurred ${error}. info: ${errorInfo}`)
+        log.error(`error occurred ${error}`, errorInfo)
         throw error
     }
 }

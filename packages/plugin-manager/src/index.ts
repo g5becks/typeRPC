@@ -60,8 +60,8 @@ export class PluginManager {
         plugins: string[],
         onInstalled: (plugin: string) => void,
         onInstalling: (plugin: string) => void,
-    ): Promise<void> {
-        await Promise.all(plugins.map((plugin) => this.installPlugin(plugin, { onInstalling, onInstalled })))
+    ): Promise<void[]> {
+        return Promise.all(plugins.map((plugin) => this.installPlugin(plugin, { onInstalling, onInstalled })))
     }
     require(plugin: string): TypeRpcPlugin | Error {
         const plug = this.#manager.require(plugin)
