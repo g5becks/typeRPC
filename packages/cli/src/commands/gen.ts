@@ -16,28 +16,11 @@ import { isValidPlugin, PluginManager } from '@typerpc/plugin-manager'
 import { Code } from '@typerpc/plugin'
 import { Project, SourceFile } from 'ts-morph'
 import { createLogger, format as formatter, getConfigFile, parseConfig, ParsedConfig } from './utils'
-import { outputFileSync, pathExistsSync } from 'fs-extra'
+import { outputFileSync, pathExistsSync, readJSONSync } from 'fs-extra'
 import { buildSchemas, validateSchemas } from '@typerpc/schema'
 import path from 'path'
 import ora from 'ora'
 import chalk from 'chalk'
-
-type GeneratedCode = { code: Code[]; outputPath: string }
-
-type FormatConfig = {
-    fmt?: string
-    out: string
-}
-
-type Args = Readonly<
-    Partial<{
-        tsconfig: string
-        plugin: string
-        out: string
-        pkg: string
-        fmt: string
-    }>
->
 
 let log: Logger = new Logger()
 
@@ -53,22 +36,29 @@ const validateTsConfigFile = (tsConfigFile: string): void => {
         )
         throw new Error(`No tsConfig.json file found at ${tsConfigFile}`)
     }
-    spinner.succeed(chalk.greenBright('Great, your tsconfig file is legit!'))
+    spinner.succeed(chalk.magenta('Great, your tsconfig file is legit!'))
 }
 
 // ensure the output path is not empty
 const validateOutputPaths = (configs: ParsedConfig[]): void => {
-    const spinner = ora({ text: "I'll need to check out your output path(s) as well", color: 'magenta' }).start()
+    const spinner = ora({
+        text: chalk.cyan("I'll need to check out your output path(s) as well"),
+        color: 'magenta',
+    }).start()
     for (const cfg of configs) {
         if (cfg.out === '') {
+            spinner.fail(chalk.bgRed(`Whoops, looks like ${cfg.configName} has an empty out field`))
             throw new Error(`${cfg.configName} has an empty out field`)
         }
     }
-    spinner.succeed('Woohoo, your output path(s) look good too!')
+    spinner.succeed(chalk.cyan('Woohoo, your output path(s) look good too!'))
 }
 
 const validatePlugins = (configs: ParsedConfig[]): void => {
-    const spinner = ora({ text: "Afraid I'm gonna have verify those plugins while I'm at it", color: 'yellow' }).start()
+    const spinner = ora({
+        text: chalk.whiteBright("Afraid I'm gonna have verify those plugins while I'm at it"),
+        color: 'yellow',
+    }).start()
     let invalids: string[] = []
     for (const cfg of configs) {
         if (!cfg.plugin.startsWith('@typerpc/') && !cfg.plugin.startsWith('typerpc-plugin-')) {
@@ -76,9 +66,10 @@ const validatePlugins = (configs: ParsedConfig[]): void => {
         }
     }
     if (invalids.length !== 0) {
+        spinner.fail(chalk.bgRed(`Uh Oh, the following plugin names are not valid typerpc plugins ${invalids}`))
         throw new Error(`the following plugin names are not valid typerpc plugins ${invalids}`)
     }
-    spinner.succeed("Valid Plugins as well, You're on you're way!")
+    spinner.succeed(chalk.whiteBright("Valid Plugins as well, You're on you're way!"))
 }
 
 const validateSchemaFiles = (files: SourceFile[]) => {
@@ -91,6 +82,7 @@ const validateSchemaFiles = (files: SourceFile[]) => {
         spinner.succeed("All systems are go, Let's generate some code!")
         return
     }
+    spinner.fail(chalk.bgRed(`Bummer, looks like we've spotter errors in you schema files`))
     throw errs.reduce((err, val) => {
         err.name.concat(val.name + '\n')
         err.message.concat(val.message + '\n')
@@ -104,13 +96,16 @@ const installPlugins = async (configs: ParsedConfig[], manager: PluginManager) =
     const onInstalled = (plugin: string) => log.info(`${plugin} already installed, fetching from cache`)
     const onInstalling = (plugin: string) => log.info(`attempting to install ${plugin} from https://registry.npmjs.org`)
     ora.promise(manager.install(plugins, onInstalled, onInstalling), {
-        text: `Installing the following plugins: ${plugins}, this shouldn't take long`,
+        text: chalk.yellow(`Installing the following plugins: ${plugins}, this shouldn't take long`),
         color: 'blue',
     })
+    return manager
 }
 
-const generateCode = (configs: ParsedConfig[], manager: PluginManager, files: SourceFile[]) => {
-    const spinner = ora({ text: 'Lift Off! Code generation has begun!', color: 'black' })
+type GeneratedCode = { code: Code[]; outputPath: string }
+
+const generateCode = (configs: ParsedConfig[], manager: PluginManager, files: SourceFile[]): GeneratedCode[] => {
+    const spinner = ora({ text: chalk.whiteBright('Lift Off! Code generation has begun!'), color: 'black' })
     let generated: GeneratedCode[] = []
     for (const cfg of configs) {
         const schemas = buildSchemas(files, cfg.pkg)
@@ -121,6 +116,11 @@ const generateCode = (configs: ParsedConfig[], manager: PluginManager, files: So
         if (isValidPlugin(gen)) {
             generated = [...generated, { code: gen(schemas), outputPath: cfg.out }]
         } else {
+            spinner.fail(
+                chalk.bgRed(
+                    `Wait just a second there, are you sure ${cfg.plugin} is an authentic @typerpc plugin? Looks like a knockoff to me`,
+                ),
+            )
             throw new Error(
                 `${cfg.plugin} is not a valid typerpc plugin. Plugins must be functions, typeof ${
                     cfg.plugin
@@ -128,12 +128,12 @@ const generateCode = (configs: ParsedConfig[], manager: PluginManager, files: So
             )
         }
     }
-    spinner.succeed('Code generation complete. That was fast!')
+    spinner.succeed(chalk.whiteBright('Code generation complete. That was fast!'))
     return generated
 }
 
 const saveToDisk = (generated: GeneratedCode[]) => {
-    ora
+    const spinner = ora({ text: chalk.cyanBright("Let's stash this code somewhere safe."), color: 'magenta' })
     if (generated.length === 0) {
         return
     }
@@ -143,29 +143,76 @@ const saveToDisk = (generated: GeneratedCode[]) => {
             try {
                 outputFileSync(filePath(gen.outputPath, entry.fileName), entry.source)
             } catch (error) {
+                spinner.fail(chalk.bgRed(``))
                 throw new Error(`error occurred writing files: ${error}`)
             }
         }
     }
+    spinner.succeed(chalk.cyanBright('Alllrighty then! Your code has been saved!'))
+}
+
+type FormatConfig = {
+    fmt?: string
+    out: string
 }
 
 const format = (formatters: FormatConfig[]) => {
+    const spinner = ora({
+        text: chalk.magentaBright("Let's make that code look good by applying some formatting"),
+        color: 'cyan',
+    })
     for (const fmt of formatters) {
         if (fmt.fmt) {
             formatter(fmt.out, fmt.fmt, log.error, log.info)
+        } else {
+            log.warn(`No code formatter provided for code saved to ${fmt.out}`)
         }
+    }
+    spinner.succeed(
+        chalk.cyanBright(
+            "All done! If you've enjoyed using @typerpc do us a favor, visit https://github.com/typerpc/typerpc and star the project. Happy Hacking!",
+        ),
+    )
+}
+
+type ErrorInfo = {
+    pluginManagerOpts: string
+    tsconfigFileData: string
+    rpcConfigData?: string
+    cmdLineArgs: string
+}
+
+type Args = Readonly<
+    Partial<{
+        tsconfig: string
+        plugin: string
+        out: string
+        pkg: string
+        fmt: string
+    }>
+>
+
+const createErrorInfo = (pluginManager: PluginManager, rpcConfig: SourceFile | undefined, args: Args): ErrorInfo => {
+    const tsconfigFileData = JSON.stringify(readJSONSync(args.tsconfig ?? ''))
+    return {
+        cmdLineArgs: JSON.stringify(args),
+        tsconfigFileData,
+        rpcConfigData: rpcConfig?.getText(),
+        pluginManagerOpts: pluginManager.opts(),
     }
 }
 
-const handler = (args: Args): void => {
-    const { tsconfig, plugin, out, pkg, fmt } = args
-    const tsConfigFilePath = tsconfig?.trim() ?? ''
-    // validate tsconfig before proceeding
-    validateTsConfigFile(tsconfig?.trim() ?? '')
-    const project = new Project({ tsConfigFilePath, skipFileDependencyResolution: true })
-    log = createLogger(project)
-
+const handler = async (args: Args): Promise<void> => {
+    let errorInfo: ErrorInfo | undefined = undefined
     try {
+        const { tsconfig, plugin, out, pkg, fmt } = args
+        const tsConfigFilePath = tsconfig?.trim() ?? ''
+        // validate tsconfig before proceeding
+        validateTsConfigFile(tsconfig?.trim() ?? '')
+        // create project
+        const project = new Project({ tsConfigFilePath, skipFileDependencyResolution: true })
+
+        log = createLogger(project)
         // get rpc.config.ts file
         const configFile = getConfigFile(project)
         // parse config objects
@@ -173,6 +220,8 @@ const handler = (args: Args): void => {
         if (typeof configFile !== 'undefined') {
             configs = parseConfig(configFile)
         }
+
+        const pluginManager = PluginManager.create(project)
         // filter out rpc.config.ts file from project source files
         const sourceFiles = project
             .getSourceFiles()
@@ -182,50 +231,21 @@ const handler = (args: Args): void => {
         if (plugin && out && pkg) {
             configs = [{ configName: 'flags', plugin, out, pkg, fmt }]
         }
+        errorInfo = createErrorInfo(pluginManager, configFile, args)
         // no configs in file or command line opts
         if (configs.length === 0) {
             throw new Error(`no configs found in rpc.config.ts and not enough arguments passed`)
         }
-        /*
-        const onInstalled = (plugin: string) => log.info(`${plugin} is already installed`)
-        const onInstalling = (plugin: string) => log.info(`installing ${plugin}`)
-        setTimeout(async () => {
-            await manager.install(['@typerpc/ts-axios'], onInstalled, onInstalling)
-            const plug = manager.require('@typerpc/ts-axios')
-            console.log(typeof plug)
-        }, 4000)
 
-         */
-        const steps: BuildStep[] = [
-            { task: validate, ctx: { sourceFiles, configs }, msg: 'Triggering input validation' },
-            {
-                task: build,
-                ctx: { sourceFiles, configs, manager },
-                msg: 'Initializing build process',
-            },
-            { task: write, ctx: writeCtx, msg: 'Saving generated code to disk' },
-            {
-                task: format,
-                ctx: {
-                    formatters: configs.map((cfg) => {
-                        return { out: cfg.out, fmt: cfg.fmt }
-                    }),
-                },
-                msg: 'Invoking Formatter(s)',
-            },
-        ]
-        let results: unknown[] = []
-        for (const step of steps) {
-            log.info(`writeCtx at step ${step.msg}`)
-            log.info(step.msg)
-            results = results.concat(await step.task.run(step.ctx))
-        }
-
-        while (results.length < steps.length - 1) {
-            console.log('processing...')
-        }
+        validateOutputPaths(configs)
+        validatePlugins(configs)
+        validateSchemaFiles(sourceFiles)
+        const manager = await installPlugins(configs, pluginManager)
+        const generated = generateCode(configs, manager, sourceFiles)
+        saveToDisk(generated)
+        format(configs.map((cfg) => ({ fmt: cfg.fmt, out: cfg.out })))
     } catch (error) {
-        log.error(`${error} + managerOpts = ${manager.opts()}`)
+        log.error(`error occurred ${error}. info: ${errorInfo}`)
         throw error
     }
 }
