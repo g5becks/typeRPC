@@ -224,11 +224,15 @@ const parseParam = (param: Param): string => (is.list(param.type) ? `q["${param.
 
 // builds a string representation of go code
 // that parses all of the query params from an *http.Request struct
-export const parseQueryParams = (params: ReadonlyArray<Param>): string => {
-    let parsed = `q := req.URL.Query()
+export const parseQueryParams = (method: QueryMethod): string => {
+    let parsed = `q := r.URL.Query()
   \n`
-    for (const param of params) {
-        parsed = parsed.concat(`${param.name} := ${fromQueryString(parseParam(param), param.type)}
+    for (const param of method.params) {
+        parsed = parsed.concat(`${param.name}, err := ${fromQueryString(parseParam(param), param.type)}
+        if err != nil {
+          RespondWithErr(w, err, ${method.hasCborReturn ? 'true' : 'false'})
+          return
+        }
         `)
     }
     return parsed
@@ -239,7 +243,7 @@ export const parseReqBody = (method: MutationMethod | QueryMethod): string => {
         return ''
     }
     if (isQueryMethod(method)) {
-        return parseQueryParams(method.params)
+        return parseQueryParams(method)
     }
     let props = ''
     for (const param of method.params) {
@@ -349,7 +353,8 @@ export const buildInterfaces = (schema: Schema): string => {
     return interfaces
 }
 
-export const helpers = `
+export const helpers = (pkgName: string) => `
+package ${pkgName}
 func marshalResponse(v interface{}, isCbor bool) ([]byte, error) {
 	if isCbor {
 		data, err := cbor.Marshal(v)

@@ -59,12 +59,12 @@ const buildHandlers = (svc) => {
 const buildSvcRoutes = (svc) => {
     return `
 func ${plugin_utils_1.capitalize(svc.name)}Routes(${plugin_utils_1.lowerCase(svc.name)} ${plugin_utils_1.capitalize(svc.name)}, middlewares ...func(handler http.Handler) http.Handler) chi.Router {
-    r := chi.NewRouter()
+    rtr := chi.NewRouter()
     for _, x := range middlewares {
-      r.Use(x)
+      rtr.Use(x)
     }
     ${buildHandlers(svc)}
-    return r
+    return rtr
 }
 `;
 };
@@ -86,8 +86,18 @@ package ${schema.packageName}
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"strconv"
 	"time"
+
+	${schema.hasCbor ? 'github.com/fxamacker/cbor/v2' : ''}
+	"github.com/go-chi/chi"
 )
+
 
 ${go_plugin_utils_1.buildTypes(schema.messages)}
 ${go_plugin_utils_1.buildInterfaces(schema)}
@@ -95,5 +105,7 @@ ${buildRoutes(schema)}
 `,
     };
 };
-exports.default = (schemas) => schemas.map((schema) => buildFile(schema)).concat({ fileName: 'chi.helpers.rpc.go', source: go_plugin_utils_1.helpers });
+exports.default = (schemas) => schemas
+    .map((schema) => buildFile(schema))
+    .concat({ fileName: 'chi.helpers.rpc.go', source: go_plugin_utils_1.helpers(schemas[0].packageName) });
 //# sourceMappingURL=index.js.map

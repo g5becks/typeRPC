@@ -177,11 +177,15 @@ exports.buildInterface = (service) => {
 const parseParam = (param) => (schema_1.is.list(param.type) ? `q["${param.name}"]` : `q.Get("${param.name}")`);
 // builds a string representation of go code
 // that parses all of the query params from an *http.Request struct
-exports.parseQueryParams = (params) => {
-    let parsed = `q := req.URL.Query()
+exports.parseQueryParams = (method) => {
+    let parsed = `q := r.URL.Query()
   \n`;
-    for (const param of params) {
-        parsed = parsed.concat(`${param.name} := ${exports.fromQueryString(parseParam(param), param.type)}
+    for (const param of method.params) {
+        parsed = parsed.concat(`${param.name}, err := ${exports.fromQueryString(parseParam(param), param.type)}
+        if err != nil {
+          RespondWithErr(w, err, ${method.hasCborReturn ? 'true' : 'false'})
+          return
+        }
         `);
     }
     return parsed;
@@ -191,7 +195,7 @@ exports.parseReqBody = (method) => {
         return '';
     }
     if (schema_1.isQueryMethod(method)) {
-        return exports.parseQueryParams(method.params);
+        return exports.parseQueryParams(method);
     }
     let props = '';
     for (const param of method.params) {
@@ -293,7 +297,8 @@ exports.buildInterfaces = (schema) => {
     }
     return interfaces;
 };
-exports.helpers = `
+exports.helpers = (pkgName) => `
+package ${pkgName}
 func marshalResponse(v interface{}, isCbor bool) ([]byte, error) {
 	if isCbor {
 		data, err := cbor.Marshal(v)

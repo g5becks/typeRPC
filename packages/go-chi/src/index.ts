@@ -80,12 +80,12 @@ const buildSvcRoutes = (svc: QueryService | MutationService): string => {
 func ${capitalize(svc.name)}Routes(${lowerCase(svc.name)} ${capitalize(
         svc.name,
     )}, middlewares ...func(handler http.Handler) http.Handler) chi.Router {
-    r := chi.NewRouter()
+    rtr := chi.NewRouter()
     for _, x := range middlewares {
-      r.Use(x)
+      rtr.Use(x)
     }
     ${buildHandlers(svc)}
-    return r
+    return rtr
 }
 `
 }
@@ -108,8 +108,18 @@ package ${schema.packageName}
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"strconv"
 	"time"
+
+	${schema.hasCbor ? 'github.com/fxamacker/cbor/v2' : ''}
+	"github.com/go-chi/chi"
 )
+
 
 ${buildTypes(schema.messages)}
 ${buildInterfaces(schema)}
@@ -119,4 +129,6 @@ ${buildRoutes(schema)}
 }
 
 export default (schemas: Schema[]): Code[] =>
-    schemas.map((schema) => buildFile(schema)).concat({ fileName: 'chi.helpers.rpc.go', source: helpers })
+    schemas
+        .map((schema) => buildFile(schema))
+        .concat({ fileName: 'chi.helpers.rpc.go', source: helpers(schemas[0].packageName) })

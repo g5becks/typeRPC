@@ -33,10 +33,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.format = exports.createLogger = exports.parseConfig = exports.getConfigFile = void 0;
 const ts_morph_1 = require("ts-morph");
 const child_process_1 = require("child_process");
+const fs = __importStar(require("fs-extra"));
 const fs_extra_1 = require("fs-extra");
 const tslog_1 = require("tslog");
 const prettyjson_1 = require("prettyjson");
-const fs = __importStar(require("fs-extra"));
 exports.getConfigFile = (project) => project.getSourceFile((file) => file.getBaseName().toLowerCase() === 'rpc.config.ts');
 const parseGeneratorConfig = (obj) => {
     var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
@@ -44,7 +44,6 @@ const parseGeneratorConfig = (obj) => {
     const plugin = (_f = (_e = (_d = obj.getProperty('plugin')) === null || _d === void 0 ? void 0 : _d.getChildrenOfKind(ts_morph_1.SyntaxKind.StringLiteral)[0]) === null || _e === void 0 ? void 0 : _e.getLiteralValue()) === null || _f === void 0 ? void 0 : _f.trim();
     const pkg = (_j = (_h = (_g = obj.getProperty('pkg')) === null || _g === void 0 ? void 0 : _g.getChildrenOfKind(ts_morph_1.SyntaxKind.StringLiteral)[0]) === null || _h === void 0 ? void 0 : _h.getLiteralValue()) === null || _j === void 0 ? void 0 : _j.trim();
     const fmt = (_m = (_l = (_k = obj.getProperty('fmt')) === null || _k === void 0 ? void 0 : _k.getChildrenOfKind(ts_morph_1.SyntaxKind.StringLiteral)[0]) === null || _l === void 0 ? void 0 : _l.getLiteralValue()) === null || _m === void 0 ? void 0 : _m.trim();
-    console.log(`outputpath = ${out}, plugin = ${plugin}, package = ${pkg}`);
     if (!out || !plugin || !pkg) {
         throw new Error(`
         error in config file: ${obj.getSourceFile().getFilePath()},
@@ -70,19 +69,20 @@ exports.parseConfig = (file) => {
     }
     return configs;
 };
-exports.createLogger = async (project) => {
+exports.createLogger = (project) => {
     const dest = project.getRootDirectories()[0].getPath() + '/.typerpc/error.log';
-    await fs.ensureFile(dest);
-    const logToFile = (logObject) => {
-        fs_extra_1.appendFile(dest, prettyjson_1.render(logObject) + '\n\n');
+    fs.ensureFileSync(dest);
+    const logToFile = async (logObject) => {
+        await fs_extra_1.appendFile(dest, prettyjson_1.render(logObject, { noColor: true }) +
+            '\n---------------------------------------------------------------------------------------------------------------------------------------\n');
     };
-    const logger = new tslog_1.Logger({ type: 'pretty' });
+    const logger = new tslog_1.Logger();
     logger.attachTransport({
-        silly: logger.silly,
-        debug: logger.debug,
-        trace: logger.trace,
-        info: logger.info,
-        warn: logger.warn,
+        silly: logToFile,
+        debug: logToFile,
+        trace: logToFile,
+        info: logToFile,
+        warn: logToFile,
         error: logToFile,
         fatal: logToFile,
     }, 'error');

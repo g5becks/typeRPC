@@ -79,7 +79,7 @@ class PluginManager {
         }
     }
     async install(plugins, onInstalled, onInstalling) {
-        await Promise.all(plugins.map((plugin) => this.installPlugin(plugin, { onInstalling, onInstalled })));
+        return Promise.all(plugins.map((plugin) => this.installPlugin(plugin, { onInstalling, onInstalled })));
     }
     require(plugin) {
         const plug = __classPrivateFieldGet(this, _manager).require(plugin);
