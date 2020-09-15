@@ -23,7 +23,7 @@ beforeEach(() => {
     files = genSourceFiles(genTestMessageFiles(genMsgNames()), project)
 })
 
-test('buildMessages() should return all messages with correct name', () => {
+test('buildMessages() should return all messages with correct location', () => {
     for (const file of files) {
         const messages = buildMessages(file)
         for (const message of messages) {

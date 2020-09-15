@@ -9,9 +9,9 @@
 export declare type GeneratorConfig = Readonly<{
     /** directory to write generated code **/
     out: string;
-    /** name of the typerpc plugin to use **/
+    /** location of the typerpc plugin to use **/
     plugin: string;
-    /** package name to use in generated code **/
+    /** package location to use in generated code **/
     pkg: string;
     /**
      * A string that will be used to execute

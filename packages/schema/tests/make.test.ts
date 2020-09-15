@@ -30,7 +30,7 @@ beforeAll(() => {
     })
 })
 
-test('make.struct should return struct with correct name and useCbor values', () => {
+test('make.struct should return struct with correct location and useCbor values', () => {
     expect(make.struct(types.struct).name).toEqual('SomeStruct')
     expect(make.struct(types.cborType).useCbor).toBeTruthy()
 })

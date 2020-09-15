@@ -73,7 +73,7 @@ export type HTTPResponseCode =
 
 /** A single Method parameter */
 export type Param = Readonly<{
-    /** the name of the parameter */
+    /** the location of the parameter */
     name: string
     /** the parameter's dataType */
     type: DataType
@@ -82,7 +82,7 @@ export type Param = Readonly<{
 }>
 
 export interface Method {
-    /** the name of the method */
+    /** the location of the method */
     readonly name: string
     /** the method's parameters */
     readonly params: ReadonlyArray<Param>
@@ -181,7 +181,7 @@ export type MutationService = Readonly<{
 
 /** A Property that Belongs to an rpc.Msg */
 export type Property = Readonly<{
-    /** The name of this property */
+    /** The location of this property */
     name: string
     /** The property's dataType */
     type: DataType
@@ -191,7 +191,7 @@ export type Property = Readonly<{
 
 /** An rpc.Msg from schema file */
 export type Message = Readonly<{
-    /** The name of the type */
+    /** The location of the type */
     name: string
     properties: ReadonlyArray<Property>
 }>
@@ -200,13 +200,13 @@ export type Message = Readonly<{
 export type Import = Readonly<{
     /** The names of the Messages that were imported */
     messageNames: ReadonlyArray<string>
-    /** The name of the file the messageNames were imported from */
+    /** The location of the file the messageNames were imported from */
     fileName: string
 }>
 
 /** A Schema used to generate server and client code */
 export type Schema = Readonly<{
-    /** name of the package to use when generating code **/
+    /** location of the package to use when generating code **/
     packageName: string
     /** Name of the file this schema was generated from without extension.  */
     fileName: string

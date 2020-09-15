@@ -34,9 +34,9 @@ export type StructLiteralProp = Readonly<{
 // Since all languages dont support object/class/struct literals,
 // When generating code for said language,
 // It is suggested to create a class/struct/object using the
-// name of the owning rpc.Message + property name if used inside of an rpc.Message.
-// If used as a method param, use the QueryService name + MutationMethod name + param name.
-// If used as a method return, use the QueryService name + MutationMethod name + 'Result'
+// location of the owning rpc.Message + property location if used inside of an rpc.Message.
+// If used as a method param, use the QueryService location + MutationMethod location + param location.
+// If used as a method return, use the QueryService location + MutationMethod location + 'Result'
 export type StructLiteral = Readonly<{
     properties: ReadonlyArray<StructLiteralProp>
     toString(): string

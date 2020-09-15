@@ -14,11 +14,15 @@ import { PluginManager as Manager } from 'live-plugin-manager'
 import { Project } from 'ts-morph'
 import * as fs from 'fs'
 import { TypeRpcPlugin } from '@typerpc/plugin'
+import { PluginConfig } from '@typerpc/config'
 
 const sanitize = (plugin: string): string => (plugin.startsWith('/') ? plugin.substring(1).trim() : plugin.trim())
 
 export const isValidPlugin = (plugin: any): plugin is TypeRpcPlugin =>
     typeof plugin === 'function' || ('default' in plugin && typeof plugin.default === 'function')
+
+export const isPluginConfig = (config: any): config is PluginConfig =>
+    'name' in config && 'version' in config && 'from' in config
 
 export class PluginManager {
     readonly #manager: Manager
@@ -43,15 +47,26 @@ export class PluginManager {
     }
 
     private async installPlugin(
-        plugin: string,
+        plugin: string | PluginConfig,
         log: { onInstalled: (plugin: string) => void; onInstalling: (plugin: string) => void },
     ): Promise<void> {
-        if (this.pluginIsInstalled(plugin)) {
-            log.onInstalled(plugin)
-            await this.#manager.installFromPath(this.pluginPath(plugin))
+        if (!isPluginConfig(plugin)) {
+            if (this.pluginIsInstalled(plugin)) {
+                log.onInstalled(plugin)
+                await this.#manager.installFromPath(this.pluginPath(plugin))
+            } else {
+                log.onInstalling(plugin)
+                await this.#manager.installFromNpm(sanitize(plugin))
+            }
         } else {
-            log.onInstalling(plugin)
-            await this.#manager.installFromNpm(sanitize(plugin))
+            if (plugin.from && plugin.from === 'github') {
+                log.onInstalling(plugin.location)
+                await this.#manager.installFromGithub(plugin.location)
+            }
+            if (plugin.from && plugin.from === 'filepath') {
+                await this.#manager.installFromPath(plugin.location)
+            }
+            await this.#manager.installFromNpm(plugin.location, plugin.version ?? 'latest')
         }
     }
     opts = () => JSON.stringify(this.#manager.options)

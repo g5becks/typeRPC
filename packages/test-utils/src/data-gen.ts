@@ -110,7 +110,7 @@ const genTuple5 = (msgNames: string[]) =>
         msgNames,
     )}, ${genRandomParamableType(msgNames)}, ${genRandomParamableType(msgNames)}>`
 
-// creates a random name for a Msg
+// creates a random location for a Msg
 export const genRandomName = (): string => {
     let name = faker.name.firstName().toUpperCase() + randomNumber(0, 200)
     if (name.includes('`')) {
@@ -131,4 +131,3 @@ export const genRandomDataType = (msgNames: string[]) => {
     const generated = [genRandomContainer(msgNames), ...comparables, '$.nil', '$.unit']
     return generated[randomNumber(0, generated.length)]
 }
-

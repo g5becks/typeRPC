@@ -261,7 +261,7 @@ export const gen: CommandModule<Record<string, unknown>, Args> = {
         plugin: {
             alias: 'p',
             type: 'string',
-            description: 'name of the typerpc plugin to use for code generation',
+            description: 'location of the typerpc plugin to use for code generation',
         },
         out: {
             alias: 'o',
@@ -270,12 +270,12 @@ export const gen: CommandModule<Record<string, unknown>, Args> = {
         },
         pkg: {
             type: 'string',
-            description: 'package name to use when generating code',
+            description: 'package location to use when generating code',
         },
         fmt: {
             alias: 'f',
             type: 'string',
-            description: 'package name to use when generating code',
+            description: 'package location to use when generating code',
         },
     },
     handler,

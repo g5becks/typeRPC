@@ -213,7 +213,7 @@ export const buildInterfaces = (schema: Schema): string => {
 }
 
 // builds the param names list for a method E.G.
-// name, age, gender
+// location, age, gender
 export const paramNames = (params: ReadonlyArray<Param>): string => {
     if (params.length === 0) {
         return ''
@@ -228,7 +228,7 @@ export const paramNames = (params: ReadonlyArray<Param>): string => {
 
 // used for building input params for methods and also to
 // builds the type specifier for destructured parameters E.G.
-// {name: string, age: number, gender: string}
+// {location: string, age: number, gender: string}
 export const buildParamsWithTypes = (params: ReadonlyArray<Param>): string => {
     if (params.length === 0) {
         return ''
@@ -244,7 +244,7 @@ export const buildParamsWithTypes = (params: ReadonlyArray<Param>): string => {
 }
 
 // makes a destructured parameters variable. E.G.
-// const {name, age}: {name: string, age: number }
+// const {location, age}: {location: string, age: number }
 export const buildParamsVar = (params: ReadonlyArray<Param>): string =>
     `const {${paramNames(params)}}: {${buildParamsWithTypes(params)}}`
 

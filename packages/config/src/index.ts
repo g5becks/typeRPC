@@ -13,23 +13,24 @@
 /**
  * A plugin to install that will be used for code generation.
  * Plugins can be installed from npm, github, or a filepath.
- * If the plugin lives on github or npm, the plugin name MUST begin
+ * If the plugin lives on github or npm, the plugin location MUST begin
  * with either @typerpc or typerpc-plugin . Plugins installed from a
  * filepath have no such restrictions
  *
- * @property {string} name
+ * @property {string} location
  * @property {string} version
  * @property {'github' | 'npm' | 'filepath'} from
  */
 export type PluginConfig = {
-    /** name of the plugin to install
-     * if using npm, simply supply the name of the package
-     * if using github specify in the format owner/repository_name#ref
+    /** location of the plugin to install
+     * if using npm, simply supply the location of the package
+     * if using github you may specify in the format owner/repository_name or
+     * owner/repository_name#ref to specify a version
      * E.G. typerpc-plugin/someplugin#351396f
      * if using a filepath provide the filepath to the plugin node_modules folder is excluded from source location
      * */
-    name: string
-    /** a version like 1.0.3 if using npm, or a github repository in the format owner/repository_name#ref (like expressjs/express#351396f) if using github
+    location: string
+    /** If using npm, you can specify a version like 1.0.3 .
      * defaults to 'latest' if not specified */
     version?: string
     /** specify where to install this plugin from defaults to npm if not specified */
@@ -46,9 +47,11 @@ export type PluginConfig = {
 export type GeneratorConfig = Readonly<{
     /** directory to write generated code **/
     out: string
-    /** name of the typerpc plugin to use or a PluginConfig object **/
+    /** location of the typerpc plugin to use or a PluginConfig object
+     * if a string is used, the latest version of the plugin will be installed
+     * from npm **/
     plugin: string | PluginConfig
-    /** package name to use in generated code **/
+    /** package location to use in generated code **/
     pkg: string
     /**
      * A string that will be used to execute
@@ -59,7 +62,7 @@ export type GeneratorConfig = Readonly<{
      * E.G. 'prettier --single-quote --trailing-comma es5 --no-semi --parser typescript --write'
      * **/
     fmt?: string
-    /** package name to use in generated code **/
+    /** package location to use in generated code **/
 }>
 
 export type Config = { [key: string]: GeneratorConfig }

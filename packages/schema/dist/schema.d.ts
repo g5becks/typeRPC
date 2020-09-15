@@ -4,7 +4,7 @@ export declare type HTTPErrCode = 400 | 401 | 402 | 403 | 404 | 405 | 406 | 407 
 export declare type HTTPResponseCode = 200 | 201 | 202 | 203 | 204 | 205 | 206 | 300 | 301 | 302 | 303 | 304 | 305 | 306 | 307 | 308;
 /** A single Method parameter */
 export declare type Param = Readonly<{
-    /** the name of the parameter */
+    /** the location of the parameter */
     name: string;
     /** the parameter's dataType */
     type: DataType;
@@ -12,7 +12,7 @@ export declare type Param = Readonly<{
     isOptional: boolean;
 }>;
 export interface Method {
-    /** the name of the method */
+    /** the location of the method */
     readonly name: string;
     /** the method's parameters */
     readonly params: ReadonlyArray<Param>;
@@ -124,7 +124,7 @@ export declare type MutationService = Readonly<{
 }>;
 /** A Property that Belongs to an rpc.Msg */
 export declare type Property = Readonly<{
-    /** The name of this property */
+    /** The location of this property */
     name: string;
     /** The property's dataType */
     type: DataType;
@@ -133,7 +133,7 @@ export declare type Property = Readonly<{
 }>;
 /** An rpc.Msg from schema file */
 export declare type Message = Readonly<{
-    /** The name of the type */
+    /** The location of the type */
     name: string;
     properties: ReadonlyArray<Property>;
 }>;
@@ -141,12 +141,12 @@ export declare type Message = Readonly<{
 export declare type Import = Readonly<{
     /** The names of the Messages that were imported */
     messageNames: ReadonlyArray<string>;
-    /** The name of the file the messageNames were imported from */
+    /** The location of the file the messageNames were imported from */
     fileName: string;
 }>;
 /** A Schema used to generate server and client code */
 export declare type Schema = Readonly<{
-    /** name of the package to use when generating code **/
+    /** location of the package to use when generating code **/
     packageName: string;
     /** Name of the file this schema was generated from without extension.  */
     fileName: string;

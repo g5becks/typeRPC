@@ -43,7 +43,7 @@ USAGE
 OPTIONS
   -f, --force
   -h, --help       show CLI help
-  -n, --name=name  name to print
+  -n, --location=location  location to print
 
 EXAMPLE
   $ typerpc hello
