@@ -44,11 +44,12 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
 };
 var _manager, _pluginsPath;
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PluginManager = exports.isValidPlugin = void 0;
+exports.PluginManager = exports.isPluginConfig = exports.isValidPlugin = void 0;
 const live_plugin_manager_1 = require("live-plugin-manager");
 const fs = __importStar(require("fs"));
 const sanitize = (plugin) => (plugin.startsWith('/') ? plugin.substring(1).trim() : plugin.trim());
 exports.isValidPlugin = (plugin) => typeof plugin === 'function' || ('default' in plugin && typeof plugin.default === 'function');
+exports.isPluginConfig = (config) => 'name' in config && 'version' in config && 'from' in config;
 class PluginManager {
     constructor(pluginsPath, cwd) {
         _manager.set(this, void 0);
@@ -69,14 +70,31 @@ class PluginManager {
         return fs.existsSync(this.pluginPath(plugin));
     }
     async installPlugin(plugin, log) {
-        if (this.pluginIsInstalled(plugin)) {
-            log.onInstalled(plugin);
-            await __classPrivateFieldGet(this, _manager).installFromPath(this.pluginPath(plugin));
+        var _a, _b;
+        if (!exports.isPluginConfig(plugin)) {
+            throw new Error(`${plugin} is not a valid typerpc plugin`);
         }
-        else {
-            log.onInstalling(plugin);
-            await __classPrivateFieldGet(this, _manager).installFromNpm(sanitize(plugin));
+        if (this.pluginIsInstalled(this.pluginPath(plugin.name))) {
+            log.onInstalled(plugin.name);
+            await __classPrivateFieldGet(this, _manager).installFromPath(this.pluginPath(plugin.name));
+            return;
         }
+        if (plugin.location) {
+            log.onInstalling(plugin.name);
+            switch (plugin.location) {
+                case 'filepath':
+                    await __classPrivateFieldGet(this, _manager).installFromPath(plugin.name);
+                    return;
+                case 'github':
+                    await __classPrivateFieldGet(this, _manager).installFromGithub(plugin.name);
+                    return;
+                case 'npm':
+                    await __classPrivateFieldGet(this, _manager).installFromNpm(plugin.name, (_a = plugin.version) !== null && _a !== void 0 ? _a : 'latest');
+                    return;
+            }
+        }
+        await __classPrivateFieldGet(this, _manager).installFromNpm(plugin.name, (_b = plugin.version) !== null && _b !== void 0 ? _b : 'latest');
+        return;
     }
     async install(plugins, onInstalled, onInstalling) {
         return Promise.all(plugins.map((plugin) => this.installPlugin(plugin, { onInstalling, onInstalled })));

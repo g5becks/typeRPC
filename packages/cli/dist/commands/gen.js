@@ -55,8 +55,10 @@ const validatePlugins = (configs) => {
     }).start();
     let invalids = [];
     for (const cfg of configs) {
-        if (!cfg.plugin.startsWith('@typerpc/') && !cfg.plugin.startsWith('typerpc-plugin-')) {
-            invalids = [...invalids, cfg.plugin];
+        if (cfg.plugin.location !== 'filepath' &&
+            !cfg.plugin.name.startsWith('@typerpc/') &&
+            !cfg.plugin.name.startsWith('typerpc-plugin-')) {
+            invalids = [...invalids, cfg.plugin.name];
         }
     }
     if (invalids.length !== 0) {
@@ -95,7 +97,7 @@ const generateCode = (configs, manager, files) => {
     let generated = [];
     for (const cfg of configs) {
         const schemas = schema_1.buildSchemas(files, cfg.pkg);
-        const gen = manager.require(cfg.plugin);
+        const gen = manager.require(cfg.plugin.name);
         if (gen instanceof Error) {
             throw Error(`error is ${gen.message}`);
         }
@@ -154,9 +156,15 @@ const createErrorInfo = (pluginManager, rpcConfig, args) => {
         pluginManagerOpts: pluginManager.opts(),
     };
 };
+const onlyOne = (plugins) => plugins.filter((plugin) => plugin !== '').length < 2;
+const getPlugin = (plugins) => plugins.filter((plugin) => plugin && plugin !== '')[0];
 const handler = async (args) => {
     var _a, _b;
-    const { tsconfig, plugin, out, pkg, fmt } = args;
+    const { tsconfig, npm, path, github, version, out, pkg, fmt } = args;
+    const plugins = [npm !== null && npm !== void 0 ? npm : '', path !== null && path !== void 0 ? path : '', github !== null && github !== void 0 ? github : ''];
+    if (!onlyOne(plugins)) {
+        throw new Error(`only one plugin option can be selected. You have specified  ${plugins}`);
+    }
     const tsConfigFilePath = (_a = tsconfig === null || tsconfig === void 0 ? void 0 : tsconfig.trim()) !== null && _a !== void 0 ? _a : '';
     // validate tsconfig before proceeding
     validateTsConfigFile((_b = tsconfig === null || tsconfig === void 0 ? void 0 : tsconfig.trim()) !== null && _b !== void 0 ? _b : '');
@@ -179,8 +187,20 @@ const handler = async (args) => {
             .filter((file) => file.getBaseName().toLowerCase() !== 'rpc.config.ts');
         // if user provides command line arguments the config file will
         // be overridden - Be sure to document this behaviour
-        if (plugin && out && pkg) {
-            configs = [{ configName: 'flags', plugin, out, pkg, fmt }];
+        if ((npm || path || github) && out && pkg) {
+            configs = [
+                {
+                    configName: 'flags',
+                    plugin: {
+                        name: getPlugin(plugins),
+                        location: npm ? 'npm' : path ? 'filepath' : github ? 'github' : 'npm',
+                        version: version !== null && version !== void 0 ? version : 'latest',
+                    },
+                    out,
+                    pkg,
+                    fmt,
+                },
+            ];
         }
         errorInfo = createErrorInfo(pluginManager, configFile, args);
         // no configs in file or command line opts
@@ -211,10 +231,25 @@ exports.gen = {
             demandOption: true,
             description: 'path to tsconfig.json for project containing your typerpc schema files',
         },
-        plugin: {
+        github: {
+            alias: 'g',
+            type: 'string',
+            description: 'name of the typerpc plugin to install from github and use for code generation',
+        },
+        npm: {
+            alias: 'n',
+            type: 'string',
+            description: 'name of the typerpc plugin to install from npm and use for code generation',
+        },
+        path: {
             alias: 'p',
             type: 'string',
-            description: 'name of the typerpc plugin to use for code generation',
+            description: 'path to the typerpc plugin to install and use for code generation',
+        },
+        version: {
+            alias: 'v',
+            type: 'string',
+            description: 'version of the plugin to install, this flag is only valid if installing from npm. If using github, specify the version as a part of the name/url. E.G. typerpc/someplugin#351396f ',
         },
         out: {
             alias: 'o',

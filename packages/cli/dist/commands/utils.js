@@ -39,11 +39,16 @@ const tslog_1 = require("tslog");
 const prettyjson_1 = require("prettyjson");
 exports.getConfigFile = (project) => project.getSourceFile((file) => file.getBaseName().toLowerCase() === 'rpc.config.ts');
 const parseGeneratorConfig = (obj) => {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u;
     const out = (_c = (_b = (_a = obj.getProperty('out')) === null || _a === void 0 ? void 0 : _a.getChildrenOfKind(ts_morph_1.SyntaxKind.StringLiteral)[0]) === null || _b === void 0 ? void 0 : _b.getLiteralValue()) === null || _c === void 0 ? void 0 : _c.trim();
-    const plugin = (_f = (_e = (_d = obj.getProperty('plugin')) === null || _d === void 0 ? void 0 : _d.getChildrenOfKind(ts_morph_1.SyntaxKind.StringLiteral)[0]) === null || _e === void 0 ? void 0 : _e.getLiteralValue()) === null || _f === void 0 ? void 0 : _f.trim();
-    const pkg = (_j = (_h = (_g = obj.getProperty('pkg')) === null || _g === void 0 ? void 0 : _g.getChildrenOfKind(ts_morph_1.SyntaxKind.StringLiteral)[0]) === null || _h === void 0 ? void 0 : _h.getLiteralValue()) === null || _j === void 0 ? void 0 : _j.trim();
-    const fmt = (_m = (_l = (_k = obj.getProperty('fmt')) === null || _k === void 0 ? void 0 : _k.getChildrenOfKind(ts_morph_1.SyntaxKind.StringLiteral)[0]) === null || _l === void 0 ? void 0 : _l.getLiteralValue()) === null || _m === void 0 ? void 0 : _m.trim();
+    const pluginConfig = (_d = obj.getProperty('plugin')) === null || _d === void 0 ? void 0 : _d.getChildrenOfKind(ts_morph_1.SyntaxKind.ObjectLiteralExpression)[0];
+    const plugin = {
+        name: (_g = (_f = (_e = pluginConfig === null || pluginConfig === void 0 ? void 0 : pluginConfig.getProperty('name')) === null || _e === void 0 ? void 0 : _e.getText()) === null || _f === void 0 ? void 0 : _f.trim()) !== null && _g !== void 0 ? _g : '',
+        version: (_k = (_j = (_h = pluginConfig === null || pluginConfig === void 0 ? void 0 : pluginConfig.getProperty('version')) === null || _h === void 0 ? void 0 : _h.getText()) === null || _j === void 0 ? void 0 : _j.trim()) !== null && _k !== void 0 ? _k : 'latest',
+        location: ((_o = (_m = (_l = pluginConfig === null || pluginConfig === void 0 ? void 0 : pluginConfig.getProperty('location')) === null || _l === void 0 ? void 0 : _l.getText()) === null || _m === void 0 ? void 0 : _m.trim()) !== null && _o !== void 0 ? _o : 'npm'),
+    };
+    const pkg = (_r = (_q = (_p = obj.getProperty('pkg')) === null || _p === void 0 ? void 0 : _p.getChildrenOfKind(ts_morph_1.SyntaxKind.StringLiteral)[0]) === null || _q === void 0 ? void 0 : _q.getLiteralValue()) === null || _r === void 0 ? void 0 : _r.trim();
+    const fmt = (_u = (_t = (_s = obj.getProperty('fmt')) === null || _s === void 0 ? void 0 : _s.getChildrenOfKind(ts_morph_1.SyntaxKind.StringLiteral)[0]) === null || _t === void 0 ? void 0 : _t.getLiteralValue()) === null || _u === void 0 ? void 0 : _u.trim();
     if (!out || !plugin || !pkg) {
         throw new Error(`
         error in config file: ${obj.getSourceFile().getFilePath()},
@@ -62,8 +67,9 @@ exports.parseConfig = (file) => {
         throw new Error(`error in config file. Invalid config object, no generators found.`);
     }
     let configs = [];
-    // get the Generator config location each property assignment
-    // pass is go the parseGeneratorConfig function
+    // get the Generator config for each property assignment
+    // pass is to the parseGeneratorConfig function along with the
+    // name of the property the config belongs to
     for (const prop of props) {
         configs = configs.concat(Object.assign(Object.assign({}, parseGeneratorConfig(prop.getChildrenOfKind(ts_morph_1.SyntaxKind.ObjectLiteralExpression)[0])), { configName: (_c = (_b = prop.getFirstChild()) === null || _b === void 0 ? void 0 : _b.getText()) !== null && _c !== void 0 ? _c : '' }));
     }
@@ -88,7 +94,7 @@ exports.createLogger = (project) => {
     }, 'error');
     return logger;
 };
-exports.format = (path, formatter,
+exports.format = (path, formatter, 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 onError, onComplete) => child_process_1.exec(`${formatter} ${path}`, (error, stdout, stderr) => {
     if (error) {

@@ -112,7 +112,7 @@ exports.fromQueryString = (param, type) => {
     }
     return '';
 };
-exports.handleOptional = (property) =>
+exports.handleOptional = (property) => 
 // if type is a scalar, make it a pointer (optional)
 schema_1.is.scalar(property.type) && property.isOptional ? '*' : '';
 exports.buildProps = (props) => {
