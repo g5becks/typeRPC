@@ -1,6 +1,6 @@
 {
   "name": "@typerpc/config",
-  "version": "0.1.6",
+  "version": "0.1.11",
   "description": "typerpc config types",
   "keywords": [
     "typerpc",
@@ -28,7 +28,7 @@
     "tsc": "tsc -b tsconfig.build.json"
   },
   "dependencies": {
-    "@typerpc/plugin": "^0.1.3"
+    "@typerpc/plugin": "^0.1.11"
   },
   "bugs": {
     "url": "https://github.com/typerpc/typerpc/issues"

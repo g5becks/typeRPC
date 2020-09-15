@@ -1,6 +1,6 @@
 {
   "name": "@typerpc/docs",
-  "version": "0.1.6",
+  "version": "0.1.11",
   "license": "MIT",
   "scripts": {
     "dev": "docz dev",
