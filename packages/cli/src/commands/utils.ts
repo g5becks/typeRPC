@@ -14,7 +14,6 @@ import { ObjectLiteralExpression, Project, SourceFile, SyntaxKind } from 'ts-mor
 import { GeneratorConfig } from '@typerpc/config'
 import { ChildProcess, exec } from 'child_process'
 import * as fs from 'fs-extra'
-import { appendFile } from 'fs-extra'
 import { ILogObject, Logger } from 'tslog'
 import { render } from 'prettyjson'
 import { appendFileSync } from 'fs'
