@@ -11,6 +11,31 @@
  */
 
 /**
+ * A plugin to install that will be used for code generation.
+ * Plugins can be installed from npm, github, or a filepath.
+ * If the plugin lives on github or npm, the plugin name MUST begin
+ * with either @typerpc or typerpc-plugin . Plugins installed from a
+ * filepath have no such restrictions
+ *
+ * @property {string} name
+ * @property {string} version
+ * @property {'github' | 'npm' | 'filepath'} from
+ */
+export type PluginConfig = {
+    /** name of the plugin to install
+     * if using npm, simply supply the name of the package
+     * if using github specify in the format owner/repository_name#ref
+     * E.G. typerpc-plugin/someplugin#351396f
+     * if using a filepath provide the filepath to the plugin node_modules folder is excluded from source location
+     * */
+    name: string
+    /** a version like 1.0.3 if using npm, or a github repository in the format owner/repository_name#ref (like expressjs/express#351396f) if using github
+     * defaults to 'latest' if not specified */
+    version?: string
+    /** specify where to install this plugin from defaults to npm if not specified */
+    from?: 'github' | 'npm' | 'filepath'
+}
+/**
  * Config options for code generation
  *
  * @property {string} out
@@ -21,8 +46,8 @@
 export type GeneratorConfig = Readonly<{
     /** directory to write generated code **/
     out: string
-    /** name of the typerpc plugin to use **/
-    plugin: string
+    /** name of the typerpc plugin to use or a PluginConfig object **/
+    plugin: string | PluginConfig
     /** package name to use in generated code **/
     pkg: string
     /**
