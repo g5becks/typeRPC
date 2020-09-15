@@ -60,7 +60,6 @@ const validatePlugins = (configs: ParsedConfig[]): void => {
     }).start()
     let invalids: string[] = []
     for (const cfg of configs) {
-        console.log('this is the location!' + cfg.plugin.location)
         if (
             cfg.plugin.location !== 'filepath' &&
             !cfg.plugin.name.startsWith('@typerpc/') &&
@@ -98,7 +97,7 @@ const validateSchemaFiles = (files: SourceFile[]) => {
 const installPlugins = async (configs: ParsedConfig[], manager: PluginManager, log: Logger) => {
     const plugins = configs.map((cfg) => cfg.plugin)
     const onInstalled = (plugin: string) => log.info(`${plugin} already installed, fetching from cache`)
-    const onInstalling = (plugin: string) => log.info(`attempting to install ${plugin} from https://registry.npmjs.org`)
+    const onInstalling = (plugin: string) => log.info(`attempting to install ${plugin}`)
     await manager.install(plugins, onInstalled, onInstalling)
 }
 

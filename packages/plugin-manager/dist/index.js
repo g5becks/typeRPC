@@ -49,7 +49,7 @@ const live_plugin_manager_1 = require("live-plugin-manager");
 const fs = __importStar(require("fs"));
 const sanitize = (plugin) => (plugin.startsWith('/') ? plugin.substring(1).trim() : plugin.trim());
 exports.isValidPlugin = (plugin) => typeof plugin === 'function' || ('default' in plugin && typeof plugin.default === 'function');
-exports.isPluginConfig = (config) => 'name' in config && 'version' in config && 'from' in config;
+exports.isPluginConfig = (config) => 'name' in config && 'version' in config && 'location' in config;
 class PluginManager {
     constructor(pluginsPath, cwd) {
         _manager.set(this, void 0);
@@ -71,8 +71,9 @@ class PluginManager {
     }
     async installPlugin(plugin, log) {
         var _a, _b;
-        if (!exports.isPluginConfig(plugin)) {
-            throw new Error(`${plugin} is not a valid typerpc plugin`);
+        const isPlugin = exports.isPluginConfig(plugin);
+        if (!isPlugin) {
+            throw new Error(`${JSON.stringify(plugin)} is not a valid typerpc plugin`);
         }
         if (this.pluginIsInstalled(this.pluginPath(plugin.name))) {
             log.onInstalled(plugin.name);

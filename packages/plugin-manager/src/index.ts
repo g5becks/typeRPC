@@ -21,7 +21,7 @@ const sanitize = (plugin: string): string => (plugin.startsWith('/') ? plugin.su
 export const isValidPlugin = (plugin: any): plugin is TypeRpcPlugin =>
     typeof plugin === 'function' || ('default' in plugin && typeof plugin.default === 'function')
 
-export const isPluginConfig = (config: any): config is PluginConfig =>
+export const isPluginConfig = (config: Record<string, unknown>): config is PluginConfig =>
     'name' in config && 'version' in config && 'location' in config
 
 export class PluginManager {
@@ -50,30 +50,29 @@ export class PluginManager {
         plugin: PluginConfig,
         log: { onInstalled: (plugin: string) => void; onInstalling: (plugin: string) => void },
     ): Promise<void> {
-        if (isPluginConfig(plugin) !== true) {
+        if (!isPluginConfig(plugin)) {
             throw new Error(`${JSON.stringify(plugin)} is not a valid typerpc plugin`)
         }
         if (this.pluginIsInstalled(this.pluginPath(plugin.name))) {
             log.onInstalled(plugin.name)
             await this.#manager.installFromPath(this.pluginPath(plugin.name))
-            return
         }
         if (plugin.location) {
             log.onInstalling(plugin.name)
             switch (plugin.location) {
                 case 'filepath':
                     await this.#manager.installFromPath(plugin.name)
-                    return
+                    break
                 case 'github':
                     await this.#manager.installFromGithub(plugin.name)
-                    return
+                    break
                 case 'npm':
                     await this.#manager.installFromNpm(plugin.name, plugin.version ?? 'latest')
-                    return
+                    break
             }
+        } else {
+            await this.#manager.installFromNpm(plugin.name, plugin.version ?? 'latest')
         }
-        await this.#manager.installFromNpm(plugin.name, plugin.version ?? 'latest')
-        return
     }
 
     opts = (): string => JSON.stringify(this.#manager.options)
@@ -82,8 +81,10 @@ export class PluginManager {
         plugins: PluginConfig[],
         onInstalled: (plugin: string) => void,
         onInstalling: (plugin: string) => void,
-    ): Promise<void[]> {
-        return Promise.all(plugins.map((plugin) => this.installPlugin(plugin, { onInstalling, onInstalled })))
+    ): Promise<void> {
+        for (const plugin of plugins) {
+            await this.installPlugin(plugin, { onInstalling, onInstalled })
+        }
     }
     require(plugin: string): TypeRpcPlugin | Error {
         const plug = this.#manager.require(plugin)

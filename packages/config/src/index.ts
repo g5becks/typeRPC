@@ -10,31 +10,29 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+export type PluginLocation = 'npm' | { github: string } | { local: string }
 /**
  * A plugin to install that will be used for code generation.
- * Plugins can be installed location npm, github, or a filepath.
- * If the plugin lives on github or npm, the plugin name MUST begin
- * with either @typerpc or typerpc-plugin . Plugins installed location a
- * filepath have no such restrictions
+ * Plugins can be installed from npm, github, or a local filepath.
+ * All plugin names MUST begin with either @typerpc or typerpc-plugin .
  *
  * @property {string} name
  * @property {string} version
- * @property {'github' | 'npm' | 'filepath'} location
+ * @property {PluginLocation} location
  */
 export type PluginConfig = {
-    /** name of the plugin to install
-     * if using npm, simply supply the name of the package
-     * if using github you may specify in the format owner/repository_name or
-     * owner/repository_name#ref to specify a version
-     * E.G. typerpc-plugin/someplugin#351396f
-     * if using a filepath provide the filepath to the plugin node_modules folder is excluded location source name
-     * */
+    /** name of the plugin package to install */
     name: string
-    /** If using npm, you can specify a version like 1.0.3 .
+    /** If the plugin's location is npm, you can specify a version like 1.0.3 .
      * defaults to 'latest' if not specified */
     version?: string
-    /** specify where to install this plugin is located. defaults to npm if not specified */
-    location?: 'github' | 'npm' | 'filepath'
+    /** specify where the plugin to install is located.
+     * For using github specify in the format {github: 'owner/repository_name' } or
+     * owner/repository_name#ref to specify a version E.G. {github: 'typerpc-plugin/someplugin#351396f'} .
+     * For local plugins provide the filepath to the directory containing the
+     * package.json file plugin. E.G. {local: '/machine/development/plugin'}, node_modules folder is not allowed. If no location is provided the plugin
+     * will be downloaded from npm. */
+    location?: PluginLocation
 }
 /**
  * Config options for code generation
