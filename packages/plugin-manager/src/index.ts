@@ -58,23 +58,28 @@ export class PluginManager {
             await this.#manager.installFromPath(this.pluginPath(plugin.name))
             return
         }
-        if (plugin.location && plugin.location === 'github') {
+        if (plugin.location) {
             log.onInstalling(plugin.name)
-            await this.#manager.installFromGithub(plugin.name)
-            return
-        }
-        if (plugin.location && plugin.location === 'filepath') {
-            await this.#manager.installFromPath(plugin.name)
-            return
+            switch (plugin.location) {
+                case 'filepath':
+                    await this.#manager.installFromPath(plugin.name)
+                    return
+                case 'github':
+                    await this.#manager.installFromGithub(plugin.name)
+                    return
+                case 'npm':
+                    await this.#manager.installFromNpm(plugin.name, plugin.version ?? 'latest')
+                    return
+            }
         }
         await this.#manager.installFromNpm(plugin.name, plugin.version ?? 'latest')
         return
     }
 
-    opts = () => JSON.stringify(this.#manager.options)
-    list = () => JSON.stringify(this.#manager.list())
+    opts = (): string => JSON.stringify(this.#manager.options)
+    list = (): string => JSON.stringify(this.#manager.list())
     async install(
-        plugins: string[],
+        plugins: PluginConfig[],
         onInstalled: (plugin: string) => void,
         onInstalling: (plugin: string) => void,
     ): Promise<void[]> {
