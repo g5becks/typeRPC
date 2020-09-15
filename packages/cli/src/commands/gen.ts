@@ -29,7 +29,7 @@ const validateTsConfigFile = (tsConfigFile: string): void => {
     const exists = pathExistsSync(tsConfigFile)
     if (tsConfigFile === '' || !exists) {
         spinner.fail(
-            chalk.bgRed(
+            chalk.red(
                 `Looks like you provided an invalid tsconfig.json file. No sweat, make sure ${tsConfigFile} exists and try again`,
             ),
         )
@@ -46,7 +46,7 @@ const validateOutputPaths = (configs: ParsedConfig[]): void => {
     }).start()
     for (const cfg of configs) {
         if (cfg.out === '') {
-            spinner.fail(chalk.bgRed(`Whoops, looks like ${cfg.configName} has an empty out field`))
+            spinner.fail(chalk.red(`Whoops, looks like ${cfg.configName} has an empty out field`))
             throw new Error(`${cfg.configName} has an empty out field`)
         }
     }
@@ -60,16 +60,17 @@ const validatePlugins = (configs: ParsedConfig[]): void => {
     }).start()
     let invalids: string[] = []
     for (const cfg of configs) {
+        console.log('this is the location!' + cfg.plugin.location)
         if (
             cfg.plugin.location !== 'filepath' &&
             !cfg.plugin.name.startsWith('@typerpc/') &&
-            !cfg.plugin.name.startsWith('typerpc-plugin-')
+            !cfg.plugin.name.startsWith('typerpc-plugin')
         ) {
             invalids = [...invalids, cfg.plugin.name]
         }
     }
     if (invalids.length !== 0) {
-        spinner.fail(chalk.bgRed(`Uh Oh, the following plugin names are not valid typerpc plugins ${invalids}`))
+        spinner.fail(chalk.red(`Uh Oh, the following plugin names are not valid typerpc plugins ${invalids}`))
         throw new Error(`the following plugin names are not valid typerpc plugins ${invalids}`)
     }
     spinner.succeed(chalk.whiteBright("Valid Plugins as well, You're on you're way!"))
@@ -85,7 +86,7 @@ const validateSchemaFiles = (files: SourceFile[]) => {
         spinner.succeed("All systems are go, Let's generate some code!")
         return
     }
-    spinner.fail(chalk.bgRed(`Bummer, looks like we've spotter errors in you schema files`))
+    spinner.fail(chalk.red(`Bummer, looks like we've spotter errors in you schema files`))
     throw errs.reduce((err, val) => {
         err.name.concat(val.name + '\n')
         err.message.concat(val.message + '\n')
@@ -116,7 +117,7 @@ const generateCode = (configs: ParsedConfig[], manager: PluginManager, files: So
             generated = [...generated, { code: gen(schemas), outputPath: cfg.out }]
         } else {
             spinner.fail(
-                chalk.bgRed(
+                chalk.red(
                     `Wait just a second there, are you sure ${cfg.plugin} is an authentic @typerpc plugin? Looks like a knockoff to me`,
                 ),
             )
@@ -142,7 +143,7 @@ const saveToDisk = async (generated: GeneratedCode[]) => {
             try {
                 await outputFile(filePath(gen.outputPath, entry.fileName), entry.source)
             } catch (error) {
-                spinner.fail(chalk.bgRed(``))
+                spinner.fail(chalk.red(``))
                 throw new Error(`error occurred writing files: ${error}`)
             }
         }

@@ -25,13 +25,23 @@ const parseGeneratorConfig = (obj: ObjectLiteralExpression): GeneratorConfig => 
 
     const pluginConfig = obj.getProperty('plugin')?.getChildrenOfKind(SyntaxKind.ObjectLiteralExpression)[0]
     const plugin: PluginConfig = {
-        name: pluginConfig?.getProperty('name')?.getText()?.trim() ?? '',
-        version: pluginConfig?.getProperty('version')?.getText()?.trim() ?? 'latest',
-        location: (pluginConfig?.getProperty('location')?.getText()?.trim() ?? 'npm') as
-            | 'npm'
-            | 'github'
-            | 'filepath'
-            | undefined,
+        name:
+            pluginConfig
+                ?.getProperty('name')
+                ?.getChildrenOfKind(SyntaxKind.StringLiteral)[0]
+                ?.getLiteralValue()
+                ?.trim() ?? '',
+        version:
+            pluginConfig
+                ?.getProperty('version')
+                ?.getChildrenOfKind(SyntaxKind.StringLiteral)[0]
+                ?.getLiteralValue()
+                ?.trim() ?? 'latest',
+        location: (pluginConfig
+            ?.getProperty('location')
+            ?.getChildrenOfKind(SyntaxKind.StringLiteral)[0]
+            ?.getLiteralValue()
+            ?.trim() ?? 'npm') as 'npm' | 'github' | 'filepath' | undefined,
     }
     const pkg = obj.getProperty('pkg')?.getChildrenOfKind(SyntaxKind.StringLiteral)[0]?.getLiteralValue()?.trim()
 
