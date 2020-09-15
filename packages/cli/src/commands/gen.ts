@@ -101,15 +101,12 @@ const validateSchemaFiles = (files: SourceFile[]) => {
 
 const installPlugins = async (configs: ParsedConfig[], manager: PluginManager) => {
     const plugins = configs.map((cfg) => cfg.plugin)
-
-    const spinner = ora({
-        text: `Installing the following plugins: ${plugins}, this shouldn't take long`,
-        color: 'blue',
-    }).start()
     const onInstalled = (plugin: string) => log.info(`${plugin} already installed, fetching from cache`)
     const onInstalling = (plugin: string) => log.info(`attempting to install ${plugin} from https://registry.npmjs.org`)
-    await manager.install(plugins, onInstalled, onInstalling)
-    return spinner
+    ora.promise(manager.install(plugins, onInstalled, onInstalling), {
+        text: `Installing the following plugins: ${plugins}, this shouldn't take long`,
+        color: 'blue',
+    })
 }
 
 const generateCode = (configs: ParsedConfig[], manager: PluginManager, files: SourceFile[]) => {
