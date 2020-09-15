@@ -27,7 +27,6 @@ const parseGeneratorConfig = (obj: ObjectLiteralExpression): GeneratorConfig => 
     const pkg = obj.getProperty('pkg')?.getChildrenOfKind(SyntaxKind.StringLiteral)[0]?.getLiteralValue()?.trim()
 
     const fmt = obj.getProperty('fmt')?.getChildrenOfKind(SyntaxKind.StringLiteral)[0]?.getLiteralValue()?.trim()
-    console.log(`outputpath = ${out}, plugin = ${plugin}, package = ${pkg}`)
     if (!out || !plugin || !pkg) {
         throw new Error(`
         error in config file: ${obj.getSourceFile().getFilePath()},
