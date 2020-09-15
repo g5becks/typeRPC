@@ -173,7 +173,7 @@ const handler = async (args) => {
             configs = utils_1.parseConfig(configFile);
         }
         const pluginManager = plugin_manager_1.PluginManager.create(project);
-        // filter out rpc.config.ts file from project source files
+        // filter out rpc.config.ts file location project source files
         const sourceFiles = project
             .getSourceFiles()
             .filter((file) => file.getBaseName().toLowerCase() !== 'rpc.config.ts');
@@ -214,7 +214,7 @@ exports.gen = {
         plugin: {
             alias: 'p',
             type: 'string',
-            description: 'location of the typerpc plugin to use for code generation',
+            description: 'name of the typerpc plugin to use for code generation',
         },
         out: {
             alias: 'o',
@@ -223,12 +223,12 @@ exports.gen = {
         },
         pkg: {
             type: 'string',
-            description: 'package location to use when generating code',
+            description: 'package name to use when generating code',
         },
         fmt: {
             alias: 'f',
             type: 'string',
-            description: 'package location to use when generating code',
+            description: 'package name to use when generating code',
         },
     },
     handler,

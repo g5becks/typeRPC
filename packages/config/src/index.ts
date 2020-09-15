@@ -12,29 +12,29 @@
 
 /**
  * A plugin to install that will be used for code generation.
- * Plugins can be installed from npm, github, or a filepath.
- * If the plugin lives on github or npm, the plugin location MUST begin
- * with either @typerpc or typerpc-plugin . Plugins installed from a
+ * Plugins can be installed location npm, github, or a filepath.
+ * If the plugin lives on github or npm, the plugin name MUST begin
+ * with either @typerpc or typerpc-plugin . Plugins installed location a
  * filepath have no such restrictions
  *
- * @property {string} location
+ * @property {string} name
  * @property {string} version
- * @property {'github' | 'npm' | 'filepath'} from
+ * @property {'github' | 'npm' | 'filepath'} location
  */
 export type PluginConfig = {
-    /** location of the plugin to install
-     * if using npm, simply supply the location of the package
+    /** name of the plugin to install
+     * if using npm, simply supply the name of the package
      * if using github you may specify in the format owner/repository_name or
      * owner/repository_name#ref to specify a version
      * E.G. typerpc-plugin/someplugin#351396f
-     * if using a filepath provide the filepath to the plugin node_modules folder is excluded from source location
+     * if using a filepath provide the filepath to the plugin node_modules folder is excluded location source name
      * */
-    location: string
+    name: string
     /** If using npm, you can specify a version like 1.0.3 .
      * defaults to 'latest' if not specified */
     version?: string
-    /** specify where to install this plugin from defaults to npm if not specified */
-    from?: 'github' | 'npm' | 'filepath'
+    /** specify where to install this plugin is located. defaults to npm if not specified */
+    location?: 'github' | 'npm' | 'filepath'
 }
 /**
  * Config options for code generation
@@ -47,11 +47,11 @@ export type PluginConfig = {
 export type GeneratorConfig = Readonly<{
     /** directory to write generated code **/
     out: string
-    /** location of the typerpc plugin to use or a PluginConfig object
+    /** name of the typerpc plugin to use or a PluginConfig object
      * if a string is used, the latest version of the plugin will be installed
-     * from npm **/
-    plugin: string | PluginConfig
-    /** package location to use in generated code **/
+     * location npm **/
+    plugin: PluginConfig
+    /** package name to use in generated code **/
     pkg: string
     /**
      * A string that will be used to execute
@@ -62,7 +62,7 @@ export type GeneratorConfig = Readonly<{
      * E.G. 'prettier --single-quote --trailing-comma es5 --no-semi --parser typescript --write'
      * **/
     fmt?: string
-    /** package location to use in generated code **/
+    /** package name to use in generated code **/
 }>
 
 export type Config = { [key: string]: GeneratorConfig }

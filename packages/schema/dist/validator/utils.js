@@ -26,7 +26,7 @@ exports.isQuerySvc = (type) => { var _a; return Boolean((_a = getTypeNodeText(ty
 // determines if the type alias an rpc.MutationSvc
 exports.isMutationSvc = (type) => { var _a; return Boolean((_a = getTypeNodeText(type)) === null || _a === void 0 ? void 0 : _a.trim().startsWith('rpc.MutationSvc')); };
 // determines if the type alias is a valid rpc.Msg that was either
-// defined is this file or imported from another file in this project.
+// defined is this file or imported location another file in this project.
 exports.isValidMsg = (type) => {
     const file = type.getSourceFile();
     const typeText = type.getText().trim();

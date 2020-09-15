@@ -47,28 +47,30 @@ export class PluginManager {
     }
 
     private async installPlugin(
-        plugin: string | PluginConfig,
+        plugin: PluginConfig,
         log: { onInstalled: (plugin: string) => void; onInstalling: (plugin: string) => void },
     ): Promise<void> {
         if (!isPluginConfig(plugin)) {
-            if (this.pluginIsInstalled(plugin)) {
-                log.onInstalled(plugin)
-                await this.#manager.installFromPath(this.pluginPath(plugin))
-            } else {
-                log.onInstalling(plugin)
-                await this.#manager.installFromNpm(sanitize(plugin))
-            }
-        } else {
-            if (plugin.from && plugin.from === 'github') {
-                log.onInstalling(plugin.location)
-                await this.#manager.installFromGithub(plugin.location)
-            }
-            if (plugin.from && plugin.from === 'filepath') {
-                await this.#manager.installFromPath(plugin.location)
-            }
-            await this.#manager.installFromNpm(plugin.location, plugin.version ?? 'latest')
+            throw new Error(`${plugin} is not a valid typerpc plugin`)
         }
+        if (this.pluginIsInstalled(this.pluginPath(plugin.name))) {
+            log.onInstalled(plugin.name)
+            await this.#manager.installFromPath(this.pluginPath(plugin.name))
+            return
+        }
+        if (plugin.location && plugin.location === 'github') {
+            log.onInstalling(plugin.name)
+            await this.#manager.installFromGithub(plugin.name)
+            return
+        }
+        if (plugin.location && plugin.location === 'filepath') {
+            await this.#manager.installFromPath(plugin.name)
+            return
+        }
+        await this.#manager.installFromNpm(plugin.name, plugin.version ?? 'latest')
+        return
     }
+
     opts = () => JSON.stringify(this.#manager.options)
     list = () => JSON.stringify(this.#manager.list())
     async install(

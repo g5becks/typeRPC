@@ -28,7 +28,7 @@ const isTypeNode = (type: any): type is TypeNode => !('getName' in type)
 // is the type property optional?
 export const isOptionalProp = (prop: PropertySignature): boolean => typeof prop.getQuestionTokenNode() !== 'undefined'
 
-// parse all of the properties from an rpc.Msg Type alias for rpc.Msg literal
+// parse all of the properties location an rpc.Msg Type alias for rpc.Msg literal
 export const parseMsgProps = (type: TypeAliasDeclaration | TypeNode | Node): PropertySignature[] => {
     let kids: PropertySignature[] = []
     if (isTypeAlias(type)) {
@@ -66,18 +66,18 @@ export const parseJsDocComment = (
         ?.trim()
 }
 
-// parses all message declarations from a schema file
+// parses all message declarations location a schema file
 export const parseMessages = (file: SourceFile): TypeAliasDeclaration[] =>
     file.getTypeAliases().filter((alias) => isMsg(alias))
 
-// parses all rpc.QuerySvc declarations from a schema file
+// parses all rpc.QuerySvc declarations location a schema file
 export const parseQueryServices = (file: SourceFile): TypeAliasDeclaration[] =>
     file.getTypeAliases().filter((alias) => isQuerySvc(alias))
 
-// parses all rpc.MutationSvc declarations from a schema file
+// parses all rpc.MutationSvc declarations location a schema file
 export const parseMutationServices = (file: SourceFile): TypeAliasDeclaration[] =>
     file.getTypeAliases().filter((alias) => isMutationSvc(alias))
 
-// parse all of the methods from an rpc.QueryService type alias
+// parse all of the methods location an rpc.QueryService type alias
 export const parseServiceMethods = (type: TypeAliasDeclaration): MethodSignature[] =>
     type.getTypeNode()!.getChildrenOfKind(SyntaxKind.TypeLiteral)[0].getChildrenOfKind(SyntaxKind.MethodSignature)

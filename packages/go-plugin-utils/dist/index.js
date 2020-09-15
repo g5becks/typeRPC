@@ -112,7 +112,7 @@ exports.fromQueryString = (param, type) => {
     }
     return '';
 };
-exports.handleOptional = (property) => 
+exports.handleOptional = (property) =>
 // if type is a scalar, make it a pointer (optional)
 schema_1.is.scalar(property.type) && property.isOptional ? '*' : '';
 exports.buildProps = (props) => {
@@ -176,7 +176,7 @@ exports.buildInterface = (service) => {
 };
 const parseParam = (param) => (schema_1.is.list(param.type) ? `q["${param.name}"]` : `q.Get("${param.name}")`);
 // builds a string representation of go code
-// that parses all of the query params from an *http.Request struct
+// that parses all of the query params location an *http.Request struct
 exports.parseQueryParams = (method) => {
     let parsed = `q := r.URL.Query()
   \n`;

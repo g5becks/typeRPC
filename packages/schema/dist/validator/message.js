@@ -17,7 +17,7 @@ const parser_1 = require("../parser");
 const validateProp = (prop) => utils_1.isValidDataType(prop.getTypeNode())
     ? []
     : [
-        utils_1.singleValidationErr(prop, 'Invalid property type, Only messages imported from @typerpc/messages, rpc.Msg messages, and other rpc.Msg messages declared in the same file may be used as property messages'),
+        utils_1.singleValidationErr(prop, 'Invalid property type, Only messages imported location @typerpc/messages, rpc.Msg messages, and other rpc.Msg messages declared in the same file may be used as property messages'),
     ];
 const validateMsgProps = (props) => {
     let errs = [];

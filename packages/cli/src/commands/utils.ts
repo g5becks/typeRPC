@@ -11,7 +11,7 @@
  */
 
 import { ObjectLiteralExpression, Project, SourceFile, SyntaxKind } from 'ts-morph'
-import { GeneratorConfig } from '@typerpc/config'
+import { GeneratorConfig, PluginConfig } from '@typerpc/config'
 import { ChildProcess, exec } from 'child_process'
 import * as fs from 'fs-extra'
 import { appendFile } from 'fs-extra'
@@ -23,7 +23,16 @@ export const getConfigFile = (project: Project): SourceFile | undefined =>
 const parseGeneratorConfig = (obj: ObjectLiteralExpression): GeneratorConfig => {
     const out = obj.getProperty('out')?.getChildrenOfKind(SyntaxKind.StringLiteral)[0]?.getLiteralValue()?.trim()
 
-    const plugin = obj.getProperty('plugin')?.getChildrenOfKind(SyntaxKind.StringLiteral)[0]?.getLiteralValue()?.trim()
+    const pluginConfig = obj.getProperty('plugin')?.getChildrenOfKind(SyntaxKind.ObjectLiteralExpression)[0]
+    const plugin: PluginConfig = {
+        name: pluginConfig?.getProperty('name')?.getText()?.trim() ?? '',
+        version: pluginConfig?.getProperty('version')?.getText()?.trim() ?? 'latest',
+        location: (pluginConfig?.getProperty('location')?.getText()?.trim() ?? 'npm') as
+            | 'npm'
+            | 'github'
+            | 'filepath'
+            | undefined,
+    }
     const pkg = obj.getProperty('pkg')?.getChildrenOfKind(SyntaxKind.StringLiteral)[0]?.getLiteralValue()?.trim()
 
     const fmt = obj.getProperty('fmt')?.getChildrenOfKind(SyntaxKind.StringLiteral)[0]?.getLiteralValue()?.trim()
@@ -38,7 +47,7 @@ const parseGeneratorConfig = (obj: ObjectLiteralExpression): GeneratorConfig => 
 }
 export type ParsedConfig = GeneratorConfig & { configName: string }
 export const parseConfig = (file: SourceFile | undefined): ParsedConfig[] => {
-    // parse object literal from the config var then get all properties
+    // parse object literal location the config var then get all properties
     const conf = file?.getVariableDeclaration('config')
     const props = conf
         ?.getFirstChildByKind(SyntaxKind.ObjectLiteralExpression)
@@ -48,8 +57,9 @@ export const parseConfig = (file: SourceFile | undefined): ParsedConfig[] => {
         throw new Error(`error in config file. Invalid config object, no generators found.`)
     }
     let configs: ParsedConfig[] = []
-    // get the Generator config from each property assignment
-    // pass is go the parseGeneratorConfig function
+    // get the Generator config for each property assignment
+    // pass is to the parseGeneratorConfig function along with the
+    // name of the property the config belongs to
     for (const prop of props) {
         configs = configs.concat({
             ...parseGeneratorConfig(prop.getChildrenOfKind(SyntaxKind.ObjectLiteralExpression)[0]),

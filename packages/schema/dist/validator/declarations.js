@@ -78,7 +78,7 @@ const validateExports = (file) => {
     if (file.getExportAssignments().length !== 0) {
         errs = errs.concat(exportErr('export assignment'));
     }
-    // validate no export lists. E.G. export {location, var, etc}
+    // validate no export lists. E.G. export {name, var, etc}
     if (file.getExportDeclarations().length !== 0) {
         errs = errs.concat(exportErr('export list'));
     }

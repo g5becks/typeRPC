@@ -54,7 +54,7 @@ const parseGeneratorConfig = (obj) => {
 };
 exports.parseConfig = (file) => {
     var _a, _b, _c;
-    // parse object literal from the config var then get all properties
+    // parse object literal location the config var then get all properties
     const conf = file === null || file === void 0 ? void 0 : file.getVariableDeclaration('config');
     const props = (_a = conf === null || conf === void 0 ? void 0 : conf.getFirstChildByKind(ts_morph_1.SyntaxKind.ObjectLiteralExpression)) === null || _a === void 0 ? void 0 : _a.getChildrenOfKind(ts_morph_1.SyntaxKind.PropertyAssignment);
     // if there are no properties throw and exit
@@ -62,7 +62,7 @@ exports.parseConfig = (file) => {
         throw new Error(`error in config file. Invalid config object, no generators found.`);
     }
     let configs = [];
-    // get the Generator config from each property assignment
+    // get the Generator config location each property assignment
     // pass is go the parseGeneratorConfig function
     for (const prop of props) {
         configs = configs.concat(Object.assign(Object.assign({}, parseGeneratorConfig(prop.getChildrenOfKind(ts_morph_1.SyntaxKind.ObjectLiteralExpression)[0])), { configName: (_c = (_b = prop.getFirstChild()) === null || _b === void 0 ? void 0 : _b.getText()) !== null && _c !== void 0 ? _c : '' }));
@@ -88,7 +88,7 @@ exports.createLogger = (project) => {
     }, 'error');
     return logger;
 };
-exports.format = (path, formatter, 
+exports.format = (path, formatter,
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 onError, onComplete) => child_process_1.exec(`${formatter} ${path}`, (error, stdout, stderr) => {
     if (error) {

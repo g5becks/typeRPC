@@ -44,7 +44,7 @@ export const isMutationSvc = (type: TypeAliasDeclaration): boolean =>
     Boolean(getTypeNodeText(type)?.trim().startsWith('rpc.MutationSvc'))
 
 // determines if the type alias is a valid rpc.Msg that was either
-// defined is this file or imported from another file in this project.
+// defined is this file or imported location another file in this project.
 export const isValidMsg = (type: TypeNode | Node): boolean => {
     const file = type.getSourceFile()
     const typeText = type.getText().trim()

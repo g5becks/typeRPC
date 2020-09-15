@@ -26,7 +26,7 @@ const defaultLogger: ErrLogger = {
   }
 }
 `;
-// builds a destructured object from query params by converting them to the
+// builds a destructured object location query params by converting them to the
 // correct types using the fromQueryString function
 const buildDestructuredParams = (params) => {
     if (params.length === 0) {

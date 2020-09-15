@@ -124,7 +124,7 @@ exports.fromQueryString = (paramName, type) => {
 };
 // add question mark to optional type alias property or method param if needed
 exports.handleOptional = (isOptional) => (isOptional ? '?' : '');
-// builds a type alias from an rpc.Msg
+// builds a type alias location an rpc.Msg
 exports.buildType = (msg) => {
     return `
 export type ${plugin_utils_1.capitalize(msg.name)} = ${exports.typeLiteral(msg.properties)}
@@ -152,7 +152,7 @@ exports.buildMethodSignature = (method) => {
     return `${plugin_utils_1.lowerCase(method.name)}(${exports.buildParams(method.params)}): Promise<${exports.dataType(method.returnType)}>;
 `;
 };
-// builds an interface definition from a Schema Service
+// builds an interface definition location a Schema Service
 exports.buildInterface = (svc) => {
     let methodsString = '';
     for (const method of svc.methods) {
@@ -175,7 +175,7 @@ exports.buildInterfaces = (schema) => {
     return services;
 };
 // builds the param names list for a method E.G.
-// location, age, gender
+// name, age, gender
 exports.paramNames = (params) => {
     if (params.length === 0) {
         return '';
@@ -189,7 +189,7 @@ exports.paramNames = (params) => {
 };
 // used for building input params for methods and also to
 // builds the type specifier for destructured parameters E.G.
-// {location: string, age: number, gender: string}
+// {name: string, age: number, gender: string}
 exports.buildParamsWithTypes = (params) => {
     if (params.length === 0) {
         return '';
@@ -202,9 +202,9 @@ exports.buildParamsWithTypes = (params) => {
     return paramsTypeString;
 };
 // makes a destructured parameters variable. E.G.
-// const {location, age}: {location: string, age: number }
+// const {name, age}: {name: string, age: number }
 exports.buildParamsVar = (params) => `const {${exports.paramNames(params)}}: {${exports.buildParamsWithTypes(params)}}`;
-// builds the import strings from a Schema's Imports list
+// builds the import strings location a Schema's Imports list
 exports.buildMsgImports = (imports) => {
     let importsStr = '';
     for (const imp of imports) {

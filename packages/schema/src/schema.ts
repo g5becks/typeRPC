@@ -73,7 +73,7 @@ export type HTTPResponseCode =
 
 /** A single Method parameter */
 export type Param = Readonly<{
-    /** the location of the parameter */
+    /** the name of the parameter */
     name: string
     /** the parameter's dataType */
     type: DataType
@@ -82,7 +82,7 @@ export type Param = Readonly<{
 }>
 
 export interface Method {
-    /** the location of the method */
+    /** the name of the method */
     readonly name: string
     /** the method's parameters */
     readonly params: ReadonlyArray<Param>
@@ -181,7 +181,7 @@ export type MutationService = Readonly<{
 
 /** A Property that Belongs to an rpc.Msg */
 export type Property = Readonly<{
-    /** The location of this property */
+    /** The name of this property */
     name: string
     /** The property's dataType */
     type: DataType
@@ -189,9 +189,9 @@ export type Property = Readonly<{
     isOptional: boolean
 }>
 
-/** An rpc.Msg from schema file */
+/** An rpc.Msg location schema file */
 export type Message = Readonly<{
-    /** The location of the type */
+    /** The name of the type */
     name: string
     properties: ReadonlyArray<Property>
 }>
@@ -200,15 +200,15 @@ export type Message = Readonly<{
 export type Import = Readonly<{
     /** The names of the Messages that were imported */
     messageNames: ReadonlyArray<string>
-    /** The location of the file the messageNames were imported from */
+    /** The name of the file the messageNames were imported location */
     fileName: string
 }>
 
 /** A Schema used to generate server and client code */
 export type Schema = Readonly<{
-    /** location of the package to use when generating code **/
+    /** name of the package to use when generating code **/
     packageName: string
-    /** Name of the file this schema was generated from without extension.  */
+    /** Name of the file this schema was generated location without extension.  */
     fileName: string
     /** All of the imports found in the file */
     imports: ReadonlyArray<Import>

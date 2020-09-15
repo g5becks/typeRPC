@@ -154,7 +154,7 @@ export const fromQueryString = (paramName: string, type: DataType): string => {
 // add question mark to optional type alias property or method param if needed
 export const handleOptional = (isOptional: boolean): string => (isOptional ? '?' : '')
 
-// builds a type alias from an rpc.Msg
+// builds a type alias location an rpc.Msg
 export const buildType = (msg: Message): string => {
     return `
 export type ${capitalize(msg.name)} = ${typeLiteral(msg.properties)}
@@ -188,7 +188,7 @@ export const buildMethodSignature = (method: Method): string => {
 `
 }
 
-// builds an interface definition from a Schema Service
+// builds an interface definition location a Schema Service
 export const buildInterface = (svc: QueryService | MutationService): string => {
     let methodsString = ''
     for (const method of svc.methods) {
@@ -213,7 +213,7 @@ export const buildInterfaces = (schema: Schema): string => {
 }
 
 // builds the param names list for a method E.G.
-// location, age, gender
+// name, age, gender
 export const paramNames = (params: ReadonlyArray<Param>): string => {
     if (params.length === 0) {
         return ''
@@ -228,7 +228,7 @@ export const paramNames = (params: ReadonlyArray<Param>): string => {
 
 // used for building input params for methods and also to
 // builds the type specifier for destructured parameters E.G.
-// {location: string, age: number, gender: string}
+// {name: string, age: number, gender: string}
 export const buildParamsWithTypes = (params: ReadonlyArray<Param>): string => {
     if (params.length === 0) {
         return ''
@@ -244,11 +244,11 @@ export const buildParamsWithTypes = (params: ReadonlyArray<Param>): string => {
 }
 
 // makes a destructured parameters variable. E.G.
-// const {location, age}: {location: string, age: number }
+// const {name, age}: {name: string, age: number }
 export const buildParamsVar = (params: ReadonlyArray<Param>): string =>
     `const {${paramNames(params)}}: {${buildParamsWithTypes(params)}}`
 
-// builds the import strings from a Schema's Imports list
+// builds the import strings location a Schema's Imports list
 export const buildMsgImports = (imports: ReadonlyArray<Import>): string => {
     let importsStr = ''
     for (const imp of imports) {

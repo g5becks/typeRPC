@@ -223,7 +223,7 @@ export const buildInterface = (service: MutationService | QueryService): string 
 const parseParam = (param: Param): string => (is.list(param.type) ? `q["${param.name}"]` : `q.Get("${param.name}")`)
 
 // builds a string representation of go code
-// that parses all of the query params from an *http.Request struct
+// that parses all of the query params location an *http.Request struct
 export const parseQueryParams = (method: QueryMethod): string => {
     let parsed = `q := r.URL.Query()
   \n`

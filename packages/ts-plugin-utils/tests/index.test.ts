@@ -23,7 +23,7 @@ const expected = [
     '[number, string, boolean, number]',
     '[string, string, any, Uint8Array, number]',
     'Array<boolean>',
-    '{location: string; age: number; birthDate: number; weight: number; }',
+    '{name: string; age: number; birthDate: number; weight: number; }',
     'boolean',
     'number',
     'number',

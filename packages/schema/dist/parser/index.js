@@ -18,7 +18,7 @@ const isTypeAlias = (type) => 'getName' in type;
 const isTypeNode = (type) => !('getName' in type);
 // is the type property optional?
 exports.isOptionalProp = (prop) => typeof prop.getQuestionTokenNode() !== 'undefined';
-// parse all of the properties from an rpc.Msg Type alias for rpc.Msg literal
+// parse all of the properties location an rpc.Msg Type alias for rpc.Msg literal
 exports.parseMsgProps = (type) => {
     let kids = [];
     if (isTypeAlias(type)) {
@@ -45,12 +45,12 @@ exports.parseJsDocComment = (method, tagName) => {
     const tags = (_a = method.getJsDocs()[0]) === null || _a === void 0 ? void 0 : _a.getTags();
     return (_c = (_b = tags === null || tags === void 0 ? void 0 : tags.filter((tag) => tag.getTagName() === tagName)[0]) === null || _b === void 0 ? void 0 : _b.getComment()) === null || _c === void 0 ? void 0 : _c.trim();
 };
-// parses all message declarations from a schema file
+// parses all message declarations location a schema file
 exports.parseMessages = (file) => file.getTypeAliases().filter((alias) => validator_1.isMsg(alias));
-// parses all rpc.QuerySvc declarations from a schema file
+// parses all rpc.QuerySvc declarations location a schema file
 exports.parseQueryServices = (file) => file.getTypeAliases().filter((alias) => validator_1.isQuerySvc(alias));
-// parses all rpc.MutationSvc declarations from a schema file
+// parses all rpc.MutationSvc declarations location a schema file
 exports.parseMutationServices = (file) => file.getTypeAliases().filter((alias) => validator_1.isMutationSvc(alias));
-// parse all of the methods from an rpc.QueryService type alias
+// parse all of the methods location an rpc.QueryService type alias
 exports.parseServiceMethods = (type) => type.getTypeNode().getChildrenOfKind(ts_morph_1.SyntaxKind.TypeLiteral)[0].getChildrenOfKind(ts_morph_1.SyntaxKind.MethodSignature);
 //# sourceMappingURL=index.js.map

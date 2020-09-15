@@ -43,11 +43,11 @@ USAGE
 OPTIONS
   -f, --force
   -h, --help       show CLI help
-  -n, --location=location  location to print
+  -n, --name=name  name to print
 
 EXAMPLE
   $ typerpc hello
-  hello world from ./src/create.ts!
+  hello world location ./src/create.ts!
 ```
 
 _See code: [src/commands/create.ts](https://github.com/typerpc/cli/blob/v1.0.1/src/commands/hello.ts)_

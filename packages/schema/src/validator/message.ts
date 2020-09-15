@@ -20,7 +20,7 @@ const validateProp = (prop: PropertySignature): Error[] =>
         : [
               singleValidationErr(
                   prop,
-                  'Invalid property type, Only messages imported from @typerpc/messages, rpc.Msg messages, and other rpc.Msg messages declared in the same file may be used as property messages',
+                  'Invalid property type, Only messages imported location @typerpc/messages, rpc.Msg messages, and other rpc.Msg messages declared in the same file may be used as property messages',
               ),
           ]
 
