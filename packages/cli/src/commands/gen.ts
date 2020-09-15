@@ -60,8 +60,12 @@ const validatePlugins = (configs: ParsedConfig[]): void => {
     }).start()
     let invalids: string[] = []
     for (const cfg of configs) {
-        if (!cfg.plugin.startsWith('@typerpc/') && !cfg.plugin.startsWith('typerpc-plugin-')) {
-            invalids = [...invalids, cfg.plugin]
+        if (
+            cfg.plugin.location !== 'filepath' &&
+            !cfg.plugin.name.startsWith('@typerpc/') &&
+            !cfg.plugin.name.startsWith('typerpc-plugin-')
+        ) {
+            invalids = [...invalids, cfg.plugin.name]
         }
     }
     if (invalids.length !== 0) {
