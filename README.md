@@ -47,7 +47,7 @@ OPTIONS
 
 EXAMPLE
   $ typerpc hello
-  hello world location ./src/create.ts!
+  hello world plugin ./src/create.ts!
 ```
 
 _See code: [src/commands/create.ts](https://github.com/typerpc/cli/blob/v1.0.1/src/commands/hello.ts)_

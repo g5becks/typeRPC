@@ -108,7 +108,7 @@ const generateCode = (configs: ParsedConfig[], manager: PluginManager, files: So
     let generated: GeneratedCode[] = []
     for (const cfg of configs) {
         const schemas = buildSchemas(files, cfg.pkg)
-        const gen = manager.require(cfg.plugin)
+        const gen = manager.require(cfg.plugin.name)
         if (gen instanceof Error) {
             throw Error(`error is ${gen.message}`)
         }
@@ -184,7 +184,10 @@ type ErrorInfo = {
 type Args = Readonly<
     Partial<{
         tsconfig: string
-        plugin: string
+        npm?: string
+        path?: string
+        github?: string
+        version?: string
         out: string
         pkg: string
         fmt: string
@@ -201,8 +204,16 @@ const createErrorInfo = (pluginManager: PluginManager, rpcConfig: SourceFile | u
     }
 }
 
+const onlyOne = (plugins: string[]): boolean => plugins.filter((plugin) => plugin !== '').length < 2
+
+const getPlugin = (plugins: string[]): string => plugins.filter((plugin) => plugin && plugin !== '')[0]
+
 const handler = async (args: Args): Promise<void> => {
-    const { tsconfig, plugin, out, pkg, fmt } = args
+    const { tsconfig, npm, path, github, version, out, pkg, fmt } = args
+    const plugins = [npm ?? '', path ?? '', github ?? '']
+    if (!onlyOne(plugins)) {
+        throw new Error(`only one plugin option can be selected. You have specified  ${plugins}`)
+    }
     const tsConfigFilePath = tsconfig?.trim() ?? ''
     // validate tsconfig before proceeding
     validateTsConfigFile(tsconfig?.trim() ?? '')
@@ -226,8 +237,20 @@ const handler = async (args: Args): Promise<void> => {
             .filter((file) => file.getBaseName().toLowerCase() !== 'rpc.config.ts')
         // if user provides command line arguments the config file will
         // be overridden - Be sure to document this behaviour
-        if (plugin && out && pkg) {
-            configs = [{ configName: 'flags', plugin, out, pkg, fmt }]
+        if ((npm || path || github) && out && pkg) {
+            configs = [
+                {
+                    configName: 'flags',
+                    plugin: {
+                        name: getPlugin(plugins),
+                        location: npm ? 'npm' : path ? 'filepath' : github ? 'github' : 'npm',
+                        version: version ?? 'latest',
+                    },
+                    out,
+                    pkg,
+                    fmt,
+                },
+            ]
         }
         errorInfo = createErrorInfo(pluginManager, configFile, args)
         // no configs in file or command line opts
@@ -262,10 +285,26 @@ export const gen: CommandModule<Record<string, unknown>, Args> = {
             demandOption: true,
             description: 'path to tsconfig.json for project containing your typerpc schema files',
         },
-        plugin: {
+        github: {
+            alias: 'g',
+            type: 'string',
+            description: 'name of the typerpc plugin to install from github and use for code generation',
+        },
+        npm: {
+            alias: 'n',
+            type: 'string',
+            description: 'name of the typerpc plugin to install from npm and use for code generation',
+        },
+        path: {
             alias: 'p',
             type: 'string',
-            description: 'name of the typerpc plugin to use for code generation',
+            description: 'path to the typerpc plugin to install and use for code generation',
+        },
+        version: {
+            alias: 'v',
+            type: 'string',
+            description:
+                'version of the plugin to install, this flag is only valid if installing from npm. If using github, specify the version as a part of the name/url. E.G. typerpc/someplugin#351396f ',
         },
         out: {
             alias: 'o',
