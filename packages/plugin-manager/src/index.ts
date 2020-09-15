@@ -22,7 +22,7 @@ export const isValidPlugin = (plugin: any): plugin is TypeRpcPlugin =>
     typeof plugin === 'function' || ('default' in plugin && typeof plugin.default === 'function')
 
 export const isPluginConfig = (config: any): config is PluginConfig =>
-    'name' in config && 'version' in config && 'from' in config
+    'name' in config && 'version' in config && 'location' in config
 
 export class PluginManager {
     readonly #manager: Manager
@@ -50,8 +50,8 @@ export class PluginManager {
         plugin: PluginConfig,
         log: { onInstalled: (plugin: string) => void; onInstalling: (plugin: string) => void },
     ): Promise<void> {
-        if (!isPluginConfig(plugin)) {
-            throw new Error(`${plugin} is not a valid typerpc plugin`)
+        if (isPluginConfig(plugin) !== true) {
+            throw new Error(`${JSON.stringify(plugin)} is not a valid typerpc plugin`)
         }
         if (this.pluginIsInstalled(this.pluginPath(plugin.name))) {
             log.onInstalled(plugin.name)
