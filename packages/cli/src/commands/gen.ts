@@ -236,12 +236,12 @@ const handler = async (args: Args): Promise<void> => {
         validateSchemaFiles(sourceFiles)
         await installPlugins(configs, pluginManager, log)
         const generated = generateCode(configs, pluginManager, sourceFiles)
+        await saveToDisk(generated)
         // noinspection JSDeepBugsSwappedArgs
         format(
             configs.map((cfg) => ({ fmt: cfg.fmt, out: cfg.out })),
             log,
         )
-        await saveToDisk(generated)
     } catch (error) {
         log.error(`error occurred ${error}`, errorInfo)
         throw error
