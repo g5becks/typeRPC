@@ -11,7 +11,7 @@
  */
 
 import { ObjectLiteralExpression, Project, SourceFile, SyntaxKind } from 'ts-morph'
-import { GeneratorConfig, PluginConfig } from '@typerpc/config'
+import { GeneratorConfig, PluginConfig, PluginLocation } from '@typerpc/config'
 import { ChildProcess, exec } from 'child_process'
 import * as fs from 'fs-extra'
 import { appendFile } from 'fs-extra'
@@ -20,6 +20,37 @@ import { render } from 'prettyjson'
 
 export const getConfigFile = (project: Project): SourceFile | undefined =>
     project.getSourceFile((file) => file.getBaseName().toLowerCase() === 'rpc.config.ts')
+
+const parsePluginLocation = (pluginConfig: ObjectLiteralExpression | undefined): PluginLocation => {
+    // get location property
+    const prop = pluginConfig?.getProperty('location')
+    // get string if exists
+    const propString = prop?.getChildrenOfKind(SyntaxKind.StringLiteral)
+    // if string is npm return npm as location
+    if (propString && propString[0]?.getLiteralValue().trim() === 'npm') {
+        return 'npm'
+    }
+    // location is not string so must be objectLiteral
+    const locationObj = prop?.getChildrenOfKind(SyntaxKind.ObjectLiteralExpression)
+    // make sure it is defined
+    if (locationObj && locationObj.length > 0) {
+        // get first objectLiteral since there is only one
+        const location = locationObj[0]
+        // if github property exists
+        if (location.getProperty('github')) {
+            // return the string found or empty, let function up the stack
+            // throw when empty string is found
+            return {
+                github:
+                    location
+                        ?.getProperty('github')
+                        ?.getChildrenOfKind(SyntaxKind.StringLiteral)[0]
+                        ?.getLiteralValue()
+                        ?.trim() ?? '',
+            }
+        }
+    }
+}
 const parseGeneratorConfig = (obj: ObjectLiteralExpression): GeneratorConfig => {
     const out = obj.getProperty('out')?.getChildrenOfKind(SyntaxKind.StringLiteral)[0]?.getLiteralValue()?.trim()
 
@@ -41,7 +72,7 @@ const parseGeneratorConfig = (obj: ObjectLiteralExpression): GeneratorConfig => 
             ?.getProperty('location')
             ?.getChildrenOfKind(SyntaxKind.StringLiteral)[0]
             ?.getLiteralValue()
-            ?.trim() ?? 'npm') as 'npm' | 'github' | 'filepath' | undefined,
+            ?.trim() ?? 'npm') as PluginLocation | undefined,
     }
     const pkg = obj.getProperty('pkg')?.getChildrenOfKind(SyntaxKind.StringLiteral)[0]?.getLiteralValue()?.trim()
 
