@@ -440,7 +440,16 @@ export const buildInterfaces = (schema: Schema): string => {
     return interfaces
 }
 
-export const clientHelpers = `
+export const goRestyHelpers = `
+func setHeaders(req *resty.Request, headers ...map[string]string) *resty.Request  {
+		if len(headers) > 0 {
+		for _, h := range  headers {
+			req.SetHeaders(h)
+		}
+	}
+	return req
+}
+
 //nolint:unparam
 func marshalBody(v interface{}, isCbor bool) ([]byte, error) {
 	if isCbor {

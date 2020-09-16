@@ -22,38 +22,16 @@ import {
 import { capitalize, lowerCase } from '@typerpc/plugin-utils'
 import {
     buildClientResponseStruct,
+    buildFileName,
     buildInterfaceMethods,
     buildMethodParams,
     buildRequestBodyType,
     buildReturnType,
     buildTypes,
+    goRestyHelpers,
     toQueryString,
 } from '@typerpc/go-plugin-utils'
-
-const buildClientStruct = (svc: QueryService | MutationService): string => {
-    return `
-type ${capitalize(svc.name)} struct {
-	client *resty.Client
-	baseUrl string
-  ${buildInterfaceMethods(svc.methods)}
-}
-
-func New${capitalize(svc.name)}(host string) (*${svc.name}, error)  {
-	_, err := url2.ParseRequestURI(host)
-	if err != nil {
-		return nil, err
-	}
-	return &${capitalize(svc.name)}{
-		client: resty.New(),
-		baseUrl: fmt.Sprintf("%s/${lowerCase(svc.name)}", host),
-	}, nil
-}
-
-func (s *${capitalize(svc.name)}) reqUrl(url string) string  {
-	return s.baseUrl + "/" + url
-}
-`
-}
+import { TypeRpcPlugin } from '@typerpc/plugin'
 
 const buildQueryParams = (method: QueryMethod): string => {
     let paramsString = ''
@@ -79,10 +57,16 @@ ${method.hasParams && isMutationMethod(method) ? buildRequestBodyType(method) : 
 ${method.isVoidReturn ? '' : buildClientResponseStruct(method.returnType)}
 req := setHeaders(s.client.R(), headers...)${isQueryMethod(method) ? buildQueryParams(method) : ''}.
   SetHeader("Accept", "${method.hasCborReturn ? 'application/cbor' : 'application/json'}")
-
-err := makeRequest(ctx, "${method.httpMethod.toUpperCase()}", req, s.reqUrl("${lowerCase(method.name)}"), ${
-        isMutationMethod(method) && method.hasCborParams ? 'true' : 'false'
-    }, ${method.hasCborReturn})
+	err := makeRequest(ctx, requestData{
+		Method:       "${method.httpMethod.toUpperCase()}",
+		Request:      req,
+		Url:          s.reqUrl("${lowerCase(method.name)}"),
+		CborBody:  ${isMutationMethod(method) && method.hasCborParams ? 'true' : 'false'},
+		CborResponse: ${method.hasCborReturn ? 'true' : 'false'},
+		Body:         ${isMutationMethod(method) && method.hasParams ? 'body' : 'nil'},
+		Out:          ${method.isVoidReturn ? 'nil' : '&resp'},
+	})
+  return resp.Data, err
   `
 }
 const buildMethod = (svcName: string, method: QueryMethod | MutationMethod): string => {
@@ -92,9 +76,56 @@ const buildMethod = (svcName: string, method: QueryMethod | MutationMethod): str
 func (s *${capitalize(svcName)}) ${capitalize(method.name)}(ctx context.Context, ${buildMethodParams(method.params)}${
         method.hasParams ? ', ' : ''
     } headers ...map[string]string) ${buildReturnType(method.returnType)} {
-
+  ${buildRequest(method)}
 }
 `
+}
+
+const buildMethods = (svc: QueryService | MutationService): string => {
+    let methods = ''
+    for (const method of svc.methods) {
+        methods = methods.concat(buildMethod(svc.name, method))
+    }
+    return methods
+}
+
+const buildClient = (svc: QueryService | MutationService): string => {
+    return `
+type ${capitalize(svc.name)} struct {
+	client *resty.Client
+	baseUrl string
+  ${buildInterfaceMethods(svc.methods)}
+}
+
+func New${capitalize(svc.name)}(host string) (*${svc.name}, error)  {
+	_, err := url2.ParseRequestURI(host)
+	if err != nil {
+		return nil, err
+	}
+	return &${capitalize(svc.name)}{
+		client: resty.New(),
+		baseUrl: fmt.Sprintf("%s/${lowerCase(svc.name)}", host),
+	}, nil
+}
+
+func (s *${capitalize(svc.name)}) reqUrl(url string) string  {
+	return s.baseUrl + "/" + url
+}
+
+${buildMethods(svc)}
+`
+}
+
+const buildClients = (schema: Schema): string => {
+    let clients = ''
+    for (const svc of schema.queryServices) {
+        clients = clients.concat(buildClient(svc))
+    }
+
+    for (const svc of schema.queryServices) {
+        clients = clients.concat(buildClient(svc))
+    }
+    return clients
 }
 
 const buildFile = (schema: Schema): string => {
@@ -105,16 +136,13 @@ import "github.com/go-resty/resty"
 
 ${buildTypes(schema.messages)}
 
+${buildClients(schema)}
 `
 }
 
-const helpers = `
-func setHeaders(req *resty.Request, headers ...map[string]string) *resty.Request  {
-		if len(headers) > 0 {
-		for _, h := range  headers {
-			req.SetHeaders(h)
-		}
-	}
-	return req
-}
-`
+const build: TypeRpcPlugin = (schemas) =>
+    schemas
+        .map((schema) => ({ fileName: buildFileName(schema.fileName), source: buildFile(schema) }))
+        .concat({ fileName: 'resty.rpc.helpers.go', source: goRestyHelpers })
+
+export default build
