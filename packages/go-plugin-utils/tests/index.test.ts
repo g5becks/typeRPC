@@ -23,7 +23,7 @@ const expected = [
     'int8, string, bool, time.Time',
     'string, string, interface{}, []byte, float32',
     '[]bool',
-    `struct{Name  string \`json:"name"\`
+    `*struct{Name  string \`json:"name"\`
 Age  int8 \`json:"age"\`
 BirthDate  time.Time \`json:"birthDate"\`
 Weight  float32 \`json:"weight"\`
