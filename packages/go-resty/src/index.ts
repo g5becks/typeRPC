@@ -11,21 +11,23 @@
  */
 
 import {
-    isQueryMethod,
-    MutationMethod,
-    MutationService,
-    Param,
-    QueryMethod,
-    QueryService,
-    Schema,
+  isMutationMethod,
+  isQueryMethod,
+  MutationMethod,
+  MutationService,
+  Param,
+  QueryMethod,
+  QueryService,
+  Schema,
 } from '@typerpc/schema'
-import { capitalize, lowerCase } from '@typerpc/plugin-utils'
+import {capitalize, lowerCase} from '@typerpc/plugin-utils'
 import {
-    buildInterfaceMethods,
-    buildMethodParams,
-    buildReturnType,
-    buildTypes,
-    toQueryString,
+  buildInterfaceMethods,
+  buildMethodParams,
+  buildRequestDataType,
+  buildReturnType,
+  buildTypes,
+  toQueryString,
 } from '@typerpc/go-plugin-utils'
 
 const buildClientStruct = (svc: QueryService | MutationService): string => {
@@ -78,6 +80,7 @@ ${method.hasParams ? buildQueryParams(method.params) : ''}.Get(s.reqUrl("${lower
 
 const buildRequest = (method: MutationMethod | QueryMethod): string => {
     return `
+${method.hasParams && isMutationMethod(method) ? buildRequestDataType(method)}
 req := setHeaders(s.client.R(), headers...).${buildRequestData(method)}.
   SetHeader("Accept", "${method.hasCborReturn ? 'application/cbor' : 'application/json'}")
   `
