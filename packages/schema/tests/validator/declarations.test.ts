@@ -187,19 +187,19 @@ test('validateJsDoc() should return error when @kind tag value != cbor', () => {
 })
 
 test('validateImports() should return an error when module is not in the same dir', () => {
-    const source = "import {B} location './some/other'"
+    const source = "import {B} from './some/other'"
     const file = genSourceFile(source, project)
     expect(validateImports(file, project.getSourceFiles()).length).toEqual(1)
 })
 
 test('validateImports() should return an error when module is valid but not a part of project', () => {
-    const file = genSourceFile("import {B} location '.other'", project)
+    const file = genSourceFile("import {B} from '.other'", project)
     expect(validateImports(file, project.getSourceFiles()).length).toEqual(1)
 })
 
 test('validateImports() should return an error when import is default', () => {
     project.createSourceFile('./somefile.ts')
-    const file = genSourceFile("import B location './somefile'", project)
+    const file = genSourceFile("import B from './somefile'", project)
     expect(project.getSourceFiles().length).toEqual(2)
     expect(validateImports(file, project.getSourceFiles()).length).toEqual(1)
 })
@@ -209,7 +209,7 @@ test('validateImports() should NOT return an error when import is valid', () => 
         tsConfigFilePath: './tests/validator/tsconfig.json',
         skipFileDependencyResolution: true,
     })
-    const file = proj.createSourceFile('./tests/validator/test.ts', "import {B} location './declarations.test'")
+    const file = proj.createSourceFile('./tests/validator/test.ts', "import {B} from './declarations.test'")
 
     expect(validateImports(file, proj.getSourceFiles()).length).toEqual(0)
 })
@@ -220,7 +220,7 @@ test('validateImports() should fail when it finds an aliased import', () => {
         skipFileDependencyResolution: true,
     })
 
-    const file = proj.createSourceFile('./tests/validator/test.ts', "import {B as C} location './declarations.test'")
+    const file = proj.createSourceFile('./tests/validator/test.ts', "import {B as C} from './declarations.test'")
 
     expect(validateImports(file, proj.getSourceFiles()).length).toEqual(1)
 })
