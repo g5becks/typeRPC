@@ -39,15 +39,27 @@ func (s *${capitalize(svc.name)}) reqUrl(url string) string  {
 `
 }
 
+const buildQueryParams = (method: QueryMethod): string => {
+    return `
+.SetQueryParams(map[string]string{
+
+})`
+}
 const buildQueryRequest = (method: QueryMethod): string => {
     return `
-resp, err := s.client.R().Se  `
+resp, err := setHeaders(s.client.R())${method.hasParams ? buildQueryParams(method) : ''}.
+  SetHeader("Accept", "${method.hasCborReturn ? 'application/cbor' : 'application/json'}").Get(s.reqUrl("${lowerCase(
+        method.name,
+    )}"))
+`
 }
-const buildMethod = (method: QueryMethod | MutationMethod): string => {
+const buildMethod = (svcName: string, method: QueryMethod | MutationMethod): string => {
     if (isQueryMethod(method)) {
     }
     return `
-func (s *ExampleServiceClient) GetUserById(ctx context.Context, id int8) (*User, error) {
+func (s *${capitalize(svcName)}) ${capitalize(
+        method.name,
+    )}(ctx context.Context, headers ...map[string]string) (*User, error) {
 
 }
 `
