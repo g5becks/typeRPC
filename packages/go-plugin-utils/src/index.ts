@@ -286,6 +286,27 @@ export const parseQueryParams = (method: QueryMethod): string => {
     return parsed
 }
 
+// used in go clients to generate a struct that contains method params as fields
+// which will be sent to the server.
+export const buildRequestData = (method: MutationMethod | QueryMethod): string => {
+    let props = ''
+    for (const param of method.params) {
+        props = props.concat(`${capitalize(param.name)} ${dataType(param.type)} \`json:"${lowerCase(param.name)}"\`
+      `)
+    }
+    let fields = ''
+    for (const param of method.params) {
+        fields = fields.concat(lowerCase(param.name) + `,\n`)
+    }
+    return `
+    rData := struct {
+      ${props}
+    }{
+      ${fields}
+    }`
+}
+
+// used in go servers to parse the request body
 export const parseReqBody = (method: MutationMethod | QueryMethod): string => {
     if (method.params.length === 0) {
         return ''

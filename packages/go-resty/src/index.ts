@@ -24,7 +24,6 @@ import {
     buildInterfaceMethods,
     buildMethodParams,
     buildReturnType,
-    buildType,
     buildTypes,
     toQueryString,
 } from '@typerpc/go-plugin-utils'
@@ -69,15 +68,20 @@ const buildQueryParams = (params: ReadonlyArray<Param>): string => {
 	})`
 }
 
-const buildQueryRequest = (method: QueryMethod): string => {
-    return `
-resp, err := setHeaders(s.client.R(), headers...)${method.hasParams ? buildQueryParams(method.params) : ''}.
-  SetHeader("Accept", "${method.hasCborReturn ? 'application/cbor' : 'application/json'}").Get(s.reqUrl("${lowerCase(
-        method.name,
-    )}"))
+const buildRequestData = (method: QueryMethod | MutationMethod): string => {
+    return isQueryMethod(method)
+        ? `
+${method.hasParams ? buildQueryParams(method.params) : ''}.Get(s.reqUrl("${lowerCase(method.name)}"))
 `
+        : ''
 }
 
+const buildRequest = (method: MutationMethod | QueryMethod): string => {
+    return `
+req := setHeaders(s.client.R(), headers...).${buildRequestData(method)}.
+  SetHeader("Accept", "${method.hasCborReturn ? 'application/cbor' : 'application/json'}")
+  `
+}
 const buildMethod = (svcName: string, method: QueryMethod | MutationMethod): string => {
     if (isQueryMethod(method)) {
     }
