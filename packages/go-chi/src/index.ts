@@ -40,22 +40,23 @@ const sendResponse = (method: MutationMethod | QueryMethod): string => {
     return `
   if err != nil {
 		RespondWithErr(w, err, ${method.hasCborReturn ? 'true' : 'false'})
+
 		return
 	}
 	 ${buildResponseStruct(method.returnType)}
    respData, err := marshalResponse(response, ${method.hasCborReturn ? 'true' : 'false'})
    if err != nil {
     		RespondWithErr(w, err, ${method.hasCborReturn ? 'true' : 'false'})
+
 		    return
    }
    w.Header().Set("Content-Type", "application/${method.hasCborReturn ? 'cbor' : 'json'}")
    w.WriteHeader(${method.responseCode})
-   w.Write(respData)
-	`
+   _, _ = w.Write(respData)`
 }
 const buildHandler = (svcName: string, method: QueryMethod | MutationMethod): string => {
     return `
-   r.${capitalize(method.httpMethod.toLowerCase())}("/${lowerCase(
+   rtr.${capitalize(method.httpMethod.toLowerCase())}("/${lowerCase(
         method.name,
     )}", func(w http.ResponseWriter, r *http.Request) {
     var err error
@@ -81,10 +82,12 @@ func ${capitalize(svc.name)}Routes(${lowerCase(svc.name)} ${capitalize(
         svc.name,
     )}, middlewares ...func(handler http.Handler) http.Handler) chi.Router {
     rtr := chi.NewRouter()
+
     for _, x := range middlewares {
       rtr.Use(x)
     }
     ${buildHandlers(svc)}
+
     return rtr
 }
 `
@@ -108,15 +111,8 @@ package ${schema.packageName}
 
 import (
 	"context"
-	"encoding/json"
-	"errors"
-	"fmt"
-	"io/ioutil"
 	"net/http"
-	"strconv"
-	"time"
 
-	${schema.hasCbor ? 'github.com/fxamacker/cbor/v2' : ''}
 	"github.com/go-chi/chi"
 )
 
@@ -128,7 +124,61 @@ ${buildRoutes(schema)}
     }
 }
 
+const buildServer = (schemas: Schema[]): string => {
+    const querySvcNames = schemas.flatMap((schema) => schema.queryServices).flatMap((svc) => capitalize(svc.name))
+    const mutationSvcNames = schemas.flatMap((schema) => schema.mutationServices).flatMap((svc) => capitalize(svc.name))
+    const svcNames = querySvcNames.concat(mutationSvcNames)
+    let services = ''
+    for (const svc of svcNames) {
+        services = services.concat(svc + '\n')
+    }
+    let endpoints = ''
+    for (const svc of svcNames) {
+        endpoints = endpoints.concat(`r.Mount("/${lowerCase(svc)}", ${svc}Routes(s.${svc}))`)
+    }
+    let serverParams = ''
+    let i = 0
+    while (i < svcNames.length) {
+        const useComma = i === svcNames.length - 1 ? '' : ', '
+        serverParams = serverParams.concat(`${lowerCase(svcNames[i])} ${svcNames[i]}${useComma}`)
+        i++
+    }
+    let serverFields = ''
+    for (const svc of svcNames) {
+        serverFields = serverFields.concat(`${capitalize(svc)}: ${lowerCase(svc)},`)
+    }
+
+    return `
+package service
+
+import (
+	"github.com/go-chi/chi"
+	"net/http"
+)
+
+type ChiRPCServer struct {
+  ${services}
+}
+
+func (s *ChiRPCServer) Run(address string, middlewares ...func(handler http.Handler) http.Handler) error {
+	r := chi.NewRouter()
+	for _, mddlwr := range middlewares {
+		r.Use(mddlwr)
+	}
+	${endpoints}
+	return http.ListenAndServe(address, r)
+}
+
+func NewChiRPCServer(${serverParams}) *ChiRPCServer  {
+	return &ChiRPCServer{
+		${serverFields}
+	}
+}
+`
+}
+
 export default (schemas: Schema[]): Code[] =>
     schemas
         .map((schema) => buildFile(schema))
-        .concat({ fileName: 'chi.helpers.rpc.go', source: helpers(schemas[0].packageName) })
+        .concat({ fileName: 'chi.rpc.helpers.go', source: helpers(schemas[0]) })
+        .concat({ fileName: 'chi.rpc.server.go', source: buildServer(schemas) })

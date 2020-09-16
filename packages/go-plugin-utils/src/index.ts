@@ -256,6 +256,7 @@ export const parseReqBody = (method: MutationMethod | QueryMethod): string => {
     err = parseReqBody(r, &rCont, ${method.hasCborParams ? 'true' : 'false'} )
 		if err != nil {
 			RespondWithErr(w, err, ${method.hasCborReturn ? 'true' : 'false'})
+
 			return
 		}
 `
@@ -263,14 +264,16 @@ export const parseReqBody = (method: MutationMethod | QueryMethod): string => {
 
 // builds the names of params to use for calling a method
 export const buildParamNames = (method: QueryMethod | MutationMethod): string => {
-    const params = method.params
+    if (!method.hasParams) {
+        return ''
+    }
     let paramString = ''
     let i = 0
-    while (i < params.length - 1) {
-        const useComma = i === params.length - 1 ? '' : ', '
+    while (i < method.params.length) {
+        const useComma = i === method.params.length - 1 ? '' : ', '
         paramString = isQueryMethod(method)
-            ? paramString.concat(`${params[i].name}${useComma}`)
-            : paramString.concat(`rCont.${capitalize(params[i].name)}${useComma}`)
+            ? paramString.concat(`${method.params[i].name}${useComma}`)
+            : paramString.concat(`rCont.${capitalize(method.params[i].name)}${useComma}`)
         i++
     }
     return paramString
@@ -353,19 +356,35 @@ export const buildInterfaces = (schema: Schema): string => {
     return interfaces
 }
 
-export const helpers = (pkgName: string) => `
-package ${pkgName}
+export const helpers = (schema: Schema) => `
+package ${schema.packageName}
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"strconv"
+	"time"
+
+	"github.com/fxamacker/cbor/v2"
+)
+
+//nolint:unparam
 func marshalResponse(v interface{}, isCbor bool) ([]byte, error) {
 	if isCbor {
 		data, err := cbor.Marshal(v)
 		if err != nil {
-			return data,NewRpcError(http.StatusInternalServerError, "failed to marshal cbor response", err)
+			return data,NewRPCError(http.StatusInternalServerError, "failed to marshal cbor response", err)
 		}
 	}
 	data, err := json.Marshal(v)
 	if err != nil {
-		return data, NewRpcError(http.StatusInternalServerError, "failed to marshal json response", err)
+		return data, NewRPCError(http.StatusInternalServerError, "failed to marshal json response", err)
 	}
+
 	return data, nil
 }
 
@@ -373,29 +392,29 @@ func parseReqBody(r *http.Request, v interface{}, isCbor bool) error {
 	reqBody, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
 	if err != nil {
-		return NewRpcError(http.StatusInternalServerError, "failed to read request body",  err)
+		return NewRPCError(http.StatusInternalServerError, "failed to read request body",  err)
 	}
 	if isCbor {
 		err := cbor.Unmarshal(reqBody, v)
 		if err != nil {
-			return  NewRpcError(http.StatusBadRequest, "failed unmarshall cbor request data", err)
+			return  NewRPCError(http.StatusBadRequest, "failed unmarshall cbor request data", err)
 		}
 	}
 	err = json.Unmarshal(reqBody, v)
 	if err != nil {
-		return NewRpcError(http.StatusBadRequest, "failed unmarshall json request data", err)
+		return NewRPCError(http.StatusBadRequest, "failed unmarshall json request data", err)
 	}
+
 	return nil
 }
 
+//nolint:unparam
 func handlePanic(w http.ResponseWriter, isCbor bool) {
-
 	// If panic occurs, serve a 500 error and then panic.
 	if rr := recover(); rr != nil {
 		RespondWithErr(w, errors.New("internal"), isCbor)
 		panic(rr)
 	}
-
 }
 
 type ctxKey struct {
@@ -419,7 +438,7 @@ type ErrorPayload struct {
 	Error string \`json:"error"\`
 }
 
-type RpcError interface {
+type RPCError interface {
 	// Code is of the valid error codes
 	Code() int
 
@@ -429,10 +448,10 @@ type RpcError interface {
 	// Cause is reason for the error
 	Cause() error
 
-	// RpcError returns a string of the form "typerpc error <Code>: <Msg>"
+	// RPCError returns a string of the form "typerpc error <Code>: <Msg>"
 	Error() string
 
-	// RpcError response payload
+	// RPCError response payload
 	Payload() ErrorPayload
 }
 
@@ -442,7 +461,7 @@ type rpcErr struct {
 	cause error
 }
 
-func NewRpcError(code int, msg string, cause error) *rpcErr {
+func NewRPCError(code int, msg string, cause error) *rpcErr {
 	return &rpcErr{code: code, msg: msg, cause: cause}
 }
 func (e *rpcErr) Code() int {
@@ -478,16 +497,19 @@ func (e *rpcErr) Payload() ErrorPayload {
 	if e.Cause() != nil {
 		errPayload.Cause = e.Cause().Error()
 	}
+
 	return errPayload
 }
 
 func RespondWithErr(w http.ResponseWriter, err error, isCbor bool) {
 	var e *rpcErr
 	if !errors.As(err, &e) {
-		e = NewRpcError(http.StatusInternalServerError, "typerpc error", err)
+		e = NewRPCError(http.StatusInternalServerError, "typerpc error", err)
 	}
 	w.WriteHeader(e.code)
+
 	var respBody []byte
+
 	if isCbor {
 			w.Header().Set("Content-Type", "application/cbor")
 		body, _ := cbor.Marshal(e.Payload())
@@ -498,7 +520,8 @@ func RespondWithErr(w http.ResponseWriter, err error, isCbor bool) {
 		body, _ := json.Marshal(e.Payload())
 		respBody = body
 	}
-	w.Write(respBody)
+
+	_,_ = w.Write(respBody)
 }
 
 func StringToTimestamp(t string) (time.Time, error) {
@@ -506,6 +529,7 @@ func StringToTimestamp(t string) (time.Time, error) {
 	if err != nil {
 		return time.Time{}, err
 	}
+
 	return time.Unix(parsed, 0), nil
 }
 
@@ -514,6 +538,7 @@ func StringToBool(param string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
+
 	return i, nil
 }
 
@@ -526,6 +551,7 @@ func StringToFloat32(param string) (float32, error) {
 	if err != nil {
 		return 0, err
 	}
+
 	return float32(i), nil
 }
 
@@ -534,6 +560,7 @@ func StringToFloat64(param string) (float64, error) {
 	if err != nil {
 		return 0, err
 	}
+
 	return i, nil
 }
 
@@ -542,6 +569,7 @@ func StringToInt8(param string) (int8, error) {
 	if err != nil {
 		return 0, err
 	}
+
 	return int8(i), nil
 }
 
@@ -550,6 +578,7 @@ func StringToUint8(param string) (uint8, error) {
 	if err != nil {
 		return 0, err
 	}
+
 	return uint8(i), nil
 }
 
@@ -558,6 +587,7 @@ func StringToInt16(param string) (int16, error) {
 	if err != nil {
 		return 0, err
 	}
+
 	return int16(i), nil
 }
 
@@ -566,6 +596,7 @@ func StringToUint16(param string) (uint16, error) {
 	if err != nil {
 		return 0, err
 	}
+
 	return uint16(i), nil
 }
 
@@ -574,6 +605,7 @@ func StringToInt32(param string) (int32, error) {
 	if err != nil {
 		return 0, err
 	}
+
 	return int32(i), nil
 }
 
@@ -582,6 +614,7 @@ func StringToUint32(param string) (uint32, error) {
 	if err != nil {
 		return 0, err
 	}
+
 	return uint32(i), nil
 }
 
@@ -590,6 +623,7 @@ func StringToInt64(param string) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
+
 	return i, nil
 }
 
@@ -598,6 +632,7 @@ func StringToUint64(param string) (uint64, error) {
 	if err != nil {
 		return 0, err
 	}
+
 	return i, nil
 }
 
@@ -610,6 +645,7 @@ func StringsToTimeStamps(params []string) ([]time.Time, error) {
 		}
 		l[i] = f
 	}
+
 	return l, nil
 }
 
@@ -622,6 +658,7 @@ func StringsToBools(params []string) ([]bool, error) {
 		}
 		l[i] = f
 	}
+
 	return l, nil
 }
 
@@ -630,6 +667,7 @@ func StringsToBytes(params []string) ([][]byte, error) {
 	for i, str := range params {
 		l[i] = []byte(str)
 	}
+
 	return l, nil
 }
 
@@ -642,6 +680,7 @@ func StringsToFloat32s(params []string) ([]float32, error) {
 		}
 		l[i] = f
 	}
+
 	return l, nil
 }
 
@@ -654,6 +693,7 @@ func StringsToFloat64s(params []string) ([]float64, error) {
 		}
 		l[i] = f
 	}
+
 	return l, nil
 }
 
@@ -666,6 +706,7 @@ func StringsToInt8s(params []string) ([]int8, error) {
 		}
 		l[i] = f
 	}
+
 	return l, nil
 }
 
@@ -678,6 +719,7 @@ func StringsToUint8s(params []string) ([]uint8, error) {
 		}
 		l[i] = f
 	}
+
 	return l, nil
 }
 
@@ -690,6 +732,7 @@ func StringsToInt16s(params []string) ([]int16, error) {
 		}
 		l[i] = f
 	}
+
 	return l, nil
 }
 
@@ -702,6 +745,7 @@ func StringsToUint16s(params []string) ([]uint16, error) {
 		}
 		l[i] = f
 	}
+
 	return l, nil
 }
 
@@ -714,6 +758,7 @@ func StringsToInt32s(params []string) ([]int32, error) {
 		}
 		l[i] = f
 	}
+
 	return l, nil
 }
 
@@ -726,6 +771,7 @@ func StringsToUint32s(params []string) ([]uint32, error) {
 		}
 		l[i] = f
 	}
+
 	return l, nil
 }
 
@@ -738,6 +784,7 @@ func StringsToInt64s(params []string) ([]int64, error) {
 		}
 		l[i] = f
 	}
+
 	return l, nil
 }
 
@@ -750,6 +797,7 @@ func StringsToUint64s(params []string) ([]uint64, error) {
 		}
 		l[i] = f
 	}
+
 	return l, nil
 }
 `

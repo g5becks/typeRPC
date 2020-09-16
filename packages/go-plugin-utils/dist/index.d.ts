@@ -20,5 +20,5 @@ export declare const buildResultInitializers: (type: DataType) => string;
 export declare const buildResponseStruct: (type: DataType) => string;
 export declare const buildFileName: (fileName: string) => string;
 export declare const buildInterfaces: (schema: Schema) => string;
-export declare const helpers: (pkgName: string) => string;
+export declare const helpers: (schema: Schema) => string;
 //# sourceMappingURL=index.d.ts.map

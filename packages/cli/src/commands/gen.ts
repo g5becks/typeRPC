@@ -160,7 +160,12 @@ const format = (formatters: FormatConfig[], log: Logger) => {
     })
     for (const fmt of formatters) {
         if (fmt.fmt) {
-            formatter(fmt.out, fmt.fmt, log.error, log.info)
+            formatter(
+                fmt.out,
+                fmt.fmt,
+                (error) => log.error(error),
+                (msg) => log.info(msg),
+            )
         } else {
             log.warn(`No code formatter provided for code saved to ${fmt.out} your code might not look very good.`)
         }

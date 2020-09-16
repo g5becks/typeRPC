@@ -25,22 +25,23 @@ const sendResponse = (method) => {
     return `
   if err != nil {
 		RespondWithErr(w, err, ${method.hasCborReturn ? 'true' : 'false'})
+
 		return
 	}
 	 ${go_plugin_utils_1.buildResponseStruct(method.returnType)}
    respData, err := marshalResponse(response, ${method.hasCborReturn ? 'true' : 'false'})
    if err != nil {
     		RespondWithErr(w, err, ${method.hasCborReturn ? 'true' : 'false'})
+
 		    return
    }
    w.Header().Set("Content-Type", "application/${method.hasCborReturn ? 'cbor' : 'json'}")
    w.WriteHeader(${method.responseCode})
-   w.Write(respData)
-	`;
+   _, _ = w.Write(respData)`;
 };
 const buildHandler = (svcName, method) => {
     return `
-   r.${plugin_utils_1.capitalize(method.httpMethod.toLowerCase())}("/${plugin_utils_1.lowerCase(method.name)}", func(w http.ResponseWriter, r *http.Request) {
+   rtr.${plugin_utils_1.capitalize(method.httpMethod.toLowerCase())}("/${plugin_utils_1.lowerCase(method.name)}", func(w http.ResponseWriter, r *http.Request) {
     var err error
     ctx := context.WithValue(r.Context(), handlerKey, "${plugin_utils_1.capitalize(svcName)}Routes/${plugin_utils_1.lowerCase(method.name)}")
     ${go_plugin_utils_1.parseReqBody(method)}
@@ -60,10 +61,12 @@ const buildSvcRoutes = (svc) => {
     return `
 func ${plugin_utils_1.capitalize(svc.name)}Routes(${plugin_utils_1.lowerCase(svc.name)} ${plugin_utils_1.capitalize(svc.name)}, middlewares ...func(handler http.Handler) http.Handler) chi.Router {
     rtr := chi.NewRouter()
+
     for _, x := range middlewares {
       rtr.Use(x)
     }
     ${buildHandlers(svc)}
+
     return rtr
 }
 `;
@@ -86,15 +89,8 @@ package ${schema.packageName}
 
 import (
 	"context"
-	"encoding/json"
-	"errors"
-	"fmt"
-	"io/ioutil"
 	"net/http"
-	"strconv"
-	"time"
 
-	${schema.hasCbor ? 'github.com/fxamacker/cbor/v2' : ''}
 	"github.com/go-chi/chi"
 )
 
@@ -105,7 +101,5 @@ ${buildRoutes(schema)}
 `,
     };
 };
-exports.default = (schemas) => schemas
-    .map((schema) => buildFile(schema))
-    .concat({ fileName: 'chi.helpers.rpc.go', source: go_plugin_utils_1.helpers(schemas[0].packageName) });
+exports.default = (schemas) => schemas.map((schema) => buildFile(schema)).concat({ fileName: 'chi.helpers.rpc.go', source: go_plugin_utils_1.helpers(schemas[0]) });
 //# sourceMappingURL=index.js.map

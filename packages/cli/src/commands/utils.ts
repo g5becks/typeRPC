@@ -153,11 +153,15 @@ export const format = (
 ): ChildProcess =>
     exec(`${formatter} ${path}`, (error, stdout, stderr) => {
         if (error) {
-            onError(error)
+            onError(
+                `Looks like there was an issue formatting your code. Are you sure you supplied a proper fmt argument? ${error}`,
+            )
             return
         }
         if (stderr) {
-            onError(stderr)
+            onError(
+                `Looks like there was an issue formatting your code. Are you sure you supplied a proper fmt argument? ${error}`,
+            )
             return
         }
 
