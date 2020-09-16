@@ -101,5 +101,61 @@ ${buildRoutes(schema)}
 `,
     };
 };
-exports.default = (schemas) => schemas.map((schema) => buildFile(schema)).concat({ fileName: 'chi.helpers.rpc.go', source: go_plugin_utils_1.helpers(schemas[0]) });
+const buildServer = (schemas) => {
+    const querySvcNames = schemas.flatMap((schema) => schema.queryServices).flatMap((svc) => plugin_utils_1.capitalize(svc.name));
+    const mutationSvcNames = schemas.flatMap((schema) => schema.mutationServices).flatMap((svc) => plugin_utils_1.capitalize(svc.name));
+    const svcNames = querySvcNames.concat(mutationSvcNames);
+    let services = '';
+    for (const svc of svcNames) {
+        services = services.concat(svc + '\n');
+    }
+    let endpoints = '';
+    for (const svc of svcNames) {
+        endpoints = endpoints.concat(`r.Mount("/${plugin_utils_1.lowerCase(svc)}", ${svc}Routes(s.${svc}))
+        `);
+    }
+    let serverParams = '';
+    let i = 0;
+    while (i < svcNames.length) {
+        const useComma = i === svcNames.length - 1 ? '' : ', ';
+        serverParams = serverParams.concat(`${plugin_utils_1.lowerCase(svcNames[i])} ${svcNames[i]}${useComma}`);
+        i++;
+    }
+    let serverFields = '';
+    for (const svc of svcNames) {
+        serverFields = serverFields.concat(`${plugin_utils_1.capitalize(svc)}: ${plugin_utils_1.lowerCase(svc)},
+        `);
+    }
+    return `
+package ${schemas[0].packageName}
+
+import (
+	"github.com/go-chi/chi"
+	"net/http"
+)
+
+type ChiRPCServer struct {
+  ${services}
+}
+
+func (s *ChiRPCServer) Run(address string, middlewares ...func(handler http.Handler) http.Handler) error {
+	r := chi.NewRouter()
+	for _, mddlwr := range middlewares {
+		r.Use(mddlwr)
+	}
+	${endpoints}
+	return http.ListenAndServe(address, r)
+}
+
+func NewChiRPCServer(${serverParams}) *ChiRPCServer  {
+	return &ChiRPCServer{
+		${serverFields}
+	}
+}
+`;
+};
+exports.default = (schemas) => schemas
+    .map((schema) => buildFile(schema))
+    .concat({ fileName: 'chi.rpc.helpers.go', source: go_plugin_utils_1.helpers(schemas[0]) })
+    .concat({ fileName: 'chi.rpc.server.go', source: buildServer(schemas) });
 //# sourceMappingURL=index.js.map

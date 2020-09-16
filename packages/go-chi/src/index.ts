@@ -134,7 +134,8 @@ const buildServer = (schemas: Schema[]): string => {
     }
     let endpoints = ''
     for (const svc of svcNames) {
-        endpoints = endpoints.concat(`r.Mount("/${lowerCase(svc)}", ${svc}Routes(s.${svc}))`)
+        endpoints = endpoints.concat(`r.Mount("/${lowerCase(svc)}", ${svc}Routes(s.${svc}))
+        `)
     }
     let serverParams = ''
     let i = 0
@@ -145,11 +146,12 @@ const buildServer = (schemas: Schema[]): string => {
     }
     let serverFields = ''
     for (const svc of svcNames) {
-        serverFields = serverFields.concat(`${capitalize(svc)}: ${lowerCase(svc)},`)
+        serverFields = serverFields.concat(`${capitalize(svc)}: ${lowerCase(svc)},
+        `)
     }
 
     return `
-package service
+package ${schemas[0].packageName}
 
 import (
 	"github.com/go-chi/chi"
