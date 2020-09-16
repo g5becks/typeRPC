@@ -63,3 +63,14 @@ ${buildTypes(schema.messages)}
 
 `
 }
+
+const helpers = `
+func setHeaders(req *resty.Request, headers ...map[string]string) *resty.Request  {
+		if len(headers) > 0 {
+		for _, h := range  headers {
+			req.SetHeaders(h)
+		}
+	}
+	return req
+}
+`
