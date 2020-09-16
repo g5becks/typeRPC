@@ -23,15 +23,14 @@ import { capitalize, lowerCase } from '@typerpc/plugin-utils'
 import {
     buildClientResponseStruct,
     buildFileName,
-    buildInterfaceMethods,
     buildMethodParams,
     buildRequestBodyType,
     buildReturnType,
     buildTypes,
-    goRestyHelpers,
     toQueryString,
 } from '@typerpc/go-plugin-utils'
 import { TypeRpcPlugin } from '@typerpc/plugin'
+import { helpers } from './helpers'
 
 const buildQueryParams = (method: QueryMethod): string => {
     let paramsString = ''
@@ -43,20 +42,20 @@ const buildQueryParams = (method: QueryMethod): string => {
         `)
     }
     return method.hasParams
-        ? `
-.SetQueryParamsFromValues(url.Values{
+        ? `.SetQueryParamsFromValues(url.Values{
 		${paramsString}
 	})`
         : ''
 }
 
 const buildRequest = (method: MutationMethod | QueryMethod): string => {
-    return `
-${method.hasParams && isMutationMethod(method) ? buildRequestBodyType(method) : ''}
+    return `${method.hasParams && isMutationMethod(method) ? buildRequestBodyType(method) : ''}
 
 ${method.isVoidReturn ? '' : buildClientResponseStruct(method.returnType)}
+
 req := setHeaders(s.client.R(), headers...)${isQueryMethod(method) ? buildQueryParams(method) : ''}.
   SetHeader("Accept", "${method.hasCborReturn ? 'application/cbor' : 'application/json'}")
+
 	err := makeRequest(ctx, requestData{
 		Method:       "${method.httpMethod.toUpperCase()}",
 		Request:      req,
@@ -66,8 +65,9 @@ req := setHeaders(s.client.R(), headers...)${isQueryMethod(method) ? buildQueryP
 		Body:         ${isMutationMethod(method) && method.hasParams ? 'body' : 'nil'},
 		Out:          ${method.isVoidReturn ? 'nil' : '&resp'},
 	})
+
   return resp.Data, err
-  `
+  `.trimStart()
 }
 const buildMethod = (svcName: string, method: QueryMethod | MutationMethod): string => {
     if (isQueryMethod(method)) {
@@ -94,14 +94,14 @@ const buildClient = (svc: QueryService | MutationService): string => {
 type ${capitalize(svc.name)} struct {
 	client *resty.Client
 	baseUrl string
-  ${buildInterfaceMethods(svc.methods)}
 }
 
 func New${capitalize(svc.name)}(host string) (*${svc.name}, error)  {
-	_, err := url2.ParseRequestURI(host)
+	_, err := url.ParseRequestURI(host)
 	if err != nil {
 		return nil, err
 	}
+
 	return &${capitalize(svc.name)}{
 		client: resty.New(),
 		baseUrl: fmt.Sprintf("%s/${lowerCase(svc.name)}", host),
@@ -122,7 +122,7 @@ const buildClients = (schema: Schema): string => {
         clients = clients.concat(buildClient(svc))
     }
 
-    for (const svc of schema.queryServices) {
+    for (const svc of schema.mutationServices) {
         clients = clients.concat(buildClient(svc))
     }
     return clients
@@ -132,7 +132,13 @@ const buildFile = (schema: Schema): string => {
     return `
 package ${schema.packageName}
 
-import "github.com/go-resty/resty"
+import (
+	"context"
+	"fmt"
+	"github.com/go-resty/resty"
+	"net/url"
+	"strconv"
+)
 
 ${buildTypes(schema.messages)}
 
@@ -143,6 +149,6 @@ ${buildClients(schema)}
 const build: TypeRpcPlugin = (schemas) =>
     schemas
         .map((schema) => ({ fileName: buildFileName(schema.fileName), source: buildFile(schema) }))
-        .concat({ fileName: 'resty.rpc.helpers.go', source: goRestyHelpers })
+        .concat({ fileName: 'resty.rpc.helpers.go', source: helpers(schemas[0].packageName) })
 
 export default build

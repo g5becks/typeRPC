@@ -11,7 +11,7 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.helpers = exports.buildInterfaces = exports.buildFileName = exports.buildResponseStruct = exports.buildResultInitializers = exports.buildResultDeclarations = exports.buildParamNames = exports.parseReqBody = exports.parseQueryParams = exports.buildInterface = exports.buildInterfaceMethods = exports.buildMethodSignature = exports.buildReturnType = exports.buildMethodParams = exports.buildTypes = exports.buildType = exports.buildProps = exports.handleOptional = exports.fromQueryString = exports.scalarFromQueryParam = exports.dataType = exports.typeMap = void 0;
+exports.serverHelpers = exports.buildInterfaces = exports.buildFileName = exports.buildServerResponseStruct = exports.buildClientResponseStruct = exports.buildResultInitializers = exports.buildResultDeclarations = exports.buildParamNames = exports.parseReqBody = exports.buildRequestBodyType = exports.parseQueryParams = exports.buildInterface = exports.buildInterfaceMethods = exports.buildMethodSignature = exports.buildReturnType = exports.buildMethodParams = exports.buildTypes = exports.buildType = exports.buildProps = exports.handleOptional = exports.toQueryString = exports.fromQueryString = exports.scalarFromQueryParam = exports.dataType = exports.typeMap = void 0;
 const schema_1 = require("@typerpc/schema");
 const plugin_utils_1 = require("@typerpc/plugin-utils");
 exports.typeMap = new Map([
@@ -112,6 +112,52 @@ exports.fromQueryString = (param, type) => {
     }
     return '';
 };
+const scalarToQueryString = (param, type) => {
+    if (!schema_1.is.queryParamable(type)) {
+        throw new TypeError('invalid data type used in query service method');
+    }
+    if (schema_1.is.scalar(type))
+        switch (type.type) {
+            case 'str':
+                return `[]string{${param}}`;
+            case 'int8':
+            case 'int16':
+            case 'int32':
+            case 'int64':
+                return `[]string{strconv.Itoa(int(${param}))}`;
+            case 'uint8':
+            case 'uint16':
+            case 'uint32':
+                return `[]string{strconv.FormatUint(uint64(${param}), 10)}`;
+            case 'uint64':
+                return `[]string{strconv.FormatUint(${param}, 10)}`;
+            case 'float32':
+                return `[]string{strconv.FormatFloat(float64(${param}), 'e', -1, 32 )}`;
+            case 'float64':
+                return `[]string{strconv.FormatFloat(${param}, 'e', -1, 32 )}`;
+            case 'bool':
+                return `[]string{strconv.FormatBool(${param})}`;
+            case 'timestamp':
+                return `[]string{strconv.FormatInt(${param}.Unix(), 10)}`;
+            default:
+                return `[]string{${param}}`;
+        }
+    return `[]string{${param}}`;
+};
+exports.toQueryString = (param, type) => {
+    if (!schema_1.is.queryParamable(type)) {
+        throw new TypeError('invalid data type used in query service method');
+    }
+    if (schema_1.is.scalar(type)) {
+        return scalarToQueryString(param, type);
+    }
+    if (schema_1.is.list(type)) {
+        if (schema_1.is.scalar(type.dataType)) {
+            return `${plugin_utils_1.capitalize(exports.dataType(type))}sToStrings(${param})`;
+        }
+    }
+    return `[]string{${param}}`;
+};
 exports.handleOptional = (property) => 
 // if type is a scalar, make it a pointer (optional)
 schema_1.is.scalar(property.type) && property.isOptional ? '*' : '';
@@ -190,6 +236,29 @@ exports.parseQueryParams = (method) => {
     }
     return parsed;
 };
+// used in go clients to generate a struct that contains method params as fields
+// which will be sent to the server.
+exports.buildRequestBodyType = (method) => {
+    let props = '';
+    for (const param of method.params) {
+        props = props.concat(`${plugin_utils_1.capitalize(param.name)} ${exports.dataType(param.type)} \`json:"${plugin_utils_1.lowerCase(param.name)}"\`
+      `);
+    }
+    let fields = '';
+    for (const param of method.params) {
+        fields = fields.concat(plugin_utils_1.lowerCase(param.name) + `,\n`);
+    }
+    return `
+    body := struct {
+      ${props}
+    }{
+      ${fields}
+    }
+
+
+    `;
+};
+// used in go servers to parse the request body
 exports.parseReqBody = (method) => {
     if (method.params.length === 0) {
         return '';
@@ -275,7 +344,19 @@ exports.buildResultInitializers = (type) => {
     }
     return `res, err`;
 };
-exports.buildResponseStruct = (type) => {
+exports.buildClientResponseStruct = (type) => {
+    let responseType = '';
+    if (schema_1.is.tuple2(type) || schema_1.is.tuple3(type) || schema_1.is.tuple4(type) || schema_1.is.tuple5(type)) {
+        responseType = '[]interface{}';
+    }
+    else {
+        responseType = exports.dataType(type);
+    }
+    return `resp := struct {
+        Data ${responseType}  \`json:"data"\`
+    }{}`;
+};
+exports.buildServerResponseStruct = (type) => {
     let responseType = '';
     let response = exports.buildResultInitializers(type).replace(', err', '');
     if (schema_1.is.tuple2(type) || schema_1.is.tuple3(type) || schema_1.is.tuple4(type) || schema_1.is.tuple5(type)) {
@@ -300,7 +381,7 @@ exports.buildInterfaces = (schema) => {
     }
     return interfaces;
 };
-exports.helpers = (schema) => `
+exports.serverHelpers = (schema) => `
 package ${schema.packageName}
 
 import (
