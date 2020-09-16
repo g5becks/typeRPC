@@ -1,34 +1,36 @@
+export declare type PluginLocation = 'npm' | {
+    github: string;
+} | {
+    local: string;
+};
 /**
  * A plugin to install that will be used for code generation.
- * Plugins can be installed location npm, github, or a filepath.
- * If the plugin lives on github or npm, the plugin name MUST begin
- * with either @typerpc or typerpc-plugin . Plugins installed location a
- * filepath have no such restrictions
+ * Plugins can be installed from npm, github, or a local filepath.
+ * All plugin names MUST begin with either @typerpc or typerpc-plugin .
  *
  * @property {string} name
  * @property {string} version
- * @property {'github' | 'npm' | 'filepath'} location
+ * @property {PluginLocation} location
  */
 export declare type PluginConfig = {
-    /** name of the plugin to install
-     * if using npm, simply supply the name of the package
-     * if using github you may specify in the format owner/repository_name or
-     * owner/repository_name#ref to specify a version
-     * E.G. typerpc-plugin/someplugin#351396f
-     * if using a filepath provide the filepath to the plugin node_modules folder is excluded location source name
-     * */
+    /** name of the plugin package to install */
     name: string;
-    /** If using npm, you can specify a version like 1.0.3 .
+    /** If the plugin's location is npm, you can specify a version like 1.0.3 .
      * defaults to 'latest' if not specified */
     version?: string;
-    /** specify where to install this plugin is located. defaults to npm if not specified */
-    location?: 'github' | 'npm' | 'filepath';
+    /** specify where the plugin to install is located.
+     * For using github specify in the format {github: 'owner/repository_name' } or
+     * owner/repository_name#ref to specify a version E.G. {github: 'typerpc-plugin/someplugin#351396f'} .
+     * For local plugins provide the filepath to the directory containing the
+     * package.json file for the plugin. E.G. {local: '/machine/development/plugin'}, node_modules folder is not allowed. If no location is provided the plugin
+     * will be downloaded from npm. */
+    location?: PluginLocation;
 };
 /**
  * Config options for code generation
  *
  * @property {string} out
- * @property {string} plugin
+ * @property {PluginConfig} plugin
  * @property {string} pkg
  * @property {string| undefined} fmt
  **/

@@ -38,17 +38,50 @@ const fs_extra_1 = require("fs-extra");
 const tslog_1 = require("tslog");
 const prettyjson_1 = require("prettyjson");
 exports.getConfigFile = (project) => project.getSourceFile((file) => file.getBaseName().toLowerCase() === 'rpc.config.ts');
+// get the value for the PluginConfig location property
+const parsePluginLocation = (pluginConfig) => {
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+    // get location property
+    const prop = pluginConfig === null || pluginConfig === void 0 ? void 0 : pluginConfig.getProperty('location');
+    // get string if exists
+    const propString = prop === null || prop === void 0 ? void 0 : prop.getChildrenOfKind(ts_morph_1.SyntaxKind.StringLiteral);
+    // if string is npm return npm as location
+    if (propString && ((_a = propString[0]) === null || _a === void 0 ? void 0 : _a.getLiteralValue().trim()) === 'npm') {
+        return 'npm';
+    }
+    // location is not string so must be objectLiteral
+    const locationObj = prop === null || prop === void 0 ? void 0 : prop.getChildrenOfKind(ts_morph_1.SyntaxKind.ObjectLiteralExpression);
+    // make sure it is defined
+    if (locationObj && locationObj.length > 0) {
+        // get first objectLiteral since there is only one
+        const location = locationObj[0];
+        // if github property exists
+        if (location.getProperty('github')) {
+            // return the string found or empty, let function up the stack
+            // throw when empty string is found
+            return {
+                github: (_e = (_d = (_c = (_b = location === null || location === void 0 ? void 0 : location.getProperty('github')) === null || _b === void 0 ? void 0 : _b.getChildrenOfKind(ts_morph_1.SyntaxKind.StringLiteral)[0]) === null || _c === void 0 ? void 0 : _c.getLiteralValue()) === null || _d === void 0 ? void 0 : _d.trim()) !== null && _e !== void 0 ? _e : '',
+            };
+        }
+        if (location.getProperty('local')) {
+            return {
+                github: (_j = (_h = (_g = (_f = location === null || location === void 0 ? void 0 : location.getProperty('local')) === null || _f === void 0 ? void 0 : _f.getChildrenOfKind(ts_morph_1.SyntaxKind.StringLiteral)[0]) === null || _g === void 0 ? void 0 : _g.getLiteralValue()) === null || _h === void 0 ? void 0 : _h.trim()) !== null && _j !== void 0 ? _j : '',
+            };
+        }
+    }
+    return 'npm';
+};
 const parseGeneratorConfig = (obj) => {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t;
     const out = (_c = (_b = (_a = obj.getProperty('out')) === null || _a === void 0 ? void 0 : _a.getChildrenOfKind(ts_morph_1.SyntaxKind.StringLiteral)[0]) === null || _b === void 0 ? void 0 : _b.getLiteralValue()) === null || _c === void 0 ? void 0 : _c.trim();
     const pluginConfig = (_d = obj.getProperty('plugin')) === null || _d === void 0 ? void 0 : _d.getChildrenOfKind(ts_morph_1.SyntaxKind.ObjectLiteralExpression)[0];
     const plugin = {
-        name: (_g = (_f = (_e = pluginConfig === null || pluginConfig === void 0 ? void 0 : pluginConfig.getProperty('name')) === null || _e === void 0 ? void 0 : _e.getText()) === null || _f === void 0 ? void 0 : _f.trim()) !== null && _g !== void 0 ? _g : '',
-        version: (_k = (_j = (_h = pluginConfig === null || pluginConfig === void 0 ? void 0 : pluginConfig.getProperty('version')) === null || _h === void 0 ? void 0 : _h.getText()) === null || _j === void 0 ? void 0 : _j.trim()) !== null && _k !== void 0 ? _k : 'latest',
-        location: ((_o = (_m = (_l = pluginConfig === null || pluginConfig === void 0 ? void 0 : pluginConfig.getProperty('location')) === null || _l === void 0 ? void 0 : _l.getText()) === null || _m === void 0 ? void 0 : _m.trim()) !== null && _o !== void 0 ? _o : 'npm'),
+        name: (_h = (_g = (_f = (_e = pluginConfig === null || pluginConfig === void 0 ? void 0 : pluginConfig.getProperty('name')) === null || _e === void 0 ? void 0 : _e.getChildrenOfKind(ts_morph_1.SyntaxKind.StringLiteral)[0]) === null || _f === void 0 ? void 0 : _f.getLiteralValue()) === null || _g === void 0 ? void 0 : _g.trim()) !== null && _h !== void 0 ? _h : '',
+        version: (_m = (_l = (_k = (_j = pluginConfig === null || pluginConfig === void 0 ? void 0 : pluginConfig.getProperty('version')) === null || _j === void 0 ? void 0 : _j.getChildrenOfKind(ts_morph_1.SyntaxKind.StringLiteral)[0]) === null || _k === void 0 ? void 0 : _k.getLiteralValue()) === null || _l === void 0 ? void 0 : _l.trim()) !== null && _m !== void 0 ? _m : 'latest',
+        location: parsePluginLocation(pluginConfig),
     };
-    const pkg = (_r = (_q = (_p = obj.getProperty('pkg')) === null || _p === void 0 ? void 0 : _p.getChildrenOfKind(ts_morph_1.SyntaxKind.StringLiteral)[0]) === null || _q === void 0 ? void 0 : _q.getLiteralValue()) === null || _r === void 0 ? void 0 : _r.trim();
-    const fmt = (_u = (_t = (_s = obj.getProperty('fmt')) === null || _s === void 0 ? void 0 : _s.getChildrenOfKind(ts_morph_1.SyntaxKind.StringLiteral)[0]) === null || _t === void 0 ? void 0 : _t.getLiteralValue()) === null || _u === void 0 ? void 0 : _u.trim();
+    const pkg = (_q = (_p = (_o = obj.getProperty('pkg')) === null || _o === void 0 ? void 0 : _o.getChildrenOfKind(ts_morph_1.SyntaxKind.StringLiteral)[0]) === null || _p === void 0 ? void 0 : _p.getLiteralValue()) === null || _q === void 0 ? void 0 : _q.trim();
+    const fmt = (_t = (_s = (_r = obj.getProperty('fmt')) === null || _r === void 0 ? void 0 : _r.getChildrenOfKind(ts_morph_1.SyntaxKind.StringLiteral)[0]) === null || _s === void 0 ? void 0 : _s.getLiteralValue()) === null || _t === void 0 ? void 0 : _t.trim();
     if (!out || !plugin || !pkg) {
         throw new Error(`
         error in config file: ${obj.getSourceFile().getFilePath()},

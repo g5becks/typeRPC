@@ -24,12 +24,14 @@ const path_1 = __importDefault(require("path"));
 const ora_1 = __importDefault(require("ora"));
 const chalk_1 = __importDefault(require("chalk"));
 const fs_1 = require("fs");
+const debug_1 = __importDefault(require("debug"));
+const debug = debug_1.default('@typerpc/cli.gen');
 // ensure that the path to tsconfig.json actually exists
 const validateTsConfigFile = (tsConfigFile) => {
     const spinner = ora_1.default({ text: chalk_1.default.magenta("Let's validate your tsconfig.json path"), color: 'cyan' }).start();
     const exists = fs_extra_1.pathExistsSync(tsConfigFile);
     if (tsConfigFile === '' || !exists) {
-        spinner.fail(chalk_1.default.bgRed(`Looks like you provided an invalid tsconfig.json file. No sweat, make sure ${tsConfigFile} exists and try again`));
+        spinner.fail(chalk_1.default.red(`Looks like you provided an invalid tsconfig.json file. No sweat, make sure ${tsConfigFile} exists and try again`));
         throw new Error(`No tsConfig.json file found at ${tsConfigFile}`);
     }
     spinner.succeed(chalk_1.default.magenta('Great, your tsconfig file is legit!'));
@@ -42,7 +44,7 @@ const validateOutputPaths = (configs) => {
     }).start();
     for (const cfg of configs) {
         if (cfg.out === '') {
-            spinner.fail(chalk_1.default.bgRed(`Whoops, looks like ${cfg.configName} has an empty out field`));
+            spinner.fail(chalk_1.default.red(`Whoops, looks like ${cfg.configName} has an empty out field`));
             throw new Error(`${cfg.configName} has an empty out field`);
         }
     }
@@ -55,14 +57,12 @@ const validatePlugins = (configs) => {
     }).start();
     let invalids = [];
     for (const cfg of configs) {
-        if (cfg.plugin.location !== 'filepath' &&
-            !cfg.plugin.name.startsWith('@typerpc/') &&
-            !cfg.plugin.name.startsWith('typerpc-plugin-')) {
+        if (!cfg.plugin.name.startsWith('@typerpc/') && !cfg.plugin.name.startsWith('typerpc-plugin')) {
             invalids = [...invalids, cfg.plugin.name];
         }
     }
     if (invalids.length !== 0) {
-        spinner.fail(chalk_1.default.bgRed(`Uh Oh, the following plugin names are not valid typerpc plugins ${invalids}`));
+        spinner.fail(chalk_1.default.red(`Uh Oh, the following plugin names are not valid typerpc plugins ${invalids}`));
         throw new Error(`the following plugin names are not valid typerpc plugins ${invalids}`);
     }
     spinner.succeed(chalk_1.default.whiteBright("Valid Plugins as well, You're on you're way!"));
@@ -77,7 +77,7 @@ const validateSchemaFiles = (files) => {
         spinner.succeed("All systems are go, Let's generate some code!");
         return;
     }
-    spinner.fail(chalk_1.default.bgRed(`Bummer, looks like we've spotter errors in you schema files`));
+    spinner.fail(chalk_1.default.red(`Bummer, looks like we've spotter errors in you schema files`));
     throw errs.reduce((err, val) => {
         var _a;
         err.name.concat(val.name + '\n');
@@ -89,7 +89,7 @@ const validateSchemaFiles = (files) => {
 const installPlugins = async (configs, manager, log) => {
     const plugins = configs.map((cfg) => cfg.plugin);
     const onInstalled = (plugin) => log.info(`${plugin} already installed, fetching from cache`);
-    const onInstalling = (plugin) => log.info(`attempting to install ${plugin} from https://registry.npmjs.org`);
+    const onInstalling = (plugin) => log.info(`attempting to install ${plugin}`);
     await manager.install(plugins, onInstalled, onInstalling);
 };
 const generateCode = (configs, manager, files) => {
@@ -105,8 +105,8 @@ const generateCode = (configs, manager, files) => {
             generated = [...generated, { code: gen(schemas), outputPath: cfg.out }];
         }
         else {
-            spinner.fail(chalk_1.default.bgRed(`Wait just a second there, are you sure ${cfg.plugin} is an authentic @typerpc plugin? Looks like a knockoff to me`));
-            throw new Error(`${cfg.plugin} is not a valid typerpc plugin. Plugins must be functions, typeof ${cfg.plugin} = ${typeof gen}`);
+            spinner.fail(chalk_1.default.red(`Wait just a second there, are you sure ${cfg.plugin.name} is an authentic @typerpc plugin? Looks like a knockoff to me`));
+            throw new Error(`${cfg.plugin.name} is not a valid typerpc plugin. Plugins must be functions, typeof ${cfg.plugin.name} = ${typeof gen}`);
         }
     }
     spinner.succeed(chalk_1.default.whiteBright('Code generation complete. That was fast!'));
@@ -124,7 +124,7 @@ const saveToDisk = async (generated) => {
                 await fs_extra_1.outputFile(filePath(gen.outputPath, entry.fileName), entry.source);
             }
             catch (error) {
-                spinner.fail(chalk_1.default.bgRed(``));
+                spinner.fail(chalk_1.default.red(``));
                 throw new Error(`error occurred writing files: ${error}`);
             }
         }
@@ -146,7 +146,7 @@ const format = (formatters, log) => {
     }
     spinner.succeed(chalk_1.default.cyanBright("All done! If you've enjoyed using @typerpc do us a favor, visit https://github.com/typerpc/typerpc and star the project. Happy Hacking!"));
 };
-const createErrorInfo = (pluginManager, rpcConfig, args) => {
+const createDebugInfo = (pluginManager, rpcConfig, args) => {
     var _a;
     const tsconfigFile = fs_1.readFileSync((_a = args.tsconfig) !== null && _a !== void 0 ? _a : '');
     return {
@@ -156,30 +156,24 @@ const createErrorInfo = (pluginManager, rpcConfig, args) => {
         pluginManagerOpts: pluginManager.opts(),
     };
 };
-const onlyOne = (plugins) => plugins.filter((plugin) => plugin !== '').length < 2;
-const getPlugin = (plugins) => plugins.filter((plugin) => plugin && plugin !== '')[0];
 const handler = async (args) => {
     var _a, _b;
-    const { tsconfig, npm, path, github, version, out, pkg, fmt } = args;
-    const plugins = [npm !== null && npm !== void 0 ? npm : '', path !== null && path !== void 0 ? path : '', github !== null && github !== void 0 ? github : ''];
-    if (!onlyOne(plugins)) {
-        throw new Error(`only one plugin option can be selected. You have specified  ${plugins}`);
+    const { tsconfig, plugin, local, github, version, out, pkg, fmt } = args;
+    if (github && local) {
+        throw new Error(`local and github plugin location set. Only one plugin location can used.`);
     }
     const tsConfigFilePath = (_a = tsconfig === null || tsconfig === void 0 ? void 0 : tsconfig.trim()) !== null && _a !== void 0 ? _a : '';
     // validate tsconfig before proceeding
     validateTsConfigFile((_b = tsconfig === null || tsconfig === void 0 ? void 0 : tsconfig.trim()) !== null && _b !== void 0 ? _b : '');
     // create project
     const project = new ts_morph_1.Project({ tsConfigFilePath, skipFileDependencyResolution: true });
-    let errorInfo = undefined;
+    let debugInfo = undefined;
     const log = utils_1.createLogger(project);
     try {
         // get rpc.config.ts file
         const configFile = utils_1.getConfigFile(project);
         // parse config objects
-        let configs = [];
-        if (typeof configFile !== 'undefined') {
-            configs = utils_1.parseConfig(configFile);
-        }
+        let configs = configFile ? utils_1.parseConfig(configFile) : [];
         const pluginManager = plugin_manager_1.PluginManager.create(project);
         // filter out rpc.config.ts file location project source files
         const sourceFiles = project
@@ -187,13 +181,13 @@ const handler = async (args) => {
             .filter((file) => file.getBaseName().toLowerCase() !== 'rpc.config.ts');
         // if user provides command line arguments the config file will
         // be overridden - Be sure to document this behaviour
-        if ((npm || path || github) && out && pkg) {
+        if ((local || github) && out && pkg) {
             configs = [
                 {
                     configName: 'flags',
                     plugin: {
-                        name: getPlugin(plugins),
-                        location: npm ? 'npm' : path ? 'filepath' : github ? 'github' : 'npm',
+                        name: plugin !== null && plugin !== void 0 ? plugin : '',
+                        location: local ? { local } : github ? { github } : 'npm',
                         version: version !== null && version !== void 0 ? version : 'latest',
                     },
                     out,
@@ -202,7 +196,7 @@ const handler = async (args) => {
                 },
             ];
         }
-        errorInfo = createErrorInfo(pluginManager, configFile, args);
+        debugInfo = createDebugInfo(pluginManager, configFile, args);
         // no configs in file or command line opts
         if (configs.length === 0) {
             throw new Error(`no configs found in rpc.config.ts and not enough arguments passed`);
@@ -217,7 +211,10 @@ const handler = async (args) => {
         format(configs.map((cfg) => ({ fmt: cfg.fmt, out: cfg.out })), log);
     }
     catch (error) {
-        log.error(`error occurred ${error}`, errorInfo);
+        if (debug.enabled) {
+            debug(debugInfo);
+        }
+        log.error(`error occurred ${error}`);
         throw error;
     }
 };
@@ -234,22 +231,22 @@ exports.gen = {
         github: {
             alias: 'g',
             type: 'string',
-            description: 'name of the typerpc plugin to install from github and use for code generation',
+            description: `github repository to download the typerpc plugin from. specify in the format owner/repository_name or owner/repository_name#ref to specify a version E.G. typerpc-plugin/someplugin#351396f`,
         },
-        npm: {
-            alias: 'n',
-            type: 'string',
-            description: 'name of the typerpc plugin to install from npm and use for code generation',
-        },
-        path: {
+        plugin: {
             alias: 'p',
             type: 'string',
-            description: 'path to the typerpc plugin to install and use for code generation',
+            description: 'name of the typerpc plugin to install and use for code generation',
+        },
+        local: {
+            alias: 'l',
+            type: 'string',
+            description: `path to the directory containing the package.json file for the local plugin to install. E.G. /machine/development/plugin`,
         },
         version: {
             alias: 'v',
             type: 'string',
-            description: 'version of the plugin to install, this flag is only valid if installing from npm. If using github, specify the version as a part of the name/url. E.G. typerpc/someplugin#351396f ',
+            description: 'version of the plugin to install, this flag is only valid if installing from npm. If using github, specify the version using the -g flag E.G. -g typerpc-plugin/someplugin#351396f ',
         },
         out: {
             alias: 'o',

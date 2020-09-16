@@ -115,12 +115,12 @@ const generateCode = (configs: ParsedConfig[], manager: PluginManager, files: So
         } else {
             spinner.fail(
                 chalk.red(
-                    `Wait just a second there, are you sure ${cfg.plugin} is an authentic @typerpc plugin? Looks like a knockoff to me`,
+                    `Wait just a second there, are you sure ${cfg.plugin.name} is an authentic @typerpc plugin? Looks like a knockoff to me`,
                 ),
             )
             throw new Error(
-                `${cfg.plugin} is not a valid typerpc plugin. Plugins must be functions, typeof ${
-                    cfg.plugin
+                `${cfg.plugin.name} is not a valid typerpc plugin. Plugins must be functions, typeof ${
+                    cfg.plugin.name
                 } = ${typeof gen}`,
             )
         }
