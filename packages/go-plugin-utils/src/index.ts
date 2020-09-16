@@ -405,6 +405,40 @@ export const buildInterfaces = (schema: Schema): string => {
 }
 
 export const clientHelpers = `
+func makeRequest(ctx context.Context, method string, req *resty.Request, url string, cborReturn bool, out interface{}) error {
+	var resp *resty.Response
+	var err error
+	if ctx.Err() != nil {
+		return NewRPCError(http.StatusRequestTimeout, "request aborted context done", ctx.Err())
+	}
+	if method == "GET" {
+		resp, err = req.Get(url)
+		if err != nil {
+			return NewRPCError(resp.StatusCode(), "rpc request failed", err)
+		}
+	} else if method == "POST" {
+		resp, err = req.Post(url)
+		if err != nil {
+			return NewRPCError(resp.StatusCode(), "rpc request failed", err)
+		}
+	}
+
+	if out != nil {
+		if cborReturn {
+			err = cbor.Unmarshal(resp.Body(), out)
+		} else {
+			err = json.Unmarshal(resp.Body(), out)
+		}
+		if err != nil {
+			return NewRPCError(http.StatusBadRequest, "failed to marshal request data", err)
+		}
+		if err = ctx.Err(); err != nil {
+			return NewRPCError(http.StatusRequestTimeout,"request aborted, context done", err)
+		}
+	}
+	return nil
+}
+
 func Int8sToStrings(params []int8) []string {
 	list := make([]string, len(params))
 	for i, param := range params {
@@ -510,6 +544,76 @@ func TimestampsToStrings(params []time.Time) []string {
 	}
 
 	return list
+}
+
+type ErrorPayload struct {
+	Code  int    \`json:"code"\`
+	Cause string \`json:"cause,omitempty"\`
+	Msg   string \`json:"msg"\`
+	Error string \`json:"error"\`
+}
+
+type RPCError interface {
+	// Code is of the valid error codes
+	Code() int
+
+	// Msg returns a human-readable, unstructured messages describing the error
+	Msg() string
+
+	// Cause is reason for the error
+	Cause() error
+
+	// RPCError returns a string of the form "typerpc error <Code>: <Msg>"
+	Error() string
+
+	// RPCError response payload
+	Payload() ErrorPayload
+}
+
+type rpcErr struct {
+	code  int
+	msg   string
+	cause error
+}
+
+func NewRPCError(code int, msg string, cause error) *rpcErr {
+	return &rpcErr{code: code, msg: msg, cause: cause}
+}
+func (e *rpcErr) Code() int {
+	return e.code
+}
+
+func (e *rpcErr) Msg() string {
+	return e.msg
+}
+
+func (e *rpcErr) Cause() error {
+	return e.cause
+}
+
+func (e *rpcErr) Error() string {
+	if e.cause != nil && e.cause.Error() != "" {
+		if e.msg != "" {
+			return fmt.Sprintf("typerpc %d error: %s -- %s", e.code, e.cause.Error(), e.msg)
+		} else {
+			return fmt.Sprintf("typerpc %d error: %s", e.code, e.cause.Error())
+		}
+	} else {
+		return fmt.Sprintf("typerpc %d error: %s", e.code, e.msg)
+	}
+}
+
+func (e *rpcErr) Payload() ErrorPayload {
+	errPayload := ErrorPayload{
+		Code:  e.Code(),
+		Msg:   e.Msg(),
+		Error: e.Error(),
+	}
+	if e.Cause() != nil {
+		errPayload.Cause = e.Cause().Error()
+	}
+
+	return errPayload
 }
 `
 export const serverHelpers = (schema: Schema) => `

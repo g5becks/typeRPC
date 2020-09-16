@@ -20,7 +20,14 @@ import {
     Schema,
 } from '@typerpc/schema'
 import { capitalize, lowerCase } from '@typerpc/plugin-utils'
-import { buildInterfaceMethods, buildType, buildTypes } from '@typerpc/go-plugin-utils'
+import {
+    buildInterfaceMethods,
+    buildMethodParams,
+    buildReturnType,
+    buildType,
+    buildTypes,
+    toQueryString,
+} from '@typerpc/go-plugin-utils'
 
 const buildClientStruct = (svc: QueryService | MutationService): string => {
     return `
@@ -48,30 +55,36 @@ func (s *${capitalize(svc.name)}) reqUrl(url string) string  {
 }
 
 const buildQueryParams = (params: ReadonlyArray<Param>): string => {
-    const paramsString = ''
+    let paramsString = ''
     for (const param of params) {
-        paramsString = paramsString.concat(`"${lowerCase(param.name)}": "",`)
+        paramsString = paramsString.concat(`"${lowerCase(param.name)}": ${toQueryString(
+            lowerCase(param.name),
+            param.type,
+        )},
+        `)
     }
     return `
-.SetQueryParams(map[string]string{
-
-})`
+.SetQueryParamsFromValues(url.Values{
+		${paramsString}
+	})`
 }
+
 const buildQueryRequest = (method: QueryMethod): string => {
     return `
-resp, err := setHeaders(s.client.R())${method.hasParams ? buildQueryParams(method.params) : ''}.
+resp, err := setHeaders(s.client.R(), headers...)${method.hasParams ? buildQueryParams(method.params) : ''}.
   SetHeader("Accept", "${method.hasCborReturn ? 'application/cbor' : 'application/json'}").Get(s.reqUrl("${lowerCase(
         method.name,
     )}"))
 `
 }
+
 const buildMethod = (svcName: string, method: QueryMethod | MutationMethod): string => {
     if (isQueryMethod(method)) {
     }
     return `
-func (s *${capitalize(svcName)}) ${capitalize(
-        method.name,
-    )}(ctx context.Context, headers ...map[string]string) (*User, error) {
+func (s *${capitalize(svcName)}) ${capitalize(method.name)}(ctx context.Context, ${buildMethodParams(method.params)}${
+        method.hasParams ? ', ' : ''
+    } headers ...map[string]string) ${buildReturnType(method.returnType)} {
 
 }
 `
