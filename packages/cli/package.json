@@ -46,6 +46,7 @@
     "url": "https://github.com/typerpc/typerpc/issues"
   },
   "devDependencies": {
+    "@types/debug": "^4.1.5",
     "@types/figlet": "^1.2.0",
     "@types/fs-extra": "^9.0.1",
     "@types/yargs": "^15.0.5"
@@ -57,6 +58,7 @@
     "@typerpc/schema": "^0.1.11",
     "@types/prettyjson": "^0.0.29",
     "chalk": "^4.1.0",
+    "debug": "^4.1.1",
     "figlet": "^1.5.0",
     "fs-extra": "^9.0.1",
     "ora": "^5.1.0",

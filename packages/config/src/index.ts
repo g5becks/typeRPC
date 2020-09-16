@@ -38,7 +38,7 @@ export type PluginConfig = {
  * Config options for code generation
  *
  * @property {string} out
- * @property {string} plugin
+ * @property {PluginConfig} plugin
  * @property {string} pkg
  * @property {string| undefined} fmt
  **/

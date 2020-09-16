@@ -22,6 +22,8 @@ import path from 'path'
 import ora from 'ora'
 import chalk from 'chalk'
 import { readFileSync } from 'fs'
+import Debug from 'debug'
+const debug = Debug('@typerpc/cli.gen')
 
 // ensure that the path to tsconfig.json actually exists
 const validateTsConfigFile = (tsConfigFile: string): void => {
@@ -170,7 +172,7 @@ const format = (formatters: FormatConfig[], log: Logger) => {
     )
 }
 
-type ErrorInfo = {
+type DebugInfo = {
     pluginManagerOpts: string
     tsconfigFileData: string
     rpcConfigData?: string
@@ -190,7 +192,7 @@ type Args = Readonly<
     }>
 >
 
-const createErrorInfo = (pluginManager: PluginManager, rpcConfig: SourceFile | undefined, args: Args): ErrorInfo => {
+const createDebugInfo = (pluginManager: PluginManager, rpcConfig: SourceFile | undefined, args: Args): DebugInfo => {
     const tsconfigFile = readFileSync(args.tsconfig ?? '')
     return {
         cmdLineArgs: JSON.stringify(args),
@@ -200,31 +202,23 @@ const createErrorInfo = (pluginManager: PluginManager, rpcConfig: SourceFile | u
     }
 }
 
-const onlyOne = (plugins: string[]): boolean => plugins.filter((plugin) => plugin !== '').length < 2
-
-const getPlugin = (plugins: string[]): string => plugins.filter((plugin) => plugin && plugin !== '')[0]
-
 const handler = async (args: Args): Promise<void> => {
-    const { tsconfig, npm, path, github, version, out, pkg, fmt } = args
-    const plugins = [npm ?? '', path ?? '', github ?? '']
-    if (!onlyOne(plugins)) {
-        throw new Error(`only one plugin option can be selected. You have specified  ${plugins}`)
+    const { tsconfig, plugin, local, github, version, out, pkg, fmt } = args
+    if (github && local) {
+        throw new Error(`local and github plugin location set. Only one plugin location can used.`)
     }
     const tsConfigFilePath = tsconfig?.trim() ?? ''
     // validate tsconfig before proceeding
     validateTsConfigFile(tsconfig?.trim() ?? '')
     // create project
     const project = new Project({ tsConfigFilePath, skipFileDependencyResolution: true })
-    let errorInfo: ErrorInfo | undefined = undefined
+    let debugInfo: DebugInfo | undefined = undefined
     const log = createLogger(project)
     try {
         // get rpc.config.ts file
         const configFile = getConfigFile(project)
         // parse config objects
-        let configs: ParsedConfig[] = []
-        if (typeof configFile !== 'undefined') {
-            configs = parseConfig(configFile)
-        }
+        let configs: ParsedConfig[] = configFile ? parseConfig(configFile) : []
 
         const pluginManager = PluginManager.create(project)
         // filter out rpc.config.ts file location project source files
@@ -233,13 +227,13 @@ const handler = async (args: Args): Promise<void> => {
             .filter((file) => file.getBaseName().toLowerCase() !== 'rpc.config.ts')
         // if user provides command line arguments the config file will
         // be overridden - Be sure to document this behaviour
-        if ((npm || path || github) && out && pkg) {
+        if ((local || github) && out && pkg) {
             configs = [
                 {
                     configName: 'flags',
                     plugin: {
-                        name: getPlugin(plugins),
-                        location: npm ? 'npm' : path ? 'filepath' : github ? 'github' : 'npm',
+                        name: plugin ?? '',
+                        location: local ? { local } : github ? { github } : 'npm',
                         version: version ?? 'latest',
                     },
                     out,
@@ -248,7 +242,7 @@ const handler = async (args: Args): Promise<void> => {
                 },
             ]
         }
-        errorInfo = createErrorInfo(pluginManager, configFile, args)
+        debugInfo = createDebugInfo(pluginManager, configFile, args)
         // no configs in file or command line opts
         if (configs.length === 0) {
             throw new Error(`no configs found in rpc.config.ts and not enough arguments passed`)
@@ -266,7 +260,10 @@ const handler = async (args: Args): Promise<void> => {
             log,
         )
     } catch (error) {
-        log.error(`error occurred ${error}`, errorInfo)
+        if (debug.enabled) {
+            debug(debugInfo)
+        }
+        log.error(`error occurred ${error}`)
         throw error
     }
 }
