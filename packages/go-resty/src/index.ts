@@ -10,7 +10,15 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { isQueryMethod, MutationMethod, MutationService, QueryMethod, QueryService, Schema } from '@typerpc/schema'
+import {
+    isQueryMethod,
+    MutationMethod,
+    MutationService,
+    Param,
+    QueryMethod,
+    QueryService,
+    Schema,
+} from '@typerpc/schema'
 import { capitalize, lowerCase } from '@typerpc/plugin-utils'
 import { buildInterfaceMethods, buildType, buildTypes } from '@typerpc/go-plugin-utils'
 
@@ -39,7 +47,11 @@ func (s *${capitalize(svc.name)}) reqUrl(url string) string  {
 `
 }
 
-const buildQueryParams = (method: QueryMethod): string => {
+const buildQueryParams = (params: ReadonlyArray<Param>): string => {
+    const paramsString = ''
+    for (const param of params) {
+        paramsString = paramsString.concat(`"${lowerCase(param.name)}": "",`)
+    }
     return `
 .SetQueryParams(map[string]string{
 
@@ -47,7 +59,7 @@ const buildQueryParams = (method: QueryMethod): string => {
 }
 const buildQueryRequest = (method: QueryMethod): string => {
     return `
-resp, err := setHeaders(s.client.R())${method.hasParams ? buildQueryParams(method) : ''}.
+resp, err := setHeaders(s.client.R())${method.hasParams ? buildQueryParams(method.params) : ''}.
   SetHeader("Accept", "${method.hasCborReturn ? 'application/cbor' : 'application/json'}").Get(s.reqUrl("${lowerCase(
         method.name,
     )}"))
