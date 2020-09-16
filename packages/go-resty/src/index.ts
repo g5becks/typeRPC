@@ -53,8 +53,15 @@ const buildRequest = (method: MutationMethod | QueryMethod): string => {
 
 ${method.isVoidReturn ? '' : buildClientResponseStruct(method.returnType)}
 
-req := setHeaders(s.client.R(), headers...)${isQueryMethod(method) ? buildQueryParams(method) : ''}.
-  SetHeader("Accept", "${method.hasCborReturn ? 'application/cbor' : 'application/json'}")
+req := setHeaders(s.client.R(), headers...)${
+        isQueryMethod(method) ? buildQueryParams(method) : ''
+    }.SetHeader("Accept", "${method.hasCborReturn ? 'application/cbor' : 'application/json'}")${
+        isMutationMethod(method)
+            ? method.hasCborParams
+                ? '.SetHeader("Content-Type", "application/cbor")'
+                : '.SetHeader("Content-Type", "application/json")'
+            : ''
+    }
 
 	err := makeRequest(ctx, requestData{
 		Method:       "${method.httpMethod.toUpperCase()}",
