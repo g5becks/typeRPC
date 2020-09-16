@@ -147,31 +147,39 @@ const scalarToQueryString = (param: string, type: DataType): string => {
     if (is.scalar(type))
         switch (type.type) {
             case 'str':
-                return param
+                return `[]string{${param}}`
             case 'int8':
             case 'int16':
             case 'int32':
             case 'int64':
-                return `strconv.Itoa(int(${param}))`
+                return `[]string{strconv.Itoa(int(${param}))}`
             case 'uint8':
             case 'uint16':
             case 'uint32':
-                return `strconv.FormatUint(uint64(${param}), 10)`
+                return `[]string{strconv.FormatUint(uint64(${param}), 10)}`
             case 'uint64':
-                return `strconv.FormatUint(${param}, 10)`
+                return `[]string{strconv.FormatUint(${param}, 10)}`
             case 'float32':
-                return `strconv.FormatFloat(float64(${param}), 'e', -1, 32 )`
+                return `[]string{strconv.FormatFloat(float64(${param}), 'e', -1, 32 )}`
             case 'float64':
-                return `strconv.FormatFloat(${param}, 'e', -1, 32 )`
+                return `[]string{strconv.FormatFloat(${param}, 'e', -1, 32 )}`
             case 'bool':
-                return `strconv.FormatBool(${param})`
+                return `[]string{strconv.FormatBool(${param})}`
             case 'timestamp':
-                return `strconv.FormatInt(${param}.Unix(), 10)`
+                return `[]string{strconv.FormatInt(${param}.Unix(), 10)}`
             default:
                 return param
         }
 }
-export const toQueryString = (param: string, type: DataType): string => {}
+export const toQueryString = (param: string, type: DataType): string => {
+    if (!is.queryParamable(type)) {
+        throw new TypeError('invalid data type used in query service method')
+    }
+    if (is.scalar(type)) {
+        return scalarToQueryString(param, type)
+    }
+    return
+}
 export const handleOptional = (property: Property): string =>
     // if type is a scalar, make it a pointer (optional)
     is.scalar(property.type) && property.isOptional ? '*' : ''
