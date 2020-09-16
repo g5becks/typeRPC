@@ -60,11 +60,7 @@ const validatePlugins = (configs: ParsedConfig[]): void => {
     }).start()
     let invalids: string[] = []
     for (const cfg of configs) {
-        if (
-            cfg.plugin.location !== 'filepath' &&
-            !cfg.plugin.name.startsWith('@typerpc/') &&
-            !cfg.plugin.name.startsWith('typerpc-plugin')
-        ) {
+        if (!cfg.plugin.name.startsWith('@typerpc/') && !cfg.plugin.name.startsWith('typerpc-plugin')) {
             invalids = [...invalids, cfg.plugin.name]
         }
     }
@@ -290,15 +286,15 @@ export const gen: CommandModule<Record<string, unknown>, Args> = {
             type: 'string',
             description: 'name of the typerpc plugin to install from github and use for code generation',
         },
-        npm: {
-            alias: 'n',
-            type: 'string',
-            description: 'name of the typerpc plugin to install from npm and use for code generation',
-        },
-        path: {
+        plugin: {
             alias: 'p',
             type: 'string',
-            description: 'path to the typerpc plugin to install and use for code generation',
+            description: 'name of the typerpc plugin to install and use for code generation',
+        },
+        local: {
+            alias: 'l',
+            type: 'string',
+            description: 'path to the typerpc plugin package to install and use for code generation',
         },
         version: {
             alias: 'v',
