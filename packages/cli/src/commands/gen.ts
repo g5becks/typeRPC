@@ -180,10 +180,10 @@ type ErrorInfo = {
 type Args = Readonly<
     Partial<{
         tsconfig: string
-        npm?: string
-        path?: string
-        github?: string
-        version?: string
+        plugin: string
+        local: string
+        github: string
+        version: string
         out: string
         pkg: string
         fmt: string
@@ -300,7 +300,7 @@ export const gen: CommandModule<Record<string, unknown>, Args> = {
             alias: 'v',
             type: 'string',
             description:
-                'version of the plugin to install, this flag is only valid if installing from npm. If using github, specify the version as a part of the name/url. E.G. typerpc/someplugin#351396f ',
+                'version of the plugin to install, this flag is only valid if installing from npm. If using github, specify the version using the -g flag E.G. -g typerpc-plugin/someplugin#351396f ',
         },
         out: {
             alias: 'o',
