@@ -30,7 +30,7 @@ export type PluginConfig = {
      * For using github specify in the format {github: 'owner/repository_name' } or
      * owner/repository_name#ref to specify a version E.G. {github: 'typerpc-plugin/someplugin#351396f'} .
      * For local plugins provide the filepath to the directory containing the
-     * package.json file plugin. E.G. {local: '/machine/development/plugin'}, node_modules folder is not allowed. If no location is provided the plugin
+     * package.json file for the plugin. E.G. {local: '/machine/development/plugin'}, node_modules folder is not allowed. If no location is provided the plugin
      * will be downloaded from npm. */
     location?: PluginLocation
 }

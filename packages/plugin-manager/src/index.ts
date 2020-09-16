@@ -24,6 +24,10 @@ export const isValidPlugin = (plugin: any): plugin is TypeRpcPlugin =>
 export const isPluginConfig = (config: Record<string, unknown>): config is PluginConfig =>
     'name' in config && 'version' in config && 'location' in config
 
+export const isGitHub = (location: any): location is { github: string } => 'github' in location
+
+export const isLocal = (location: any): location is { local: string } => 'local' in location
+
 export class PluginManager {
     readonly #manager: Manager
     readonly #pluginsPath: string
@@ -57,18 +61,13 @@ export class PluginManager {
             log.onInstalled(plugin.name)
             await this.#manager.installFromPath(this.pluginPath(plugin.name))
         }
+        log.onInstalling(plugin.name)
         if (plugin.location) {
-            log.onInstalling(plugin.name)
-            switch (plugin.location) {
-                case 'filepath':
-                    await this.#manager.installFromPath(plugin.name)
-                    break
-                case 'github':
-                    await this.#manager.installFromGithub(plugin.name)
-                    break
-                case 'npm':
-                    await this.#manager.installFromNpm(plugin.name, plugin.version ?? 'latest')
-                    break
+            if (isGitHub(plugin.location)) {
+                await this.#manager.installFromGithub(plugin.location.github)
+            }
+            if (isLocal(plugin.location)) {
+                await this.#manager.installFromPath(plugin.location.local)
             }
         } else {
             await this.#manager.installFromNpm(plugin.name, plugin.version ?? 'latest')
