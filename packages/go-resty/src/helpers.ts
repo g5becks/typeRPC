@@ -69,7 +69,13 @@ func makeRequest(ctx context.Context, data requestData) error {
 	if data.Method == "GET" {
 		resp, err = data.Request.Get(data.Url)
 		if err != nil {
-			return NewRPCError(resp.StatusCode(), "rpc request failed", err)
+			var status int
+			if resp != nil {
+				status = resp.StatusCode()
+			} else {
+				status = http.StatusBadRequest
+			}
+			return NewRPCError(status, "rpc request failed", err)
 		}
 	} else if data.Method == "POST" {
 		if data.Body != nil {
@@ -83,7 +89,13 @@ func makeRequest(ctx context.Context, data requestData) error {
 		}
 		resp, err = data.Request.Post(data.Url)
 		if err != nil {
-			return NewRPCError(resp.StatusCode(), "rpc request failed", err)
+			var status int
+			if resp != nil {
+				status = resp.StatusCode()
+			} else {
+				status = http.StatusBadRequest
+			}
+			return NewRPCError(status, "rpc request failed", err)
 		}
 	}
 
