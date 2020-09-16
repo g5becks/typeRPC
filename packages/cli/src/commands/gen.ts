@@ -284,7 +284,7 @@ export const gen: CommandModule<Record<string, unknown>, Args> = {
         github: {
             alias: 'g',
             type: 'string',
-            description: `github repository to download the typerpc plugin from. pecify in the format owner/repository_name or owner/repository_name#ref to specify a version E.G. typerpc-plugin/someplugin#351396f`,
+            description: `github repository to download the typerpc plugin from. specify in the format owner/repository_name or owner/repository_name#ref to specify a version E.G. typerpc-plugin/someplugin#351396f`,
         },
         plugin: {
             alias: 'p',
@@ -294,7 +294,7 @@ export const gen: CommandModule<Record<string, unknown>, Args> = {
         local: {
             alias: 'l',
             type: 'string',
-            description: 'path to the typerpc plugin package to install and use for code generation',
+            description: `path to the directory containing the package.json file for the local plugin to install. E.G. /machine/development/plugin`,
         },
         version: {
             alias: 'v',
