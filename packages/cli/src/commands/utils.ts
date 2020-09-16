@@ -52,7 +52,7 @@ const parsePluginLocation = (pluginConfig: ObjectLiteralExpression | undefined):
         }
         if (location.getProperty('local')) {
             return {
-                github:
+                local:
                     location
                         ?.getProperty('local')
                         ?.getChildrenOfKind(SyntaxKind.StringLiteral)[0]
