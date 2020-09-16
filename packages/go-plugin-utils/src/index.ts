@@ -299,7 +299,7 @@ export const buildRequestBodyType = (method: MutationMethod): string => {
         fields = fields.concat(lowerCase(param.name) + `,\n`)
     }
     return `
-    data := struct {
+    body := struct {
       ${props}
     }{
       ${fields}
@@ -399,7 +399,19 @@ export const buildResultInitializers = (type: DataType): string => {
     return `res, err`
 }
 
-export const buildResponseStruct = (type: DataType): string => {
+export const buildClientResponseStruct = (type: DataType): string => {
+    let responseType = ''
+    if (is.tuple2(type) || is.tuple3(type) || is.tuple4(type) || is.tuple5(type)) {
+        responseType = '[]interface{}'
+    } else {
+        responseType = dataType(type)
+    }
+    return `resp := struct {
+        Data ${responseType}  \`json:"data"\`
+    }{}`
+}
+
+export const buildServerResponseStruct = (type: DataType): string => {
     let responseType = ''
     let response = buildResultInitializers(type).replace(', err', '')
 
@@ -445,42 +457,52 @@ func marshalBody(v interface{}, isCbor bool) ([]byte, error) {
 	return data, nil
 }
 
-func makeRequest(ctx context.Context, method string, req *resty.Request, url string, cborParams bool, cborReturn bool, body interface{}, out interface{}) error {
+type requestData struct {
+	Method string
+	Request *resty.Request
+	Url string
+	CborBody bool
+	CborResponse bool
+	Body interface{}
+	Out interface{}
+}
+
+func makeRequest(ctx context.Context, data requestData) error {
 	var resp *resty.Response
 	var err error
-	var data []byte
+	var respData []byte
 	if ctx.Err() != nil {
 		return NewRPCError(http.StatusRequestTimeout, "request aborted context done", ctx.Err())
 	}
-	if method == "GET" {
-		resp, err = req.Get(url)
+	if data.Method == "GET" {
+		resp, err = data.Request.Get(data.Url)
 		if err != nil {
 			return NewRPCError(resp.StatusCode(), "rpc request failed", err)
 		}
-	} else if method == "POST" {
-		if body != nil {
-			data, err = marshalBody(body, cborParams)
+	} else if data.Method == "POST" {
+		if data.Body != nil {
+			respData, err = marshalBody(data.Body, data.CborBody)
 			if err != nil {
 				return err
 			}
 		}
-		if data != nil {
-			req.SetBody(data)
+		if respData != nil {
+			data.Request.SetBody(respData)
 		}
-		resp, err = req.Post(url)
+		resp, err = data.Request.Post(data.Url)
 		if err != nil {
 			return NewRPCError(resp.StatusCode(), "rpc request failed", err)
 		}
 	}
 
-	if out != nil {
-		if cborReturn {
-			err = cbor.Unmarshal(resp.Body(), out)
+	if data.Out != nil {
+		if data.CborResponse {
+			err = cbor.Unmarshal(resp.Body(), data.Out)
 		} else {
-			err = json.Unmarshal(resp.Body(), out)
+			err = json.Unmarshal(resp.Body(), data.Out)
 		}
 		if err != nil {
-			return NewRPCError(http.StatusBadRequest, "failed to marshal request data", err)
+			return NewRPCError(http.StatusBadRequest, "failed to marshal request respData", err)
 		}
 		if err = ctx.Err(); err != nil {
 			return NewRPCError(http.StatusRequestTimeout, "request aborted, context done", err)

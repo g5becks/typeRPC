@@ -15,13 +15,13 @@ import {
     isQueryMethod,
     MutationMethod,
     MutationService,
-    Param,
     QueryMethod,
     QueryService,
     Schema,
 } from '@typerpc/schema'
 import { capitalize, lowerCase } from '@typerpc/plugin-utils'
 import {
+    buildClientResponseStruct,
     buildInterfaceMethods,
     buildMethodParams,
     buildRequestBodyType,
@@ -76,8 +76,13 @@ const buildRequest = (method: MutationMethod | QueryMethod): string => {
     return `
 ${method.hasParams && isMutationMethod(method) ? buildRequestBodyType(method) : ''}
 
-req := setHeaders(s.client.R(), headers...).${buildRequestData(method)}.
+${method.isVoidReturn ? '' : buildClientResponseStruct(method.returnType)}
+req := setHeaders(s.client.R(), headers...)${isQueryMethod(method) ? buildQueryParams(method) : ''}.
   SetHeader("Accept", "${method.hasCborReturn ? 'application/cbor' : 'application/json'}")
+
+err := makeRequest(ctx, "${method.httpMethod.toUpperCase()}", req, s.reqUrl("${lowerCase(method.name)}"), ${
+        isMutationMethod(method) && method.hasCborParams ? 'true' : 'false'
+    }, ${method.hasCborReturn})
   `
 }
 const buildMethod = (svcName: string, method: QueryMethod | MutationMethod): string => {

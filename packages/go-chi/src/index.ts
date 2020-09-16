@@ -17,7 +17,7 @@ import {
     buildFileName,
     buildInterfaces,
     buildParamNames,
-    buildResponseStruct,
+    buildServerResponseStruct,
     buildResultDeclarations,
     buildResultInitializers,
     buildTypes,
@@ -43,7 +43,7 @@ const sendResponse = (method: MutationMethod | QueryMethod): string => {
 
 		return
 	}
-	 ${buildResponseStruct(method.returnType)}
+	 ${buildServerResponseStruct(method.returnType)}
    respData, err := marshalResponse(response, ${method.hasCborReturn ? 'true' : 'false'})
    if err != nil {
     		RespondWithErr(w, err, ${method.hasCborReturn ? 'true' : 'false'})
