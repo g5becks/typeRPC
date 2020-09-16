@@ -21,6 +21,7 @@ import { render } from 'prettyjson'
 export const getConfigFile = (project: Project): SourceFile | undefined =>
     project.getSourceFile((file) => file.getBaseName().toLowerCase() === 'rpc.config.ts')
 
+// get the value for the PluginConfig location property
 const parsePluginLocation = (pluginConfig: ObjectLiteralExpression | undefined): PluginLocation => {
     // get location property
     const prop = pluginConfig?.getProperty('location')
@@ -49,7 +50,18 @@ const parsePluginLocation = (pluginConfig: ObjectLiteralExpression | undefined):
                         ?.trim() ?? '',
             }
         }
+        if (location.getProperty('local')) {
+            return {
+                github:
+                    location
+                        ?.getProperty('local')
+                        ?.getChildrenOfKind(SyntaxKind.StringLiteral)[0]
+                        ?.getLiteralValue()
+                        ?.trim() ?? '',
+            }
+        }
     }
+    return 'npm'
 }
 const parseGeneratorConfig = (obj: ObjectLiteralExpression): GeneratorConfig => {
     const out = obj.getProperty('out')?.getChildrenOfKind(SyntaxKind.StringLiteral)[0]?.getLiteralValue()?.trim()
@@ -68,11 +80,7 @@ const parseGeneratorConfig = (obj: ObjectLiteralExpression): GeneratorConfig => 
                 ?.getChildrenOfKind(SyntaxKind.StringLiteral)[0]
                 ?.getLiteralValue()
                 ?.trim() ?? 'latest',
-        location: (pluginConfig
-            ?.getProperty('location')
-            ?.getChildrenOfKind(SyntaxKind.StringLiteral)[0]
-            ?.getLiteralValue()
-            ?.trim() ?? 'npm') as PluginLocation | undefined,
+        location: parsePluginLocation(pluginConfig),
     }
     const pkg = obj.getProperty('pkg')?.getChildrenOfKind(SyntaxKind.StringLiteral)[0]?.getLiteralValue()?.trim()
 
