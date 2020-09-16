@@ -11,23 +11,23 @@
  */
 
 import {
-  isMutationMethod,
-  isQueryMethod,
-  MutationMethod,
-  MutationService,
-  Param,
-  QueryMethod,
-  QueryService,
-  Schema,
+    isMutationMethod,
+    isQueryMethod,
+    MutationMethod,
+    MutationService,
+    Param,
+    QueryMethod,
+    QueryService,
+    Schema,
 } from '@typerpc/schema'
-import {capitalize, lowerCase} from '@typerpc/plugin-utils'
+import { capitalize, lowerCase } from '@typerpc/plugin-utils'
 import {
-  buildInterfaceMethods,
-  buildMethodParams,
-  buildRequestDataType,
-  buildReturnType,
-  buildTypes,
-  toQueryString,
+    buildInterfaceMethods,
+    buildMethodParams,
+    buildRequestBodyType,
+    buildReturnType,
+    buildTypes,
+    toQueryString,
 } from '@typerpc/go-plugin-utils'
 
 const buildClientStruct = (svc: QueryService | MutationService): string => {
@@ -55,32 +55,27 @@ func (s *${capitalize(svc.name)}) reqUrl(url string) string  {
 `
 }
 
-const buildQueryParams = (params: ReadonlyArray<Param>): string => {
+const buildQueryParams = (method: QueryMethod): string => {
     let paramsString = ''
-    for (const param of params) {
+    for (const param of method.params) {
         paramsString = paramsString.concat(`"${lowerCase(param.name)}": ${toQueryString(
             lowerCase(param.name),
             param.type,
         )},
         `)
     }
-    return `
+    return method.hasParams
+        ? `
 .SetQueryParamsFromValues(url.Values{
 		${paramsString}
 	})`
-}
-
-const buildRequestData = (method: QueryMethod | MutationMethod): string => {
-    return isQueryMethod(method)
-        ? `
-${method.hasParams ? buildQueryParams(method.params) : ''}.Get(s.reqUrl("${lowerCase(method.name)}"))
-`
         : ''
 }
 
 const buildRequest = (method: MutationMethod | QueryMethod): string => {
     return `
-${method.hasParams && isMutationMethod(method) ? buildRequestDataType(method)}
+${method.hasParams && isMutationMethod(method) ? buildRequestBodyType(method) : ''}
+
 req := setHeaders(s.client.R(), headers...).${buildRequestData(method)}.
   SetHeader("Accept", "${method.hasCborReturn ? 'application/cbor' : 'application/json'}")
   `

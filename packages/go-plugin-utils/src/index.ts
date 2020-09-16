@@ -288,7 +288,7 @@ export const parseQueryParams = (method: QueryMethod): string => {
 
 // used in go clients to generate a struct that contains method params as fields
 // which will be sent to the server.
-export const buildRequestDataType = (method: MutationMethod): string => {
+export const buildRequestBodyType = (method: MutationMethod): string => {
     let props = ''
     for (const param of method.params) {
         props = props.concat(`${capitalize(param.name)} ${dataType(param.type)} \`json:"${lowerCase(param.name)}"\`
@@ -299,11 +299,14 @@ export const buildRequestDataType = (method: MutationMethod): string => {
         fields = fields.concat(lowerCase(param.name) + `,\n`)
     }
     return `
-    rData := struct {
+    data := struct {
       ${props}
     }{
       ${fields}
-    }`
+    }
+
+
+    `
 }
 
 // used in go servers to parse the request body
@@ -426,9 +429,26 @@ export const buildInterfaces = (schema: Schema): string => {
 }
 
 export const clientHelpers = `
-func makeRequest(ctx context.Context, method string, req *resty.Request, url string, cborReturn bool, out interface{}) error {
+//nolint:unparam
+func marshalBody(v interface{}, isCbor bool) ([]byte, error) {
+	if isCbor {
+		data, err := cbor.Marshal(v)
+		if err != nil {
+			return data, NewRPCError(http.StatusBadRequest, "failed to marshal cbor data", err)
+		}
+	}
+	data, err := json.Marshal(v)
+	if err != nil {
+		return data, NewRPCError(http.StatusBadRequest, "failed to marshal json data", err)
+	}
+
+	return data, nil
+}
+
+func makeRequest(ctx context.Context, method string, req *resty.Request, url string, cborParams bool, cborReturn bool, body interface{}, out interface{}) error {
 	var resp *resty.Response
 	var err error
+	var data []byte
 	if ctx.Err() != nil {
 		return NewRPCError(http.StatusRequestTimeout, "request aborted context done", ctx.Err())
 	}
@@ -438,6 +458,15 @@ func makeRequest(ctx context.Context, method string, req *resty.Request, url str
 			return NewRPCError(resp.StatusCode(), "rpc request failed", err)
 		}
 	} else if method == "POST" {
+		if body != nil {
+			data, err = marshalBody(body, cborParams)
+			if err != nil {
+				return err
+			}
+		}
+		if data != nil {
+			req.SetBody(data)
+		}
 		resp, err = req.Post(url)
 		if err != nil {
 			return NewRPCError(resp.StatusCode(), "rpc request failed", err)
@@ -454,7 +483,7 @@ func makeRequest(ctx context.Context, method string, req *resty.Request, url str
 			return NewRPCError(http.StatusBadRequest, "failed to marshal request data", err)
 		}
 		if err = ctx.Err(); err != nil {
-			return NewRPCError(http.StatusRequestTimeout,"request aborted, context done", err)
+			return NewRPCError(http.StatusRequestTimeout, "request aborted, context done", err)
 		}
 	}
 	return nil
