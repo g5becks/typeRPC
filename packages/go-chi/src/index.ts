@@ -21,7 +21,7 @@ import {
     buildResultDeclarations,
     buildResultInitializers,
     buildTypes,
-    helpers,
+    serverHelpers,
     parseReqBody,
 } from '@typerpc/go-plugin-utils'
 
@@ -182,5 +182,5 @@ func NewChiRPCServer(${serverParams}) *ChiRPCServer  {
 export default (schemas: Schema[]): Code[] =>
     schemas
         .map((schema) => buildFile(schema))
-        .concat({ fileName: 'chi.rpc.helpers.go', source: helpers(schemas[0]) })
+        .concat({ fileName: 'chi.rpc.helpers.go', source: serverHelpers(schemas[0]) })
         .concat({ fileName: 'chi.rpc.server.go', source: buildServer(schemas) })

@@ -168,9 +168,11 @@ const scalarToQueryString = (param: string, type: DataType): string => {
             case 'timestamp':
                 return `[]string{strconv.FormatInt(${param}.Unix(), 10)}`
             default:
-                return param
+                return `[]string{${param}}`
         }
+    return `[]string{${param}}`
 }
+
 export const toQueryString = (param: string, type: DataType): string => {
     if (!is.queryParamable(type)) {
         throw new TypeError('invalid data type used in query service method')
@@ -178,8 +180,14 @@ export const toQueryString = (param: string, type: DataType): string => {
     if (is.scalar(type)) {
         return scalarToQueryString(param, type)
     }
-    return
+    if (is.list(type)) {
+        if (is.scalar(type.dataType)) {
+            return `${capitalize(dataType(type))}sToStrings(${param})`
+        }
+    }
+    return `[]string{${param}}`
 }
+
 export const handleOptional = (property: Property): string =>
     // if type is a scalar, make it a pointer (optional)
     is.scalar(property.type) && property.isOptional ? '*' : ''
@@ -396,7 +404,115 @@ export const buildInterfaces = (schema: Schema): string => {
     return interfaces
 }
 
-export const helpers = (schema: Schema) => `
+export const clientHelpers = `
+func Int8sToStrings(params []int8) []string {
+	list := make([]string, len(params))
+	for i, param := range params {
+		list[i] = strconv.Itoa(int(param))
+	}
+
+	return list
+}
+
+func Int16sToStrings(params []int16) []string {
+	list := make([]string, len(params))
+	for i, param := range params {
+		list[i] = strconv.Itoa(int(param))
+	}
+
+	return list
+}
+
+func Int32sToStrings(params []int32) []string {
+	list := make([]string, len(params))
+	for i, param := range params {
+		list[i] = strconv.Itoa(int(param))
+	}
+
+	return list
+}
+
+func Int64sToStrings(params []int64) []string {
+	list := make([]string, len(params))
+	for i, param := range params {
+		list[i] = strconv.Itoa(int(param))
+	}
+
+	return list
+}
+
+func Uint8sToStrings(params []uint8) []string {
+	list := make([]string, len(params))
+	for i, param := range params {
+		list[i] = strconv.FormatUint(uint64(param), 10)
+	}
+
+	return list
+}
+
+func Uint16sToStrings(params []uint16) []string {
+	list := make([]string, len(params))
+	for i, param := range params {
+		list[i] = strconv.FormatUint(uint64(param), 10)
+	}
+
+	return list
+}
+func Uint32sToStrings(params []uint32) []string {
+	list := make([]string, len(params))
+	for i, param := range params {
+		list[i] = strconv.FormatUint(uint64(param), 10)
+	}
+
+	return list
+}
+
+func Uint64sToStrings(params []uint64) []string {
+	list := make([]string, len(params))
+	for i, param := range params {
+		list[i] = strconv.FormatUint(param, 10)
+	}
+
+	return list
+}
+
+func Float32sToStrings(params []float32) []string {
+	list := make([]string, len(params))
+	for i, param := range params {
+		list[i] = strconv.FormatFloat(float64(param), 'e', -1, 32)
+	}
+
+	return list
+}
+
+func Float64sToStrings(params []float64) []string {
+	list := make([]string, len(params))
+	for i, param := range params {
+		list[i] = strconv.FormatFloat(param, 'e', -1, 32)
+	}
+
+	return list
+}
+
+func BoolsToStrings(params []bool) []string {
+	list := make([]string, len(params))
+	for i, param := range params {
+		list[i] = strconv.FormatBool(param)
+	}
+
+	return list
+}
+
+func TimestampsToStrings(params []time.Time) []string {
+	list := make([]string, len(params))
+	for i, param := range params {
+		list[i] = strconv.FormatInt(param.Unix(), 10)
+	}
+
+	return list
+}
+`
+export const serverHelpers = (schema: Schema) => `
 package ${schema.packageName}
 
 import (
