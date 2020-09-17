@@ -166,11 +166,18 @@ const format = (formatters: FormatConfig[], log: Logger, configFilePath?: string
         text: chalk.magentaBright("Let's make that code look good by applying some formatting"),
         color: 'cyan',
     })
-    const filePath = (dir: string) => (configFilePath ? path.join(configFilePath, dir) : dir)
+    const filePath = (dir: string, isAbsolute: boolean) => {
+        // if absolute path, just return it
+        if (isAbsolute) {
+            return dir
+        }
+        // if there is a config file make the output path relative to the config file path
+        return configFilePath ? path.join(configFilePath, dir) : dir
+    }
     for (const fmt of formatters) {
         if (fmt.fmt) {
             formatter(
-                filePath(fmt.out),
+                filePath(fmt.out, path.isAbsolute(fmt.out)),
                 fmt.fmt,
                 (error) => log.error(error),
                 (msg) => log.info(msg),
