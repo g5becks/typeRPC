@@ -15,7 +15,7 @@ import { Logger } from 'tslog'
 import { isValidPlugin, PluginManager } from '@typerpc/plugin-manager'
 import { Code } from '@typerpc/plugin'
 import { Project, SourceFile } from 'ts-morph'
-import { createLogger, format as formatter, getConfigFile, parseConfig, ParsedConfig } from './utils'
+import { createLogger, format as formatter, getConfigFile, getRpcConfigPath, parseConfig, ParsedConfig } from './utils'
 import { outputFile, pathExistsSync } from 'fs-extra'
 import { buildSchemas, validateSchemas } from '@typerpc/schema'
 import path from 'path'
@@ -129,12 +129,13 @@ const generateCode = (configs: ParsedConfig[], manager: PluginManager, files: So
     return generated
 }
 
-const saveToDisk = async (generated: GeneratedCode[]) => {
+const saveToDisk = async (generated: GeneratedCode[], configFilePath?: string) => {
     const spinner = ora({ text: chalk.cyanBright("Let's stash this code somewhere safe."), color: 'magenta' })
     if (generated.length === 0) {
         return
     }
-    const filePath = (out: string, file: string) => path.join(out, file)
+    const filePath = (out: string, file: string) =>
+        configFilePath ? path.join(configFilePath, out, file) : path.join(out, file)
     for (const gen of generated) {
         for (const entry of gen.code) {
             try {
@@ -153,15 +154,16 @@ type FormatConfig = {
     out: string
 }
 
-const format = (formatters: FormatConfig[], log: Logger) => {
+const format = (formatters: FormatConfig[], log: Logger, configFilePath?: string) => {
     const spinner = ora({
         text: chalk.magentaBright("Let's make that code look good by applying some formatting"),
         color: 'cyan',
     })
+    const filePath = (dir: string) => (configFilePath ? path.join(configFilePath, dir) : dir)
     for (const fmt of formatters) {
         if (fmt.fmt) {
             formatter(
-                fmt.out,
+                filePath(fmt.out),
                 fmt.fmt,
                 (error) => log.error(error),
                 (msg) => log.info(msg),
@@ -222,6 +224,8 @@ const handler = async (args: Args): Promise<void> => {
     try {
         // get rpc.config.ts file
         const configFile = getConfigFile(project)
+        // get rpc.config.ts filepath to use for generating code
+        const configFilePath = getRpcConfigPath(configFile)
         // parse config objects
         let configs: ParsedConfig[] = configFile ? parseConfig(configFile) : []
 
@@ -258,11 +262,12 @@ const handler = async (args: Args): Promise<void> => {
         validateSchemaFiles(sourceFiles)
         await installPlugins(configs, pluginManager, log)
         const generated = generateCode(configs, pluginManager, sourceFiles)
-        await saveToDisk(generated)
+        await saveToDisk(generated, configFilePath)
         // noinspection JSDeepBugsSwappedArgs
         format(
             configs.map((cfg) => ({ fmt: cfg.fmt, out: cfg.out })),
             log,
+            configFilePath,
         )
     } catch (error) {
         if (debug.enabled) {

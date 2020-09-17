@@ -167,3 +167,10 @@ export const format = (
 
         onComplete(`code formatting succeeded using formatter: ${formatter}, msg: ${stdout}`)
     })
+
+export const getRpcConfigPath = (file: SourceFile | undefined): string | undefined => {
+    if (!file) {
+        return file
+    }
+    return file.getDirectory().getPath().toString().trim()
+}
