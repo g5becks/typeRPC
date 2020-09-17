@@ -30,7 +30,7 @@ const handler = async (args: Args) => {
     await scaffold(name, yarn, client, server)
 }
 export const create: CommandModule<Record<string, unknown>, Args> = {
-    command: 'create',
+    command: 'create <name>',
     describe: 'creates a new typerpc application',
     builder: (_) => {
         return yargs
