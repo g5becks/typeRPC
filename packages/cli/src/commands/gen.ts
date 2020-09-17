@@ -134,12 +134,19 @@ const saveToDisk = async (generated: GeneratedCode[], configFilePath?: string) =
     if (generated.length === 0) {
         return
     }
-    const filePath = (out: string, file: string) =>
-        configFilePath ? path.join(configFilePath, out, file) : path.join(out, file)
+    const filePath = (out: string, file: string, isAbsolute: boolean) => {
+        if (isAbsolute) {
+            return path.join(out, file)
+        }
+        return configFilePath ? path.join(configFilePath, out, file) : path.join(out, file)
+    }
     for (const gen of generated) {
         for (const entry of gen.code) {
             try {
-                await outputFile(filePath(gen.outputPath, entry.fileName), entry.source)
+                await outputFile(
+                    filePath(gen.outputPath, entry.fileName, path.isAbsolute(gen.outputPath)),
+                    entry.source,
+                )
             } catch (error) {
                 spinner.fail(chalk.red(``))
                 throw new Error(`error occurred writing files: ${error}`)
