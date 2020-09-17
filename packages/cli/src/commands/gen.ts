@@ -135,9 +135,12 @@ const saveToDisk = async (generated: GeneratedCode[], configFilePath?: string) =
         return
     }
     const filePath = (out: string, file: string, isAbsolute: boolean) => {
+        // if path is absolute, make filepath relative to that path and return it
         if (isAbsolute) {
             return path.join(out, file)
         }
+        // if config file was used, make the out dir relative to the config file
+        // and store the path there, otherwise use cwd
         return configFilePath ? path.join(configFilePath, out, file) : path.join(out, file)
     }
     for (const gen of generated) {

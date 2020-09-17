@@ -11,85 +11,23 @@
  */
 
 import yargs, { CommandModule } from 'yargs'
+import { scaffold } from './utils'
 
 type Args = Readonly<
     Partial<{
         name: string
         client: string
         server: string
+        yarn: boolean
     }>
 >
 
-const tsconfigFile = `
-{
-  "compilerOptions": {
-    "noEmit": true,
-    "strict": true,
-    "strictFunctionTypes": false,
-    "forceConsistentCasingInFileNames": true
-  }
-}
-`
-
-const rpcConfig = (client?: string, server?: string) => `
-import {Config} from '@typerpc/config'
-
-// edit the fields below to your liking to generate your desired code.
-const config: Config = {
-	// config object for client side code, this key can be named whatever you like
-	// but be sure to make it self explanatory
-	client: {
-		// path to store generated outputs. Can be relative E.G. ./client | .\\client
-		// or absolute E.G. /home/machine/development/client | C:\\Users\\username\\development\\client
-		out: '',
-		// a valid PluginConfig object, this plugin will be used to generate code for the client key
-		plugin: {
-			// the name of the plugin to use for generating code.
-			// all plugin names must start with either @typerpc or typerpc-plugin
-			// this makes searching for plugins on github and npm a breeze.
-			name: '${client ?? ''}',
-			/* optional location of the plugin. This key is only needed if the plugin is not hosted on npm
-			location: {
-				// set the local key if using a plugin that is located on disk. useful for development. E.G. /home/Dev/some_path/typerpc-plugin-some-neat-plugin-name
-				local: ''
-
-				// or set the github key to download the plugin from github.
-				// repository can be specified in the format owner/repository_name#ref
-				// E.G. mygithubusername/my-special-plugin#351396f
-				github: 'owner/repository_name'
-			},
-
-			 */
-
-		},
-		// name of the package for the generated output
-		// E.G. 'rpc' for go perhaps, or 'com.myorg.somepackage' for java
-		// this field is not currently used for ts/js but may be in future versions
-		// so it is required nonetheless
-		pkg: '',
-		// a string to use for formatting the generated client output
-		// E.G. 'prettier --single-quote --no-semi --trailing-comma all --write'
-		// do not include a path, this will be added at runtime.
-		fmt: ''
-	},
-
-	server: {
-
-		out: './server',
-		plugin: { name: ${server} ?? ''},
-		// name of the package for the generated output
-		pkg: 'rpc',
-		// a string to use for formatting the generated output
-		fmt: 'gofmt -d -s -w'
-	}
-
-}
-`
-const handler = (args: Args) => {
-    const { name, client, server } = args
+const handler = async (args: Args) => {
+    const { name, client, server, yarn } = args
     if (!name) {
         throw new Error(`name must be provided when using the create command`)
     }
+    await scaffold(name, yarn, client, server)
 }
 export const create: CommandModule<Record<string, unknown>, Args> = {
     command: 'create',
@@ -112,6 +50,11 @@ export const create: CommandModule<Record<string, unknown>, Args> = {
                     alias: 's',
                     type: 'string',
                     description: 'name of the plugin to use for server side code generation',
+                },
+                yarn: {
+                    alias: 'y',
+                    type: 'boolean',
+                    description: 'use yarn to install packages instead of npm',
                 },
             })
     },
