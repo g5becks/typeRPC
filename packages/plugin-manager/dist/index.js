@@ -29,20 +29,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, privateMap, value) {
-    if (!privateMap.has(receiver)) {
-        throw new TypeError("attempted to set private field on non-instance");
-    }
-    privateMap.set(receiver, value);
-    return value;
-};
-var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, privateMap) {
-    if (!privateMap.has(receiver)) {
-        throw new TypeError("attempted to get private field on non-instance");
-    }
-    return privateMap.get(receiver);
-};
-var _manager, _pluginsPath;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PluginManager = exports.isLocal = exports.isGitHub = exports.isPluginConfig = exports.isValidPlugin = void 0;
 const live_plugin_manager_1 = require("live-plugin-manager");
@@ -53,20 +39,18 @@ exports.isPluginConfig = (config) => 'name' in config && 'version' in config && 
 exports.isGitHub = (location) => typeof location === 'object' && 'github' in location;
 exports.isLocal = (location) => typeof location === 'object' && 'local' in location;
 class PluginManager {
-    constructor(pluginsPath, cwd) {
-        _manager.set(this, void 0);
-        _pluginsPath.set(this, void 0);
-        this.opts = () => JSON.stringify(__classPrivateFieldGet(this, _manager).options);
-        this.list = () => JSON.stringify(__classPrivateFieldGet(this, _manager).list());
-        __classPrivateFieldSet(this, _pluginsPath, pluginsPath);
-        __classPrivateFieldSet(this, _manager, new live_plugin_manager_1.PluginManager({ pluginsPath, cwd }));
+    constructor(pluginPath, cwd) {
+        this.opts = () => JSON.stringify(this.manager.options);
+        this.list = () => JSON.stringify(this.manager.list());
+        this.pluginsPath = pluginPath;
+        this.manager = new live_plugin_manager_1.PluginManager({ pluginsPath: pluginPath, cwd });
     }
     static create(project) {
         const cwd = project.getRootDirectories()[0].getPath();
         return new PluginManager(cwd + '/.typerpc/plugins', cwd);
     }
     pluginPath(plugin) {
-        return `${__classPrivateFieldGet(this, _pluginsPath)}/${sanitize(plugin)}`;
+        return `${this.pluginsPath}/${sanitize(plugin)}`;
     }
     pluginIsInstalled(plugin) {
         return fs.existsSync(this.pluginPath(plugin));
@@ -78,19 +62,23 @@ class PluginManager {
         }
         if (this.pluginIsInstalled(this.pluginPath(plugin.name))) {
             log.onInstalled(plugin.name);
-            await __classPrivateFieldGet(this, _manager).installFromPath(this.pluginPath(plugin.name));
+            await this.manager.installFromPath(this.pluginPath(plugin.name));
         }
         log.onInstalling(plugin.name);
-        if (plugin.location) {
+        if (typeof plugin.location !== 'undefined' && plugin.location !== 'npm') {
             if (exports.isGitHub(plugin.location)) {
-                await __classPrivateFieldGet(this, _manager).installFromGithub(plugin.location.github);
+                await this.manager.installFromGithub(plugin.location.github);
             }
             if (exports.isLocal(plugin.location)) {
-                await __classPrivateFieldGet(this, _manager).installFromPath(plugin.location.local);
+                await this.manager.installFromPath(plugin.location.local);
             }
         }
+        else if (plugin.location === 'npm') {
+            const info = await this.manager.installFromNpm(plugin.name, (_a = plugin.version) !== null && _a !== void 0 ? _a : 'latest');
+            console.log(info);
+        }
         else {
-            await __classPrivateFieldGet(this, _manager).installFromNpm(plugin.name, (_a = plugin.version) !== null && _a !== void 0 ? _a : 'latest');
+            console.log('plugin has invalid location field');
         }
     }
     async install(plugins, onInstalled, onInstalling) {
@@ -99,7 +87,7 @@ class PluginManager {
         }
     }
     require(plugin) {
-        const plug = __classPrivateFieldGet(this, _manager).require(plugin);
+        const plug = this.manager.require(plugin);
         return exports.isValidPlugin(plug)
             ? typeof plug === 'function'
                 ? plug
@@ -109,5 +97,4 @@ class PluginManager {
     }
 }
 exports.PluginManager = PluginManager;
-_manager = new WeakMap(), _pluginsPath = new WeakMap();
 //# sourceMappingURL=index.js.map

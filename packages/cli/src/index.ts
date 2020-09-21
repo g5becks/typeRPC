@@ -14,7 +14,6 @@ import yargs from 'yargs'
 import { gen } from './commands/gen'
 import chalk from 'chalk'
 import figlet from 'figlet'
-import { Logger } from 'tslog'
 import { create } from './commands/create'
 
 console.log(chalk.blue(figlet.textSync('typerpc')))
@@ -32,6 +31,4 @@ const argv = yargs
     .help()
     .epilogue('for more information, please visit https://typerpc.run').argv
 
-const log = new Logger()
-
-log.info(`typerpc ran with ${argv}`)
+console.log(`typerpc running with with ${argv}`)

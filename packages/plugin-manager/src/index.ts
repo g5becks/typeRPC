@@ -31,12 +31,12 @@ export const isLocal = (location: any): location is { local: string } =>
     typeof location === 'object' && 'local' in location
 
 export class PluginManager {
-    readonly #manager: Manager
-    readonly #pluginsPath: string
+    private readonly manager: Manager
+    private readonly pluginsPath: string
 
-    private constructor(pluginsPath: string, cwd: string) {
-        this.#pluginsPath = pluginsPath
-        this.#manager = new Manager({ pluginsPath, cwd })
+    private constructor(pluginPath: string, cwd: string) {
+        this.pluginsPath = pluginPath
+        this.manager = new Manager({ pluginsPath: pluginPath, cwd })
     }
 
     static create(project: Project): PluginManager {
@@ -45,7 +45,7 @@ export class PluginManager {
     }
 
     private pluginPath(plugin: string): string {
-        return `${this.#pluginsPath}/${sanitize(plugin)}`
+        return `${this.pluginsPath}/${sanitize(plugin)}`
     }
 
     private pluginIsInstalled(plugin: string): boolean {
@@ -61,24 +61,25 @@ export class PluginManager {
         }
         if (this.pluginIsInstalled(this.pluginPath(plugin.name))) {
             log.onInstalled(plugin.name)
-            await this.#manager.installFromPath(this.pluginPath(plugin.name))
+            await this.manager.installFromPath(this.pluginPath(plugin.name))
         }
         log.onInstalling(plugin.name)
-        if (plugin.location) {
+        if (typeof plugin.location !== 'undefined' && plugin.location !== 'npm') {
             if (isGitHub(plugin.location)) {
-                await this.#manager.installFromGithub(plugin.location.github)
+                await this.manager.installFromGithub(plugin.location.github)
             }
             if (isLocal(plugin.location)) {
-                await this.#manager.installFromPath(plugin.location.local)
+                await this.manager.installFromPath(plugin.location.local)
             }
-            if (plugin.location === 'npm') {
-                await this.#manager.installFromNpm(plugin.name, plugin.version ?? 'latest')
-            }
+        } else if (plugin.location === 'npm') {
+            await this.manager.installFromNpm(plugin.name, plugin.version ?? 'latest')
+        } else {
+            console.log('plugin has invalid location field')
         }
     }
 
-    opts = (): string => JSON.stringify(this.#manager.options)
-    list = (): string => JSON.stringify(this.#manager.list())
+    opts = (): string => JSON.stringify(this.manager.options)
+    list = (): string => JSON.stringify(this.manager.list())
     async install(
         plugins: PluginConfig[],
         onInstalled: (plugin: string) => void,
@@ -89,7 +90,7 @@ export class PluginManager {
         }
     }
     require(plugin: string): TypeRpcPlugin | Error {
-        const plug = this.#manager.require(plugin)
+        const plug = this.manager.require(plugin)
         return isValidPlugin(plug)
             ? typeof plug === 'function'
                 ? plug

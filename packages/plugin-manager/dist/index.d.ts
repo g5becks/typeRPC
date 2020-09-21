@@ -10,7 +10,8 @@ export declare const isLocal: (location: any) => location is {
     local: string;
 };
 export declare class PluginManager {
-    #private;
+    private readonly manager;
+    private readonly pluginsPath;
     private constructor();
     static create(project: Project): PluginManager;
     private pluginPath;
