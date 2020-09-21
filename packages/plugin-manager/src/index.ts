@@ -71,8 +71,9 @@ export class PluginManager {
             if (isLocal(plugin.location)) {
                 await this.#manager.installFromPath(plugin.location.local)
             }
-        } else {
-            await this.#manager.installFromNpm(plugin.name, plugin.version ?? 'latest')
+            if (plugin.location === 'npm') {
+                await this.#manager.installFromNpm(plugin.name, plugin.version ?? 'latest')
+            }
         }
     }
 
