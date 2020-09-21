@@ -106,6 +106,7 @@ const generateCode = (configs: ParsedConfig[], manager: PluginManager, files: So
     let generated: GeneratedCode[] = []
     for (const cfg of configs) {
         const schemas = buildSchemas(files, cfg.pkg)
+        console.log(schemas)
         const gen = manager.require(cfg.plugin.name)
         if (gen instanceof Error) {
             throw Error(`error is ${gen.message}`)
@@ -251,6 +252,9 @@ const handler = async (args: Args): Promise<void> => {
         const sourceFiles = project
             .getSourceFiles()
             .filter((file) => file.getBaseName().toLowerCase() !== 'rpc.config.ts')
+        if (!sourceFiles || !sourceFiles.length) {
+            throw new Error('no source file found in your project. Please check your ts.config.json file for errors')
+        }
         // if user provides command line arguments the config file will
         // be overridden - Be sure to document this behaviour
         if ((local || github) && out && pkg) {
