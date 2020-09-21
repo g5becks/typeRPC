@@ -95,7 +95,7 @@ const validateSchemaFiles = (files: SourceFile[]) => {
 const installPlugins = async (configs: ParsedConfig[], manager: PluginManager, log: Logger) => {
     const plugins = configs.map((cfg) => cfg.plugin)
     const onInstalled = (plugin: string) => log.info(`${plugin} already installed, fetching from cache`)
-    const onInstalling = (plugin: string) => log.info(`attempting to install ${plugin}`)
+    const onInstalling = (plugin: string) => log.info(`attempting to install ${plugin} `)
     await manager.install(plugins, onInstalled, onInstalling)
 }
 

@@ -14,10 +14,11 @@ import { ObjectLiteralExpression, Project, SourceFile, SyntaxKind } from 'ts-mor
 import { GeneratorConfig, PluginConfig, PluginLocation } from '@typerpc/config'
 import { ChildProcess, exec } from 'child_process'
 import * as fs from 'fs-extra'
-import { appendFile, outputFile } from 'fs-extra'
+import { outputFile } from 'fs-extra'
 import { ILogObject, Logger } from 'tslog'
 import { render } from 'prettyjson'
 import chalk from 'chalk'
+import { appendFileSync } from 'fs'
 
 export const getConfigFile = (project: Project): SourceFile | undefined =>
     project.getSourceFile((file) => file.getBaseName().toLowerCase() === 'rpc.config.ts')
@@ -122,8 +123,8 @@ export const parseConfig = (file: SourceFile | undefined): ParsedConfig[] => {
 export const createLogger = (project: Project): Logger => {
     const dest = project.getRootDirectories()[0].getPath() + '/.typerpc/error.log'
     fs.ensureFileSync(dest)
-    const logToFile = async (logObject: ILogObject) => {
-        await appendFile(
+    const logToFile = (logObject: ILogObject) => {
+        appendFileSync(
             dest,
             render(logObject, { noColor: true }) +
                 '\n---------------------------------------------------------------------------------------------------------------------------------------\n',
