@@ -112,16 +112,24 @@ const generateCode = (configs, manager, files) => {
     spinner.succeed(chalk_1.default.whiteBright('Code generation complete. That was fast!'));
     return generated;
 };
-const saveToDisk = async (generated) => {
+const saveToDisk = async (generated, configFilePath) => {
     const spinner = ora_1.default({ text: chalk_1.default.cyanBright("Let's stash this code somewhere safe."), color: 'magenta' });
     if (generated.length === 0) {
         return;
     }
-    const filePath = (out, file) => path_1.default.join(out, file);
+    const filePath = (out, file, isAbsolute) => {
+        // if path is absolute, make filepath relative to that path and return it
+        if (isAbsolute) {
+            return path_1.default.join(out, file);
+        }
+        // if config file was used, make the out dir relative to the config file
+        // and store the path there, otherwise use cwd
+        return configFilePath ? path_1.default.join(configFilePath, out, file) : path_1.default.join(out, file);
+    };
     for (const gen of generated) {
         for (const entry of gen.code) {
             try {
-                await fs_extra_1.outputFile(filePath(gen.outputPath, entry.fileName), entry.source);
+                await fs_extra_1.outputFile(filePath(gen.outputPath, entry.fileName, path_1.default.isAbsolute(gen.outputPath)), entry.source);
             }
             catch (error) {
                 spinner.fail(chalk_1.default.red(``));
@@ -131,14 +139,22 @@ const saveToDisk = async (generated) => {
     }
     spinner.succeed(chalk_1.default.cyanBright('Alllrighty then! Your code has been saved!'));
 };
-const format = (formatters, log) => {
+const format = (formatters, log, configFilePath) => {
     const spinner = ora_1.default({
         text: chalk_1.default.magentaBright("Let's make that code look good by applying some formatting"),
         color: 'cyan',
     });
+    const filePath = (dir, isAbsolute) => {
+        // if absolute path, just return it
+        if (isAbsolute) {
+            return dir;
+        }
+        // if there is a config file make the output path relative to the config file path
+        return configFilePath ? path_1.default.join(configFilePath, dir) : dir;
+    };
     for (const fmt of formatters) {
         if (fmt.fmt) {
-            utils_1.format(fmt.out, fmt.fmt, log.error, log.info);
+            utils_1.format(filePath(fmt.out, path_1.default.isAbsolute(fmt.out)), fmt.fmt, (error) => log.error(error), (msg) => log.info(msg));
         }
         else {
             log.warn(`No code formatter provided for code saved to ${fmt.out} your code might not look very good.`);
@@ -172,6 +188,8 @@ const handler = async (args) => {
     try {
         // get rpc.config.ts file
         const configFile = utils_1.getConfigFile(project);
+        // get rpc.config.ts filepath to use for generating code
+        const configFilePath = utils_1.getRpcConfigPath(configFile);
         // parse config objects
         let configs = configFile ? utils_1.parseConfig(configFile) : [];
         const pluginManager = plugin_manager_1.PluginManager.create(project);
@@ -206,9 +224,9 @@ const handler = async (args) => {
         validateSchemaFiles(sourceFiles);
         await installPlugins(configs, pluginManager, log);
         const generated = generateCode(configs, pluginManager, sourceFiles);
-        await saveToDisk(generated);
+        await saveToDisk(generated, configFilePath);
         // noinspection JSDeepBugsSwappedArgs
-        format(configs.map((cfg) => ({ fmt: cfg.fmt, out: cfg.out })), log);
+        format(configs.map((cfg) => ({ fmt: cfg.fmt, out: cfg.out })), log, configFilePath);
     }
     catch (error) {
         if (debug.enabled) {

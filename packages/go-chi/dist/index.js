@@ -28,7 +28,7 @@ const sendResponse = (method) => {
 
 		return
 	}
-	 ${go_plugin_utils_1.buildResponseStruct(method.returnType)}
+	 ${go_plugin_utils_1.buildServerResponseStruct(method.returnType)}
    respData, err := marshalResponse(response, ${method.hasCborReturn ? 'true' : 'false'})
    if err != nil {
     		RespondWithErr(w, err, ${method.hasCborReturn ? 'true' : 'false'})
@@ -156,6 +156,6 @@ func NewChiRPCServer(${serverParams}) *ChiRPCServer  {
 };
 exports.default = (schemas) => schemas
     .map((schema) => buildFile(schema))
-    .concat({ fileName: 'chi.rpc.helpers.go', source: go_plugin_utils_1.helpers(schemas[0]) })
+    .concat({ fileName: 'chi.rpc.helpers.go', source: go_plugin_utils_1.serverHelpers(schemas[0]) })
     .concat({ fileName: 'chi.rpc.server.go', source: buildServer(schemas) });
 //# sourceMappingURL=index.js.map

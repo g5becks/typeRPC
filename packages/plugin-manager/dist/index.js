@@ -50,8 +50,8 @@ const fs = __importStar(require("fs"));
 const sanitize = (plugin) => (plugin.startsWith('/') ? plugin.substring(1).trim() : plugin.trim());
 exports.isValidPlugin = (plugin) => typeof plugin === 'function' || ('default' in plugin && typeof plugin.default === 'function');
 exports.isPluginConfig = (config) => 'name' in config && 'version' in config && 'location' in config;
-exports.isGitHub = (location) => 'github' in location;
-exports.isLocal = (location) => 'local' in location;
+exports.isGitHub = (location) => typeof location === 'object' && 'github' in location;
+exports.isLocal = (location) => typeof location === 'object' && 'local' in location;
 class PluginManager {
     constructor(pluginsPath, cwd) {
         _manager.set(this, void 0);
