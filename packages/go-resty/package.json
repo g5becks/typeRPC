@@ -34,7 +34,11 @@
     "@typerpc/plugin-utils": "^0.1.13",
     "@typerpc/schema": "^0.1.13"
   },
+    "publishConfig": {
+    "access": "public"
+  },
   "bugs": {
     "url": "https://github.com/typerpc/typerpc/issues"
-  }
+  },
+  "gitHead": "9277a584a98be1d5b9d97eb7aa43435b41c79d66"
 }
