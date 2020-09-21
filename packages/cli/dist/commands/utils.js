@@ -41,6 +41,7 @@ const fs_extra_1 = require("fs-extra");
 const tslog_1 = require("tslog");
 const prettyjson_1 = require("prettyjson");
 const chalk_1 = __importDefault(require("chalk"));
+const fs_1 = require("fs");
 exports.getConfigFile = (project) => project.getSourceFile((file) => file.getBaseName().toLowerCase() === 'rpc.config.ts');
 // get the value for the PluginConfig location property
 const parsePluginLocation = (pluginConfig) => {
@@ -115,8 +116,8 @@ exports.parseConfig = (file) => {
 exports.createLogger = (project) => {
     const dest = project.getRootDirectories()[0].getPath() + '/.typerpc/error.log';
     fs.ensureFileSync(dest);
-    const logToFile = async (logObject) => {
-        await fs_extra_1.appendFile(dest, prettyjson_1.render(logObject, { noColor: true }) +
+    const logToFile = (logObject) => {
+        fs_1.appendFileSync(dest, prettyjson_1.render(logObject, { noColor: true }) +
             '\n---------------------------------------------------------------------------------------------------------------------------------------\n');
     };
     const logger = new tslog_1.Logger();

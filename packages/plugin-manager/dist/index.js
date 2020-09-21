@@ -74,8 +74,7 @@ class PluginManager {
             }
         }
         else if (plugin.location === 'npm') {
-            const info = await this.manager.installFromNpm(plugin.name, (_a = plugin.version) !== null && _a !== void 0 ? _a : 'latest');
-            console.log(info);
+            await this.manager.installFromNpm(plugin.name, (_a = plugin.version) !== null && _a !== void 0 ? _a : 'latest');
         }
         else {
             console.log('plugin has invalid location field');

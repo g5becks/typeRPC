@@ -89,7 +89,7 @@ const validateSchemaFiles = (files) => {
 const installPlugins = async (configs, manager, log) => {
     const plugins = configs.map((cfg) => cfg.plugin);
     const onInstalled = (plugin) => log.info(`${plugin} already installed, fetching from cache`);
-    const onInstalling = (plugin) => log.info(`attempting to install ${plugin}`);
+    const onInstalling = (plugin) => log.info(`attempting to install ${plugin} `);
     await manager.install(plugins, onInstalled, onInstalling);
 };
 const generateCode = (configs, manager, files) => {

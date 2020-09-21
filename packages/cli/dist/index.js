@@ -19,7 +19,6 @@ const yargs_1 = __importDefault(require("yargs"));
 const gen_1 = require("./commands/gen");
 const chalk_1 = __importDefault(require("chalk"));
 const figlet_1 = __importDefault(require("figlet"));
-const tslog_1 = require("tslog");
 const create_1 = require("./commands/create");
 console.log(chalk_1.default.blue(figlet_1.default.textSync('typerpc')));
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -33,6 +32,5 @@ const argv = yargs_1.default
     .example('create', '')
     .help()
     .epilogue('for more information, please visit https://typerpc.run').argv;
-const log = new tslog_1.Logger();
-log.info(`typerpc ran with ${argv}`);
+console.log(`typerpc running with with ${argv}`);
 //# sourceMappingURL=index.js.map
