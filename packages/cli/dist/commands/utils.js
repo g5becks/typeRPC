@@ -360,7 +360,11 @@ const tsconfigFile = `
     "strict": true,
     "strictFunctionTypes": false,
     "forceConsistentCasingInFileNames": true
-  }
+  },
+    "include": [
+    "./*.ts",
+    "/src/*.ts"
+  ]
 }
 `;
 const eslintrc = `

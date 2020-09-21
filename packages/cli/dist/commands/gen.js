@@ -232,7 +232,7 @@ const handler = async (args) => {
         if (debug.enabled) {
             debug(debugInfo);
         }
-        log.error(`error occurred ${error}`);
+        log.error(`error occurred ${error}, stack: ${error.stack}`);
         throw error;
     }
 };
