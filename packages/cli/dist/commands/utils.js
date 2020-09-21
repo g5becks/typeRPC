@@ -363,7 +363,7 @@ const tsconfigFile = `
   },
     "include": [
     "./*.ts",
-    "/src/*.ts"
+    "./src/*.ts"
   ]
 }
 `;

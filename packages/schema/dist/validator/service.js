@@ -118,11 +118,18 @@ const validateQueryMethodParams = (method) => {
 };
 // Ensures return type of a method is either a valid typerpc type or a type
 // declared in the same project.
-const validateReturnType = (method) => utils_1.isValidDataType(method.getReturnTypeNode())
-    ? []
-    : [
-        utils_1.singleValidationErr(method, `${method.getName()} has an invalid return type. All rpc.Service methods must return a valid typerpc type, an rpc.Msg literal, or an rpc.Msg defined in the same file. To return nothing, use 't.unit'`),
-    ];
+const validateReturnType = (method) => {
+    if (typeof method.getReturnTypeNode() === 'undefined') {
+        return [
+            utils_1.singleValidationErr(method, `${method.getName()} has an invalid return type. All rpc.Service methods must return a valid typerpc type, an rpc.Msg literal, or an rpc.Msg defined in the same file. To return nothing, use 't.unit'`),
+        ];
+    }
+    return utils_1.isValidDataType(method.getReturnTypeNode())
+        ? []
+        : [
+            utils_1.singleValidationErr(method, `${method.getName()} has an invalid return type. All rpc.Service methods must return a valid typerpc type, an rpc.Msg literal, or an rpc.Msg defined in the same file. To return nothing, use 't.unit'`),
+        ];
+};
 // Ensure type of method params is either a typerpc type or a type
 // declared in the same source project.
 const validateParams = (method) => 
