@@ -440,8 +440,8 @@ export const buildInterfaces = (schema: Schema): string => {
     return interfaces
 }
 
-export const serverHelpers = (schema: Schema) => `
-package ${schema.packageName}
+export const serverHelpers = (pkg: string) => `
+package ${pkg}
 
 import (
 	"context"

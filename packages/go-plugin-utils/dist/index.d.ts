@@ -23,5 +23,5 @@ export declare const buildClientResponseStruct: (type: DataType) => string;
 export declare const buildServerResponseStruct: (type: DataType) => string;
 export declare const buildFileName: (fileName: string) => string;
 export declare const buildInterfaces: (schema: Schema) => string;
-export declare const serverHelpers: (schema: Schema) => string;
+export declare const serverHelpers: (pkg: string) => string;
 //# sourceMappingURL=index.d.ts.map

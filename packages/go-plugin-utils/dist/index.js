@@ -381,8 +381,8 @@ exports.buildInterfaces = (schema) => {
     }
     return interfaces;
 };
-exports.serverHelpers = (schema) => `
-package ${schema.packageName}
+exports.serverHelpers = (pkg) => `
+package ${pkg}
 
 import (
 	"context"

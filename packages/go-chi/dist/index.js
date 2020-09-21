@@ -102,6 +102,10 @@ ${buildRoutes(schema)}
     };
 };
 const buildServer = (schemas) => {
+    if (schemas.length === 0) {
+        throw new Error('no schemas provided to @typerpc/go-chi plugin. Cannot generate code without schemas');
+    }
+    const packageName = schemas[0].packageName;
     const querySvcNames = schemas.flatMap((schema) => schema.queryServices).flatMap((svc) => plugin_utils_1.capitalize(svc.name));
     const mutationSvcNames = schemas.flatMap((schema) => schema.mutationServices).flatMap((svc) => plugin_utils_1.capitalize(svc.name));
     const svcNames = querySvcNames.concat(mutationSvcNames);
@@ -127,7 +131,7 @@ const buildServer = (schemas) => {
         `);
     }
     return `
-package ${schemas[0].packageName}
+package ${packageName}
 
 import (
 	"github.com/go-chi/chi"
@@ -154,8 +158,13 @@ func NewChiRPCServer(${serverParams}) *ChiRPCServer  {
 }
 `;
 };
-exports.default = (schemas) => schemas
-    .map((schema) => buildFile(schema))
-    .concat({ fileName: 'chi.rpc.helpers.go', source: go_plugin_utils_1.serverHelpers(schemas[0]) })
-    .concat({ fileName: 'chi.rpc.server.go', source: buildServer(schemas) });
+exports.default = (schemas) => {
+    if (schemas.length === 0) {
+        throw new Error('no schemas provided to @typerpc/go-chi plugin. Cannot generate code without schemas');
+    }
+    return schemas
+        .map((schema) => buildFile(schema))
+        .concat({ fileName: 'chi.rpc.helpers.go', source: go_plugin_utils_1.serverHelpers(schemas[0].packageName) })
+        .concat({ fileName: 'chi.rpc.server.go', source: buildServer(schemas) });
+};
 //# sourceMappingURL=index.js.map
