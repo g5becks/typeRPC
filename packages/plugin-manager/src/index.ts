@@ -24,9 +24,11 @@ export const isValidPlugin = (plugin: any): plugin is TypeRpcPlugin =>
 export const isPluginConfig = (config: Record<string, unknown>): config is PluginConfig =>
     'name' in config && 'version' in config && 'location' in config
 
-export const isGitHub = (location: any): location is { github: string } => 'github' in location
+export const isGitHub = (location: any): location is { github: string } =>
+    typeof location === 'object' && 'github' in location
 
-export const isLocal = (location: any): location is { local: string } => 'local' in location
+export const isLocal = (location: any): location is { local: string } =>
+    typeof location === 'object' && 'local' in location
 
 export class PluginManager {
     readonly #manager: Manager
