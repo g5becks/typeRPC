@@ -1,13 +1,13 @@
 +++
 title = "Plugins"
 date = 2020-09-22T14:54:20-04:00
-weight = 5
+weight = 3
 chapter = true
-pre = "<b>X. </b>"
+pre = "<b>3. </b>"
 +++
 
-### Chapter X
+### Chapter 3
 
-# Some Chapter title
+# Plugins
 
-Lorem Ipsum.
+Understanding Typerpc Plugins.
