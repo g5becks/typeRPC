@@ -9,9 +9,8 @@ home = [ "HTML", "RSS", "JSON"]
 
 [params]
   themeVariant = "blue"
-  editURL = ""
-  # Author of the site, will be used in meta information
-  author = ""
+  editURL = "https://github.com/typerpc/typerpc/tree/master/packages/docs"
+  author = "Gary Becks <techstar.dev@hotmail.com>"
   # Description of the site, will be used in meta information
   description = ""
   # Shows a checkmark for visited pages on the menu
