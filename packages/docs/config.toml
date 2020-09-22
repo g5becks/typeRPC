@@ -39,3 +39,8 @@ name = "<i class='fab fa-fw fa-github'></i> GitHub repo"
 identifier = "ds"
 url = "https://github.com/typerpc/typerpc"
 weight = 10
+
+[[menu.shortcuts]]
+name = "<i class='fas fa-tags'></i> Tags"
+url = "/tags"
+weight = 30
