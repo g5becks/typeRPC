@@ -19,7 +19,7 @@ import { create } from './commands/create'
 console.log(chalk.blue(figlet.textSync('typerpc')))
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-require('yargonaut').help('3D-ASCII').helpStyle('green').errors('Calvin S').errorsStyle('red')
+require('yargonaut').style('blue').helpStyle('green').errors('Calvin S').errorsStyle('red')
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const argv = yargs
