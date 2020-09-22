@@ -1,5 +1,6 @@
 +++
-title = "Plugins"
+title = "Typerpc Plugins"
+menuTitle = "Plugins"
 date = 2020-09-22T14:54:20-04:00
 weight = 3
 chapter = true
@@ -8,6 +9,7 @@ pre = "<b>3. </b>"
 
 ### Chapter 3
 
-# Plugins
+# Typerpc Plugins
 
-Understanding Typerpc Plugins.
+“I'm not a great programmer; I'm just a good programmer with great habits.”
+― Kent Beck 
