@@ -1,14 +1,14 @@
 
-@typerpc/cli
-============
+# Typerpc
 
-Cross Language Rpc Framework
+The Universal Rpc Framework.
 
-[![oclif](https://img.shields.io/badge/cli-oclif-brightgreen.svg)](https://oclif.io)
+![Node.js%20CI](https://github.com/typerpc/typerpc/workflows/Node.js%20CI/badge.svg)
 [![Version](https://img.shields.io/npm/v/@typerpc/cli.svg)](https://npmjs.org/package/@typerpc/cli)
 [![Downloads/week](https://img.shields.io/npm/dw/@typerpc/cli.svg)](https://npmjs.org/package/@typerpc/cli)
 [![License](https://img.shields.io/npm/l/@typerpc/cli.svg)](https://github.com/typerpc/cli/blob/master/package.json)
 [![Known Vulnerabilities](https://snyk.io/test/github/typerpc/typerpc/badge.svg?targetFile=package.json)](https://snyk.io/test/github/typerpc/typerpc?targetFile=package.json)
+
 <!-- toc -->
 * [Usage](#usage)
 * [Commands](#commands)
