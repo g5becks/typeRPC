@@ -27,7 +27,5 @@ home = [ "HTML", "RSS", "JSON"]
   disableNextPrev = false
   # Order sections in menu by "weight" or "title". Default to "weight"
   ordersectionsby = "weight"
-  # Provide a list of custom css files to load relative from the `static/` folder in the site root.
-  custom_css = ["css/foo.css", "css/bar.css"]
   # Change the title separator. Default to "::".
   titleSeparator = "-"
