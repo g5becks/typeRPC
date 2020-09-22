@@ -11,5 +11,5 @@ pre = "<b>3. </b>"
 
 # Typerpc Plugins
 
-“I'm not a great programmer; I'm just a good programmer with great habits.”
-― Kent Beck 
+“Think twice, code once.”
+― Waseem Latif 
