@@ -1,0 +1,4 @@
+baseURL = "http://typerpc.run/"
+languageCode = "en-us"
+title = "Typerpc"
+theme = "hugo-theme-learn"
