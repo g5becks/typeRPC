@@ -10,4 +10,5 @@ pre = "<b>2. </b>"
 
 # Typerpc Schema
 
-Learn how to write Typerpc Schema files.
+“Talk is cheap. Show me the code.”
+― Linus Torvalds 

@@ -1,13 +1,13 @@
 +++
 title = "Cli"
 date = 2020-09-22T14:49:54-04:00
-weight = 5
+weight = 4
 chapter = true
-pre = "<b>X. </b>"
+pre = "<b>4. </b>"
 +++
 
-### Chapter X
+### Chapter 4
 
-# Some Chapter title
+# The Typerpc Command Line Interface
 
-Lorem Ipsum.
+Getting to know the Typerpc cli.

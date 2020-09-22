@@ -3,11 +3,11 @@ title = "Configuration"
 date = 2020-09-22T14:50:24-04:00
 weight = 5
 chapter = true
-pre = "<b>X. </b>"
+pre = "<b>5. </b>"
 +++
 
-### Chapter X
+### Chapter 5
 
-# Some Chapter title
+# Configuring Typerpc
 
-Lorem Ipsum.
+.
