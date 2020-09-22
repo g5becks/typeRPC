@@ -10,4 +10,5 @@ pre = "<b>1. </b>"
 
 # Getting Started
 
-Learn the basics of typerpc.
+“I am committed to push my branch to the master”
+― Halgurd Hussein

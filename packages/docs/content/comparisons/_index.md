@@ -1,13 +1,13 @@
 +++
-title = "Comparisons"
+title = "Typerpc Comparisons"
 date = 2020-09-22T14:54:01-04:00
-weight = 5
+weight = 6
 chapter = true
-pre = "<b>X. </b>"
+pre = "<b>6. </b>"
 +++
 
-### Chapter X
+### Chapter 6
 
-# Some Chapter title
+# Typerpc Comapared to ...
 
 Lorem Ipsum.
