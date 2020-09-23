@@ -14,7 +14,8 @@ draft: false
 
 Here is a very small example of a typerpc schema definition for a simple user service. From this schema, typerpc will generate  
 ```ts
-// basic types used for service definitionsimport {$, rpc} from '@typerpc/types'
+// basic types used for service definitions
+import { $, rpc } from '@typerpc/types'
  
 // A type that will be used to transfer data between client(s) and server(s).  
 type User = rpc.Msg<{
