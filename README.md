@@ -1,8 +1,6 @@
 
 ![](./logo.png)
 
-#### The Universal Rpc Framework
-
 ![Node.js%20CI](https://github.com/typerpc/typerpc/workflows/Node.js%20CI/badge.svg)
 [![Version](https://img.shields.io/npm/v/@typerpc/cli.svg)](https://npmjs.org/package/@typerpc/cli)
 [![Downloads/week](https://img.shields.io/npm/dw/@typerpc/cli.svg)](https://npmjs.org/package/@typerpc/cli)
