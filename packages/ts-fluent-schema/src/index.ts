@@ -12,7 +12,7 @@
 
 import { Code } from '@typerpc/plugin'
 import { DataType, is, make, Message, MutationMethod, QueryMethod, Schema, StructLiteral } from '@typerpc/schema'
-import { lowerCase } from 'plugin-utils/dist'
+import { capitalize, lowerCase } from 'plugin-utils/dist'
 const typeMap: Map<string, string> = new Map<string, string>([
     [make.bool.type, 'boolean()'],
     [make.int8.type, 'number()'],
@@ -110,8 +110,9 @@ const buildMsgSchemasForFile = (schema: Schema): string => {
 const buildBodySchema = (svcName: string, method: MutationMethod | QueryMethod): string => {
     let schema = `S.object().id('${svcName}.${method.name}').title('${svcName}.${method.name} Body').description('${svcName}.${method.name} Request body')`
     for (const param of method.params) {
-        schema = schema.concat(`.prop('${param.name}')`)
+        schema = schema.concat(`.prop('${param.name}', ${schemaType(param.type)})`)
     }
+    return `const ${lowerCase(svcName)}${capitalize(method.name)}RequestSchema = ${schema}`
 }
 
 const buildImports = (): string => "import S from 'fluent-schema'"
