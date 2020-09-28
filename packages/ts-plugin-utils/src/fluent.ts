@@ -114,7 +114,7 @@ const buildMsgSchemasForFile = (schema: Schema): string => {
     return msgs
 }
 
-const buildRequestSchema = (svcName: string, method: MutationMethod): string => {
+const buildRequestSchema = (svcName: string, method: MutationMethod | QueryMethod): string => {
     let schema = `S.object().id('${svcName}.${method.name}Request').title('${svcName}.${method.name} Body').description('${svcName}.${method.name} Request Schema')`
     for (const param of method.params) {
         schema = schema.concat(`.prop('${param.name}', ${schemaType(param.type)})`)
@@ -125,6 +125,11 @@ const buildRequestSchema = (svcName: string, method: MutationMethod): string => 
 
 const buildRequestSchemasForFile = (schema: Schema): string => {
     let schemas = ''
+    for (const svc of schema.queryServices) {
+        for (const method of svc.methods) {
+            schemas = schemas.concat(buildRequestSchema(svc.name, method))
+        }
+    }
     for (const svc of schema.mutationServices) {
         for (const method of svc.methods) {
             schemas = schemas.concat(buildRequestSchema(svc.name, method))
