@@ -1,0 +1,1 @@
+{"version":3,"file":"data-gen.d.ts","sourceRoot":"","sources":["../src/data-gen.ts"],"names":[],"mappings":"AAcA,wBAAgB,YAAY,CAAC,GAAG,EAAE,MAAM,EAAE,GAAG,EAAE,MAAM,UAGpD;AAyCD,eAAO,MAAM,6BAA6B,cACwD,CAAA;AAElG,eAAO,MAAM,2BAA2B,cAAqD,CAAA;AAoD7F,eAAO,MAAM,aAAa,QAAO,MAShC,CAAA;AAED,eAAO,MAAM,kBAAkB,aAAc,MAAM,EAAE,WAGpD,CAAA;AAED,eAAO,MAAM,iBAAiB,aAAc,MAAM,EAAE,WAGnD,CAAA"}
