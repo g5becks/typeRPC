@@ -11,7 +11,8 @@
  */
 
 import { Code } from '@typerpc/plugin'
-import { DataType, is, make, MutationMethod, QueryMethod, Schema, StructLiteral } from '@typerpc/schema'
+import { DataType, is, make, Message, MutationMethod, QueryMethod, Schema, StructLiteral } from '@typerpc/schema'
+import { lowerCase } from 'plugin-utils/dist'
 const typeMap: Map<string, string> = new Map<string, string>([
     [make.bool.type, 'boolean()'],
     [make.int8.type, 'number()'],
@@ -64,6 +65,20 @@ const schemaType = (type: DataType): string => {
     if (is.structLiteral(type)) {
         return buildObjectSchema(type)
     }
+
+    if (is.struct(type)) {
+        return `${lowerCase(type.name)}Schema`
+    }
+}
+
+const buildMsgSchema = (msg: Message): string => {
+    let schema = `S.object().id('${msg.name}').title('${msg.name} Schema').description('Schema for ${msg.name} rpc message')`
+    for (const prop of msg.properties) {
+        schema = schema.concat(
+            `.prop('${prop.name}', S.${schemaType(prop.type)})${prop.isOptional ? '' : '.required()'}`,
+        )
+    }
+    return `const ${lowerCase(msg.name)}Schema = ${buildMsgSchema}`
 }
 
 const buildBodySchema = (svcName: string, method: MutationMethod | QueryMethod): string => {
