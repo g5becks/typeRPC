@@ -69,6 +69,23 @@ const schemaType = (type: DataType): string => {
     if (is.struct(type)) {
         return `${lowerCase(type.name)}Schema`
     }
+    if (is.tuple2(type)) {
+        return `array().items([${schemaType(type.item1)}, ${schemaType(type.item2)}])`
+    }
+    if (is.tuple3(type)) {
+        return `array().items([${schemaType(type.item1)}, ${schemaType(type.item2)}, ${schemaType(type.item3)}])`
+    }
+    if (is.tuple4(type)) {
+        return `array().items([${schemaType(type.item1)}, ${schemaType(type.item2)}, ${schemaType(
+            type.item3,
+        )}, ${schemaType(type.item4)}])`
+    }
+    if (is.tuple5(type)) {
+        return `array().items([${schemaType(type.item1)}, ${schemaType(type.item2)}, ${schemaType(
+            type.item4,
+        )}, ${schemaType(type.item5)}])`
+    }
+    return '{}'
 }
 
 const buildMsgSchema = (msg: Message): string => {
