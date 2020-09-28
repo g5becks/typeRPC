@@ -33,6 +33,12 @@ const typeMap: Map<string, string> = new Map<string, string>([
     [make.blob.type, 'array().items(S.number())'],
 ])
 
+export const requestSchemaName = (svcName: string, method: MutationMethod | QueryMethod): string =>
+    `${lowerCase(svcName)}${capitalize(method.name)}RequestSchema`
+
+export const responseSchemaName = (svcName: string, method: MutationMethod | QueryMethod): string =>
+    `${lowerCase(svcName)}${capitalize(method.name)}ResponseSchema`
+
 const buildObjectSchema = (struct: StructLiteral): string => {
     let obj = 'object()'
     for (const prop of struct.properties) {
@@ -113,7 +119,7 @@ const buildRequestSchema = (svcName: string, method: MutationMethod): string => 
     for (const param of method.params) {
         schema = schema.concat(`.prop('${param.name}', ${schemaType(param.type)})`)
     }
-    return `const ${lowerCase(svcName)}${capitalize(method.name)}RequestSchema = ${schema}
+    return `const ${requestSchemaName(svcName, method)} = ${schema}
     `
 }
 
@@ -130,7 +136,7 @@ const buildRequestSchemasForFile = (schema: Schema): string => {
 const buildResponseSchema = (svcName: string, method: MutationMethod | QueryMethod): string =>
     method.isVoidReturn
         ? ''
-        : `const ${lowerCase(svcName)}${capitalize(method.name)} = S.object().id('${svcName}.${
+        : `const ${responseSchemaName(svcName, method)} = S.object().id('${svcName}.${
               method.name
           }Response').title('${svcName}.${method.name} Response').description('${svcName}.${
               method.name
@@ -151,11 +157,6 @@ const buildResponseSchemasForFile = (schema: Schema): string => {
     return schemas
 }
 
-export const requestSchemaName = (svcName: string, method: MutationMethod | QueryMethod): string =>
-    `${lowerCase(svcName)}${capitalize(method.name)}RequestSchema`
-
-export const responseSchemaName = (svcName: string, method: MutationMethod | QueryMethod): string =>
-    `${lowerCase(svcName)}${capitalize(method.name)}ResponseSchema`
 export const buildFluentSchemas = (schema: Schema): string =>
     `${buildMsgSchemasForFile(schema)}
   ${buildRequestSchemasForFile(schema)}
