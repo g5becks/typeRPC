@@ -112,17 +112,28 @@ const buildRequestSchema = (svcName: string, method: MutationMethod | QueryMetho
     for (const param of method.params) {
         schema = schema.concat(`.prop('${param.name}', ${schemaType(param.type)})`)
     }
-    return `const ${lowerCase(svcName)}${capitalize(method.name)}RequestSchema = ${schema}`
+    return `const ${lowerCase(svcName)}${capitalize(method.name)}RequestSchema = ${schema}
+    `
 }
 
-const buildImports = (): string => "import S from 'fluent-schema'"
+const buildRequestSchemasForFile = (schema: Schema): string => {
+    let schemas = ''
+    for (const svc of schema.queryServices) {
+        for (const method of svc.methods) {
+            schemas = schemas.concat(buildRequestSchema(svc.name, method))
+        }
+    }
+    for (const svc of schema.mutationServices) {
+        for (const method of svc.methods) {
+            schemas = schemas.concat(buildRequestSchema(svc.name, method))
+        }
+    }
+    return schemas
+}
 
-const buildFile = (schema: Schema): Code => {
+export const buildFluentSchemas = (schema: Schema): Code => {
     const source = `
-  ${buildMsgSchemasForFile(schema)}`
+  ${buildMsgSchemasForFile(schema)}
+  ${buildRequestSchemasForFile(schema)}`
     return { fileName: `${schema.fileName}.rpc.schemas.ts`, source }
 }
-
-// builds all schemas and server file
-const build = (schemas: Schema[]): Code[] => [...schemas.map((schema) => buildFile(schema))]
-export default build
