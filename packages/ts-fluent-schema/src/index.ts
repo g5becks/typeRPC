@@ -95,7 +95,16 @@ const buildMsgSchema = (msg: Message): string => {
             `.prop('${prop.name}', S.${schemaType(prop.type)})${prop.isOptional ? '' : '.required()'}`,
         )
     }
-    return `const ${lowerCase(msg.name)}Schema = ${buildMsgSchema}`
+    return `const ${lowerCase(msg.name)}Schema = ${buildMsgSchema}
+    `
+}
+
+const buildMsgSchemasForFile = (schema: Schema): string => {
+    let msgs = ''
+    for (const msg of schema.messages) {
+        msgs = msgs.concat(buildMsgSchema(msg))
+    }
+    return msgs
 }
 
 const buildBodySchema = (svcName: string, method: MutationMethod | QueryMethod): string => {
@@ -107,7 +116,11 @@ const buildBodySchema = (svcName: string, method: MutationMethod | QueryMethod):
 
 const buildImports = (): string => "import S from 'fluent-schema'"
 
-const buildFile = (schema: Schema): Code => {}
+const buildFile = (schema: Schema): Code => {
+    const source = `
+  ${buildMsgSchemasForFile(schema)}`
+    return { fileName: `${schema.fileName}.rpc.schemas.ts`, source }
+}
 
 // builds all schemas and server file
 const build = (schemas: Schema[]): Code[] => [...schemas.map((schema) => buildFile(schema))]
