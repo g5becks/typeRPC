@@ -14,7 +14,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const plugin_utils_1 = require("@typerpc/plugin-utils");
 const schema_1 = require("@typerpc/schema");
 const ts_plugin_utils_1 = require("@typerpc/ts-plugin-utils");
-const nanoid_1 = require("nanoid");
 // build generic route types for fastify route methods
 // https://www.fastify.io/docs/latest/TypeScript/#using-generics
 const buildReqBodyOrParamsType = (params) => {
@@ -331,10 +330,9 @@ export function createServer(
     fileName: 'fastify.rpc.server.ts',
 };
 const buildFile = (schema) => {
-    const id = nanoid_1.nanoid();
     let types = '';
     for (const msg of schema.messages) {
-        types = types.concat(ts_plugin_utils_1.buildType(msg).concat('\n' + ts_plugin_utils_1.buildMsgSchema(msg, id)));
+        types = types.concat(ts_plugin_utils_1.buildType(msg).concat('\n' + ts_plugin_utils_1.buildMsgSchema(msg, schema.fileName)));
     }
     const source = `
 import fastify, { FastifyPluginAsync, LogLevel } from 'fastify'
@@ -343,7 +341,6 @@ import fastifySensible from 'fastify-sensible'
 import S from 'fluent-schema'
 import { pluginOpts, registerOptions, RpcPlugin } from './fastify.rpc.server'
 
-    const SCHEMA_ID = '${id}'
 
     ${types}
     ${ts_plugin_utils_1.buildInterfaces(schema)}
