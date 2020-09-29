@@ -158,7 +158,7 @@ const buildRoutes = (svc: MutationService | QueryService): string => {
 }
 
 const buildSvcRoutes = (svc: MutationService | QueryService): string => {
-    return `const ${lowerCase(svc.name)} = (${lowerCase(svc.name)}: ${capitalize(
+    return `const ${lowerCase(svc.name)}Routes = (${lowerCase(svc.name)}: ${capitalize(
         svc.name,
     )}): FastifyPluginAsync => async (instance, _) => {
        instance.register(fastifySensible)
