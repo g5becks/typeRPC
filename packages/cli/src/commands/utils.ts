@@ -10,15 +10,15 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { ObjectLiteralExpression, Project, SourceFile, SyntaxKind } from 'ts-morph'
 import { GeneratorConfig, PluginConfig, PluginLocation } from '@typerpc/config'
+import chalk from 'chalk'
 import { ChildProcess, exec } from 'child_process'
+import { appendFileSync } from 'fs'
 import * as fs from 'fs-extra'
 import { outputFile } from 'fs-extra'
-import { ILogObject, Logger } from 'tslog'
 import { render } from 'prettyjson'
-import chalk from 'chalk'
-import { appendFileSync } from 'fs'
+import { ObjectLiteralExpression, Project, SourceFile, SyntaxKind } from 'ts-morph'
+import { ILogObject, Logger } from 'tslog'
 
 export const getConfigFile = (project: Project): SourceFile | undefined =>
     project.getSourceFile((file) => file.getBaseName().toLowerCase() === 'rpc.config.ts')
@@ -40,7 +40,7 @@ const parsePluginLocation = (pluginConfig: ObjectLiteralExpression | undefined):
         // get first objectLiteral since there is only one
         const location = locationObj[0]
         // if github property exists
-        if (location.getProperty('github')) {
+        if (location?.getProperty('github')) {
             // return the string found or empty, let function up the stack
             // throw when empty string is found
             return {
@@ -52,7 +52,7 @@ const parsePluginLocation = (pluginConfig: ObjectLiteralExpression | undefined):
                         ?.trim() ?? '',
             }
         }
-        if (location.getProperty('local')) {
+        if (location?.getProperty('local')) {
             return {
                 local:
                     location
@@ -87,11 +87,11 @@ const parseGeneratorConfig = (obj: ObjectLiteralExpression): GeneratorConfig => 
     const pkg = obj.getProperty('pkg')?.getChildrenOfKind(SyntaxKind.StringLiteral)[0]?.getLiteralValue()?.trim()
 
     const fmt = obj.getProperty('fmt')?.getChildrenOfKind(SyntaxKind.StringLiteral)[0]?.getLiteralValue()?.trim()
-    if (!out || !plugin || !pkg) {
+    if (!out || !pkg) {
         throw new Error(`
         error in config file: ${obj.getSourceFile().getFilePath()},
         at line number: ${obj.getStartLineNumber()},
-        message: all generator config objects must contain the following properties: [outputPath, plugin, packageName]`)
+        message: all generator config objects must contain the following properties: [out, plugin, pkg]`)
     }
 
     return { out, plugin, pkg, fmt }
@@ -544,7 +544,7 @@ type User = rpc.Msg<{
     age: $.int8
     weight: $.float32
     verified: $.bool
-    embeddedMsg: SomeMessage
+    // embeddedMsg: SomeMessage
     embeddedMsgLiteral: rpc.Msg<{
         cool: $.list<$.bool>
     }>
@@ -571,7 +571,12 @@ type MutationService = rpc.MutationSvc<{
 }>
 
 `
-export const scaffold = async (projectName: string, yarn?: boolean, client?: string, server?: string) => {
+export const scaffold = async (
+    projectName: string,
+    yarn?: boolean,
+    client?: string,
+    server?: string,
+): Promise<void> => {
     const files = [
         { fileName: `package.json`, source: packageJson(projectName) },
         { fileName: 'rpc.config.ts', source: rpcConfig(client, server) },

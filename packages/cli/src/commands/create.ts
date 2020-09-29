@@ -22,7 +22,7 @@ type Args = Readonly<
     }>
 >
 
-const handler = async (args: Args) => {
+const handler = async (args: Args): Promise<void> => {
     const { name, client, server, yarn } = args
     if (!name) {
         throw new Error(`name must be provided when using the create command`)
