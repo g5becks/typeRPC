@@ -147,9 +147,7 @@ export const ${lowerCase(svc.name)}Plugin = (
   logLevel: LogLevel,
   opts: PluginOptions = {}
 ): RpcPlugin => ({
-  plugin: fp(${lowerCase(svc.name)}Routes(${lowerCase(svc.name)}: ${capitalize(svc.name)}), pluginOpts("${
-    svc.name
-}Plugin", opts)),
+  plugin: fp(${lowerCase(svc.name)}Routes(${lowerCase(svc.name)}), pluginOpts("${svc.name}Plugin", opts)),
   opts: registerOptions("/${lowerCase(svc.name)}", logLevel),
 })
 `
