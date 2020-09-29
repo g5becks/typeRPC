@@ -176,6 +176,7 @@ import { RegisterOptions } from 'fastify/types/register'
 import http2 from 'http2'
 import https from 'https'
 import pino from 'pino'
+import qs from 'qs'
 
 /**
  * Creates an implementation of PluginOptions for a fastify-plugin
@@ -281,6 +282,7 @@ export function createHttp2SecureServer<Server extends http2.Http2SecureServer>(
     const instance = fastify({
         ...opts,
         logger,
+        querystringParser: (str) => (qs.parse(str) as unknown) as { [key: string]: string | string[] },
     })
     for (const plugin of plugins) {
         instance.register(plugin.plugin, plugin.opts)
@@ -305,6 +307,7 @@ export function createHttp2Server<Server extends http2.Http2Server>(
     const instance = fastify({
         ...opts,
         logger,
+        querystringParser: (str) => (qs.parse(str) as unknown) as { [key: string]: string | string[] },
     })
     for (const plugin of plugins) {
         instance.register(plugin.plugin, plugin.opts)
@@ -330,6 +333,7 @@ export function createSecureServer<Server extends https.Server>(
     const instance = fastify({
         ...opts,
         logger,
+        querystringParser: (str) => (qs.parse(str) as unknown) as { [key: string]: string | string[] },
     })
     for (const plugin of plugins) {
         instance.register(plugin.plugin, plugin.opts)
@@ -355,6 +359,7 @@ export function createServer(
     const instance = fastify({
         ...opts,
         logger,
+        querystringParser: (str) => (qs.parse(str) as unknown) as { [key: string]: string | string[] },
     })
     for (const plugin of plugins) {
         instance.register(plugin.plugin, plugin.opts)
@@ -376,7 +381,6 @@ import fp, { PluginOptions } from 'fastify-plugin'
 import fastifySensible from 'fastify-sensible'
 import S from 'fluent-schema'
 import { pluginOpts, registerOptions, RpcPlugin } from './fastify.rpc.server'
-
 
     ${types}
     ${buildInterfaces(schema)}
