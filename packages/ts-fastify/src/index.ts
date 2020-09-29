@@ -13,10 +13,11 @@
 import { Code } from '@typerpc/plugin'
 import { capitalize, lowerCase } from '@typerpc/plugin-utils'
 import {
+    is,
+    isMutationMethod,
     isQueryMethod,
     MutationMethod,
     MutationService,
-    Param,
     QueryMethod,
     QueryService,
     Schema,
@@ -33,12 +34,20 @@ import {
 
 // build generic route types for fastify route methods
 // https://www.fastify.io/docs/latest/TypeScript/#using-generics
-const buildReqBodyOrParamsType = (params: ReadonlyArray<Param>): string => {
+const buildReqBodyOrParamsType = (method: QueryMethod | MutationMethod): string => {
     let props = ''
 
-    for (const param of params) {
-        props = props.concat(`${lowerCase(param.name)}${param.isOptional ? '?' : ''}: ${dataType(param.type)},
+    for (const param of method.params) {
+        if (isMutationMethod(method)) {
+            props = props.concat(`${lowerCase(param.name)}${param.isOptional ? '?' : ''}: ${dataType(param.type)},
         `)
+        } else if (isQueryMethod(method)) {
+            props = props.concat(
+                `${lowerCase(param.name)}${param.isOptional ? '?' : ''}: ${
+                    is.scalar(param.type) ? 'string' : 'string[]'
+                }`,
+            )
+        }
     }
     return `{${props}
   }`
@@ -85,7 +94,7 @@ const parseParams = (method: QueryMethod | MutationMethod): string =>
     method.hasParams ? `const {${paramNames(method.params)}} = request.${isQueryMethod(method) ? 'query' : 'body'}` : ''
 const buildRoute = (svcName: string, method: QueryMethod | MutationMethod): string => {
     return `instance.route<{
-        ${isQueryMethod(method) ? 'Querystring' : 'Body'}: ${buildReqBodyOrParamsType(method.params)}
+        ${isQueryMethod(method) ? 'Querystring' : 'Body'}: ${buildReqBodyOrParamsType(method)}
     }>({
       method: '${method.httpMethod.toUpperCase().trim()}',
       url: '/${lowerCase(method.name)}',
@@ -381,6 +390,7 @@ import fp, { PluginOptions } from 'fastify-plugin'
 import fastifySensible from 'fastify-sensible'
 import S from 'fluent-schema'
 import { pluginOpts, registerOptions, RpcPlugin } from './fastify.rpc.server'
+import { isMutationMethod } from '../../schema/src/schema';
 
     ${types}
     ${buildInterfaces(schema)}
