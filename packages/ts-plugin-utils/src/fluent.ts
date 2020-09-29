@@ -11,8 +11,17 @@
  */
 
 import { capitalize, lowerCase } from '@typerpc/plugin-utils'
-import { DataType, is, make, Message, MutationMethod, QueryMethod, StructLiteral } from '@typerpc/schema'
-import { isMutationMethod, isQueryMethod } from '../../schema/src/schema'
+import {
+    DataType,
+    is,
+    isMutationMethod,
+    isQueryMethod,
+    make,
+    Message,
+    MutationMethod,
+    QueryMethod,
+    StructLiteral,
+} from '@typerpc/schema'
 const typeMap: Map<string, string> = new Map<string, string>([
     [make.bool.type, 'boolean()'],
     [make.int8.type, 'number()'],
