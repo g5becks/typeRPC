@@ -14,7 +14,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.buildResponseSchema = exports.buildRequestSchema = exports.buildMsgSchema = exports.responseSchemaName = exports.requestSchemaName = void 0;
 const plugin_utils_1 = require("@typerpc/plugin-utils");
 const schema_1 = require("@typerpc/schema");
-const schema_2 = require("../../schema/src/schema");
 const typeMap = new Map([
     [schema_1.make.bool.type, 'boolean()'],
     [schema_1.make.int8.type, 'number()'],
@@ -92,10 +91,10 @@ exports.buildMsgSchema = (msg, hash) => {
 exports.buildRequestSchema = (svcName, method) => {
     let schema = `S.object().id('${svcName}.${method.name}Request').title('${svcName}.${method.name} Body').description('${svcName}.${method.name} Request Schema')`;
     for (const param of method.params) {
-        if (schema_2.isMutationMethod(method)) {
+        if (schema_1.isMutationMethod(method)) {
             schema = schema.concat(`.prop('${param.name}', ${schema_1.is.struct(param.type) ? '' : 'S.'}${schemaType(param.type)})`);
         }
-        else if (schema_2.isQueryMethod(method)) {
+        else if (schema_1.isQueryMethod(method)) {
             schema = schema.concat(`.prop('${param.name}', S.${schema_1.is.scalar(param.type) ? 'string()' : 'array().items(S.string())'})${param.isOptional ? '' : '.required()'}`);
         }
     }
