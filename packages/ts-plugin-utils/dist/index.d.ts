@@ -15,4 +15,5 @@ export declare const paramNames: (params: ReadonlyArray<Param>) => string;
 export declare const buildParamsWithTypes: (params: ReadonlyArray<Param>) => string;
 export declare const buildParamsVar: (params: ReadonlyArray<Param>) => string;
 export declare const buildMsgImports: (imports: ReadonlyArray<Import>) => string;
+export * from './fluent';
 //# sourceMappingURL=index.d.ts.map

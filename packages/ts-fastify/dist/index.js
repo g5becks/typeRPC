@@ -1,3 +1,4 @@
+"use strict";
 /*
  * Copyright (c) 2020. Gary Becks - <techstar.dev@hotmail.com>
  *
@@ -9,85 +10,60 @@
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-import { Code } from '@typerpc/plugin'
-import { capitalize, lowerCase } from '@typerpc/plugin-utils'
-import {
-    isQueryMethod,
-    MutationMethod,
-    MutationService,
-    Param,
-    QueryMethod,
-    QueryService,
-    Schema,
-} from '@typerpc/schema'
-import {
-    buildInterfaces,
-    buildMsgSchema,
-    buildRequestSchema,
-    buildResponseSchema,
-    buildType,
-    dataType,
-    paramNames,
-} from '@typerpc/ts-plugin-utils'
-
+Object.defineProperty(exports, "__esModule", { value: true });
+const plugin_utils_1 = require("@typerpc/plugin-utils");
+const schema_1 = require("@typerpc/schema");
+const ts_plugin_utils_1 = require("@typerpc/ts-plugin-utils");
 // build generic route types for fastify route methods
 // https://www.fastify.io/docs/latest/TypeScript/#using-generics
-const buildReqBodyOrParamsType = (params: ReadonlyArray<Param>): string => {
-    let props = ''
-
+const buildReqBodyOrParamsType = (params) => {
+    let props = '';
     for (const param of params) {
-        props = props.concat(`${lowerCase(param.name)}${param.isOptional ? '?' : ''}: ${dataType(param.type)},
-        `)
+        props = props.concat(`${plugin_utils_1.lowerCase(param.name)}${param.isOptional ? '?' : ''}: ${ts_plugin_utils_1.dataType(param.type)},
+        `);
     }
     return `{${props}
-  }`
-}
-
-const requestSchema = (svcName: string, method: QueryMethod | MutationMethod): string => {
+  }`;
+};
+const requestSchema = (svcName, method) => {
     if (!method.hasParams) {
-        return ''
+        return '';
     }
-    return isQueryMethod(method) ? 'querystring' : 'body' + `: ${buildRequestSchema(svcName, method)},`
-}
-
-const responseSchema = (svcName: string, method: QueryMethod | MutationMethod): string => {
+    return schema_1.isQueryMethod(method) ? 'querystring' : 'body' + `: ${ts_plugin_utils_1.buildRequestSchema(svcName, method)},`;
+};
+const responseSchema = (svcName, method) => {
     if (method.isVoidReturn || method.hasCborReturn) {
-        return ''
+        return '';
     }
     return `response: {
-        '2xx': ${buildResponseSchema(svcName, method)}
-    },`
-}
-
-const errArgs = (method: MutationMethod | QueryMethod): string => {
+        '2xx': ${ts_plugin_utils_1.buildResponseSchema(svcName, method)}
+    },`;
+};
+const errArgs = (method) => {
     if (!method.hasParams) {
-        return `""`
+        return `""`;
     }
-    let p = ''
+    let p = '';
     for (const param of method.params) {
-        p = p.concat(`"${param.name}": "\${${param.name}}",`)
+        p = p.concat(`"${param.name}": "\${${param.name}}",`);
     }
-    return `{${p}}`
-}
-
-const invokeMethod = (svcName: string, method: QueryMethod | MutationMethod): string => {
-    const call = `await ${lowerCase(svcName)}.${lowerCase(method.name)}`
+    return `{${p}}`;
+};
+const invokeMethod = (svcName, method) => {
+    const call = `await ${plugin_utils_1.lowerCase(svcName)}.${plugin_utils_1.lowerCase(method.name)}`;
     if (method.isVoidReturn) {
-        return !method.hasParams ? call + '()' : call + `(${paramNames(method.params)})`
+        return !method.hasParams ? call + '()' : call + `(${ts_plugin_utils_1.paramNames(method.params)})`;
     }
-    const invoke = `const data = ` + call
-    return method.hasParams ? invoke + `(${paramNames(method.params)})` : invoke + '()'
-}
-
-const parseParams = (method: QueryMethod | MutationMethod): string =>
-    method.hasParams ? `const {${paramNames(method.params)}} = request.${isQueryMethod(method) ? 'query' : 'body'}` : ''
-const buildRoute = (svcName: string, method: QueryMethod | MutationMethod): string => {
+    const invoke = `const data = ` + call;
+    return method.hasParams ? invoke + `(${ts_plugin_utils_1.paramNames(method.params)})` : invoke + '()';
+};
+const parseParams = (method) => method.hasParams ? `const {${ts_plugin_utils_1.paramNames(method.params)}} = request.${schema_1.isQueryMethod(method) ? 'query' : 'body'}` : '';
+const buildRoute = (svcName, method) => {
     return `instance.route<{
-        ${isQueryMethod(method) ? 'Querystring' : 'Body'}: ${buildReqBodyOrParamsType(method.params)}
+        ${schema_1.isQueryMethod(method) ? 'Querystring' : 'Body'}: ${buildReqBodyOrParamsType(method.params)}
     }>({
       method: '${method.httpMethod.toUpperCase().trim()}',
-      url: '/${lowerCase(method.name)}',
+      url: '/${plugin_utils_1.lowerCase(method.name)}',
       schema: {
          ${requestSchema(svcName, method)}
          ${responseSchema(svcName, method)}
@@ -103,11 +79,7 @@ const buildRoute = (svcName: string, method: QueryMethod | MutationMethod): stri
 
       } catch (error) {
         request.log.error(
-          \`{"route": "/${lowerCase(svcName)}/${lowerCase(
-        method.name,
-    )}", "service_name": "${svcName}", "method_name": "${method.name}", "args": "${errArgs(
-        method,
-    )}", "error_msg": "\${error.message}" , "stack": "\${error.stack}"}\`
+          \`{"route": "/${plugin_utils_1.lowerCase(svcName)}/${plugin_utils_1.lowerCase(method.name)}", "service_name": "${svcName}", "method_name": "${method.name}", "args": "${errArgs(method)}", "error_msg": "\${error.message}" , "stack": "\${error.stack}"}\`
         );
         reply
           .code(${method.errorCode})
@@ -117,49 +89,42 @@ const buildRoute = (svcName: string, method: QueryMethod | MutationMethod): stri
 
       },
     })
-    `
-}
-
-const buildRoutes = (svc: MutationService | QueryService): string => {
-    let routes = ''
+    `;
+};
+const buildRoutes = (svc) => {
+    let routes = '';
     for (const method of svc.methods) {
-        routes = routes.concat(buildRoute(svc.name, method))
+        routes = routes.concat(buildRoute(svc.name, method));
     }
-    return routes
-}
-
-const buildSvcRoutes = (svc: MutationService | QueryService): string => {
-    return `${lowerCase(svc.name)} = (${lowerCase(svc.name)}: ${capitalize(
-        svc.name,
-    )}): FastifyPluginAsync => async (instance, _) => {
+    return routes;
+};
+const buildSvcRoutes = (svc) => {
+    return `${plugin_utils_1.lowerCase(svc.name)} = (${plugin_utils_1.lowerCase(svc.name)}: ${plugin_utils_1.capitalize(svc.name)}): FastifyPluginAsync => async (instance, _) => {
        instance.register(fastifySensible)
 
        ${buildRoutes(svc)}
     }
-    `
-}
-
-const buildPlugin = (svc: MutationService | QueryService): string => `
-export const ${lowerCase(svc.name)}Plugin = (
+    `;
+};
+const buildPlugin = (svc) => `
+export const ${plugin_utils_1.lowerCase(svc.name)}Plugin = (
   logLevel: LogLevel,
   opts: PluginOptions = {}
 ): RpcPlugin => ({
-  plugin: fp(${lowerCase(svc.name)}Routes(), pluginOpts("${svc.name}Plugin", opts)),
-  opts: registerOptions("/${lowerCase(svc.name)}", logLevel),
+  plugin: fp(${plugin_utils_1.lowerCase(svc.name)}Routes(), pluginOpts("${svc.name}Plugin", opts)),
+  opts: registerOptions("/${plugin_utils_1.lowerCase(svc.name)}", logLevel),
 })
-`
-
-const buildPlugins = (schema: Schema): string => {
-    let plugins = ''
+`;
+const buildPlugins = (schema) => {
+    let plugins = '';
     for (const svc of schema.queryServices) {
-        plugins = plugins.concat(buildSvcRoutes(svc).concat(buildPlugin(svc)))
+        plugins = plugins.concat(buildSvcRoutes(svc).concat(buildPlugin(svc)));
     }
     for (const svc of schema.mutationServices) {
-        plugins = plugins.concat(buildSvcRoutes(svc).concat(buildPlugin(svc)))
+        plugins = plugins.concat(buildSvcRoutes(svc).concat(buildPlugin(svc)));
     }
-    return plugins
-}
-
+    return plugins;
+};
 const server = {
     source: `
 import fastify, {
@@ -361,12 +326,11 @@ export function createServer(
 }
 `,
     fileName: 'fastify.rpc.server.ts',
-}
-
-const buildFile = (schema: Schema): Code => {
-    let types = ''
+};
+const buildFile = (schema) => {
+    let types = '';
     for (const msg of schema.messages) {
-        types = types.concat(buildType(msg).concat('\n' + buildMsgSchema(msg)))
+        types = types.concat(ts_plugin_utils_1.buildType(msg).concat('\n' + ts_plugin_utils_1.buildMsgSchema(msg)));
     }
     const source = `
 import fastify, { FastifyPluginAsync, LogLevel } from 'fastify'
@@ -376,13 +340,12 @@ import S from 'fluent-schema'
 import { pluginOpts, registerOptions, RpcPlugin } from './fastify.rpc.server'
 
     ${types}
-    ${buildInterfaces(schema)}
+    ${ts_plugin_utils_1.buildInterfaces(schema)}
     ${buildPlugins(schema)}
-    `
-    return { fileName: schema.fileName + '.ts', source }
-}
-
+    `;
+    return { fileName: schema.fileName + '.ts', source };
+};
 // builds all schemas and server file
-const build = (schemas: Schema[]): Code[] => [...schemas.map((schema) => buildFile(schema)), server]
-
-export default build
+const build = (schemas) => [...schemas.map((schema) => buildFile(schema)), server];
+exports.default = build;
+//# sourceMappingURL=index.js.map

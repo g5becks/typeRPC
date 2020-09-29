@@ -22,7 +22,7 @@ const figlet_1 = __importDefault(require("figlet"));
 const create_1 = require("./commands/create");
 console.log(chalk_1.default.blue(figlet_1.default.textSync('typerpc')));
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-require('yargonaut').help('3D-ASCII').helpStyle('green').errors('Calvin S').errorsStyle('red');
+require('yargonaut').style('blue').helpStyle('green').errors('Calvin S').errorsStyle('red');
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const argv = yargs_1.default
     .command(gen_1.gen)
