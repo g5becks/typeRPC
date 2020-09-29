@@ -29,7 +29,8 @@ const requestSchema = (svcName, method) => {
     if (!method.hasParams) {
         return '';
     }
-    return schema_1.isQueryMethod(method) ? 'querystring' : 'body' + `: ${ts_plugin_utils_1.buildRequestSchema(svcName, method)},`;
+    const schema = ts_plugin_utils_1.buildRequestSchema(svcName, method);
+    return schema_1.isQueryMethod(method) ? `querystring: ${schema},` : `body: ${schema},`;
 };
 const responseSchema = (svcName, method) => {
     if (method.isVoidReturn || method.hasCborReturn) {
@@ -99,7 +100,7 @@ const buildRoutes = (svc) => {
     return routes;
 };
 const buildSvcRoutes = (svc) => {
-    return `${plugin_utils_1.lowerCase(svc.name)} = (${plugin_utils_1.lowerCase(svc.name)}: ${plugin_utils_1.capitalize(svc.name)}): FastifyPluginAsync => async (instance, _) => {
+    return `const ${plugin_utils_1.lowerCase(svc.name)} = (${plugin_utils_1.lowerCase(svc.name)}: ${plugin_utils_1.capitalize(svc.name)}): FastifyPluginAsync => async (instance, _) => {
        instance.register(fastifySensible)
 
        ${buildRoutes(svc)}
@@ -108,10 +109,11 @@ const buildSvcRoutes = (svc) => {
 };
 const buildPlugin = (svc) => `
 export const ${plugin_utils_1.lowerCase(svc.name)}Plugin = (
+  ${plugin_utils_1.lowerCase(svc.name)}: ${plugin_utils_1.capitalize(svc.name)},
   logLevel: LogLevel,
   opts: PluginOptions = {}
 ): RpcPlugin => ({
-  plugin: fp(${plugin_utils_1.lowerCase(svc.name)}Routes(), pluginOpts("${svc.name}Plugin", opts)),
+  plugin: fp(${plugin_utils_1.lowerCase(svc.name)}Routes(${plugin_utils_1.lowerCase(svc.name)}: ${plugin_utils_1.capitalize(svc.name)}), pluginOpts("${svc.name}Plugin", opts)),
   opts: registerOptions("/${plugin_utils_1.lowerCase(svc.name)}", logLevel),
 })
 `;

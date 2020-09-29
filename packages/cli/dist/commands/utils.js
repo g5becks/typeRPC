@@ -34,14 +34,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.scaffold = exports.getRpcConfigPath = exports.format = exports.createLogger = exports.parseConfig = exports.getConfigFile = void 0;
-const ts_morph_1 = require("ts-morph");
+const chalk_1 = __importDefault(require("chalk"));
 const child_process_1 = require("child_process");
+const fs_1 = require("fs");
 const fs = __importStar(require("fs-extra"));
 const fs_extra_1 = require("fs-extra");
-const tslog_1 = require("tslog");
 const prettyjson_1 = require("prettyjson");
-const chalk_1 = __importDefault(require("chalk"));
-const fs_1 = require("fs");
+const ts_morph_1 = require("ts-morph");
+const tslog_1 = require("tslog");
 exports.getConfigFile = (project) => project.getSourceFile((file) => file.getBaseName().toLowerCase() === 'rpc.config.ts');
 // get the value for the PluginConfig location property
 const parsePluginLocation = (pluginConfig) => {
@@ -61,14 +61,14 @@ const parsePluginLocation = (pluginConfig) => {
         // get first objectLiteral since there is only one
         const location = locationObj[0];
         // if github property exists
-        if (location.getProperty('github')) {
+        if (location === null || location === void 0 ? void 0 : location.getProperty('github')) {
             // return the string found or empty, let function up the stack
             // throw when empty string is found
             return {
                 github: (_e = (_d = (_c = (_b = location === null || location === void 0 ? void 0 : location.getProperty('github')) === null || _b === void 0 ? void 0 : _b.getChildrenOfKind(ts_morph_1.SyntaxKind.StringLiteral)[0]) === null || _c === void 0 ? void 0 : _c.getLiteralValue()) === null || _d === void 0 ? void 0 : _d.trim()) !== null && _e !== void 0 ? _e : '',
             };
         }
-        if (location.getProperty('local')) {
+        if (location === null || location === void 0 ? void 0 : location.getProperty('local')) {
             return {
                 local: (_j = (_h = (_g = (_f = location === null || location === void 0 ? void 0 : location.getProperty('local')) === null || _f === void 0 ? void 0 : _f.getChildrenOfKind(ts_morph_1.SyntaxKind.StringLiteral)[0]) === null || _g === void 0 ? void 0 : _g.getLiteralValue()) === null || _h === void 0 ? void 0 : _h.trim()) !== null && _j !== void 0 ? _j : '',
             };
@@ -87,11 +87,11 @@ const parseGeneratorConfig = (obj) => {
     };
     const pkg = (_q = (_p = (_o = obj.getProperty('pkg')) === null || _o === void 0 ? void 0 : _o.getChildrenOfKind(ts_morph_1.SyntaxKind.StringLiteral)[0]) === null || _p === void 0 ? void 0 : _p.getLiteralValue()) === null || _q === void 0 ? void 0 : _q.trim();
     const fmt = (_t = (_s = (_r = obj.getProperty('fmt')) === null || _r === void 0 ? void 0 : _r.getChildrenOfKind(ts_morph_1.SyntaxKind.StringLiteral)[0]) === null || _s === void 0 ? void 0 : _s.getLiteralValue()) === null || _t === void 0 ? void 0 : _t.trim();
-    if (!out || !plugin || !pkg) {
+    if (!out || !pkg) {
         throw new Error(`
         error in config file: ${obj.getSourceFile().getFilePath()},
         at line number: ${obj.getStartLineNumber()},
-        message: all generator config objects must contain the following properties: [outputPath, plugin, packageName]`);
+        message: all generator config objects must contain the following properties: missing config property : ${out ? 'pkg' : 'out'} [out, plugin, pkg]`);
     }
     return { out, plugin, pkg, fmt };
 };
@@ -514,7 +514,7 @@ type User = rpc.Msg<{
     age: $.int8
     weight: $.float32
     verified: $.bool
-    embeddedMsg: SomeMessage
+    // embeddedMsg: SomeMessage
     embeddedMsgLiteral: rpc.Msg<{
         cool: $.list<$.bool>
     }>
@@ -551,7 +551,7 @@ exports.scaffold = async (projectName, yarn, client, server) => {
         { fileName: '.eslintrc.js', source: eslintrc },
         { fileName: 'tsconfig.json', source: tsconfigFile },
         { fileName: '.gitignore', source: gitIgnore },
-        { fileName: './api/example.ts', source: exampleSource },
+        { fileName: './src/example.ts', source: exampleSource },
     ];
     let promises = [];
     for (const file of files) {

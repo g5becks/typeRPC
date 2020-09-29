@@ -1,6 +1,6 @@
-import { Project, SourceFile } from 'ts-morph';
 import { GeneratorConfig } from '@typerpc/config';
 import { ChildProcess } from 'child_process';
+import { Project, SourceFile } from 'ts-morph';
 import { Logger } from 'tslog';
 export declare const getConfigFile: (project: Project) => SourceFile | undefined;
 export declare type ParsedConfig = GeneratorConfig & {

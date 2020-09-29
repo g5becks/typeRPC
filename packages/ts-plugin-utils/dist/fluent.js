@@ -85,7 +85,7 @@ exports.buildMsgSchema = (msg) => {
     for (const prop of msg.properties) {
         schema = schema.concat(`.prop('${plugin_utils_1.lowerCase(prop.name)}', S.${schemaType(prop.type)})${prop.isOptional ? '' : '.required()'}`);
     }
-    return `const ${plugin_utils_1.lowerCase(msg.name)}Schema = ${exports.buildMsgSchema}
+    return `const ${plugin_utils_1.lowerCase(msg.name)}Schema = ${schema}
     `;
 };
 exports.buildRequestSchema = (svcName, method) => {
