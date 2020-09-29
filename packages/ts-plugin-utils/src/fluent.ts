@@ -100,7 +100,9 @@ export const buildMsgSchema = (msg: Message, hash: string): string => {
     let schema = `S.object().id('${msg.name}-${hash}').title('${msg.name} Schema').description('Schema for ${msg.name} rpc message')`
     for (const prop of msg.properties) {
         schema = schema.concat(
-            `.prop('${lowerCase(prop.name)}', S.${schemaType(prop.type)})${prop.isOptional ? '' : '.required()'}`,
+            `.prop('${lowerCase(prop.name)}', ${is.struct(param.type) ? '' : 'S.'}${schemaType(prop.type)})${
+                prop.isOptional ? '' : '.required()'
+            }`,
         )
     }
     return `const ${lowerCase(msg.name)}Schema = ${schema}
@@ -111,7 +113,9 @@ export const buildRequestSchema = (svcName: string, method: MutationMethod | Que
     let schema = `S.object().id('${svcName}.${method.name}Request').title('${svcName}.${method.name} Body').description('${svcName}.${method.name} Request Schema')`
     for (const param of method.params) {
         if (isMutationMethod(method)) {
-            schema = schema.concat(`.prop('${param.name}', S.${schemaType(param.type)})`)
+            schema = schema.concat(
+                `.prop('${param.name}', ${is.struct(param.type) ? '' : 'S.'}${schemaType(param.type)})`,
+            )
         } else if (isQueryMethod(method)) {
             schema = schema.concat(
                 `.prop('${param.name}', S.${is.scalar(param.type) ? 'string()' : 'array().items(S.string())'})${
@@ -128,6 +132,6 @@ export const buildResponseSchema = (svcName: string, method: MutationMethod | Qu
         ? '{}'
         : `S.object().id('${svcName}.${method.name}Response').title('${svcName}.${
               method.name
-          } Response').description('${svcName}.${method.name} Response Schema').prop('data', S.${schemaType(
-              method.returnType,
-          )})`
+          } Response').description('${svcName}.${method.name} Response Schema').prop('data', ${
+              is.struct(param.type) ? '' : 'S.'
+          }${schemaType(method.returnType)})`
