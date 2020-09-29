@@ -11,7 +11,7 @@
  */
 
 import { capitalize, lowerCase } from '@typerpc/plugin-utils'
-import { DataType, is, make, Message, MutationMethod, QueryMethod, Schema, StructLiteral } from '@typerpc/schema'
+import { DataType, is, make, Message, MutationMethod, QueryMethod, StructLiteral } from '@typerpc/schema'
 const typeMap: Map<string, string> = new Map<string, string>([
     [make.bool.type, 'boolean()'],
     [make.int8.type, 'number()'],
@@ -95,7 +95,7 @@ const schemaType = (type: DataType): string => {
     return '{}'
 }
 
-const buildMsgSchema = (msg: Message): string => {
+export const buildMsgSchema = (msg: Message): string => {
     let schema = `S.object().id('${msg.name}').title('${msg.name} Schema').description('Schema for ${msg.name} rpc message')`
     for (const prop of msg.properties) {
         schema = schema.concat(
@@ -106,64 +106,19 @@ const buildMsgSchema = (msg: Message): string => {
     `
 }
 
-const buildMsgSchemasForFile = (schema: Schema): string => {
-    let msgs = ''
-    for (const msg of schema.messages) {
-        msgs = msgs.concat(buildMsgSchema(msg))
-    }
-    return msgs
-}
-
-const buildRequestSchema = (svcName: string, method: MutationMethod | QueryMethod): string => {
+export const buildRequestSchema = (svcName: string, method: MutationMethod | QueryMethod): string => {
     let schema = `S.object().id('${svcName}.${method.name}Request').title('${svcName}.${method.name} Body').description('${svcName}.${method.name} Request Schema')`
     for (const param of method.params) {
         schema = schema.concat(`.prop('${param.name}', ${schemaType(param.type)})`)
     }
-    return `const ${requestSchemaName(svcName, method)} = ${schema}
-    `
+    return schema
 }
 
-const buildRequestSchemasForFile = (schema: Schema): string => {
-    let schemas = ''
-    for (const svc of schema.queryServices) {
-        for (const method of svc.methods) {
-            schemas = schemas.concat(buildRequestSchema(svc.name, method))
-        }
-    }
-    for (const svc of schema.mutationServices) {
-        for (const method of svc.methods) {
-            schemas = schemas.concat(buildRequestSchema(svc.name, method))
-        }
-    }
-    return schemas
-}
-
-const buildResponseSchema = (svcName: string, method: MutationMethod | QueryMethod): string =>
+export const buildResponseSchema = (svcName: string, method: MutationMethod | QueryMethod): string =>
     method.isVoidReturn
-        ? ''
-        : `const ${responseSchemaName(svcName, method)} = S.object().id('${svcName}.${
+        ? '{}'
+        : `S.object().id('${svcName}.${method.name}Response').title('${svcName}.${
               method.name
-          }Response').title('${svcName}.${method.name} Response').description('${svcName}.${
-              method.name
-          } Response Schema').prop('data', ${schemaType(method.returnType)})`
-
-const buildResponseSchemasForFile = (schema: Schema): string => {
-    let schemas = ''
-    for (const svc of schema.queryServices) {
-        for (const method of svc.methods) {
-            schemas = schemas.concat(buildResponseSchema(svc.name, method))
-        }
-    }
-    for (const svc of schema.mutationServices) {
-        for (const method of svc.methods) {
-            schemas = schemas.concat(buildResponseSchema(svc.name, method))
-        }
-    }
-    return schemas
-}
-
-export const buildFluentSchemas = (schema: Schema): string =>
-    `${buildMsgSchemasForFile(schema)}
-  ${buildRequestSchemasForFile(schema)}
-  ${buildResponseSchemasForFile(schema)}
-  `
+          } Response').description('${svcName}.${method.name} Response Schema').prop('data', ${schemaType(
+              method.returnType,
+          )})`
