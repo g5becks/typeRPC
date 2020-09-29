@@ -100,7 +100,7 @@ export const buildMsgSchema = (msg: Message, hash: string): string => {
     let schema = `S.object().id('${msg.name}-${hash}').title('${msg.name} Schema').description('Schema for ${msg.name} rpc message')`
     for (const prop of msg.properties) {
         schema = schema.concat(
-            `.prop('${lowerCase(prop.name)}', ${is.struct(param.type) ? '' : 'S.'}${schemaType(prop.type)})${
+            `.prop('${lowerCase(prop.name)}', ${is.struct(prop.type) ? '' : 'S.'}${schemaType(prop.type)})${
                 prop.isOptional ? '' : '.required()'
             }`,
         )
@@ -133,5 +133,5 @@ export const buildResponseSchema = (svcName: string, method: MutationMethod | Qu
         : `S.object().id('${svcName}.${method.name}Response').title('${svcName}.${
               method.name
           } Response').description('${svcName}.${method.name} Response Schema').prop('data', ${
-              is.struct(param.type) ? '' : 'S.'
+              is.struct(method.returnType) ? '' : 'S.'
           }${schemaType(method.returnType)})`
