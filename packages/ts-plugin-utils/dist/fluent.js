@@ -58,7 +58,7 @@ const schemaType = (type) => {
         return 'object()';
     }
     if (schema_1.is.list(type)) {
-        return `array().items(${schemaType(type.dataType)})`;
+        return `array().items(S.${schemaType(type.dataType)})`;
     }
     if (schema_1.is.structLiteral(type)) {
         return buildObjectSchema(type);
@@ -80,8 +80,8 @@ const schemaType = (type) => {
     }
     return '{}';
 };
-exports.buildMsgSchema = (msg) => {
-    let schema = `S.object().id('${msg.name}').title('${msg.name} Schema').description('Schema for ${msg.name} rpc message')`;
+exports.buildMsgSchema = (msg, hash) => {
+    let schema = `S.object().id('${msg.name}-${hash}').title('${msg.name} Schema').description('Schema for ${msg.name} rpc message')`;
     for (const prop of msg.properties) {
         schema = schema.concat(`.prop('${plugin_utils_1.lowerCase(prop.name)}', S.${schemaType(prop.type)})${prop.isOptional ? '' : '.required()'}`);
     }
@@ -91,11 +91,11 @@ exports.buildMsgSchema = (msg) => {
 exports.buildRequestSchema = (svcName, method) => {
     let schema = `S.object().id('${svcName}.${method.name}Request').title('${svcName}.${method.name} Body').description('${svcName}.${method.name} Request Schema')`;
     for (const param of method.params) {
-        schema = schema.concat(`.prop('${param.name}', ${schemaType(param.type)})`);
+        schema = schema.concat(`.prop('${param.name}', S.${schemaType(param.type)})`);
     }
     return schema;
 };
 exports.buildResponseSchema = (svcName, method) => method.isVoidReturn
     ? '{}'
-    : `S.object().id('${svcName}.${method.name}Response').title('${svcName}.${method.name} Response').description('${svcName}.${method.name} Response Schema').prop('data', ${schemaType(method.returnType)})`;
+    : `S.object().id('${svcName}.${method.name}Response').title('${svcName}.${method.name} Response').description('${svcName}.${method.name} Response Schema').prop('data', S.${schemaType(method.returnType)})`;
 //# sourceMappingURL=fluent.js.map
