@@ -76,7 +76,7 @@ const schemaType = (type: DataType): string => {
     }
 
     if (is.list(type)) {
-        return `array().items(S.${schemaType(type.dataType)})`
+        return `array().items(${is.struct(type.dataType) ? '' : 'S.'}${schemaType(type.dataType)})`
     }
 
     if (is.structLiteral(type)) {
@@ -105,8 +105,8 @@ const schemaType = (type: DataType): string => {
     return '{}'
 }
 
-export const buildMsgSchema = (msg: Message, hash: string): string => {
-    let schema = `S.object().id('${msg.name}-${hash}').title('${msg.name} Schema').description('Schema for ${msg.name} rpc message')`
+export const buildMsgSchema = (msg: Message, file: string): string => {
+    let schema = `S.object().id('${msg.name}_${file}.ts').title('${msg.name} Schema').description('Schema for ${msg.name} rpc message')`
     for (const prop of msg.properties) {
         schema = schema.concat(
             `.prop('${lowerCase(prop.name)}', ${is.struct(prop.type) ? '' : 'S.'}${schemaType(prop.type)})${

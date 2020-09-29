@@ -140,7 +140,7 @@ const buildRoute = (svcName: string, method: QueryMethod | MutationMethod): stri
         );
         reply
           .code(${method.errorCode})
-          .send({error: \`\${error.message}\`})
+          .send({error: \`\${error.message}\`, user_msg: 'internal server error'})
          return
       }
 
