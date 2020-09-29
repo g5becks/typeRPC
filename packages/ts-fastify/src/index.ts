@@ -409,7 +409,6 @@ import fp, { PluginOptions } from 'fastify-plugin'
 import fastifySensible from 'fastify-sensible'
 import S from 'fluent-schema'
 import { pluginOpts, registerOptions, RpcPlugin } from './fastify.rpc.server'
-import { isMutationMethod } from '../../schema/src/schema';
 
     ${types}
     ${buildInterfaces(schema)}
