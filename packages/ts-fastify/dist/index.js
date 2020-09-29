@@ -16,13 +16,19 @@ const schema_1 = require("@typerpc/schema");
 const ts_plugin_utils_1 = require("@typerpc/ts-plugin-utils");
 // build generic route types for fastify route methods
 // https://www.fastify.io/docs/latest/TypeScript/#using-generics
-const buildReqBodyOrParamsType = (params) => {
+const buildReqBodyOrParamsType = (method) => {
     let props = '';
-    for (const param of params) {
-        props = props.concat(`${plugin_utils_1.lowerCase(param.name)}${param.isOptional ? '?' : ''}: ${ts_plugin_utils_1.dataType(param.type)},
+    for (const param of method.params) {
+        if (schema_1.isMutationMethod(method)) {
+            props = props.concat(`${plugin_utils_1.lowerCase(param.name)}${param.isOptional ? '?' : ''}: ${ts_plugin_utils_1.dataType(param.type)},
         `);
+        }
+        else if (schema_1.isQueryMethod(method)) {
+            props = props.concat(`${plugin_utils_1.lowerCase(param.name)}${param.isOptional ? '?' : ''}: ${schema_1.is.scalar(param.type) ? 'string' : 'string[]'}`);
+        }
     }
-    return `{${props}
+    return `{
+      ${props}
   }`;
 };
 const requestSchema = (svcName, method) => {
@@ -58,10 +64,27 @@ const invokeMethod = (svcName, method) => {
     const invoke = `const data = ` + call;
     return method.hasParams ? invoke + `(${ts_plugin_utils_1.paramNames(method.params)})` : invoke + '()';
 };
-const parseParams = (method) => method.hasParams ? `const {${ts_plugin_utils_1.paramNames(method.params)}} = request.${schema_1.isQueryMethod(method) ? 'query' : 'body'}` : '';
+const parseParams = (method) => {
+    if (!method.hasParams) {
+        return '';
+    }
+    if (schema_1.isMutationMethod(method)) {
+        return `const {${ts_plugin_utils_1.paramNames(method.params)}} = request.body`;
+    }
+    const variable = ts_plugin_utils_1.buildParamsVar(method.params);
+    let parsedParams = '';
+    let i = 0;
+    while (i < method.params.length) {
+        const parsed = ts_plugin_utils_1.fromQueryString(`request.query.${method.params[i].name}`, method.params[i].type);
+        const useComma = i === method.params.length - 1 ? '' : ', ';
+        parsedParams = parsedParams.concat(`${method.params[i].name}: ${parsed}${useComma}`);
+        i++;
+    }
+    return `${variable} = {${parsedParams}}`;
+};
 const buildRoute = (svcName, method) => {
     return `instance.route<{
-        ${schema_1.isQueryMethod(method) ? 'Querystring' : 'Body'}: ${buildReqBodyOrParamsType(method.params)}
+        ${schema_1.isQueryMethod(method) ? 'Querystring' : 'Body'}: ${buildReqBodyOrParamsType(method)}
     }>({
       method: '${method.httpMethod.toUpperCase().trim()}',
       url: '/${plugin_utils_1.lowerCase(method.name)}',
@@ -141,6 +164,7 @@ import { RegisterOptions } from 'fastify/types/register'
 import http2 from 'http2'
 import https from 'https'
 import pino from 'pino'
+import qs from 'qs'
 
 /**
  * Creates an implementation of PluginOptions for a fastify-plugin
@@ -246,6 +270,7 @@ export function createHttp2SecureServer<Server extends http2.Http2SecureServer>(
     const instance = fastify({
         ...opts,
         logger,
+        querystringParser: (str) => (qs.parse(str) as unknown) as { [key: string]: string | string[] },
     })
     for (const plugin of plugins) {
         instance.register(plugin.plugin, plugin.opts)
@@ -270,6 +295,7 @@ export function createHttp2Server<Server extends http2.Http2Server>(
     const instance = fastify({
         ...opts,
         logger,
+        querystringParser: (str) => (qs.parse(str) as unknown) as { [key: string]: string | string[] },
     })
     for (const plugin of plugins) {
         instance.register(plugin.plugin, plugin.opts)
@@ -295,6 +321,7 @@ export function createSecureServer<Server extends https.Server>(
     const instance = fastify({
         ...opts,
         logger,
+        querystringParser: (str) => (qs.parse(str) as unknown) as { [key: string]: string | string[] },
     })
     for (const plugin of plugins) {
         instance.register(plugin.plugin, plugin.opts)
@@ -320,6 +347,7 @@ export function createServer(
     const instance = fastify({
         ...opts,
         logger,
+        querystringParser: (str) => (qs.parse(str) as unknown) as { [key: string]: string | string[] },
     })
     for (const plugin of plugins) {
         instance.register(plugin.plugin, plugin.opts)
@@ -340,7 +368,7 @@ import fp, { PluginOptions } from 'fastify-plugin'
 import fastifySensible from 'fastify-sensible'
 import S from 'fluent-schema'
 import { pluginOpts, registerOptions, RpcPlugin } from './fastify.rpc.server'
-
+import { isMutationMethod } from '../../schema/src/schema';
 
     ${types}
     ${ts_plugin_utils_1.buildInterfaces(schema)}
