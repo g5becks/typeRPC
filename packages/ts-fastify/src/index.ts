@@ -25,10 +25,12 @@ import {
 import {
     buildInterfaces,
     buildMsgSchema,
+    buildParamsVar,
     buildRequestSchema,
     buildResponseSchema,
     buildType,
     dataType,
+    fromQueryString,
     paramNames,
 } from '@typerpc/ts-plugin-utils'
 
@@ -49,7 +51,8 @@ const buildReqBodyOrParamsType = (method: QueryMethod | MutationMethod): string 
             )
         }
     }
-    return `{${props}
+    return `{
+      ${props}
   }`
 }
 
@@ -90,8 +93,24 @@ const invokeMethod = (svcName: string, method: QueryMethod | MutationMethod): st
     return method.hasParams ? invoke + `(${paramNames(method.params)})` : invoke + '()'
 }
 
-const parseParams = (method: QueryMethod | MutationMethod): string =>
-    method.hasParams ? `const {${paramNames(method.params)}} = request.${isQueryMethod(method) ? 'query' : 'body'}` : ''
+const parseParams = (method: QueryMethod | MutationMethod): string => {
+    if (!method.hasParams) {
+        return ''
+    }
+    if (isMutationMethod(method)) {
+        return `const {${paramNames(method.params)}} = request.body`
+    }
+    const variable = buildParamsVar(method.params)
+    let parsedParams = ''
+    let i = 0
+    while (i < method.params.length) {
+        const parsed = fromQueryString(`request.query.${method.params[i].name}`, method.params[i].type)
+        const useComma = i === method.params.length - 1 ? '' : ', '
+        parsedParams = parsedParams.concat(`${method.params[i].name}: ${parsed}${useComma}`)
+        i++
+    }
+    return `${variable} = {${parsedParams}}`
+}
 const buildRoute = (svcName: string, method: QueryMethod | MutationMethod): string => {
     return `instance.route<{
         ${isQueryMethod(method) ? 'Querystring' : 'Body'}: ${buildReqBodyOrParamsType(method)}
