@@ -13,7 +13,7 @@
 import { Code } from '@typerpc/plugin'
 import { lowerCase } from '@typerpc/plugin-utils'
 import { MutationMethod, QueryMethod, Schema } from '@typerpc/schema'
-import { dataType } from '@typerpc/ts-plugin-utils'
+import { buildMsgSchema, buildType, dataType } from '@typerpc/ts-plugin-utils'
 
 // build generic route types for fastify route methods
 // https://www.fastify.io/docs/latest/TypeScript/#using-generics
@@ -32,6 +32,8 @@ const helpers = `
 import { FastifyPluginCallback, LogLevel } from "fastify"
 import { PluginOptions } from "fastify-plugin"
 import { RegisterOptions } from "fastify/types/register"
+import { buildType } from '../../ts-plugin-utils/src/index';
+import { buildMsgSchema } from '../../ts-plugin-utils/src/fluent';
 
 /**
  * Creates an implementation of PluginOptions for a fastify-plugin
@@ -80,6 +82,15 @@ export const registerOptions = (
 ): RegisterOptions => {
   return { prefix, logLevel }
 }`
+
+const buildFile = (schema: Schema): Code => {
+    let types = ''
+    for (const msg of schema.messages) {
+        types = types.concat(buildType(msg).concat('\n' + buildMsgSchema(msg)))
+    }
+    const source = ``
+    return { fileName: schema.fileName + '.ts', source }
+}
 // builds all schemas and server file
 const build = (schemas: Schema[]): Code[] => [...schemas.map((schema) => buildFile(schema)), buildServer(schemas)]
 
