@@ -58,7 +58,7 @@ const schemaType = (type) => {
         return 'object()';
     }
     if (schema_1.is.list(type)) {
-        return `array().items(S.${schemaType(type.dataType)})`;
+        return `array().items(${schema_1.is.struct(type.dataType) ? '' : 'S.'}${schemaType(type.dataType)})`;
     }
     if (schema_1.is.structLiteral(type)) {
         return buildObjectSchema(type);
@@ -80,8 +80,8 @@ const schemaType = (type) => {
     }
     return '{}';
 };
-exports.buildMsgSchema = (msg, hash) => {
-    let schema = `S.object().id('${msg.name}-${hash}').title('${msg.name} Schema').description('Schema for ${msg.name} rpc message')`;
+exports.buildMsgSchema = (msg, file) => {
+    let schema = `S.object().id('${msg.name}_${file}.ts').title('${msg.name} Schema').description('Schema for ${msg.name} rpc message')`;
     for (const prop of msg.properties) {
         schema = schema.concat(`.prop('${plugin_utils_1.lowerCase(prop.name)}', ${schema_1.is.struct(prop.type) ? '' : 'S.'}${schemaType(prop.type)})${prop.isOptional ? '' : '.required()'}`);
     }

@@ -107,7 +107,7 @@ const buildRoute = (svcName, method) => {
         );
         reply
           .code(${method.errorCode})
-          .send({error: \`\${error.message}\`})
+          .send({error: \`\${error.message}\`, user_msg: 'internal server error'})
          return
       }
 
@@ -123,7 +123,7 @@ const buildRoutes = (svc) => {
     return routes;
 };
 const buildSvcRoutes = (svc) => {
-    return `const ${plugin_utils_1.lowerCase(svc.name)} = (${plugin_utils_1.lowerCase(svc.name)}: ${plugin_utils_1.capitalize(svc.name)}): FastifyPluginAsync => async (instance, _) => {
+    return `const ${plugin_utils_1.lowerCase(svc.name)}Routes = (${plugin_utils_1.lowerCase(svc.name)}: ${plugin_utils_1.capitalize(svc.name)}): FastifyPluginAsync => async (instance, _) => {
        instance.register(fastifySensible)
 
        ${buildRoutes(svc)}
@@ -368,7 +368,6 @@ import fp, { PluginOptions } from 'fastify-plugin'
 import fastifySensible from 'fastify-sensible'
 import S from 'fluent-schema'
 import { pluginOpts, registerOptions, RpcPlugin } from './fastify.rpc.server'
-import { isMutationMethod } from '../../schema/src/schema';
 
     ${types}
     ${ts_plugin_utils_1.buildInterfaces(schema)}
