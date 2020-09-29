@@ -12,6 +12,7 @@
 
 import { capitalize, lowerCase } from '@typerpc/plugin-utils'
 import { DataType, is, make, Message, MutationMethod, QueryMethod, StructLiteral } from '@typerpc/schema'
+import { isMutationMethod, isQueryMethod } from '../../schema/src/schema'
 const typeMap: Map<string, string> = new Map<string, string>([
     [make.bool.type, 'boolean()'],
     [make.int8.type, 'number()'],
@@ -109,7 +110,15 @@ export const buildMsgSchema = (msg: Message, hash: string): string => {
 export const buildRequestSchema = (svcName: string, method: MutationMethod | QueryMethod): string => {
     let schema = `S.object().id('${svcName}.${method.name}Request').title('${svcName}.${method.name} Body').description('${svcName}.${method.name} Request Schema')`
     for (const param of method.params) {
-        schema = schema.concat(`.prop('${param.name}', S.${schemaType(param.type)})`)
+        if (isMutationMethod(method)) {
+            schema = schema.concat(`.prop('${param.name}', S.${schemaType(param.type)})`)
+        } else if (isQueryMethod(method)) {
+            schema = schema.concat(
+                `.prop('${param.name}', S.${is.scalar(param.type) ? 'string()' : 'array().items(S.string())'})${
+                    param.isOptional ? '' : '.required()'
+                }`,
+            )
+        }
     }
     return schema
 }
