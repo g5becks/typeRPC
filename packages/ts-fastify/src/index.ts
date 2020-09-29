@@ -116,17 +116,53 @@ const buildRoute = (svcName: string, method: QueryMethod | MutationMethod): stri
       }
 
       },
-    })`
+    })
+    `
 }
 
 const buildRoutes = (svc: MutationService | QueryService): string => {
+    let routes = ''
+    for (const method of svc.methods) {
+        routes = routes.concat(buildRoute(svc.name, method))
+    }
+    return routes
+}
+
+const buildSvcRoutes = (svc: MutationService | QueryService): string => {
     return `${lowerCase(svc.name)} = (${lowerCase(svc.name)}: ${capitalize(
         svc.name,
     )}): FastifyPluginAsync => async (instance, _) => {
        instance.register(fastifySensible)
-    }`
+
+       ${buildRoutes(svc)}
+    }
+    `
 }
-const helpers = `
+
+const buildPlugin = (svc: MutationService | QueryService): string => `
+export const ${lowerCase(svc.name)}Plugin = (
+  logLevel: LogLevel,
+  opts: PluginOptions = {}
+): RpcPlugin => ({
+  plugin: fp(${lowerCase(svc.name)}Routes(), pluginOpts("${svc.name}Plugin", opts)),
+  opts: registerOptions("/${lowerCase(svc.name)}", logLevel),
+})
+`
+
+const buildPlugins = (schema: Schema): string => {
+    let plugins = ''
+    for (const svc of schema.queryServices) {
+        plugins = plugins.concat(buildSvcRoutes(svc).concat(buildPlugin(svc)))
+    }
+    for (const svc of schema.mutationServices) {
+        plugins = plugins.concat(buildSvcRoutes(svc).concat(buildPlugin(svc)))
+    }
+    return plugins
+}
+
+const buildServer = (schemas: Schema[]): Code => {
+    return {
+        source: `
 import { FastifyPluginCallback, LogLevel } from "fastify"
 import { PluginOptions } from "fastify-plugin"
 import { RegisterOptions } from "fastify/types/register"
@@ -177,7 +213,10 @@ export const registerOptions = (
   logLevel: LogLevel
 ): RegisterOptions => {
   return { prefix, logLevel }
-}`
+}`,
+        fileName: 'fastify.rpc.server.ts',
+    }
+}
 
 const buildFile = (schema: Schema): Code => {
     let types = ''
@@ -186,7 +225,9 @@ const buildFile = (schema: Schema): Code => {
     }
     const source = `
     ${types}
-    ${buildInterfaces(schema)}`
+    ${buildInterfaces(schema)}
+    ${buildPlugins(schema)}
+    `
     return { fileName: schema.fileName + '.ts', source }
 }
 // builds all schemas and server file
