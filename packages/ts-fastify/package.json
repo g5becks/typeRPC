@@ -32,8 +32,7 @@
         "@typerpc/plugin": "^0.1.17",
         "@typerpc/plugin-utils": "^0.1.17",
         "@typerpc/schema": "^0.1.17",
-        "@typerpc/ts-plugin-utils": "^0.1.19",
-        "nanoid": "^3.1.12"
+        "@typerpc/ts-plugin-utils": "^0.1.19"
     },
     "devDependencies": {
         "@typerpc/test-utils": "^0.1.17"

@@ -30,7 +30,6 @@ import {
     dataType,
     paramNames,
 } from '@typerpc/ts-plugin-utils'
-import { nanoid } from 'nanoid'
 
 // build generic route types for fastify route methods
 // https://www.fastify.io/docs/latest/TypeScript/#using-generics
@@ -367,10 +366,9 @@ export function createServer(
 }
 
 const buildFile = (schema: Schema): Code => {
-    const id = nanoid()
     let types = ''
     for (const msg of schema.messages) {
-        types = types.concat(buildType(msg).concat('\n' + buildMsgSchema(msg, id)))
+        types = types.concat(buildType(msg).concat('\n' + buildMsgSchema(msg, schema.fileName)))
     }
     const source = `
 import fastify, { FastifyPluginAsync, LogLevel } from 'fastify'
@@ -379,7 +377,6 @@ import fastifySensible from 'fastify-sensible'
 import S from 'fluent-schema'
 import { pluginOpts, registerOptions, RpcPlugin } from './fastify.rpc.server'
 
-    const SCHEMA_ID = '${id}'
 
     ${types}
     ${buildInterfaces(schema)}
