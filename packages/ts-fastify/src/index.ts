@@ -72,6 +72,15 @@ const buildRoute = (svcName: string, method: QueryMethod | MutationMethod): stri
       },
       handler: async (request, reply) => {
         const {${paramNames(method.params)}} = request.${isQueryMethod(method) ? 'query' : 'body'}
+      try {
+      } catch (error) {
+        request.log.error(
+          \`{"route": "/${lowerCase(svcName)}/${lowerCase(
+        method.name,
+    )}", "service_name": "someServiceName", "method_name": "someMethod", "args": "", "error_msg": "\${error.message}" , "stack": "\${error.stack}"}\`
+        );
+      }
+
       },
     })`
 }
