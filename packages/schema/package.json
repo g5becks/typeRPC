@@ -1,6 +1,6 @@
 {
   "name": "@typerpc/schema",
-  "version": "0.1.16",
+  "version": "0.1.17",
   "description": "typerpc schema definitions",
   "keywords": [
     "typerpc",
@@ -38,7 +38,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "@typerpc/types": "^0.1.11"
+    "@typerpc/types": "^0.1.17"
   },
   "bugs": {
     "url": "https://github.com/typerpc/typerpc/issues"
