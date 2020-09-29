@@ -160,12 +160,20 @@ const buildPlugins = (schema: Schema): string => {
     return plugins
 }
 
-const buildServer = (schemas: Schema[]): Code => {
-    return {
-        source: `
-import { FastifyPluginCallback, LogLevel } from "fastify"
-import { PluginOptions } from "fastify-plugin"
-import { RegisterOptions } from "fastify/types/register"
+const server = {
+    source: `
+import fastify, {
+    FastifyInstance,
+    FastifyLoggerInstance,
+    FastifyPluginCallback,
+    FastifyServerOptions,
+    LogLevel,
+} from 'fastify'
+import { PluginOptions } from 'fastify-plugin'
+import { RegisterOptions } from 'fastify/types/register'
+import http2 from 'http2'
+import https from 'https'
+import pino from 'pino'
 
 /**
  * Creates an implementation of PluginOptions for a fastify-plugin
@@ -213,9 +221,146 @@ export const registerOptions = (
   logLevel: LogLevel
 ): RegisterOptions => {
   return { prefix, logLevel }
-}`,
-        fileName: 'fastify.rpc.server.ts',
+}
+
+/**
+ * Used as opts param to {@link createHttp2SecureServer} function
+ *
+ * @type {object}
+ */
+export type FastifyHttp2SecureOptions<
+    Server extends http2.Http2SecureServer,
+    Logger extends FastifyLoggerInstance = FastifyLoggerInstance
+> = FastifyServerOptions<Server, Logger> & {
+    http2: true
+    https: http2.SecureServerOptions
+}
+
+/**
+ * Used as opts param to {@link createHttp2Server} function
+ *
+ * @type {object}
+ */
+export type FastifyHttp2Options<
+    Server extends http2.Http2Server,
+    Logger extends FastifyLoggerInstance = FastifyLoggerInstance
+> = FastifyServerOptions<Server, Logger> & {
+    http2: true
+    http2SessionTimeout?: number
+}
+
+/**
+ * Used as opts param to {@link createSecureServer} function
+ *
+ * @type {object}
+ */
+export type FastifyHttpsOptions<
+    Server extends https.Server,
+    Logger extends FastifyLoggerInstance = FastifyLoggerInstance
+> = FastifyServerOptions<Server, Logger> & {
+    https: https.ServerOptions
+}
+
+/**
+ * Creates a {@link FastifyInstance} with http2 and https enabled
+ *
+ * @export
+ * @template Server the type of server to create
+ * @param {FastifyHttp2SecureOptions<Server>} opts @see {@link https://www.fastify.io/docs/latest/Server/}
+ * @param {pino.Logger} logger a pino.Logger instance @see {@link https://github.com/pinojs/pino/blob/HEAD/docs/api.md}
+ * @param {...RpcPlugin[]} plugins list of plugins to register
+ * @returns {FastifyInstance<Server>} configured {@link FastifyInstance}
+ */
+export function createHttp2SecureServer<Server extends http2.Http2SecureServer>(
+    opts: FastifyHttp2SecureOptions<Server>,
+    logger: pino.Logger,
+    ...plugins: RpcPlugin[]
+): FastifyInstance<Server> {
+    const instance = fastify({
+        ...opts,
+        logger,
+    })
+    for (const plugin of plugins) {
+        instance.register(plugin.plugin, plugin.opts)
     }
+    return instance
+}
+/**
+ * Creates a {@link FastifyInstance} with https enables
+ *
+ * @export
+ * @template Server the type of server to create
+ * @param {FastifyHttp2SecureOptions<Server>} opts @see {@link https://www.fastify.io/docs/latest/Server/}
+ * @param {pino.Logger} logger a pino.Logger instance @see {@link https://github.com/pinojs/pino/blob/HEAD/docs/api.md}
+ * @param {...RpcPlugin[]} plugins list of plugins to register
+ * @returns {FastifyInstance<Server>} configured {@link FastifyInstance}
+ */
+export function createHttp2Server<Server extends http2.Http2Server>(
+    opts: FastifyHttp2Options<Server>,
+    logger: pino.Logger,
+    ...plugins: RpcPlugin[]
+): FastifyInstance<Server> {
+    const instance = fastify({
+        ...opts,
+        logger,
+    })
+    for (const plugin of plugins) {
+        instance.register(plugin.plugin, plugin.opts)
+    }
+    return instance
+}
+
+/**
+ * Creates a {@link FastifyInstance} with https enabled
+ *
+ * @export
+ * @template Server the type of server to create
+ * @param {FastifyHttp2SecureOptions<Server>} opts @see {@link https://www.fastify.io/docs/latest/Server/}
+ * @param {pino.Logger} logger a pino.Logger instance @see {@link https://github.com/pinojs/pino/blob/HEAD/docs/api.md}
+ * @param {...RpcPlugin[]} plugins list of plugins to register
+ * @returns {FastifyInstance<Server>} configured {@link FastifyInstance}
+ */
+export function createSecureServer<Server extends https.Server>(
+    opts: FastifyHttpsOptions<Server>,
+    logger: pino.Logger,
+    ...plugins: RpcPlugin[]
+): FastifyInstance<Server> {
+    const instance = fastify({
+        ...opts,
+        logger,
+    })
+    for (const plugin of plugins) {
+        instance.register(plugin.plugin, plugin.opts)
+    }
+    return instance
+}
+
+/**
+ * Creates a {@link FastifyInstance}
+ *
+ * @export
+ * @template Server the type of server to create
+ * @param {FastifyHttp2SecureOptions<Server>} opts @see {@link https://www.fastify.io/docs/latest/Server/}
+ * @param {pino.Logger} logger a pino.Logger instance @see {@link https://github.com/pinojs/pino/blob/HEAD/docs/api.md}
+ * @param {...RpcPlugin[]} plugins list of plugins to register
+ * @returns {FastifyInstance<Server>} configured {@link FastifyInstance}
+ */
+export function createServer(
+    opts: FastifyServerOptions,
+    logger: pino.Logger,
+    ...plugins: RpcPlugin[]
+): FastifyInstance {
+    const instance = fastify({
+        ...opts,
+        logger,
+    })
+    for (const plugin of plugins) {
+        instance.register(plugin.plugin, plugin.opts)
+    }
+    return instance
+}
+`,
+    fileName: 'fastify.rpc.server.ts',
 }
 
 const buildFile = (schema: Schema): Code => {
@@ -224,6 +369,12 @@ const buildFile = (schema: Schema): Code => {
         types = types.concat(buildType(msg).concat('\n' + buildMsgSchema(msg)))
     }
     const source = `
+import fastify, { FastifyPluginAsync, LogLevel } from 'fastify'
+import fp, { PluginOptions } from 'fastify-plugin'
+import fastifySensible from 'fastify-sensible'
+import S from 'fluent-schema'
+import { pluginOpts, registerOptions, RpcPlugin } from './fastify.rpc.server'
+
     ${types}
     ${buildInterfaces(schema)}
     ${buildPlugins(schema)}
@@ -231,6 +382,6 @@ const buildFile = (schema: Schema): Code => {
     return { fileName: schema.fileName + '.ts', source }
 }
 // builds all schemas and server file
-const build = (schemas: Schema[]): Code[] => [...schemas.map((schema) => buildFile(schema)), buildServer(schemas)]
+const build = (schemas: Schema[]): Code[] => [...schemas.map((schema) => buildFile(schema)), server]
 
 export default build
