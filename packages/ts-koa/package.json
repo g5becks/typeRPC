@@ -1,6 +1,6 @@
 {
   "name": "@typerpc/ts-koa",
-  "version": "0.1.18",
+  "version": "0.1.19",
   "description": "typerpc typescript koa plugin",
   "keywords": [
     "typerpc",
@@ -34,7 +34,7 @@
     "@typerpc/plugin": "^0.1.17",
     "@typerpc/plugin-utils": "^0.1.17",
     "@typerpc/schema": "^0.1.17",
-    "@typerpc/ts-plugin-utils": "^0.1.18"
+    "@typerpc/ts-plugin-utils": "^0.1.19"
   },
   "devDependencies": {
     "@typerpc/test-utils": "^0.1.17"
