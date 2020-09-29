@@ -60,6 +60,28 @@ const responseSchema = (svcName: string, method: QueryMethod | MutationMethod): 
     },`
 }
 
+const errArgs = (method: MutationMethod | QueryMethod): string => {
+    if (!method.hasParams) {
+        return `""`
+    }
+    let p = ''
+    for (const param of method.params) {
+        p = p.concat(`"${param.name}": "\${${param.name}}",`)
+    }
+    return `{${p}}`
+}
+
+const invokeMethod = (svcName: string, method: QueryMethod | MutationMethod): string => {
+    const call = `await ${lowerCase(svcName)}.${lowerCase(method.name)}`
+    if (method.isVoidReturn) {
+        return !method.hasParams ? call + '()' : call + `(${paramNames(method.params)})`
+    }
+    const invoke = `const data = ` + call
+    return method.hasParams ? invoke + `(${paramNames(method.params)})` : invoke + '()'
+}
+
+const parseParams = (method: QueryMethod | MutationMethod): string =>
+    method.hasParams ? `const {${paramNames(method.params)}} = request.${isQueryMethod(method) ? 'query' : 'body'}` : ''
 const buildRoute = (svcName: string, method: QueryMethod | MutationMethod): string => {
     return `instance.route<{
         ${isQueryMethod(method) ? 'Querystring' : 'Body'}: ${buildReqBodyOrParamsType(method.params)}
@@ -71,14 +93,26 @@ const buildRoute = (svcName: string, method: QueryMethod | MutationMethod): stri
          ${responseSchema(svcName, method)}
       },
       handler: async (request, reply) => {
-        const {${paramNames(method.params)}} = request.${isQueryMethod(method) ? 'query' : 'body'}
+        ${parseParams(method)}
       try {
+        ${invokeMethod(svcName, method)}
+        reply
+        .code(${method.responseCode})
+        .type('application/${method.hasCborReturn ? 'cbor' : 'json'}')
+        .send({data})
+
       } catch (error) {
         request.log.error(
           \`{"route": "/${lowerCase(svcName)}/${lowerCase(
         method.name,
-    )}", "service_name": "someServiceName", "method_name": "someMethod", "args": "", "error_msg": "\${error.message}" , "stack": "\${error.stack}"}\`
+    )}", "service_name": "${svcName}", "method_name": "${method.name}", "args": "${errArgs(
+        method,
+    )}", "error_msg": "\${error.message}" , "stack": "\${error.stack}"}\`
         );
+        reply
+          .code(${method.errorCode})
+          .send({error: \`\${error.message}\`})
+         return
       }
 
       },
