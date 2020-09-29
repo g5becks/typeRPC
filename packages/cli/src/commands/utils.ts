@@ -91,7 +91,9 @@ const parseGeneratorConfig = (obj: ObjectLiteralExpression): GeneratorConfig => 
         throw new Error(`
         error in config file: ${obj.getSourceFile().getFilePath()},
         at line number: ${obj.getStartLineNumber()},
-        message: all generator config objects must contain the following properties: [out, plugin, pkg]`)
+        message: all generator config objects must contain the following properties: missing config property : ${
+            out ? 'pkg' : 'out'
+        } [out, plugin, pkg]`)
     }
 
     return { out, plugin, pkg, fmt }
@@ -586,7 +588,7 @@ export const scaffold = async (
         { fileName: '.eslintrc.js', source: eslintrc },
         { fileName: 'tsconfig.json', source: tsconfigFile },
         { fileName: '.gitignore', source: gitIgnore },
-        { fileName: './api/example.ts', source: exampleSource },
+        { fileName: './src/example.ts', source: exampleSource },
     ]
     let promises: Promise<void>[] = []
     for (const file of files) {

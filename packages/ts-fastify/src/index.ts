@@ -48,7 +48,8 @@ const requestSchema = (svcName: string, method: QueryMethod | MutationMethod): s
     if (!method.hasParams) {
         return ''
     }
-    return isQueryMethod(method) ? 'querystring' : 'body' + `: ${buildRequestSchema(svcName, method)},`
+    const schema = buildRequestSchema(svcName, method)
+    return isQueryMethod(method) ? `querystring: ${schema},` : `body: ${schema},`
 }
 
 const responseSchema = (svcName: string, method: QueryMethod | MutationMethod): string => {
@@ -129,7 +130,7 @@ const buildRoutes = (svc: MutationService | QueryService): string => {
 }
 
 const buildSvcRoutes = (svc: MutationService | QueryService): string => {
-    return `${lowerCase(svc.name)} = (${lowerCase(svc.name)}: ${capitalize(
+    return `const ${lowerCase(svc.name)} = (${lowerCase(svc.name)}: ${capitalize(
         svc.name,
     )}): FastifyPluginAsync => async (instance, _) => {
        instance.register(fastifySensible)
@@ -141,10 +142,13 @@ const buildSvcRoutes = (svc: MutationService | QueryService): string => {
 
 const buildPlugin = (svc: MutationService | QueryService): string => `
 export const ${lowerCase(svc.name)}Plugin = (
+  ${lowerCase(svc.name)}: ${capitalize(svc.name)},
   logLevel: LogLevel,
   opts: PluginOptions = {}
 ): RpcPlugin => ({
-  plugin: fp(${lowerCase(svc.name)}Routes(), pluginOpts("${svc.name}Plugin", opts)),
+  plugin: fp(${lowerCase(svc.name)}Routes(${lowerCase(svc.name)}: ${capitalize(svc.name)}), pluginOpts("${
+    svc.name
+}Plugin", opts)),
   opts: registerOptions("/${lowerCase(svc.name)}", logLevel),
 })
 `

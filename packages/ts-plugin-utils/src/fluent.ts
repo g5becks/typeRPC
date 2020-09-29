@@ -102,7 +102,7 @@ export const buildMsgSchema = (msg: Message): string => {
             `.prop('${lowerCase(prop.name)}', S.${schemaType(prop.type)})${prop.isOptional ? '' : '.required()'}`,
         )
     }
-    return `const ${lowerCase(msg.name)}Schema = ${buildMsgSchema}
+    return `const ${lowerCase(msg.name)}Schema = ${schema}
     `
 }
 
