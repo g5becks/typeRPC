@@ -25,6 +25,7 @@ import {
     buildInterfaces,
     buildMsgSchema,
     buildRequestSchema,
+    buildResponseSchema,
     buildType,
     dataType,
     paramNames,
@@ -47,8 +48,18 @@ const requestSchema = (svcName: string, method: QueryMethod | MutationMethod): s
     if (!method.hasParams) {
         return ''
     }
-    return isQueryMethod(method) ? 'querystring' : 'body' + `: ${buildRequestSchema(svcName, method)}`
+    return isQueryMethod(method) ? 'querystring' : 'body' + `: ${buildRequestSchema(svcName, method)},`
 }
+
+const responseSchema = (svcName: string, method: QueryMethod | MutationMethod): string => {
+    if (method.isVoidReturn || method.hasCborReturn) {
+        return ''
+    }
+    return `response: {
+        '2xx': ${buildResponseSchema(svcName, method)}
+    },`
+}
+
 const buildRoute = (svcName: string, method: QueryMethod | MutationMethod): string => {
     return `instance.route<{
         ${isQueryMethod(method) ? 'Querystring' : 'Body'}: ${buildReqBodyOrParamsType(method.params)}
@@ -57,6 +68,7 @@ const buildRoute = (svcName: string, method: QueryMethod | MutationMethod): stri
       url: '/${lowerCase(method.name)}',
       schema: {
          ${requestSchema(svcName, method)}
+         ${responseSchema(svcName, method)}
       },
       handler: async (request, reply) => {
         const {${paramNames(method.params)}} = request.${isQueryMethod(method) ? 'query' : 'body'}
