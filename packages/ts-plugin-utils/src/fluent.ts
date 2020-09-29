@@ -66,7 +66,7 @@ const schemaType = (type: DataType): string => {
     }
 
     if (is.list(type)) {
-        return `array().items(${schemaType(type.dataType)})`
+        return `array().items(S.${schemaType(type.dataType)})`
     }
 
     if (is.structLiteral(type)) {
@@ -95,8 +95,8 @@ const schemaType = (type: DataType): string => {
     return '{}'
 }
 
-export const buildMsgSchema = (msg: Message): string => {
-    let schema = `S.object().id('${msg.name}').title('${msg.name} Schema').description('Schema for ${msg.name} rpc message')`
+export const buildMsgSchema = (msg: Message, hash: string): string => {
+    let schema = `S.object().id('${msg.name}-${hash}').title('${msg.name} Schema').description('Schema for ${msg.name} rpc message')`
     for (const prop of msg.properties) {
         schema = schema.concat(
             `.prop('${lowerCase(prop.name)}', S.${schemaType(prop.type)})${prop.isOptional ? '' : '.required()'}`,
@@ -109,7 +109,7 @@ export const buildMsgSchema = (msg: Message): string => {
 export const buildRequestSchema = (svcName: string, method: MutationMethod | QueryMethod): string => {
     let schema = `S.object().id('${svcName}.${method.name}Request').title('${svcName}.${method.name} Body').description('${svcName}.${method.name} Request Schema')`
     for (const param of method.params) {
-        schema = schema.concat(`.prop('${param.name}', ${schemaType(param.type)})`)
+        schema = schema.concat(`.prop('${param.name}', S.${schemaType(param.type)})`)
     }
     return schema
 }
@@ -119,6 +119,6 @@ export const buildResponseSchema = (svcName: string, method: MutationMethod | Qu
         ? '{}'
         : `S.object().id('${svcName}.${method.name}Response').title('${svcName}.${
               method.name
-          } Response').description('${svcName}.${method.name} Response Schema').prop('data', ${schemaType(
+          } Response').description('${svcName}.${method.name} Response Schema').prop('data', S.${schemaType(
               method.returnType,
           )})`
