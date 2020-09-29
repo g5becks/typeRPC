@@ -11,16 +11,31 @@
  */
 
 import { Code } from '@typerpc/plugin'
-import { lowerCase } from '@typerpc/plugin-utils'
-import { MutationMethod, QueryMethod, Schema } from '@typerpc/schema'
-import { buildMsgSchema, buildType, dataType } from '@typerpc/ts-plugin-utils'
+import { capitalize, lowerCase } from '@typerpc/plugin-utils'
+import {
+    isQueryMethod,
+    MutationMethod,
+    MutationService,
+    Param,
+    QueryMethod,
+    QueryService,
+    Schema,
+} from '@typerpc/schema'
+import {
+    buildInterfaces,
+    buildMsgSchema,
+    buildRequestSchema,
+    buildType,
+    dataType,
+    paramNames,
+} from '@typerpc/ts-plugin-utils'
 
 // build generic route types for fastify route methods
 // https://www.fastify.io/docs/latest/TypeScript/#using-generics
-const buildReqBodyOrParamsType = (svcName: string, method: MutationMethod | QueryMethod): string => {
+const buildReqBodyOrParamsType = (params: ReadonlyArray<Param>): string => {
     let props = ''
 
-    for (const param of method.params) {
+    for (const param of params) {
         props = props.concat(`${lowerCase(param.name)}${param.isOptional ? '?' : ''}: ${dataType(param.type)},
         `)
     }
@@ -28,12 +43,38 @@ const buildReqBodyOrParamsType = (svcName: string, method: MutationMethod | Quer
   }`
 }
 
+const requestSchema = (svcName: string, method: QueryMethod | MutationMethod): string => {
+    if (!method.hasParams) {
+        return ''
+    }
+    return isQueryMethod(method) ? 'querystring' : 'body' + `: ${buildRequestSchema(svcName, method)}`
+}
+const buildRoute = (svcName: string, method: QueryMethod | MutationMethod): string => {
+    return `instance.route<{
+        ${isQueryMethod(method) ? 'Querystring' : 'Body'}: ${buildReqBodyOrParamsType(method.params)}
+    }>({
+      method: '${method.httpMethod.toUpperCase().trim()}',
+      url: '/${lowerCase(method.name)}',
+      schema: {
+         ${requestSchema(svcName, method)}
+      },
+      handler: async (request, reply) => {
+        const {${paramNames(method.params)}} = request.${isQueryMethod(method) ? 'query' : 'body'}
+      },
+    })`
+}
+
+const buildRoutes = (svc: MutationService | QueryService): string => {
+    return `${lowerCase(svc.name)} = (${lowerCase(svc.name)}: ${capitalize(
+        svc.name,
+    )}): FastifyPluginAsync => async (instance, _) => {
+       instance.register(fastifySensible)
+    }`
+}
 const helpers = `
 import { FastifyPluginCallback, LogLevel } from "fastify"
 import { PluginOptions } from "fastify-plugin"
 import { RegisterOptions } from "fastify/types/register"
-import { buildType } from '../../ts-plugin-utils/src/index';
-import { buildMsgSchema } from '../../ts-plugin-utils/src/fluent';
 
 /**
  * Creates an implementation of PluginOptions for a fastify-plugin
@@ -88,7 +129,9 @@ const buildFile = (schema: Schema): Code => {
     for (const msg of schema.messages) {
         types = types.concat(buildType(msg).concat('\n' + buildMsgSchema(msg)))
     }
-    const source = ``
+    const source = `
+    ${types}
+    ${buildInterfaces(schema)}`
     return { fileName: schema.fileName + '.ts', source }
 }
 // builds all schemas and server file
