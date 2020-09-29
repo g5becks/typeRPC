@@ -24,7 +24,7 @@ import {
     Schema,
     StructLiteralProp,
 } from '@typerpc/schema'
-import { buildFluentSchemas, requestSchemaName, responseSchemaName } from './fluent'
+
 export const typeMap: Map<string, string> = new Map<string, string>([
     [make.bool.type, 'boolean'],
     [make.int8.type, 'number'],
@@ -263,4 +263,4 @@ export const buildMsgImports = (imports: ReadonlyArray<Import>): string => {
     return importsStr
 }
 
-export { buildFluentSchemas, requestSchemaName, responseSchemaName }
+export * from './fluent'
