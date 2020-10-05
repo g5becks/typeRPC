@@ -12,16 +12,17 @@
 
 import { capitalize, lowerCase } from '@typerpc/plugin-utils'
 import {
-    DataType,
-    Import,
-    is,
-    make,
-    Message,
-    Method,
-    MutationService,
-    Param,
-    QueryService,
-    Schema,
+  DataType,
+  Import,
+  is,
+  make,
+  Message,
+  Method,
+  MutationService,
+  Param,
+
+  QueryService,
+  Schema
 } from '@typerpc/schema'
 
 export const typeMap: Map<string, string> = new Map<string, string>([
@@ -72,9 +73,9 @@ export const dataType = (type: DataType, propName?: string, methodName?: string)
 
     if (is.structLiteral(type)) {
         return propName
-            ? `${capitalize(propName)}Prop`
+            ? `${capitalize(propName)}`
             : methodName
-            ? `${capitalize(methodName)}Param`
+            ? `${capitalize(methodName)}`
             : 'Map<String, dynamic>'
     }
 
@@ -142,16 +143,30 @@ export const fromQueryString = (paramName: string, type: DataType): string => {
 }
 
 // add question mark to optional type alias property or method param if needed
-export const handleOptional = (isOptional: boolean): string => (isOptional ? '?' : '')
+export const handleOptional = (isOptional: boolean): string => (isOptional ? '@required' : '')
 
-// builds a type alias location an rpc.Msg
+const propClassName = (msgName: string, propName: string): string => {
+  return capitalize(msgName) + capitalize(propName) + 'Prop'
+}
+const buildMsgProps = (msg: Message): string => {
+
+    let properties = ''
+    for (const property of msg.properties) {
+        // if the property is an anonymous msg, return the name of the built class
+        properties = properties.concat(
+            `${handleOptional(property.isOptional)} ${is.structLiteral(property.type) ? propClassName(msg.name, property.name): dataType(property.type)} ${lowerCase(property.name)},`,
+        )
+    }
+    return properties
+}
+
 export const buildMsgClass = (msg: Message): string => {
     return `
 @freezed
 class ${capitalize(msg.name)} with _$${capitalize(msg.name)} {
    @JsonSerializable(explicitToJson: true)
    factory ${capitalize(msg.name)}({
-
+      ${buildMsgProps(msg)}
    }) = _${capitalize(msg.name)};
 
    factory ${capitalize(msg.name)}.fromJson(Map<String, dynamic> json) =>
@@ -165,6 +180,13 @@ export const buildTypes = (schema: Schema): string => {
     let types = ''
     for (const type of schema.messages) {
         types = types.concat(buildMsgClass(type))
+        // dart does not anonymous structs or classes, so we must check for
+        // struct literal properties build them before hand.
+        for (const prop of type.properties) {
+            if (is.structLiteral(prop.type)) {
+              types = types.
+            }
+        }
     }
     return types
 }
