@@ -147,7 +147,16 @@ export const handleOptional = (isOptional: boolean): string => (isOptional ? '?'
 // builds a type alias location an rpc.Msg
 export const buildMsgClass = (msg: Message): string => {
     return `
-export type ${capitalize(msg.name)} = ${typeLiteral(msg.properties)}
+@freezed
+class ${capitalize(msg.name)} with _$${capitalize(msg.name)} {
+   @JsonSerializable(explicitToJson: true)
+   factory ${capitalize(msg.name)}({
+
+   }) = _${capitalize(msg.name)};
+
+   factory ${capitalize(msg.name)}.fromJson(Map<String, dynamic> json) =>
+   _${capitalize(msg.name)}FromJson(json);
+}
 `
 }
 
