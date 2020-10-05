@@ -49,7 +49,7 @@ exports.dataType = (type) => {
         return `Map<${exports.dataType(type.keyType)}, ${exports.dataType(type.valType)}>`;
     }
     if (schema_1.is.list(type)) {
-        return `<${exports.dataType(type.dataType)}>`;
+        return `List<${exports.dataType(type.dataType)}>`;
     }
     if (schema_1.is.struct(type)) {
         return type.name;
