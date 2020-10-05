@@ -63,7 +63,7 @@ export const dataType = (type: DataType): string => {
     }
 
     if (is.list(type)) {
-        return `<${dataType(type.dataType)}>`
+        return `List<${dataType(type.dataType)}>`
     }
 
     if (is.struct(type)) {
