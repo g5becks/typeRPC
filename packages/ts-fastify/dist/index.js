@@ -123,7 +123,7 @@ const buildRoutes = (svc) => {
     return routes;
 };
 const buildSvcRoutes = (svc) => {
-    return `const ${plugin_utils_1.lowerCase(svc.name)}Routes = (${plugin_utils_1.lowerCase(svc.name)}: ${plugin_utils_1.capitalize(svc.name)}): FastifyPluginAsync => async (instance, _) => {
+    return `const ${plugin_utils_1.lowerCase(svc.name)}Routes = (${plugin_utils_1.lowerCase(svc.name)}: ${plugin_utils_1.capitalize(svc.name)}): FastifyPluginAsync => async (instance) => {
        instance.register(fastifySensible)
 
        ${buildRoutes(svc)}

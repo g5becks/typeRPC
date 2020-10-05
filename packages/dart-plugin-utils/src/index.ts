@@ -45,7 +45,7 @@ export const typeMap: Map<string, string> = new Map<string, string>([
 ])
 
 // Converts the input dataType into a typescript representation
-export const dataType = (type: DataType, propName?: string, methodName?: string): string => {
+export const dataType = (type: DataType): string => {
     if (is.dataType(type) !== true) {
         throw new TypeError(`invalid data type: ${type.toString()}`)
     }
@@ -68,10 +68,6 @@ export const dataType = (type: DataType, propName?: string, methodName?: string)
 
     if (is.struct(type)) {
         return type.name
-    }
-
-    if (is.structLiteral(type)) {
-        return propName ? `${capitalize(propName)}` : methodName ? `${capitalize(methodName)}` : 'Map<String, dynamic>'
     }
 
     if (is.tuple2(type)) {
@@ -171,6 +167,25 @@ class ${capitalize(msg.name)} with _$${capitalize(msg.name)} {
 `
 }
 
+const paramClassName = (svcName: string, methodName: string, paramName: string): string =>
+    capitalize(svcName) + capitalize(methodName) + capitalize(paramName) + 'Param'
+
+const buildClassesForParams = (svc: MutationService | QueryService): string => {
+    let types = ''
+    for (const method of svc.methods) {
+        for (const param of method.params) {
+            if (is.structLiteral(param.type)) {
+                types = types.concat(
+                    buildMsgClass({
+                        name: paramClassName(svc.name, method.name, param.name),
+                        properties: param.type.properties,
+                    }),
+                )
+            }
+        }
+    }
+    return types
+}
 // converts all rpc.Msg in a schema into type aliases
 export const buildTypes = (schema: Schema): string => {
     let types = ''
@@ -186,35 +201,42 @@ export const buildTypes = (schema: Schema): string => {
             }
         }
     }
+    schema.queryServices.forEach((svc) => {
+        types = types.concat(buildClassesForParams(svc))
+    })
+
+    schema.mutationServices.forEach((svc) => {
+        types = types.concat(buildClassesForParams(svc))
+    })
     return types
 }
 
-// builds all of the parameters of a method
-export const buildParams = (params: ReadonlyArray<Param>): string => {
-    let paramsString = ''
-    for (let i = 0; i < params.length; i++) {
-        const useComma = i === params.length - 1 ? '' : ','
-        paramsString = paramsString.concat(
-            `${params[i].name}${handleOptional(params[i].isOptional)}: ${dataType(params[i].type)}${useComma}`,
-        )
-    }
-    return paramsString
-}
-
-// builds a single method signature for an interface
-export const buildMethodSignature = (method: Method): string => {
-    return `${lowerCase(method.name)}(${buildParams(method.params)}): Promise<${dataType(method.returnType)}>;
-`
-}
-
 // builds an interface definition location a Schema Service
-export const buildInterface = (svc: QueryService | MutationService): string => {
+export const buildAbstractClass = (svc: QueryService | MutationService): string => {
+    const buildParams = (method: Method): string => {
+        let paramsString = ''
+        for (let i = 0; i < method.params.length; i++) {
+            paramsString = paramsString.concat(
+                `${handleOptional(method.params[i].isOptional)} ${
+                    is.structLiteral(method.params[i].type)
+                        ? paramClassName(svc.name, method.name, method.params[i].name)
+                        : dataType(method.params[i].type)
+                } ${lowerCase(method.params[i].name)},`,
+            )
+        }
+        return paramsString
+    }
+    const buildMethodSignature = (method: Method): string => {
+        return `Future<${dataType(method.returnType)}> ${lowerCase(method.name)}(${buildParams(method)});
+`
+    }
+
     let methodsString = ''
     for (const method of svc.methods) {
         methodsString = methodsString.concat(buildMethodSignature(method))
     }
     return `
-export interface ${capitalize(svc.name)} {
+abstract class ${capitalize(svc.name)} {
   ${methodsString}
 }\n`
 }
@@ -223,10 +245,10 @@ export interface ${capitalize(svc.name)} {
 export const buildInterfaces = (schema: Schema): string => {
     let services = ''
     for (const svc of schema.queryServices) {
-        services = services.concat(buildInterface(svc))
+        services = services.concat(buildAbstractClass(svc))
     }
     for (const svc of schema.mutationServices) {
-        services = services.concat(buildInterface(svc))
+        services = services.concat(buildAbstractClass(svc))
     }
     return services
 }
@@ -239,33 +261,10 @@ export const paramNames = (params: ReadonlyArray<Param>): string => {
     }
     let names = ''
     for (let i = 0; i < params.length; i++) {
-        const useComma = i === params.length - 1 ? '' : ', '
-        names = names.concat(`${params[i].name}${useComma}`)
+        names = names.concat(`${params[i].name},`)
     }
     return names
 }
-
-// used for building input params for methods and also to
-// builds the type specifier for destructured parameters E.G.
-// {name: string, age: number, gender: string}
-export const buildParamsWithTypes = (params: ReadonlyArray<Param>): string => {
-    if (params.length === 0) {
-        return ''
-    }
-    let paramsTypeString = ''
-    for (let i = 0; i < params.length; i++) {
-        const useComma = i === params.length - 1 ? '' : ', '
-        paramsTypeString = paramsTypeString.concat(
-            `${params[i].name}${handleOptional(params[i].isOptional)}: ${dataType(params[i].type)}${useComma}`,
-        )
-    }
-    return paramsTypeString
-}
-
-// makes a destructured parameters variable. E.G.
-// const {name, age}: {name: string, age: number }
-export const buildParamsVar = (params: ReadonlyArray<Param>): string =>
-    `const {${paramNames(params)}}: {${buildParamsWithTypes(params)}}`
 
 // builds the import strings location a Schema's Imports list
 export const buildMsgImports = (imports: ReadonlyArray<Import>): string => {
@@ -277,7 +276,7 @@ export const buildMsgImports = (imports: ReadonlyArray<Import>): string => {
             msgs = msgs.concat(`${imp.messageNames[i]} ${i === imp.messageNames.length - 1 ? '' : ','}`)
             i++
         }
-        importsStr = importsStr.concat(`import {${msgs}} from './${imp.fileName}'\n`)
+        importsStr = importsStr.concat(`} from './${imp.fileName}'\n`)
     }
     return importsStr
 }
