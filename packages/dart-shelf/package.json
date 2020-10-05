@@ -1,34 +1,38 @@
 {
-  "name": "@typerpc/dart-shelf",
-  "version": "0.1.24",
-  "description": "A typerpc plugin for generating dart servers",
-  "keywords": [
-    "typerpc",
-    "dart",
-    "shelf",
-    "json",
-    "rpc",
-    "typerpc"
-  ],
-  "author": "Gary Becks <techstar.dev@hotmail.com>",
-  "homepage": "http://typerpc.run",
-  "license": "BSD-2-Clause",
-  "main": "dist/index.js",
-  "directories": {
-    "lib": "lib",
-    "test": "__tests__"
-  },
-  "files": [
-    "lib"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/typerpc/typerpc.git"
-  },
-  "scripts": {
-    "test": "echo \"Error: run tests from root\" && exit 1"
-  },
-  "bugs": {
-    "url": "https://github.com/typerpc/typerpc/issues"
-  }
+    "name": "@typerpc/dart-shelf",
+    "version": "0.1.24",
+    "description": "A typerpc plugin for generating dart servers",
+    "keywords": [
+        "typerpc",
+        "dart",
+        "shelf",
+        "json",
+        "rpc",
+        "typerpc"
+    ],
+    "author": "Gary Becks <techstar.dev@hotmail.com>",
+    "homepage": "http://typerpc.run",
+    "license": "BSD-2-Clause",
+    "main": "dist/index.js",
+    "directories": {
+        "lib": "lib",
+        "test": "__tests__"
+    },
+    "files": [
+        "lib"
+    ],
+    "publishConfig": {
+        "access": "public"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/typerpc/typerpc.git"
+    },
+    "scripts": {
+        "test": "echo \"Error: run tests from root\" && exit 1"
+    },
+    "bugs": {
+        "url": "https://github.com/typerpc/typerpc/issues"
+    },
+    "gitHead": "1daac54309f6ca384401eb7736aec7367c62c255"
 }
