@@ -22,7 +22,6 @@ import {
     Param,
     QueryService,
     Schema,
-    StructLiteralProp,
 } from '@typerpc/schema'
 
 export const typeMap: Map<string, string> = new Map<string, string>([
@@ -42,25 +41,11 @@ export const typeMap: Map<string, string> = new Map<string, string>([
     [make.dyn.type, 'dynamic'],
     [make.timestamp.type, 'DateTime'],
     [make.unit.type, 'void'],
-    [make.blob.type, 'Uint8Array'],
+    [make.blob.type, 'Uint8List'],
 ])
 
-export const typeLiteral = (props: ReadonlyArray<StructLiteralProp>): string => {
-    let properties = ''
-    let i = 0
-    while (i < props.length) {
-        /* eslint-disable @typescript-eslint/no-use-before-define */
-        properties = properties.concat(
-            `${props[i].name}${props[i].isOptional ? '?' : ''}: ${dataType(props[i].type)}; `,
-        )
-        i++
-        /* eslint-disable @typescript-eslint/no-use-before-define */
-    }
-    return `{${properties}}`
-}
-
 // Converts the input dataType into a typescript representation
-export const dataType = (type: DataType): string => {
+export const dataType = (type: DataType, propName?: string, methodName?: string): string => {
     if (is.dataType(type) !== true) {
         throw new TypeError(`invalid data type: ${type.toString()}`)
     }
@@ -74,11 +59,11 @@ export const dataType = (type: DataType): string => {
     }
 
     if (is.map(type)) {
-        return `{[key: string]: ${dataType(type.valType)}}`
+        return `Map<${dataType(type.keyType)}, ${dataType(type.valType)}>`
     }
 
     if (is.list(type)) {
-        return `Array<${dataType(type.dataType)}>`
+        return `<${dataType(type.dataType)}>`
     }
 
     if (is.struct(type)) {
@@ -86,28 +71,34 @@ export const dataType = (type: DataType): string => {
     }
 
     if (is.structLiteral(type)) {
-        return typeLiteral(type.properties)
+        return propName
+            ? `${capitalize(propName)}Prop`
+            : methodName
+            ? `${capitalize(methodName)}Param`
+            : 'Map<String, dynamic>'
     }
 
     if (is.tuple2(type)) {
-        return `[${dataType(type.item1)}, ${dataType(type.item2)}]`
+        return `Tuple2<${dataType(type.item1)}, ${dataType(type.item2)}>`
     }
 
     if (is.tuple3(type)) {
-        return `[${dataType(type.item1)}, ${dataType(type.item2)}, ${dataType(type.item3)}]`
+        return `Tuple3<${dataType(type.item1)}, ${dataType(type.item2)}, ${dataType(type.item3)}>`
     }
 
     if (is.tuple4(type)) {
-        return `[${dataType(type.item1)}, ${dataType(type.item2)}, ${dataType(type.item3)}, ${dataType(type.item4)}]`
+        return `Tuple4<${dataType(type.item1)}, ${dataType(type.item2)}, ${dataType(type.item3)}, ${dataType(
+            type.item4,
+        )}>`
     }
 
     if (is.tuple5(type)) {
-        return `[${dataType(type.item1)}, ${dataType(type.item2)}, ${dataType(type.item3)}, ${dataType(
+        return `Tuple5<${dataType(type.item1)}, ${dataType(type.item2)}, ${dataType(type.item3)}, ${dataType(
             type.item4,
-        )}, ${dataType(type.item5)}]`
+        )}, ${dataType(type.item5)}>`
     }
 
-    return 'any'
+    return 'dynamic'
 }
 
 // returns a string representation of a function call used to
@@ -154,7 +145,7 @@ export const fromQueryString = (paramName: string, type: DataType): string => {
 export const handleOptional = (isOptional: boolean): string => (isOptional ? '?' : '')
 
 // builds a type alias location an rpc.Msg
-export const buildType = (msg: Message): string => {
+export const buildMsgClass = (msg: Message): string => {
     return `
 export type ${capitalize(msg.name)} = ${typeLiteral(msg.properties)}
 `
@@ -164,7 +155,7 @@ export type ${capitalize(msg.name)} = ${typeLiteral(msg.properties)}
 export const buildTypes = (schema: Schema): string => {
     let types = ''
     for (const type of schema.messages) {
-        types = types.concat(buildType(type))
+        types = types.concat(buildMsgClass(type))
     }
     return types
 }
