@@ -12,17 +12,16 @@
 
 import { capitalize, lowerCase } from '@typerpc/plugin-utils'
 import {
-  DataType,
-  Import,
-  is,
-  make,
-  Message,
-  Method,
-  MutationService,
-  Param,
-
-  QueryService,
-  Schema
+    DataType,
+    Import,
+    is,
+    make,
+    Message,
+    Method,
+    MutationService,
+    Param,
+    QueryService,
+    Schema,
 } from '@typerpc/schema'
 
 export const typeMap: Map<string, string> = new Map<string, string>([
@@ -72,11 +71,7 @@ export const dataType = (type: DataType, propName?: string, methodName?: string)
     }
 
     if (is.structLiteral(type)) {
-        return propName
-            ? `${capitalize(propName)}`
-            : methodName
-            ? `${capitalize(methodName)}`
-            : 'Map<String, dynamic>'
+        return propName ? `${capitalize(propName)}` : methodName ? `${capitalize(methodName)}` : 'Map<String, dynamic>'
     }
 
     if (is.tuple2(type)) {
@@ -146,15 +141,16 @@ export const fromQueryString = (paramName: string, type: DataType): string => {
 export const handleOptional = (isOptional: boolean): string => (isOptional ? '@required' : '')
 
 const propClassName = (msgName: string, propName: string): string => {
-  return capitalize(msgName) + capitalize(propName) + 'Prop'
+    return capitalize(msgName) + capitalize(propName) + 'Prop'
 }
 const buildMsgProps = (msg: Message): string => {
-
     let properties = ''
     for (const property of msg.properties) {
         // if the property is an anonymous msg, return the name of the built class
         properties = properties.concat(
-            `${handleOptional(property.isOptional)} ${is.structLiteral(property.type) ? propClassName(msg.name, property.name): dataType(property.type)} ${lowerCase(property.name)},`,
+            `${handleOptional(property.isOptional)} ${
+                is.structLiteral(property.type) ? propClassName(msg.name, property.name) : dataType(property.type)
+            } ${lowerCase(property.name)},`,
         )
     }
     return properties
@@ -184,7 +180,9 @@ export const buildTypes = (schema: Schema): string => {
         // struct literal properties build them before hand.
         for (const prop of type.properties) {
             if (is.structLiteral(prop.type)) {
-              types = types.
+                types = types.concat(
+                    buildMsgClass({ name: propClassName(type.name, prop.name), properties: prop.type.properties }),
+                )
             }
         }
     }
