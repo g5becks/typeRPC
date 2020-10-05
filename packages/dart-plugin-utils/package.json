@@ -1,0 +1,30 @@
+{
+  "name": "@typerpc/dart-plugin-utils",
+  "version": "0.1.23",
+  "description": "utility functions for generating dart code",
+  "keywords": [
+    "typerpc",
+    "plugin"
+  ],
+  "author": "Gary Becks <techstar.dev@hotmail.com>",
+  "homepage": "https://typerpc.run",
+  "license": "BSD-2-Clause",
+  "main": "dist/index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/typerpc/typerpc.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  },
+  "bugs": {
+    "url": "https://github.com/typerpc/typerpc/issues"
+  }
+}
