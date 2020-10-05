@@ -1,0 +1,14 @@
+{
+    "extends": "../../tsconfig.build.json",
+    "compilerOptions": {
+        "outDir": "./dist",
+        "rootDir": "./src"
+    },
+    "references": [
+        { "path": "../plugin/tsconfig.build.json" },
+        { "path": "../dart-plugin-utils/tsconfig.build.json" },
+        { "path": "../schema/tsconfig.build.json" },
+        { "path": "../plugin-utils/tsconfig.build.json" }
+    ],
+    "include": ["src/**/*"]
+}
