@@ -90,8 +90,8 @@ const parseGeneratorConfig = (obj) => {
     if (!out || !pkg) {
         throw new Error(`
         error in config file: ${obj.getSourceFile().getFilePath()},
-        at line number: ${obj.getStartLineNumber()},
-        message: all generator config objects must contain the following properties: missing config property : ${out ? 'pkg' : 'out'} [out, plugin, pkg]`);
+        at line number: ${obj.getEndLineNumber()},
+        message: all generator config objects must contain the following properties: [out, plugin, pkg]. Config property : ${out ? 'pkg' : 'out'} was either not found or was empty.`);
     }
     return { out, plugin, pkg, fmt };
 };
