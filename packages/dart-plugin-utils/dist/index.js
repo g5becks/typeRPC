@@ -124,7 +124,7 @@ const buildMsgProps = (msg) => {
 exports.buildMsgClass = (msg) => {
     return `
 @freezed
-class ${plugin_utils_1.capitalize(msg.name)} with _$${plugin_utils_1.capitalize(msg.name)} {
+abstract class ${plugin_utils_1.capitalize(msg.name)} with _$${plugin_utils_1.capitalize(msg.name)} {
    @JsonSerializable(explicitToJson: true)
    factory ${plugin_utils_1.capitalize(msg.name)}({
       ${buildMsgProps(msg)}
@@ -215,7 +215,7 @@ const buildResponseClass = (svcName, method, schema) => {
     const className = exports.responseClassName(svcName, method.name, schema);
     return `
 @freezed
-class ${className} with _$${className} {
+abstract class ${className} with _$${className} {
    @JsonSerializable(explicitToJson: true)
    factory ${plugin_utils_1.capitalize(className)}({
      @required ${schema_1.is.structLiteral(method.returnType)
