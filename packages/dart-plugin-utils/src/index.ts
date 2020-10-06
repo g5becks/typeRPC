@@ -172,7 +172,7 @@ class ${capitalize(msg.name)} with _$${capitalize(msg.name)} {
 }
 
 const paramClassName = (svcName: string, methodName: string, paramName: string): string =>
-    capitalize(svcName) + capitalize(methodName) + capitalize(paramName) + 'Param'
+    '_' + capitalize(svcName) + capitalize(methodName) + capitalize(paramName) + 'Param'
 
 // Builds classes for any parameter that is a literal object, which dart does
 // not support :( .
@@ -195,11 +195,11 @@ const buildClassesForParams = (svc: MutationService | QueryService): string => {
 
 // The name of the class that will be built to serialize/deserialize the request
 export const requestClassName = (svcName: string, methodName: string): string =>
-    capitalize(svcName) + capitalize(methodName) + 'Request'
+    '_' + capitalize(svcName) + capitalize(methodName) + 'Request'
 
 // The name of the class that will be  build to serialize/deserialize the response
 export const responseClassName = (svcName: string, methodName: string): string =>
-    capitalize(svcName) + capitalize(methodName) + 'Response'
+    '_' + capitalize(svcName) + capitalize(methodName) + 'Response'
 
 // Builds request classes for every method in a schema file
 const buildRequestClasses = (schema: Schema): string => {
@@ -226,7 +226,7 @@ const buildRequestClasses = (schema: Schema): string => {
 }
 
 const returnTypeLiteralName = (svcName: string, methodName: string): string =>
-    capitalize(svcName) + capitalize(methodName) + 'ReturnLiteral'
+    '_' + capitalize(svcName) + capitalize(methodName) + 'ReturnLiteral'
 
 // Builds a class for any methods in a file that returns an object literal,
 // which dart does not support yet.

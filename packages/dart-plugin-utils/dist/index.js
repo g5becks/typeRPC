@@ -135,7 +135,7 @@ class ${plugin_utils_1.capitalize(msg.name)} with _$${plugin_utils_1.capitalize(
 }
 `;
 };
-const paramClassName = (svcName, methodName, paramName) => plugin_utils_1.capitalize(svcName) + plugin_utils_1.capitalize(methodName) + plugin_utils_1.capitalize(paramName) + 'Param';
+const paramClassName = (svcName, methodName, paramName) => '_' + plugin_utils_1.capitalize(svcName) + plugin_utils_1.capitalize(methodName) + plugin_utils_1.capitalize(paramName) + 'Param';
 // Builds classes for any parameter that is a literal object, which dart does
 // not support :( .
 const buildClassesForParams = (svc) => {
@@ -153,9 +153,9 @@ const buildClassesForParams = (svc) => {
     return types;
 };
 // The name of the class that will be built to serialize/deserialize the request
-exports.requestClassName = (svcName, methodName) => plugin_utils_1.capitalize(svcName) + plugin_utils_1.capitalize(methodName) + 'Request';
+exports.requestClassName = (svcName, methodName) => '_' + plugin_utils_1.capitalize(svcName) + plugin_utils_1.capitalize(methodName) + 'Request';
 // The name of the class that will be  build to serialize/deserialize the response
-exports.responseClassName = (svcName, methodName) => plugin_utils_1.capitalize(svcName) + plugin_utils_1.capitalize(methodName) + 'Response';
+exports.responseClassName = (svcName, methodName) => '_' + plugin_utils_1.capitalize(svcName) + plugin_utils_1.capitalize(methodName) + 'Response';
 // Builds request classes for every method in a schema file
 const buildRequestClasses = (schema) => {
     let classes = '';
@@ -175,7 +175,7 @@ const buildRequestClasses = (schema) => {
     }
     return classes;
 };
-const returnTypeLiteralName = (svcName, methodName) => plugin_utils_1.capitalize(svcName) + plugin_utils_1.capitalize(methodName) + 'ReturnLiteral';
+const returnTypeLiteralName = (svcName, methodName) => '_' + plugin_utils_1.capitalize(svcName) + plugin_utils_1.capitalize(methodName) + 'ReturnLiteral';
 // Builds a class for any methods in a file that returns an object literal,
 // which dart does not support yet.
 const buildReturnTypeLiterals = (schema) => {
