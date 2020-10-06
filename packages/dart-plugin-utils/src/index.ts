@@ -172,6 +172,8 @@ class ${capitalize(msg.name)} with _$${capitalize(msg.name)} {
 const paramClassName = (svcName: string, methodName: string, paramName: string): string =>
     capitalize(svcName) + capitalize(methodName) + capitalize(paramName) + 'Param'
 
+// Builds classes for any parameter that is a literal object, which dart does
+// not support :( .
 const buildClassesForParams = (svc: MutationService | QueryService): string => {
     let types = ''
     for (const method of svc.methods) {
@@ -197,7 +199,8 @@ export const requestClassName = (svcName: string, methodName: string): string =>
 export const responseClassName = (svcName: string, methodName: string): string =>
     capitalize(svcName) + capitalize(methodName) + 'Response'
 
-const buildRequestArgsClasses = (schema: Schema): string => {
+// Builds request classes for every method in a schema file
+const buildRequestClasses = (schema: Schema): string => {
     let classes = ''
     for (const svc of schema.queryServices) {
         for (const method of svc.methods) {
@@ -269,7 +272,7 @@ export const buildTypes = (schema: Schema): string => {
     schema.mutationServices.forEach((svc) => {
         types = types.concat(buildClassesForParams(svc))
     })
-    types = types.concat(buildRequestArgsClasses(schema))
+    types = types.concat(buildRequestClasses(schema))
     return types
 }
 
