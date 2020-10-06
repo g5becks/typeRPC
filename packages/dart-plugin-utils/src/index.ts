@@ -159,7 +159,7 @@ const buildMsgProps = (msg: Message): string => {
 export const buildMsgClass = (msg: Message): string => {
     return `
 @freezed
-class ${capitalize(msg.name)} with _$${capitalize(msg.name)} {
+abstract class ${capitalize(msg.name)} with _$${capitalize(msg.name)} {
    @JsonSerializable(explicitToJson: true)
    factory ${capitalize(msg.name)}({
       ${buildMsgProps(msg)}
@@ -274,7 +274,7 @@ const buildResponseClass = (svcName: string, method: MutationMethod | QueryMetho
     const className = responseClassName(svcName, method.name, schema)
     return `
 @freezed
-class ${className} with _$${className} {
+abstract class ${className} with _$${className} {
    @JsonSerializable(explicitToJson: true)
    factory ${capitalize(className)}({
      @required ${
