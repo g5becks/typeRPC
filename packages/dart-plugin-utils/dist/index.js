@@ -136,7 +136,7 @@ class ${plugin_utils_1.capitalize(msg.name)} with _$${plugin_utils_1.capitalize(
 `;
 };
 // builds a class for a param that is a msgLiteral since dart doesn't support them.
-const paramClassName = (svcName, methodName, paramName, schema) => isDupMethod(methodName, schema)
+const paramClassName = (svcName, methodName, paramName, schema) => isDupMethodName(methodName, schema)
     ? '_' + plugin_utils_1.capitalize(svcName)
     : '_' + plugin_utils_1.capitalize(methodName) + plugin_utils_1.capitalize(paramName) + 'Param';
 // Builds classes for any parameter that is a literal object, which dart does
@@ -156,9 +156,9 @@ const buildClassesForParams = (svc, schema) => {
     return types;
 };
 // The name of the class that will be built to serialize/deserialize the request
-exports.requestClassName = (svcName, methodName, schema) => isDupMethod(methodName, schema) ? '_' + plugin_utils_1.capitalize(svcName) : '_' + plugin_utils_1.capitalize(methodName) + 'Request';
+exports.requestClassName = (svcName, methodName, schema) => isDupMethodName(methodName, schema) ? '_' + plugin_utils_1.capitalize(svcName) : '_' + plugin_utils_1.capitalize(methodName) + 'Request';
 // The name of the class that will be  build to serialize/deserialize the response
-exports.responseClassName = (svcName, methodName, schema) => isDupMethod(methodName, schema) ? '_' + plugin_utils_1.capitalize(svcName) : '_' + plugin_utils_1.capitalize(methodName) + 'Response';
+exports.responseClassName = (svcName, methodName, schema) => isDupMethodName(methodName, schema) ? '_' + plugin_utils_1.capitalize(svcName) : '_' + plugin_utils_1.capitalize(methodName) + 'Response';
 // Builds request classes for every method in a schema file
 const buildRequestClasses = (schema) => {
     let classes = '';
@@ -178,9 +178,10 @@ const buildRequestClasses = (schema) => {
     }
     return classes;
 };
-const isDupMethod = (methodName, schema) => schema.mutationServices.flatMap((svc) => svc.methods).some((method) => method.name === methodName) ||
-    schema.queryServices.flatMap((svc) => svc.methods).some((method) => method.name === methodName);
-const returnTypeLiteralName = (svcName, methodName, schema) => isDupMethod(methodName, schema) ? plugin_utils_1.capitalize(svcName) : '' + plugin_utils_1.capitalize(methodName) + 'Result';
+// Checks to see if the name of a method has been used more than once, if true some generated class for method params and return types will be prepended with the names of the services that they belong to in order to avoid naming collisions.
+const isDupMethodName = (methodName, schema) => schema.mutationServices.flatMap((svc) => svc.methods).filter((method) => method.name === methodName).length > 1 ||
+    schema.queryServices.flatMap((svc) => svc.methods).filter((method) => method.name === methodName).length > 1;
+const returnTypeLiteralName = (svcName, methodName, schema) => isDupMethodName(methodName, schema) ? plugin_utils_1.capitalize(svcName) : '' + plugin_utils_1.capitalize(methodName) + 'Result';
 // Builds a class for any methods in a file that returns an object literal,
 // which dart does not support yet.
 const buildReturnTypeLiterals = (schema) => {
