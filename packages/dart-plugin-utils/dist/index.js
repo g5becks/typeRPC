@@ -122,16 +122,17 @@ const buildMsgProps = (msg) => {
     return properties;
 };
 exports.buildMsgClass = (msg) => {
+    const className = plugin_utils_1.capitalize(msg.name);
     return `
 @freezed
-abstract class ${plugin_utils_1.capitalize(msg.name)} with _$${plugin_utils_1.capitalize(msg.name)} {
+abstract class ${className} with _$${className} {
    @JsonSerializable(explicitToJson: true)
-   factory ${plugin_utils_1.capitalize(msg.name)}({
+   factory ${className}({
       ${buildMsgProps(msg)}
-   }) = _${plugin_utils_1.capitalize(msg.name)}Freezed;
+   }) = ${className.startsWith('_') ? '' : '_'}${className}Freezed;
 
-   factory ${plugin_utils_1.capitalize(msg.name)}.fromJson(Map<String, dynamic> json) =>
-   _$${plugin_utils_1.capitalize(msg.name)}FromJson(json);
+   factory ${className}.fromJson(Map<String, dynamic> json) =>
+   _$${className}FromJson(json);
 }
 `;
 };
@@ -221,7 +222,7 @@ abstract class ${className} with _$${className} {
      @required ${schema_1.is.structLiteral(method.returnType)
         ? returnTypeLiteralName(svcName, method.name, schema)
         : exports.dataType(method.returnType)} data,
-   }) = _${plugin_utils_1.capitalize(className)}Freezed;
+   }) = ${plugin_utils_1.capitalize(className)}Freezed;
 
    factory ${plugin_utils_1.capitalize(className)}.fromJson(Map<String, dynamic> json) =>
    _$${plugin_utils_1.capitalize(className)}FromJson(json);
