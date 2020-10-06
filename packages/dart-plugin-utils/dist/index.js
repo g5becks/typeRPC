@@ -11,7 +11,7 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.buildMsgImports = exports.paramNames = exports.buildInterfaces = exports.buildAbstractClass = exports.buildTypes = exports.buildMsgClass = exports.handleOptional = exports.fromQueryString = exports.scalarFromQueryParam = exports.dataType = exports.typeMap = void 0;
+exports.buildMsgImports = exports.paramNames = exports.buildInterfaces = exports.buildAbstractClass = exports.buildTypes = exports.responseClassName = exports.requestClassName = exports.buildMsgClass = exports.handleOptional = exports.fromQueryString = exports.scalarFromQueryParam = exports.dataType = exports.typeMap = void 0;
 const plugin_utils_1 = require("@typerpc/plugin-utils");
 const schema_1 = require("@typerpc/schema");
 exports.typeMap = new Map([
@@ -112,6 +112,7 @@ exports.handleOptional = (isOptional) => (isOptional ? '@required' : '');
 const propClassName = (msgName, propName) => {
     return plugin_utils_1.capitalize(msgName) + plugin_utils_1.capitalize(propName) + 'Prop';
 };
+// Builds a class for any properties which are literal objects, which dart doesn't support.
 const buildMsgProps = (msg) => {
     let properties = '';
     for (const property of msg.properties) {
@@ -135,6 +136,8 @@ class ${plugin_utils_1.capitalize(msg.name)} with _$${plugin_utils_1.capitalize(
 `;
 };
 const paramClassName = (svcName, methodName, paramName) => plugin_utils_1.capitalize(svcName) + plugin_utils_1.capitalize(methodName) + plugin_utils_1.capitalize(paramName) + 'Param';
+// Builds classes for any parameter that is a literal object, which dart does
+// not support :( .
 const buildClassesForParams = (svc) => {
     let types = '';
     for (const method of svc.methods) {
@@ -148,6 +151,91 @@ const buildClassesForParams = (svc) => {
         }
     }
     return types;
+};
+// The name of the class that will be built to serialize/deserialize the request
+exports.requestClassName = (svcName, methodName) => plugin_utils_1.capitalize(svcName) + plugin_utils_1.capitalize(methodName) + 'Request';
+// The name of the class that will be  build to serialize/deserialize the response
+exports.responseClassName = (svcName, methodName) => plugin_utils_1.capitalize(svcName) + plugin_utils_1.capitalize(methodName) + 'Response';
+// Builds request classes for every method in a schema file
+const buildRequestClasses = (schema) => {
+    let classes = '';
+    for (const svc of schema.queryServices) {
+        for (const method of svc.methods) {
+            if (method.hasParams) {
+                classes = classes.concat(exports.buildMsgClass({ name: exports.requestClassName(svc.name, method.name), properties: method.params }));
+            }
+        }
+    }
+    for (const svc of schema.mutationServices) {
+        for (const method of svc.methods) {
+            if (method.hasParams) {
+                classes = classes.concat(exports.buildMsgClass({ name: exports.requestClassName(svc.name, method.name), properties: method.params }));
+            }
+        }
+    }
+    return classes;
+};
+const returnTypeLiteralName = (svcName, methodName) => plugin_utils_1.capitalize(svcName) + plugin_utils_1.capitalize(methodName) + 'ReturnLiteral';
+// Builds a class for any methods in a file that returns an object literal,
+// which dart does not support yet.
+const buildReturnTypeLiterals = (schema) => {
+    let classes = '';
+    for (const svc of schema.queryServices) {
+        for (const method of svc.methods) {
+            if (!method.isVoidReturn && schema_1.is.structLiteral(method.returnType)) {
+                classes = classes.concat(exports.buildMsgClass({
+                    name: returnTypeLiteralName(svc.name, method.name),
+                    properties: method.returnType.properties,
+                }));
+            }
+        }
+    }
+    for (const svc of schema.mutationServices) {
+        for (const method of svc.methods) {
+            if (!method.isVoidReturn && schema_1.is.structLiteral(method.returnType)) {
+                classes = classes.concat(exports.buildMsgClass({
+                    name: returnTypeLiteralName(svc.name, method.name),
+                    properties: method.returnType.properties,
+                }));
+            }
+        }
+    }
+    return classes;
+};
+const buildResponseClass = (svcName, method) => {
+    if (method.isVoidReturn) {
+        return '';
+    }
+    const className = exports.responseClassName(svcName, method.name);
+    return `
+  @freezed
+  ${className} with _$${className} {
+   @JsonSerializable(explicitToJson: true)
+   factory ${plugin_utils_1.capitalize(className)}({
+      ${schema_1.is.structLiteral(method.returnType)
+        ? returnTypeLiteralName(svcName, method.name)
+        : exports.dataType(method.returnType)} data,
+   }) = _${plugin_utils_1.capitalize(className)};
+
+   factory ${plugin_utils_1.capitalize(className)}.fromJson(Map<String, dynamic> json) =>
+   _${plugin_utils_1.capitalize(className)}FromJson(json);
+
+  }
+`;
+};
+const buildResponseClasses = (schema) => {
+    let classes = '';
+    for (const svc of schema.queryServices) {
+        for (const method of svc.methods) {
+            classes = classes.concat(buildResponseClass(svc.name, method));
+        }
+    }
+    for (const svc of schema.mutationServices) {
+        for (const method of svc.methods) {
+            classes = classes.concat(buildResponseClass(svc.name, method));
+        }
+    }
+    return classes;
 };
 // converts all rpc.Msg in a schema into type aliases
 exports.buildTypes = (schema) => {
@@ -168,6 +256,9 @@ exports.buildTypes = (schema) => {
     schema.mutationServices.forEach((svc) => {
         types = types.concat(buildClassesForParams(svc));
     });
+    types = types.concat(buildRequestClasses(schema));
+    types = types.concat(buildReturnTypeLiterals(schema));
+    types = types.concat(buildResponseClasses(schema));
     return types;
 };
 // builds an interface definition location a Schema Service
