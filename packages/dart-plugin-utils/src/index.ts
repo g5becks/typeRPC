@@ -166,7 +166,7 @@ abstract class ${capitalize(msg.name)} with _$${capitalize(msg.name)} {
    }) = _${capitalize(msg.name)};
 
    factory ${capitalize(msg.name)}.fromJson(Map<String, dynamic> json) =>
-   _${capitalize(msg.name)}FromJson(json);
+   _$${capitalize(msg.name)}FromJson(json);
 }
 `
 }
@@ -285,7 +285,7 @@ abstract class ${className} with _$${className} {
    }) = _${capitalize(className)};
 
    factory ${capitalize(className)}.fromJson(Map<String, dynamic> json) =>
-   _${capitalize(className)}FromJson(json);
+   _$${capitalize(className)}FromJson(json);
 
   }
 `
