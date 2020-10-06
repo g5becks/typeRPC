@@ -171,19 +171,20 @@ class ${capitalize(msg.name)} with _$${capitalize(msg.name)} {
 `
 }
 
-const paramClassName = (svcName: string, methodName: string, paramName: string): string =>
-    '_' + capitalize(svcName) + capitalize(methodName) + capitalize(paramName) + 'Param'
+// builds a class for a param that is a msgLiteral since dart doesn't support them.
+const paramClassName = (svcName: string, methodName: string, paramName: string, schema: Schema): string =>
+   isDupMethod(methodName, schema) ? '_' + capitalize(svcName) : '_' + capitalize(methodName) + capitalize(paramName) + 'Param'
 
 // Builds classes for any parameter that is a literal object, which dart does
 // not support :( .
-const buildClassesForParams = (svc: MutationService | QueryService): string => {
+const buildClassesForParams = (svc: MutationService | QueryService, schema: Schema): string => {
     let types = ''
     for (const method of svc.methods) {
         for (const param of method.params) {
             if (is.structLiteral(param.type)) {
                 types = types.concat(
                     buildMsgClass({
-                        name: paramClassName(svc.name, method.name, param.name),
+                        name: paramClassName(svc.name, method.name, param.name, schema),
                         properties: param.type.properties,
                     }),
                 )
@@ -194,8 +195,8 @@ const buildClassesForParams = (svc: MutationService | QueryService): string => {
 }
 
 // The name of the class that will be built to serialize/deserialize the request
-export const requestClassName = (svcName: string, methodName: string): string =>
-    '_' + capitalize(svcName) + capitalize(methodName) + 'Request'
+export const requestClassName = (svcName: string, methodName: string, schema: Schema): string =>
+    isDupMethod(methodName, schema) ? '_' + capitalize(svcName) + capitalize(methodName) + 'Request'
 
 // The name of the class that will be  build to serialize/deserialize the response
 export const responseClassName = (svcName: string, methodName: string): string =>
