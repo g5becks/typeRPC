@@ -186,6 +186,40 @@ const buildClassesForParams = (svc: MutationService | QueryService): string => {
     }
     return types
 }
+
+export const requestClassName = (svcName: string, methodName: string): string =>
+    capitalize(svcName) + capitalize(methodName) + 'Request'
+
+export const responseClassName = (svcName: string, methodName: string): string =>
+    capitalize(svcName) + capitalize(methodName) + 'Response'
+
+const buildRequestArgsClasses = (schema: Schema): string => {
+    let classes = ''
+    for (const svc of schema.queryServices) {
+        for (const method of svc.methods) {
+            if (method.hasParams) {
+                classes = classes.concat(
+                    buildMsgClass({ name: requestClassName(svc.name, method.name), properties: method.params }),
+                )
+            }
+        }
+    }
+    for (const svc of schema.mutationServices) {
+        for (const method of svc.methods) {
+            if (method.hasParams) {
+                classes = classes.concat(
+                    buildMsgClass({ name: requestClassName(svc.name, method.name), properties: method.params }),
+                )
+            }
+        }
+    }
+    return classes
+}
+;
+const buildResponseClasses = (schema: Schema): string => {
+  let class
+}
+
 // converts all rpc.Msg in a schema into type aliases
 export const buildTypes = (schema: Schema): string => {
     let types = ''
@@ -208,6 +242,7 @@ export const buildTypes = (schema: Schema): string => {
     schema.mutationServices.forEach((svc) => {
         types = types.concat(buildClassesForParams(svc))
     })
+    types = types.concat(buildRequestArgsClasses(schema))
     return types
 }
 
