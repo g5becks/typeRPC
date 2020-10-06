@@ -18,9 +18,11 @@ import {
     make,
     Message,
     Method,
-    MutationService,
+  MutationMethod,
+  MutationService,
     Param,
-    QueryService,
+  QueryMethod,
+  QueryService,
     Schema,
 } from '@typerpc/schema'
 
@@ -187,9 +189,11 @@ const buildClassesForParams = (svc: MutationService | QueryService): string => {
     return types
 }
 
+// The name of the class that will be built to serialize/deserialize the request
 export const requestClassName = (svcName: string, methodName: string): string =>
     capitalize(svcName) + capitalize(methodName) + 'Request'
 
+// The name of the class that will be  build to serialize/deserialize the response
 export const responseClassName = (svcName: string, methodName: string): string =>
     capitalize(svcName) + capitalize(methodName) + 'Response'
 
@@ -215,9 +219,32 @@ const buildRequestArgsClasses = (schema: Schema): string => {
     }
     return classes
 }
-;
+
+const buildResponseClass = (svcName: string ,method: MutationMethod | QueryMethod): string => {
+  if (method.isVoidReturn) {
+    return ''
+  }
+  const className = responseClassName(svcName, method.name)
+  return `
+  @freezed
+  ${className} with _$${className} {
+   @JsonSerializable(explicitToJson: true)
+   factory ${capitalize(className)}({
+      ${is.structLiteral(method.returnType) ? }
+   }) = _${capitalize(className)};
+
+   factory ${capitalize(className)}.fromJson(Map<String, dynamic> json) =>
+   _${capitalize(className)}FromJson(json);
+
+  }`
+}
 const buildResponseClasses = (schema: Schema): string => {
-  let class
+  let classes = ''
+  for (const svc of schema.queryServices) {
+    for (const method of svc.methods) {
+    }
+
+  }
 }
 
 // converts all rpc.Msg in a schema into type aliases
