@@ -135,16 +135,19 @@ class ${plugin_utils_1.capitalize(msg.name)} with _$${plugin_utils_1.capitalize(
 }
 `;
 };
-const paramClassName = (svcName, methodName, paramName) => '_' + plugin_utils_1.capitalize(svcName) + plugin_utils_1.capitalize(methodName) + plugin_utils_1.capitalize(paramName) + 'Param';
+// builds a class for a param that is a msgLiteral since dart doesn't support them.
+const paramClassName = (svcName, methodName, paramName, schema) => isDupMethod(methodName, schema)
+    ? '_' + plugin_utils_1.capitalize(svcName)
+    : '_' + plugin_utils_1.capitalize(methodName) + plugin_utils_1.capitalize(paramName) + 'Param';
 // Builds classes for any parameter that is a literal object, which dart does
 // not support :( .
-const buildClassesForParams = (svc) => {
+const buildClassesForParams = (svc, schema) => {
     let types = '';
     for (const method of svc.methods) {
         for (const param of method.params) {
             if (schema_1.is.structLiteral(param.type)) {
                 types = types.concat(exports.buildMsgClass({
-                    name: paramClassName(svc.name, method.name, param.name),
+                    name: paramClassName(svc.name, method.name, param.name, schema),
                     properties: param.type.properties,
                 }));
             }
@@ -153,29 +156,31 @@ const buildClassesForParams = (svc) => {
     return types;
 };
 // The name of the class that will be built to serialize/deserialize the request
-exports.requestClassName = (svcName, methodName) => '_' + plugin_utils_1.capitalize(svcName) + plugin_utils_1.capitalize(methodName) + 'Request';
+exports.requestClassName = (svcName, methodName, schema) => isDupMethod(methodName, schema) ? '_' + plugin_utils_1.capitalize(svcName) : '_' + plugin_utils_1.capitalize(methodName) + 'Request';
 // The name of the class that will be  build to serialize/deserialize the response
-exports.responseClassName = (svcName, methodName) => '_' + plugin_utils_1.capitalize(svcName) + plugin_utils_1.capitalize(methodName) + 'Response';
+exports.responseClassName = (svcName, methodName, schema) => isDupMethod(methodName, schema) ? '_' + plugin_utils_1.capitalize(svcName) : '_' + plugin_utils_1.capitalize(methodName) + 'Response';
 // Builds request classes for every method in a schema file
 const buildRequestClasses = (schema) => {
     let classes = '';
     for (const svc of schema.queryServices) {
         for (const method of svc.methods) {
             if (method.hasParams) {
-                classes = classes.concat(exports.buildMsgClass({ name: exports.requestClassName(svc.name, method.name), properties: method.params }));
+                classes = classes.concat(exports.buildMsgClass({ name: exports.requestClassName(svc.name, method.name, schema), properties: method.params }));
             }
         }
     }
     for (const svc of schema.mutationServices) {
         for (const method of svc.methods) {
             if (method.hasParams) {
-                classes = classes.concat(exports.buildMsgClass({ name: exports.requestClassName(svc.name, method.name), properties: method.params }));
+                classes = classes.concat(exports.buildMsgClass({ name: exports.requestClassName(svc.name, method.name, schema), properties: method.params }));
             }
         }
     }
     return classes;
 };
-const returnTypeLiteralName = (svcName, methodName) => plugin_utils_1.capitalize(svcName) + plugin_utils_1.capitalize(methodName) + 'Result';
+const isDupMethod = (methodName, schema) => schema.mutationServices.flatMap((svc) => svc.methods).some((method) => method.name === methodName) ||
+    schema.queryServices.flatMap((svc) => svc.methods).some((method) => method.name === methodName);
+const returnTypeLiteralName = (svcName, methodName, schema) => isDupMethod(methodName, schema) ? plugin_utils_1.capitalize(svcName) : '' + plugin_utils_1.capitalize(methodName) + 'Result';
 // Builds a class for any methods in a file that returns an object literal,
 // which dart does not support yet.
 const buildReturnTypeLiterals = (schema) => {
@@ -184,7 +189,7 @@ const buildReturnTypeLiterals = (schema) => {
         for (const method of svc.methods) {
             if (!method.isVoidReturn && schema_1.is.structLiteral(method.returnType)) {
                 classes = classes.concat(exports.buildMsgClass({
-                    name: returnTypeLiteralName(svc.name, method.name),
+                    name: returnTypeLiteralName(svc.name, method.name, schema),
                     properties: method.returnType.properties,
                 }));
             }
@@ -194,7 +199,7 @@ const buildReturnTypeLiterals = (schema) => {
         for (const method of svc.methods) {
             if (!method.isVoidReturn && schema_1.is.structLiteral(method.returnType)) {
                 classes = classes.concat(exports.buildMsgClass({
-                    name: returnTypeLiteralName(svc.name, method.name),
+                    name: returnTypeLiteralName(svc.name, method.name, schema),
                     properties: method.returnType.properties,
                 }));
             }
@@ -202,17 +207,19 @@ const buildReturnTypeLiterals = (schema) => {
     }
     return classes;
 };
-const buildResponseClass = (svcName, method) => {
+const buildResponseClass = (svcName, method, schema) => {
     if (method.isVoidReturn) {
         return '';
     }
-    const className = exports.responseClassName(svcName, method.name);
+    const className = exports.responseClassName(svcName, method.name, schema);
     return `
 @freezed
 class ${className} with _$${className} {
    @JsonSerializable(explicitToJson: true)
    factory ${plugin_utils_1.capitalize(className)}({
-     @required ${schema_1.is.structLiteral(method.returnType) ? returnTypeLiteralName(svcName, method.name) : exports.dataType(method.returnType)} data,
+     @required ${schema_1.is.structLiteral(method.returnType)
+        ? returnTypeLiteralName(svcName, method.name, schema)
+        : exports.dataType(method.returnType)} data,
    }) = _${plugin_utils_1.capitalize(className)};
 
    factory ${plugin_utils_1.capitalize(className)}.fromJson(Map<String, dynamic> json) =>
@@ -225,12 +232,12 @@ const buildResponseClasses = (schema) => {
     let classes = '';
     for (const svc of schema.queryServices) {
         for (const method of svc.methods) {
-            classes = classes.concat(buildResponseClass(svc.name, method));
+            classes = classes.concat(buildResponseClass(svc.name, method, schema));
         }
     }
     for (const svc of schema.mutationServices) {
         for (const method of svc.methods) {
-            classes = classes.concat(buildResponseClass(svc.name, method));
+            classes = classes.concat(buildResponseClass(svc.name, method, schema));
         }
     }
     return classes;
@@ -249,10 +256,10 @@ exports.buildTypes = (schema) => {
         }
     }
     schema.queryServices.forEach((svc) => {
-        types = types.concat(buildClassesForParams(svc));
+        types = types.concat(buildClassesForParams(svc, schema));
     });
     schema.mutationServices.forEach((svc) => {
-        types = types.concat(buildClassesForParams(svc));
+        types = types.concat(buildClassesForParams(svc, schema));
     });
     types = types.concat(buildRequestClasses(schema));
     types = types.concat(buildReturnTypeLiterals(schema));
@@ -260,12 +267,12 @@ exports.buildTypes = (schema) => {
     return types;
 };
 // builds an interface definition location a Schema Service
-exports.buildAbstractClass = (svc) => {
+exports.buildAbstractClass = (svc, schema) => {
     const buildParams = (method) => {
         let paramsString = '';
         for (let i = 0; i < method.params.length; i++) {
             paramsString = paramsString.concat(`${exports.handleOptional(method.params[i].isOptional)} ${schema_1.is.structLiteral(method.params[i].type)
-                ? paramClassName(svc.name, method.name, method.params[i].name)
+                ? paramClassName(svc.name, method.name, method.params[i].name, schema)
                 : exports.dataType(method.params[i].type)} ${plugin_utils_1.lowerCase(method.params[i].name)},`);
         }
         return paramsString;
@@ -273,7 +280,7 @@ exports.buildAbstractClass = (svc) => {
     const buildMethodSignature = (method) => {
         const built = `({${buildParams(method)}})`;
         const returnType = schema_1.is.structLiteral(method.returnType)
-            ? returnTypeLiteralName(svc.name, method.name)
+            ? returnTypeLiteralName(svc.name, method.name, schema)
             : `Future<${exports.dataType(method.returnType)}>`;
         return `${returnType} ${plugin_utils_1.lowerCase(method.name)}${!method.hasParams ? '()' : built};
 `;
@@ -291,10 +298,10 @@ abstract class ${plugin_utils_1.capitalize(svc.name)} {
 exports.buildInterfaces = (schema) => {
     let services = '';
     for (const svc of schema.queryServices) {
-        services = services.concat(exports.buildAbstractClass(svc));
+        services = services.concat(exports.buildAbstractClass(svc, schema));
     }
     for (const svc of schema.mutationServices) {
-        services = services.concat(exports.buildAbstractClass(svc));
+        services = services.concat(exports.buildAbstractClass(svc, schema));
     }
     return services;
 };

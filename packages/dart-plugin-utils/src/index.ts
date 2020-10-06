@@ -173,7 +173,9 @@ class ${capitalize(msg.name)} with _$${capitalize(msg.name)} {
 
 // builds a class for a param that is a msgLiteral since dart doesn't support them.
 const paramClassName = (svcName: string, methodName: string, paramName: string, schema: Schema): string =>
-   isDupMethod(methodName, schema) ? '_' + capitalize(svcName) : '_' + capitalize(methodName) + capitalize(paramName) + 'Param'
+    isDupMethod(methodName, schema)
+        ? '_' + capitalize(svcName)
+        : '_' + capitalize(methodName) + capitalize(paramName) + 'Param'
 
 // Builds classes for any parameter that is a literal object, which dart does
 // not support :( .
@@ -196,11 +198,11 @@ const buildClassesForParams = (svc: MutationService | QueryService, schema: Sche
 
 // The name of the class that will be built to serialize/deserialize the request
 export const requestClassName = (svcName: string, methodName: string, schema: Schema): string =>
-    isDupMethod(methodName, schema) ? '_' + capitalize(svcName) + capitalize(methodName) + 'Request'
+    isDupMethod(methodName, schema) ? '_' + capitalize(svcName) : '_' + capitalize(methodName) + 'Request'
 
 // The name of the class that will be  build to serialize/deserialize the response
-export const responseClassName = (svcName: string, methodName: string): string =>
-    '_' + capitalize(svcName) + capitalize(methodName) + 'Response'
+export const responseClassName = (svcName: string, methodName: string, schema: Schema): string =>
+    isDupMethod(methodName, schema) ? '_' + capitalize(svcName) : '_' + capitalize(methodName) + 'Response'
 
 // Builds request classes for every method in a schema file
 const buildRequestClasses = (schema: Schema): string => {
@@ -209,7 +211,7 @@ const buildRequestClasses = (schema: Schema): string => {
         for (const method of svc.methods) {
             if (method.hasParams) {
                 classes = classes.concat(
-                    buildMsgClass({ name: requestClassName(svc.name, method.name), properties: method.params }),
+                    buildMsgClass({ name: requestClassName(svc.name, method.name, schema), properties: method.params }),
                 )
             }
         }
@@ -218,7 +220,7 @@ const buildRequestClasses = (schema: Schema): string => {
         for (const method of svc.methods) {
             if (method.hasParams) {
                 classes = classes.concat(
-                    buildMsgClass({ name: requestClassName(svc.name, method.name), properties: method.params }),
+                    buildMsgClass({ name: requestClassName(svc.name, method.name, schema), properties: method.params }),
                 )
             }
         }
@@ -268,7 +270,7 @@ const buildResponseClass = (svcName: string, method: MutationMethod | QueryMetho
     if (method.isVoidReturn) {
         return ''
     }
-    const className = responseClassName(svcName, method.name)
+    const className = responseClassName(svcName, method.name, schema)
     return `
 @freezed
 class ${className} with _$${className} {
@@ -319,11 +321,11 @@ export const buildTypes = (schema: Schema): string => {
         }
     }
     schema.queryServices.forEach((svc) => {
-        types = types.concat(buildClassesForParams(svc))
+        types = types.concat(buildClassesForParams(svc, schema))
     })
 
     schema.mutationServices.forEach((svc) => {
-        types = types.concat(buildClassesForParams(svc))
+        types = types.concat(buildClassesForParams(svc, schema))
     })
     types = types.concat(buildRequestClasses(schema))
     types = types.concat(buildReturnTypeLiterals(schema))
@@ -339,7 +341,7 @@ export const buildAbstractClass = (svc: QueryService | MutationService, schema: 
             paramsString = paramsString.concat(
                 `${handleOptional(method.params[i].isOptional)} ${
                     is.structLiteral(method.params[i].type)
-                        ? paramClassName(svc.name, method.name, method.params[i].name)
+                        ? paramClassName(svc.name, method.name, method.params[i].name, schema)
                         : dataType(method.params[i].type)
                 } ${lowerCase(method.params[i].name)},`,
             )
