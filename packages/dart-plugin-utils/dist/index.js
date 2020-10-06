@@ -131,7 +131,7 @@ abstract class ${plugin_utils_1.capitalize(msg.name)} with _$${plugin_utils_1.ca
    }) = _${plugin_utils_1.capitalize(msg.name)};
 
    factory ${plugin_utils_1.capitalize(msg.name)}.fromJson(Map<String, dynamic> json) =>
-   _${plugin_utils_1.capitalize(msg.name)}FromJson(json);
+   _$${plugin_utils_1.capitalize(msg.name)}FromJson(json);
 }
 `;
 };
@@ -224,7 +224,7 @@ abstract class ${className} with _$${className} {
    }) = _${plugin_utils_1.capitalize(className)};
 
    factory ${plugin_utils_1.capitalize(className)}.fromJson(Map<String, dynamic> json) =>
-   _${plugin_utils_1.capitalize(className)}FromJson(json);
+   _$${plugin_utils_1.capitalize(className)}FromJson(json);
 
   }
 `;
