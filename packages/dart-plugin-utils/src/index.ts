@@ -225,8 +225,12 @@ const buildRequestClasses = (schema: Schema): string => {
     return classes
 }
 
-const returnTypeLiteralName = (svcName: string, methodName: string): string =>
-    capitalize(svcName) + capitalize(methodName) + 'Result'
+const isDupMethod = (methodName: string, schema: Schema): boolean =>
+    schema.mutationServices.flatMap((svc) => svc.methods).some((method) => method.name === methodName) ||
+    schema.queryServices.flatMap((svc) => svc.methods).some((method) => method.name === methodName)
+
+const returnTypeLiteralName = (svcName: string, methodName: string, schema: Schema): string =>
+    isDupMethod(methodName, schema) ? capitalize(svcName) : '' + capitalize(methodName) + 'Result'
 
 // Builds a class for any methods in a file that returns an object literal,
 // which dart does not support yet.
@@ -237,7 +241,7 @@ const buildReturnTypeLiterals = (schema: Schema) => {
             if (!method.isVoidReturn && is.structLiteral(method.returnType)) {
                 classes = classes.concat(
                     buildMsgClass({
-                        name: returnTypeLiteralName(svc.name, method.name),
+                        name: returnTypeLiteralName(svc.name, method.name, schema),
                         properties: method.returnType.properties,
                     }),
                 )
@@ -249,7 +253,7 @@ const buildReturnTypeLiterals = (schema: Schema) => {
             if (!method.isVoidReturn && is.structLiteral(method.returnType)) {
                 classes = classes.concat(
                     buildMsgClass({
-                        name: returnTypeLiteralName(svc.name, method.name),
+                        name: returnTypeLiteralName(svc.name, method.name, schema),
                         properties: method.returnType.properties,
                     }),
                 )
@@ -259,7 +263,7 @@ const buildReturnTypeLiterals = (schema: Schema) => {
     return classes
 }
 
-const buildResponseClass = (svcName: string, method: MutationMethod | QueryMethod): string => {
+const buildResponseClass = (svcName: string, method: MutationMethod | QueryMethod, schema: Schema): string => {
     if (method.isVoidReturn) {
         return ''
     }
@@ -270,7 +274,9 @@ class ${className} with _$${className} {
    @JsonSerializable(explicitToJson: true)
    factory ${capitalize(className)}({
      @required ${
-         is.structLiteral(method.returnType) ? returnTypeLiteralName(svcName, method.name) : dataType(method.returnType)
+         is.structLiteral(method.returnType)
+             ? returnTypeLiteralName(svcName, method.name, schema)
+             : dataType(method.returnType)
      } data,
    }) = _${capitalize(className)};
 
@@ -285,12 +291,12 @@ const buildResponseClasses = (schema: Schema): string => {
     let classes = ''
     for (const svc of schema.queryServices) {
         for (const method of svc.methods) {
-            classes = classes.concat(buildResponseClass(svc.name, method))
+            classes = classes.concat(buildResponseClass(svc.name, method, schema))
         }
     }
     for (const svc of schema.mutationServices) {
         for (const method of svc.methods) {
-            classes = classes.concat(buildResponseClass(svc.name, method))
+            classes = classes.concat(buildResponseClass(svc.name, method, schema))
         }
     }
     return classes
@@ -325,7 +331,7 @@ export const buildTypes = (schema: Schema): string => {
 }
 
 // builds an interface definition location a Schema Service
-export const buildAbstractClass = (svc: QueryService | MutationService): string => {
+export const buildAbstractClass = (svc: QueryService | MutationService, schema: Schema): string => {
     const buildParams = (method: Method): string => {
         let paramsString = ''
         for (let i = 0; i < method.params.length; i++) {
@@ -342,7 +348,7 @@ export const buildAbstractClass = (svc: QueryService | MutationService): string 
     const buildMethodSignature = (method: Method): string => {
         const built = `({${buildParams(method)}})`
         const returnType = is.structLiteral(method.returnType)
-            ? returnTypeLiteralName(svc.name, method.name)
+            ? returnTypeLiteralName(svc.name, method.name, schema)
             : `Future<${dataType(method.returnType)}>`
         return `${returnType} ${lowerCase(method.name)}${!method.hasParams ? '()' : built};
 `
@@ -362,10 +368,10 @@ abstract class ${capitalize(svc.name)} {
 export const buildInterfaces = (schema: Schema): string => {
     let services = ''
     for (const svc of schema.queryServices) {
-        services = services.concat(buildAbstractClass(svc))
+        services = services.concat(buildAbstractClass(svc, schema))
     }
     for (const svc of schema.mutationServices) {
-        services = services.concat(buildAbstractClass(svc))
+        services = services.concat(buildAbstractClass(svc, schema))
     }
     return services
 }
