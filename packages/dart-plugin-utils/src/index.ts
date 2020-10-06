@@ -173,7 +173,7 @@ class ${capitalize(msg.name)} with _$${capitalize(msg.name)} {
 
 // builds a class for a param that is a msgLiteral since dart doesn't support them.
 const paramClassName = (svcName: string, methodName: string, paramName: string, schema: Schema): string =>
-    isDupMethod(methodName, schema)
+    isDupMethodName(methodName, schema)
         ? '_' + capitalize(svcName)
         : '_' + capitalize(methodName) + capitalize(paramName) + 'Param'
 
@@ -198,11 +198,11 @@ const buildClassesForParams = (svc: MutationService | QueryService, schema: Sche
 
 // The name of the class that will be built to serialize/deserialize the request
 export const requestClassName = (svcName: string, methodName: string, schema: Schema): string =>
-    isDupMethod(methodName, schema) ? '_' + capitalize(svcName) : '_' + capitalize(methodName) + 'Request'
+    isDupMethodName(methodName, schema) ? '_' + capitalize(svcName) : '_' + capitalize(methodName) + 'Request'
 
 // The name of the class that will be  build to serialize/deserialize the response
 export const responseClassName = (svcName: string, methodName: string, schema: Schema): string =>
-    isDupMethod(methodName, schema) ? '_' + capitalize(svcName) : '_' + capitalize(methodName) + 'Response'
+    isDupMethodName(methodName, schema) ? '_' + capitalize(svcName) : '_' + capitalize(methodName) + 'Response'
 
 // Builds request classes for every method in a schema file
 const buildRequestClasses = (schema: Schema): string => {
@@ -228,12 +228,13 @@ const buildRequestClasses = (schema: Schema): string => {
     return classes
 }
 
-const isDupMethod = (methodName: string, schema: Schema): boolean =>
-    schema.mutationServices.flatMap((svc) => svc.methods).some((method) => method.name === methodName) ||
-    schema.queryServices.flatMap((svc) => svc.methods).some((method) => method.name === methodName)
+// Checks to see if the name of a method has been used more than once, if true some generated class for method params and return types will be prepended with the names of the services that they belong to in order to avoid naming collisions.
+const isDupMethodName = (methodName: string, schema: Schema): boolean =>
+    schema.mutationServices.flatMap((svc) => svc.methods).filter((method) => method.name === methodName).length > 1 ||
+    schema.queryServices.flatMap((svc) => svc.methods).filter((method) => method.name === methodName).length > 1
 
 const returnTypeLiteralName = (svcName: string, methodName: string, schema: Schema): string =>
-    isDupMethod(methodName, schema) ? capitalize(svcName) : '' + capitalize(methodName) + 'Result'
+    isDupMethodName(methodName, schema) ? capitalize(svcName) : '' + capitalize(methodName) + 'Result'
 
 // Builds a class for any methods in a file that returns an object literal,
 // which dart does not support yet.
