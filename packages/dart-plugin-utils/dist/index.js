@@ -175,7 +175,7 @@ const buildRequestClasses = (schema) => {
     }
     return classes;
 };
-const returnTypeLiteralName = (svcName, methodName) => '_' + plugin_utils_1.capitalize(svcName) + plugin_utils_1.capitalize(methodName) + 'ReturnLiteral';
+const returnTypeLiteralName = (svcName, methodName) => plugin_utils_1.capitalize(svcName) + plugin_utils_1.capitalize(methodName) + 'Result';
 // Builds a class for any methods in a file that returns an object literal,
 // which dart does not support yet.
 const buildReturnTypeLiterals = (schema) => {
@@ -271,7 +271,11 @@ exports.buildAbstractClass = (svc) => {
         return paramsString;
     };
     const buildMethodSignature = (method) => {
-        return `Future<${exports.dataType(method.returnType)}> ${plugin_utils_1.lowerCase(method.name)}({${buildParams(method)}});
+        const built = `({${buildParams(method)}})`;
+        const returnType = schema_1.is.structLiteral(method.returnType)
+            ? returnTypeLiteralName(svc.name, method.name)
+            : `Future<${exports.dataType(method.returnType)}>`;
+        return `${returnType} ${plugin_utils_1.lowerCase(method.name)}${!method.hasParams ? '()' : built};
 `;
     };
     let methodsString = '';
