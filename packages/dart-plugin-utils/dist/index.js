@@ -108,7 +108,7 @@ exports.fromQueryString = (paramName, type) => {
     return schema_1.is.list(type) ? `${paramName}.map(val => ${exports.scalarFromQueryParam('val', type.dataType)})` : paramName;
 };
 // add question mark to optional type alias property or method param if needed
-exports.handleOptional = (isOptional) => (isOptional ? '@required' : '');
+exports.handleOptional = (isOptional) => (isOptional ? '' : '@required');
 const propClassName = (msgName, propName) => {
     return plugin_utils_1.capitalize(msgName) + plugin_utils_1.capitalize(propName) + 'Prop';
 };
@@ -212,9 +212,7 @@ const buildResponseClass = (svcName, method) => {
 class ${className} with _$${className} {
    @JsonSerializable(explicitToJson: true)
    factory ${plugin_utils_1.capitalize(className)}({
-      ${schema_1.is.structLiteral(method.returnType)
-        ? returnTypeLiteralName(svcName, method.name)
-        : exports.dataType(method.returnType)} data,
+     @required ${schema_1.is.structLiteral(method.returnType) ? returnTypeLiteralName(svcName, method.name) : exports.dataType(method.returnType)} data,
    }) = _${plugin_utils_1.capitalize(className)};
 
    factory ${plugin_utils_1.capitalize(className)}.fromJson(Map<String, dynamic> json) =>
@@ -273,7 +271,7 @@ exports.buildAbstractClass = (svc) => {
         return paramsString;
     };
     const buildMethodSignature = (method) => {
-        return `Future<${exports.dataType(method.returnType)}> ${plugin_utils_1.lowerCase(method.name)}(${buildParams(method)});
+        return `Future<${exports.dataType(method.returnType)}> ${plugin_utils_1.lowerCase(method.name)}({${buildParams(method)}});
 `;
     };
     let methodsString = '';
