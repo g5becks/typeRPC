@@ -340,7 +340,11 @@ export const buildAbstractClass = (svc: QueryService | MutationService): string 
         return paramsString
     }
     const buildMethodSignature = (method: Method): string => {
-        return `Future<${dataType(method.returnType)}> ${lowerCase(method.name)}({${buildParams(method)}});
+        const built = `({${buildParams(method)}})`
+        const returnType = is.structLiteral(method.returnType)
+            ? returnTypeLiteralName(svc.name, method.name)
+            : `Future<${dataType(method.returnType)}>`
+        return `${returnType} ${lowerCase(method.name)}${!method.hasParams ? '()' : built};
 `
     }
 
