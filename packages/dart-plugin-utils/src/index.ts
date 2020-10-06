@@ -157,16 +157,17 @@ const buildMsgProps = (msg: Message): string => {
 }
 
 export const buildMsgClass = (msg: Message): string => {
+    const className = capitalize(msg.name)
     return `
 @freezed
-abstract class ${capitalize(msg.name)} with _$${capitalize(msg.name)} {
+abstract class ${className} with _$${className} {
    @JsonSerializable(explicitToJson: true)
-   factory ${capitalize(msg.name)}({
+   factory ${className}({
       ${buildMsgProps(msg)}
-   }) = _${capitalize(msg.name)}Freezed;
+   }) = ${className.startsWith('_') ? '' : '_'}${className}Freezed;
 
-   factory ${capitalize(msg.name)}.fromJson(Map<String, dynamic> json) =>
-   _$${capitalize(msg.name)}FromJson(json);
+   factory ${className}.fromJson(Map<String, dynamic> json) =>
+   _$${className}FromJson(json);
 }
 `
 }
@@ -282,7 +283,7 @@ abstract class ${className} with _$${className} {
              ? returnTypeLiteralName(svcName, method.name, schema)
              : dataType(method.returnType)
      } data,
-   }) = _${capitalize(className)}Freezed;
+   }) = ${capitalize(className)}Freezed;
 
    factory ${capitalize(className)}.fromJson(Map<String, dynamic> json) =>
    _$${capitalize(className)}FromJson(json);
