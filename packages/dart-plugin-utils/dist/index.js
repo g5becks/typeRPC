@@ -128,7 +128,7 @@ abstract class ${plugin_utils_1.capitalize(msg.name)} with _$${plugin_utils_1.ca
    @JsonSerializable(explicitToJson: true)
    factory ${plugin_utils_1.capitalize(msg.name)}({
       ${buildMsgProps(msg)}
-   }) = _${plugin_utils_1.capitalize(msg.name)};
+   }) = _${plugin_utils_1.capitalize(msg.name)}Freezed;
 
    factory ${plugin_utils_1.capitalize(msg.name)}.fromJson(Map<String, dynamic> json) =>
    _$${plugin_utils_1.capitalize(msg.name)}FromJson(json);
@@ -221,7 +221,7 @@ abstract class ${className} with _$${className} {
      @required ${schema_1.is.structLiteral(method.returnType)
         ? returnTypeLiteralName(svcName, method.name, schema)
         : exports.dataType(method.returnType)} data,
-   }) = _${plugin_utils_1.capitalize(className)};
+   }) = _${plugin_utils_1.capitalize(className)}Freezed;
 
    factory ${plugin_utils_1.capitalize(className)}.fromJson(Map<String, dynamic> json) =>
    _$${plugin_utils_1.capitalize(className)}FromJson(json);
