@@ -1,6 +1,6 @@
 {
     "name": "@typerpc/dart-plugin-utils",
-    "version": "0.1.28",
+    "version": "0.1.29",
     "description": "utility functions for generating dart code",
     "keywords": [
         "typerpc",
