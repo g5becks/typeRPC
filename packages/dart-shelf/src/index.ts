@@ -27,8 +27,8 @@ import 'package:args/args.dart';
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as io;
 
-part '${fileName(schema.fileName)}.freezed.dart';
-part '${fileName(schema.fileName)}.g.dart';
+part '${fileName(schema.fileName).replace('.dart', '')}.freezed.dart';
+part '${fileName(schema.fileName).replace('.dart', '')}.g.dart';
 `
 const fileName = (name: string): string => (name.includes('-') ? name.split('-').join('_') + '.dart' : name + '.dart')
 
