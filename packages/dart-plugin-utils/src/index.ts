@@ -18,11 +18,11 @@ import {
     make,
     Message,
     Method,
-  MutationMethod,
-  MutationService,
+    MutationMethod,
+    MutationService,
     Param,
-  QueryMethod,
-  QueryService,
+    QueryMethod,
+    QueryService,
     Schema,
 } from '@typerpc/schema'
 
@@ -141,6 +141,8 @@ export const handleOptional = (isOptional: boolean): string => (isOptional ? '@r
 const propClassName = (msgName: string, propName: string): string => {
     return capitalize(msgName) + capitalize(propName) + 'Prop'
 }
+
+// Builds a class for any properties which are literal objects, which dart doesn't support.
 const buildMsgProps = (msg: Message): string => {
     let properties = ''
     for (const property of msg.properties) {
@@ -223,31 +225,77 @@ const buildRequestClasses = (schema: Schema): string => {
     return classes
 }
 
-const buildResponseClass = (svcName: string ,method: MutationMethod | QueryMethod): string => {
-  if (method.isVoidReturn) {
-    return ''
-  }
-  const className = responseClassName(svcName, method.name)
-  return `
+const returnTypeLiteralName = (svcName: string, methodName: string): string =>
+    capitalize(svcName) + capitalize(methodName) + 'ReturnLiteral'
+
+// Builds a class for any methods in a file that returns an object literal,
+// which dart does not support yet.
+const buildReturnTypeLiterals = (schema: Schema) => {
+    let classes = ''
+    for (const svc of schema.queryServices) {
+        for (const method of svc.methods) {
+            if (!method.isVoidReturn && is.structLiteral(method.returnType)) {
+                classes = classes.concat(
+                    buildMsgClass({
+                        name: returnTypeLiteralName(svc.name, method.name),
+                        properties: method.returnType.properties,
+                    }),
+                )
+            }
+        }
+    }
+    for (const svc of schema.mutationServices) {
+        for (const method of svc.methods) {
+            if (!method.isVoidReturn && is.structLiteral(method.returnType)) {
+                classes = classes.concat(
+                    buildMsgClass({
+                        name: returnTypeLiteralName(svc.name, method.name),
+                        properties: method.returnType.properties,
+                    }),
+                )
+            }
+        }
+    }
+    return classes
+}
+
+const buildResponseClass = (svcName: string, method: MutationMethod | QueryMethod): string => {
+    if (method.isVoidReturn) {
+        return ''
+    }
+    const className = responseClassName(svcName, method.name)
+    return `
   @freezed
   ${className} with _$${className} {
    @JsonSerializable(explicitToJson: true)
    factory ${capitalize(className)}({
-      ${is.structLiteral(method.returnType) ? }
+      ${
+          is.structLiteral(method.returnType)
+              ? returnTypeLiteralName(svcName, method.name)
+              : dataType(method.returnType)
+      } data,
    }) = _${capitalize(className)};
 
    factory ${capitalize(className)}.fromJson(Map<String, dynamic> json) =>
    _${capitalize(className)}FromJson(json);
 
-  }`
-}
-const buildResponseClasses = (schema: Schema): string => {
-  let classes = ''
-  for (const svc of schema.queryServices) {
-    for (const method of svc.methods) {
-    }
-
   }
+`
+}
+
+const buildResponseClasses = (schema: Schema): string => {
+    let classes = ''
+    for (const svc of schema.queryServices) {
+        for (const method of svc.methods) {
+            classes = classes.concat(buildResponseClass(svc.name, method))
+        }
+    }
+    for (const svc of schema.mutationServices) {
+        for (const method of svc.methods) {
+            classes = classes.concat(buildResponseClass(svc.name, method))
+        }
+    }
+    return classes
 }
 
 // converts all rpc.Msg in a schema into type aliases
@@ -273,6 +321,8 @@ export const buildTypes = (schema: Schema): string => {
         types = types.concat(buildClassesForParams(svc))
     })
     types = types.concat(buildRequestClasses(schema))
+    types = types.concat(buildReturnTypeLiterals(schema))
+    types = types.concat(buildResponseClasses(schema))
     return types
 }
 
