@@ -136,7 +136,7 @@ export const fromQueryString = (paramName: string, type: DataType): string => {
 }
 
 // add question mark to optional type alias property or method param if needed
-export const handleOptional = (isOptional: boolean): string => (isOptional ? '@required' : '')
+export const handleOptional = (isOptional: boolean): string => (isOptional ? '' : '@required')
 
 const propClassName = (msgName: string, propName: string): string => {
     return capitalize(msgName) + capitalize(propName) + 'Prop'
@@ -269,11 +269,9 @@ const buildResponseClass = (svcName: string, method: MutationMethod | QueryMetho
 class ${className} with _$${className} {
    @JsonSerializable(explicitToJson: true)
    factory ${capitalize(className)}({
-      ${
-          is.structLiteral(method.returnType)
-              ? returnTypeLiteralName(svcName, method.name)
-              : dataType(method.returnType)
-      } data,
+     @required ${
+         is.structLiteral(method.returnType) ? returnTypeLiteralName(svcName, method.name) : dataType(method.returnType)
+     } data,
    }) = _${capitalize(className)};
 
    factory ${capitalize(className)}.fromJson(Map<String, dynamic> json) =>
@@ -342,7 +340,7 @@ export const buildAbstractClass = (svc: QueryService | MutationService): string 
         return paramsString
     }
     const buildMethodSignature = (method: Method): string => {
-        return `Future<${dataType(method.returnType)}> ${lowerCase(method.name)}(${buildParams(method)});
+        return `Future<${dataType(method.returnType)}> ${lowerCase(method.name)}({${buildParams(method)}});
 `
     }
 
