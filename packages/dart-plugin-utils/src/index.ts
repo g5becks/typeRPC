@@ -163,7 +163,7 @@ abstract class ${capitalize(msg.name)} with _$${capitalize(msg.name)} {
    @JsonSerializable(explicitToJson: true)
    factory ${capitalize(msg.name)}({
       ${buildMsgProps(msg)}
-   }) = _${capitalize(msg.name)};
+   }) = _${capitalize(msg.name)}Freezed;
 
    factory ${capitalize(msg.name)}.fromJson(Map<String, dynamic> json) =>
    _$${capitalize(msg.name)}FromJson(json);
@@ -282,7 +282,7 @@ abstract class ${className} with _$${className} {
              ? returnTypeLiteralName(svcName, method.name, schema)
              : dataType(method.returnType)
      } data,
-   }) = _${capitalize(className)};
+   }) = _${capitalize(className)}Freezed;
 
    factory ${capitalize(className)}.fromJson(Map<String, dynamic> json) =>
    _$${capitalize(className)}FromJson(json);
