@@ -226,7 +226,7 @@ const buildRequestClasses = (schema: Schema): string => {
 }
 
 const returnTypeLiteralName = (svcName: string, methodName: string): string =>
-    '_' + capitalize(svcName) + capitalize(methodName) + 'ReturnLiteral'
+    capitalize(svcName) + capitalize(methodName) + 'Result'
 
 // Builds a class for any methods in a file that returns an object literal,
 // which dart does not support yet.
