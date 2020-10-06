@@ -208,8 +208,8 @@ const buildResponseClass = (svcName, method) => {
     }
     const className = exports.responseClassName(svcName, method.name);
     return `
-  @freezed
-  ${className} with _$${className} {
+@freezed
+class ${className} with _$${className} {
    @JsonSerializable(explicitToJson: true)
    factory ${plugin_utils_1.capitalize(className)}({
       ${schema_1.is.structLiteral(method.returnType)

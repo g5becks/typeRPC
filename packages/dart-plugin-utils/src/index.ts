@@ -265,8 +265,8 @@ const buildResponseClass = (svcName: string, method: MutationMethod | QueryMetho
     }
     const className = responseClassName(svcName, method.name)
     return `
-  @freezed
-  ${className} with _$${className} {
+@freezed
+class ${className} with _$${className} {
    @JsonSerializable(explicitToJson: true)
    factory ${capitalize(className)}({
       ${
