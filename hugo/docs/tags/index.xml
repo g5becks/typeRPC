@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Tags on Typerpc Docs</title>
+    <link>/tags/</link>
+    <description>Recent content in Tags on Typerpc Docs</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 22 Sep 2020 14:49:54 -0400</lastBuildDate><atom:link href="/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>cli</title>
+      <link>/tags/cli/</link>
+      <pubDate>Tue, 22 Sep 2020 14:49:54 -0400</pubDate>
+      
+      <guid>/tags/cli/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>command line</title>
+      <link>/tags/command-line/</link>
+      <pubDate>Tue, 22 Sep 2020 14:49:54 -0400</pubDate>
+      
+      <guid>/tags/command-line/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>typerpc</title>
+      <link>/tags/typerpc/</link>
+      <pubDate>Tue, 22 Sep 2020 14:49:54 -0400</pubDate>
+      
+      <guid>/tags/typerpc/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>

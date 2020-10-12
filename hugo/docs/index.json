@@ -1,0 +1,92 @@
+[
+{
+	"uri": "/getting_started/",
+	"title": "Getting Started",
+	"tags": [],
+	"description": "",
+	"content": "Chapter 1 Getting Started “I am committed to push my branch to the master” ― Halgurd Hussein\n"
+},
+{
+	"uri": "/schema/",
+	"title": "Schema",
+	"tags": [],
+	"description": "",
+	"content": "Chapter 2 Typerpc Schema “Talk is cheap. Show me the code.” ― Linus Torvalds\n"
+},
+{
+	"uri": "/plugins/",
+	"title": "Typerpc Plugins",
+	"tags": [],
+	"description": "",
+	"content": "Chapter 3 Typerpc Plugins “Think twice, code once.” ― Waseem Latif\n"
+},
+{
+	"uri": "/cli/",
+	"title": "Cli",
+	"tags": ["cli", "command line", "typerpc"],
+	"description": "",
+	"content": "Chapter 4 The Typerpc CLI “The most important property of a program is whether it accomplishes the intention of its user.” ― C.A.R. Hoare\n"
+},
+{
+	"uri": "/configuration/",
+	"title": "Configuration",
+	"tags": [],
+	"description": "",
+	"content": "Chapter 5 Configuring Typerpc .\n"
+},
+{
+	"uri": "/comparisons/",
+	"title": "Typerpc Comparisons",
+	"tags": [],
+	"description": "",
+	"content": "Chapter 6 Typerpc Comapared to \u0026hellip; “Programming isn\u0026rsquo;t about what you know; it\u0026rsquo;s about what you can figure out.” ― Chris Pine, Learn to Program\n"
+},
+{
+	"uri": "/guides/",
+	"title": "Guides",
+	"tags": [],
+	"description": "",
+	"content": "Chapter 7 Typerpc in practice. “The happiest moment i felt; is that moment when i realized my ability to create.” ― Dr. Hazem Ali\n"
+},
+{
+	"uri": "/tags/cli/",
+	"title": "cli",
+	"tags": [],
+	"description": "",
+	"content": ""
+},
+{
+	"uri": "/tags/command-line/",
+	"title": "command line",
+	"tags": [],
+	"description": "",
+	"content": ""
+},
+{
+	"uri": "/tags/",
+	"title": "Tags",
+	"tags": [],
+	"description": "",
+	"content": ""
+},
+{
+	"uri": "/tags/typerpc/",
+	"title": "typerpc",
+	"tags": [],
+	"description": "",
+	"content": ""
+},
+{
+	"uri": "/",
+	"title": "Typerpc",
+	"tags": [],
+	"description": "",
+	"content": "What is typerpc ? Typerpc is a schema-driven universal rpc framework written in typescript that aims to increase developer productivity by eliminating much of the work that goes into creating api servers and clients. How does it achieve this goal? Code generation to the rescue! Declare your service definitions using our typescript based IDL, then run typerpc gen -t ./tsconfig.json and typerpc will generate statically typed clients and servers in your desired programming language(s) and framework(s). Json or Cbor serialization/deserialization, routing, and all other networking code is taken care of for you so you can focus on writing the code that is important to your business.\nWhat does it look Like? Here is a very small example of a typerpc schema definition for a simple user service.\n// basic types used for service definitions import { $, rpc } from \u0026#39;@typercp/types\u0026#39; // A type that will be used to transfer data between client(s) and server(s). type User = rpc.Msg\u0026lt;{ id: $.int8 name: $.str password: $.str }\u0026gt; // A query service used to query User data from the server using HTTP GET requests. type UserQueries = rpc.QuerySvc\u0026lt;{ getUserById(id: $.int8): User }\u0026gt; // A mutation service used to create or mutate data using HTTP POST requests. type UserMutations = rpc.MutationSvc\u0026lt;{ createUser(username: $.str, password: $.str): User updatePassword(password: $.str): $.bool }\u0026gt; Assuming you\u0026rsquo;ve used an identical config, using this schema, typerpc will generate the code seen Here for the client, and the code see Here for the server.\n"
+},
+{
+	"uri": "/categories/",
+	"title": "Categories",
+	"tags": [],
+	"description": "",
+	"content": ""
+}]

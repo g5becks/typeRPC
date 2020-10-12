@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en" class="js csstransforms3d">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="Hugo 0.76.4" />
+    <meta name="description" content="Documentation for typerpc">
+<meta name="author" content="Gary Becks &lt;techstar.dev@hotmail.com&gt;">
+
+    <link rel="icon" href="/images/favicon.png" type="image/png">
+
+    <title>Cli - Typerpc Docs</title>
+
+    
+    <link href="/css/nucleus.css?1602533064" rel="stylesheet">
+    <link href="/css/fontawesome-all.min.css?1602533064" rel="stylesheet">
+    <link href="/css/hybrid.css?1602533064" rel="stylesheet">
+    <link href="/css/featherlight.min.css?1602533064" rel="stylesheet">
+    <link href="/css/perfect-scrollbar.min.css?1602533064" rel="stylesheet">
+    <link href="/css/auto-complete.css?1602533064" rel="stylesheet">
+    <link href="/css/atom-one-dark-reasonable.css?1602533064" rel="stylesheet">
+    <link href="/css/theme.css?1602533064" rel="stylesheet">
+    <link href="/css/hugo-theme.css?1602533064" rel="stylesheet">
+    
+    <link href="/css/theme-blue.css?1602533064" rel="stylesheet">
+    
+    
+
+    <script src="/js/jquery-3.3.1.min.js?1602533064"></script>
+
+    <style>
+      :root #header + #content > #left > #rlblock_left{
+          display:none !important;
+      }
+      
+    </style>
+    
+  </head>
+  <body class="" data-url="/cli/">
+    <nav id="sidebar" class="showVisitedLinks">
+
+
+
+  <div id="header-wrapper">
+    <div id="header">
+      <a id="logo" href="/">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="170" height="80" style=""><path fill="#ffffff" d="M25.2265625,54.2890625l-4.23828125,0l0-16.4609375l-5.427734375,0l0-3.52734375l15.09375,0l0,3.52734375l-5.427734375,0l0,16.4609375z M33.13943359375,39.00390625l4.56640625,0l2.884765625,8.599609375q0.369140625,1.12109375,0.505859375,2.65234375l0.08203125,0q0.150390625-1.408203125,0.587890625-2.65234375l2.830078125-8.599609375l4.470703125,0l-6.466796875,17.240234375q-0.888671875,2.392578125-2.5361328125,3.58203125t-3.8486328125,1.189453125q-1.080078125,0-2.119140625-0.232421875l0-3.30859375q0.751953125,0.177734375,1.640625,0.177734375q1.107421875,0,1.9345703125-0.6767578125t1.2919921875-2.0439453125l0.24609375-0.751953125z M61.5737890625,54.5625q-2.693359375,0-4.224609375-1.955078125l-0.21875,0q0.21875,1.9140625,0.21875,2.21484375l0,6.193359375l-4.169921875,0l0-22.01171875l3.390625,0l0.587890625,1.982421875l0.19140625,0q1.462890625-2.26953125,4.333984375-2.26953125q2.70703125,0,4.23828125,2.091796875t1.53125,5.810546875q0,2.447265625-0.7177734375,4.251953125t-2.0439453125,2.748046875t-3.1171875,0.943359375z M60.3433203125,42.052734375q-1.544921875,0-2.255859375,0.9501953125t-0.73828125,3.1376953125l0,0.451171875q0,2.4609375,0.7314453125,3.52734375t2.3173828125,1.06640625q2.802734375,0,2.802734375-4.62109375q0-2.255859375-0.6904296875-3.3837890625t-2.1669921875-1.1279296875z M79.15267578125,41.68359375q-1.326171875,0-2.078125,0.8408203125t-0.861328125,2.3857421875l5.8515625,0q-0.02734375-1.544921875-0.806640625-2.3857421875t-2.10546875-0.8408203125z M79.74056640625,54.5625q-3.69140625,0-5.76953125-2.037109375t-2.078125-5.76953125q0-3.841796875,1.9208984375-5.9404296875t5.3115234375-2.0986328125q3.240234375,0,5.044921875,1.845703125t1.8046875,5.099609375l0,2.0234375l-9.857421875,0q0.068359375,1.77734375,1.052734375,2.775390625t2.76171875,0.998046875q1.380859375,0,2.611328125-0.287109375t2.5703125-0.916015625l0,3.2265625q-1.09375,0.546875-2.337890625,0.8134765625t-3.03515625,0.2666015625z M99.82140625,38.716796875q0.84765625,0,1.408203125,0.123046875l-0.314453125,3.91015625q-0.505859375-0.13671875-1.23046875-0.13671875q-1.99609375,0-3.1103515625,1.025390625t-1.1142578125,2.87109375l0,7.779296875l-4.169921875,0l0-15.28515625l3.158203125,0l0.615234375,2.5703125l0.205078125,0q0.7109375-1.28515625,1.9208984375-2.0712890625t2.6318359375-0.7861328125z M114.32412109375,54.5625q-2.693359375,0-4.224609375-1.955078125l-0.21875,0q0.21875,1.9140625,0.21875,2.21484375l0,6.193359375l-4.169921875,0l0-22.01171875l3.390625,0l0.587890625,1.982421875l0.19140625,0q1.462890625-2.26953125,4.333984375-2.26953125q2.70703125,0,4.23828125,2.091796875t1.53125,5.810546875q0,2.447265625-0.7177734375,4.251953125t-2.0439453125,2.748046875t-3.1171875,0.943359375z M113.09365234375,42.052734375q-1.544921875,0-2.255859375,0.9501953125t-0.73828125,3.1376953125l0,0.451171875q0,2.4609375,0.7314453125,3.52734375t2.3173828125,1.06640625q2.802734375,0,2.802734375-4.62109375q0-2.255859375-0.6904296875-3.3837890625t-2.1669921875-1.1279296875z M131.7799609375,54.5625q-7.13671875,0-7.13671875-7.833984375q0-3.896484375,1.94140625-5.9541015625t5.564453125-2.0576171875q2.65234375,0,4.7578125,1.0390625l-1.23046875,3.2265625q-0.984375-0.396484375-1.83203125-0.6494140625t-1.6953125-0.2529296875q-3.25390625,0-3.25390625,4.62109375q0,4.484375,3.25390625,4.484375q1.203125,0,2.228515625-0.3212890625t2.05078125-1.0048828125l0,3.568359375q-1.01171875,0.642578125-2.0439453125,0.888671875t-2.6044921875,0.24609375z"/><path fill="#" d=""/>&lt;/
+</a>
+
+    </div>
+    
+        <div class="searchbox">
+    <label for="search-by"><i class="fas fa-search"></i></label>
+    <input data-search-input id="search-by" type="search" placeholder="Search...">
+    <span data-search-clear=""><i class="fas fa-times"></i></span>
+</div>
+
+<script type="text/javascript" src="/js/lunr.min.js?1602533064"></script>
+<script type="text/javascript" src="/js/auto-complete.js?1602533064"></script>
+<script type="text/javascript">
+    
+        var baseurl = "\/";
+    
+</script>
+<script type="text/javascript" src="/js/search.js?1602533064"></script>
+
+    
+  </div>
+
+    <div class="highlightable">
+    <ul class="topics">
+
+        
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/getting_started/" title="Getting Started" class="dd-item 
+        
+        
+        
+        ">
+      <a href="/getting_started/">
+          <b>1. </b>Getting Started
+          
+            <i class="fas fa-check read-icon"></i>
+          
+      </a>
+      
+              
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/schema/" title="Schema" class="dd-item 
+        
+        
+        
+        ">
+      <a href="/schema/">
+          <b>2. </b>Schema
+          
+            <i class="fas fa-check read-icon"></i>
+          
+      </a>
+      
+              
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/plugins/" title="Typerpc Plugins" class="dd-item 
+        
+        
+        
+        ">
+      <a href="/plugins/">
+          <b>3. </b>Plugins
+          
+            <i class="fas fa-check read-icon"></i>
+          
+      </a>
+      
+              
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/cli/" title="Cli" class="dd-item 
+        parent
+        active
+        
+        ">
+      <a href="/cli/">
+          <b>4. </b>Cli
+          
+            <i class="fas fa-check read-icon"></i>
+          
+      </a>
+      
+              
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/configuration/" title="Configuration" class="dd-item 
+        
+        
+        
+        ">
+      <a href="/configuration/">
+          <b>5. </b>Configuration
+          
+            <i class="fas fa-check read-icon"></i>
+          
+      </a>
+      
+              
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/comparisons/" title="Typerpc Comparisons" class="dd-item 
+        
+        
+        
+        ">
+      <a href="/comparisons/">
+          <b>6. </b>Comparisons
+          
+            <i class="fas fa-check read-icon"></i>
+          
+      </a>
+      
+              
+    </li>
+  
+ 
+
+          
+          
+
+
+
+
+ 
+  
+    
+    <li data-nav-id="/guides/" title="Guides" class="dd-item 
+        
+        
+        
+        ">
+      <a href="/guides/">
+          <b>7. </b>Guides
+          
+            <i class="fas fa-check read-icon"></i>
+          
+      </a>
+      
+              
+    </li>
+  
+ 
+
+          
+         
+    </ul>
+
+    
+    
+      <section id="shortcuts">
+        <h3>More</h3>
+        <ul>
+          
+              <li> 
+                  <a class="padding" href="https://github.com/typerpc/typerpc"><i class='fab fa-fw fa-github'></i> GitHub repo</a>
+              </li>
+          
+        </ul>
+      </section>
+    
+
+    
+    <section id="prefooter">
+      <hr/>
+      <ul>
+      
+      
+      
+        <li><a class="padding" href="#" data-clear-history-toggle=""><i class="fas fa-history fa-fw"></i> Clear History</a></li>
+      
+      </ul>
+    </section>
+    
+    <section id="footer">
+      <center>
+    
+    <a class="github-button" href="https://github.com/typerpc/typerpc/archive/master.zip" data-icon="octicon-cloud-download" aria-label="Download matcornic/hugo-theme-learn on GitHub">Download</a>
+
+    
+    <a class="github-button" href="https://github.com/typerpc/typerpc/" data-icon="octicon-star" data-show-count="true" aria-label="Star matcornic/hugo-theme-learn on GitHub">Star</a>
+
+    
+    <a class="github-button" href="https://github.com/typerpc/typerpc/fork" data-icon="octicon-repo-forked" data-show-count="true" aria-label="Fork matcornic/hugo-theme-learn on GitHub">Fork</a>
+
+</center>
+
+<script async defer src="https://buttons.github.io/buttons.js"></script>
+
+    </section>
+  </div>
+</nav>
+
+
+
+
+        <section id="body">
+        <div id="overlay"></div>
+        <div class="padding highlightable">
+              
+              <div>
+                <div id="top-bar">
+                
+                  
+                  
+                  
+                  <div id="top-github-link">
+                    <a class="github-link" title='Edit this page' href="https://github.com/typerpc/typerpc/tree/master/packages/docscli/_index.md" target="blank">
+                      <i class="fas fa-code-branch"></i>
+                      <span id="top-github-link-text">Edit this page</span>
+                    </a>
+                  </div>
+                  
+                
+                
+                <div id="breadcrumbs" itemscope="" itemtype="http://data-vocabulary.org/Breadcrumb">
+                    <span id="sidebar-toggle-span">
+                        <a href="#" id="sidebar-toggle" data-sidebar-toggle="">
+                          <i class="fas fa-bars"></i>
+                        </a>
+                    </span>
+                  
+                  <span class="links">
+                 
+                 
+                    
+          
+          
+            
+            
+          
+          
+            <a href='/'>Typerpc</a> > Cli
+          
+        
+          
+        
+                 
+                  </span>
+                </div>
+                
+              </div>
+            </div>
+            
+        <div id="head-tags">
+        
+<div class="tags">
+
+  <a class="tag-link" href="/tags/cli">cli</a>
+
+  <a class="tag-link" href="/tags/command-line">command line</a>
+
+  <a class="tag-link" href="/tags/typerpc">typerpc</a>
+
+</div>
+
+        </div>
+        
+          <div id="chapter">
+        
+        <div id="body-inner">
+          
+
+        
+
+
+
+	<h3 id="chapter-4">Chapter 4</h3>
+<h1 id="the-typerpc-cli">The Typerpc CLI</h1>
+<p>“The most important property of a program is whether it accomplishes the intention of its user.”
+― C.A.R. Hoare</p>
+
+
+
+
+
+<footer class=" footline" >
+	
+</footer>
+
+        
+            </div> 
+        
+        </div>
+        
+
+      </div>
+
+    <div id="navigation">
+        
+        
+
+        
+            
+            
+                
+                    
+                    
+                
+                
+
+                    
+                    
+                        
+                    
+                    
+
+                    
+                        
+            
+            
+                
+                    
+                        
+                        
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                        
+                        
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+                        
+            
+            
+                
+                    
+                
+                
+
+                    
+                    
+                    
+
+                    
+            
+        
+                    
+            
+        
+
+        
+
+
+	 
+	 
+		
+			<a class="nav nav-prev" href="/plugins/" title="Typerpc Plugins"> <i class="fa fa-chevron-left"></i></a>
+		
+		
+			<a class="nav nav-next" href="/configuration/" title="Configuration" style="margin-right: 0px;"><i class="fa fa-chevron-right"></i></a>
+		
+	
+    </div>
+
+    </section>
+
+    <div style="left: -1000px; overflow: scroll; position: absolute; top: -1000px; border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;">
+      <div style="border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;"></div>
+    </div>
+    <script src="/js/clipboard.min.js?1602533064"></script>
+    <script src="/js/perfect-scrollbar.min.js?1602533064"></script>
+    <script src="/js/perfect-scrollbar.jquery.min.js?1602533064"></script>
+    <script src="/js/jquery.sticky.js?1602533064"></script>
+    <script src="/js/featherlight.min.js?1602533064"></script>
+    <script src="/js/highlight.pack.js?1602533064"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <script src="/js/modernizr.custom-3.6.0.js?1602533064"></script>
+    <script src="/js/learn.js?1602533064"></script>
+    <script src="/js/hugo-learn.js?1602533064"></script>
+    
+    
+
+  </body>
+</html>

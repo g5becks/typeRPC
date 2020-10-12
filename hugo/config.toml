@@ -3,7 +3,7 @@ languageCode = "en-us"
 title = "Typerpc"
 theme = "hugo-theme-learn"
 
-publishDir = "docs"
+publishDir = "../docs"
 # For search functionality
 [outputs]
 home = [ "HTML", "RSS", "JSON"]
