@@ -34,7 +34,8 @@
   "scripts": {
     "run": "node ./dist/index.js",
     "lint:fix": "eslint --fix src/**",
-    "build": "yarn run clean && yarn run tsc",
+    "build": "yarn run clean && yarn run tsc && pkg",
+    "pkg": "pkg --targets node12-linux-x64,node12-macos-x64,node12-win-x64 --out-path ./dist/pkg package.json",
     "clean": "rm -rf ./dist && rm -rf tsconfig.build.tsbuildinfo",
     "tsc": "tsc -b tsconfig.build.json",
     "postpack": "rm -f oclif.manifest.json",
@@ -49,7 +50,8 @@
     "@types/debug": "^4.1.5",
     "@types/figlet": "^1.2.0",
     "@types/fs-extra": "^9.0.1",
-    "@types/yargs": "^15.0.5"
+    "@types/yargs": "^15.0.5",
+    "pkg": "^4.4.9"
   },
   "dependencies": {
     "@typerpc/config": "^0.1.17",
@@ -67,6 +69,10 @@
     "tslog": "^2.8.0",
     "yargonaut": "^1.1.4",
     "yargs": "^16.0.3"
+  },
+
+  "pkg": {
+    "assets": "../../node_modules/figlet/fonts/Standard.flf"
   },
   "gitHead": "9277a584a98be1d5b9d97eb7aa43435b41c79d66"
 }
