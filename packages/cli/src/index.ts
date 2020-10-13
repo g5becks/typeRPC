@@ -22,7 +22,7 @@ console.log(chalk.blue(figlet.textSync('typerpc')))
 require('yargonaut').style('blue').helpStyle('green').errors('Calvin S').errorsStyle('red')
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const argv = yargs
+export const argv = yargs
     .command(gen)
     .command(create)
     .demandCommand(1, 'You must supply a command to use typerpc')
@@ -30,5 +30,3 @@ const argv = yargs
     .example('create', '')
     .help()
     .epilogue('for more information, please visit https://typerpc.run').argv
-
-console.log(`typerpc running with with ${argv}`)

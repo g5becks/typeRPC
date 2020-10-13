@@ -34,7 +34,7 @@
   "scripts": {
     "run": "node ./dist/index.js",
     "lint:fix": "eslint --fix src/**",
-    "build": "yarn run clean && yarn run tsc && pkg",
+    "build": "yarn run clean && yarn run tsc && yarn run pkg",
     "pkg": "pkg --targets node12-linux-x64,node12-macos-x64,node12-win-x64 --out-path ./dist/pkg package.json",
     "clean": "rm -rf ./dist && rm -rf tsconfig.build.tsbuildinfo",
     "tsc": "tsc -b tsconfig.build.json",

@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.argv = void 0;
 /*
  * Copyright (c) 2020. Gary Becks - <techstar.dev@hotmail.com>
  *
@@ -24,7 +25,7 @@ console.log(chalk_1.default.blue(figlet_1.default.textSync('typerpc')));
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require('yargonaut').style('blue').helpStyle('green').errors('Calvin S').errorsStyle('red');
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const argv = yargs_1.default
+exports.argv = yargs_1.default
     .command(gen_1.gen)
     .command(create_1.create)
     .demandCommand(1, 'You must supply a command to use typerpc')
@@ -32,5 +33,4 @@ const argv = yargs_1.default
     .example('create', '')
     .help()
     .epilogue('for more information, please visit https://typerpc.run').argv;
-console.log(`typerpc running with with ${argv}`);
 //# sourceMappingURL=index.js.map
