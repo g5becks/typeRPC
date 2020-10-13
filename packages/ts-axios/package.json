@@ -1,6 +1,6 @@
 {
   "name": "@typerpc/ts-axios",
-  "version": "0.1.28",
+  "version": "0.1.38",
   "description": "typerpc typescript axios plugin",
   "keywords": [
     "typerpc",

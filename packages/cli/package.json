@@ -1,6 +1,6 @@
 {
   "name": "@typerpc/cli",
-  "version": "0.1.28",
+  "version": "0.1.38",
   "description": "typerpc command line tooling",
   "keywords": [
     "typerpc",
@@ -56,7 +56,7 @@
   "dependencies": {
     "@typerpc/config": "^0.1.17",
     "@typerpc/plugin": "^0.1.17",
-    "@typerpc/plugin-manager": "^0.1.28",
+    "@typerpc/plugin-manager": "^0.1.38",
     "@typerpc/schema": "^0.1.17",
     "@types/prettyjson": "^0.0.29",
     "chalk": "^4.1.0",
@@ -70,7 +70,6 @@
     "yargonaut": "^1.1.4",
     "yargs": "^16.0.3"
   },
-
   "pkg": {
     "assets": "../../node_modules/figlet/fonts/Standard.flf"
   },
