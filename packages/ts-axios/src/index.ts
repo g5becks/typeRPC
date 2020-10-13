@@ -83,9 +83,11 @@ const buildMethod = (method: MutationMethod | QueryMethod): string => {
     return `${method.name}(${buildParamsWithTypes(method.params)} ${
         method.hasParams ? ', ' : ''
     } cfg?:RpcConfig): Promise<AxiosResponse<${returnType}>> {
-    return this.client.request<${returnType}>({...cfg, ${buildRequestHeaders(method)}${buildResponseType(
+    return this.client.request<${returnType}, AxiosResponse<${returnType}>>({...cfg, ${buildRequestHeaders(
         method,
-    )} url: '/${method.name}', method: '${method.httpMethod}', ${method.hasParams ? buildRequestData(method) : ''}})
+    )}${buildResponseType(method)} url: '/${method.name}', method: '${method.httpMethod}', ${
+        method.hasParams ? buildRequestData(method) : ''
+    }})
 }
 `
 }
