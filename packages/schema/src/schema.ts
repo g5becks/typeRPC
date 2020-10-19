@@ -189,11 +189,19 @@ export type Property = Readonly<{
     isOptional: boolean
 }>
 
-/** An rpc.Msg location schema file */
+/** An rpc.Msg found in a schema file */
 export type Message = Readonly<{
     /** The name of the type */
     name: string
     properties: ReadonlyArray<Property>
+}>
+
+/** An rpc.Union found in a schema file */
+export type Union = Readonly<{
+    /** The name of the union type */
+    name: string
+    /** The list of variant types */
+    types: ReadonlyArray<DataType>
 }>
 
 /** An import declaration found in a Schema file */
@@ -214,6 +222,11 @@ export type Schema = Readonly<{
     imports: ReadonlyArray<Import>
     /** All Messages to be converted to Types/Classes for this file. */
     messages: ReadonlyArray<Message>
+
+    /** All Unions to be converted to Types or other representation of
+     * Discriminated unions for schema file
+     */
+    unions: ReadonlyArray<Union>
     /** All rpc.QuerySvc's to be generated for this file */
     queryServices: ReadonlyArray<QueryService>
     /** All rpc.MutationSvc's to be generated for this file */
