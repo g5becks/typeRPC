@@ -12,17 +12,18 @@
 
 import { capitalize, lowerCase } from '@typerpc/plugin-utils'
 import {
-    DataType,
-    Import,
-    is,
-    make,
-    Message,
-    Method,
-    MutationService,
-    Param,
-    QueryService,
-    Schema,
-    StructLiteralProp,
+  DataType,
+  Import,
+  is,
+  make,
+  Message,
+  Method,
+  MutationService,
+  Param,
+  QueryService,
+  Schema,
+  StructLiteralProp,
+  Union
 } from '@typerpc/schema'
 
 export const typeMap: Map<string, string> = new Map<string, string>([
@@ -98,6 +99,10 @@ export const dataType = (type: DataType): string => {
 
     if (is.structLiteral(type)) {
         return typeLiteral(type.properties)
+    }
+
+    if (is.unionLiteral(type)) {
+        return unionLiteral(type.types)
     }
 
     if (is.tuple2(type)) {
@@ -179,6 +184,8 @@ export const buildTypes = (schema: Schema): string => {
     }
     return types
 }
+
+export const buildUnion = (union: Union)
 
 // builds all of the parameters of a method
 export const buildParams = (params: ReadonlyArray<Param>): string => {
@@ -269,6 +276,7 @@ export const buildMsgImports = (imports: ReadonlyArray<Import>): string => {
             i++
         }
         importsStr = importsStr.concat(`import {${msgs}} from './${imp.fileName}'\n`)
+import { Union } from '../../schema/src/schema';
     }
     return importsStr
 }
