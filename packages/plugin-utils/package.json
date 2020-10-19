@@ -1,46 +1,47 @@
 {
-  "name": "@typerpc/plugin-utils",
-  "version": "0.1.17",
-  "description": "utility functions for creating typerpc plugins",
-  "keywords": [
-    "typerpc",
-    "plugin",
-    "utils",
-    "json",
-    "typescript",
-    "cbor",
-    "graphql"
-  ],
-  "author": "Gary Becks <techstar.dev@hotmail.com>",
-  "homepage": "https://typerpc.run",
-  "license": "BSD-2-Clause",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "directories": {
-    "lib": "src",
-    "test": "tests"
-  },
-  "files": [
-    "dist"
-  ],
-  "publishConfig": {
-    "access": "public"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/typerpc/typerpc.git"
-  },
-  "dependencies": {
-    "@typerpc/schema": "^0.1.17"
-  },
-  "scripts": {
-    "lint:fix": "eslint --fix src/**",
-    "build": "yarn run clean && yarn run tsc",
-    "clean": "rm -rf ./dist && rm -rf tsconfig.build.tsbuildinfo",
-    "tsc": "tsc -b tsconfig.build.json"
-  },
-  "bugs": {
-    "url": "https://github.com/typerpc/typerpc/issues"
-  },
-  "gitHead": "9277a584a98be1d5b9d97eb7aa43435b41c79d66"
+    "name": "@typerpc/plugin-utils",
+    "version": "0.1.17",
+    "description": "utility functions for creating typerpc plugins",
+    "keywords": [
+        "typerpc",
+        "plugin",
+        "utils",
+        "json",
+        "typescript",
+        "cbor",
+        "graphql"
+    ],
+    "author": "Gary Becks <techstar.dev@hotmail.com>",
+    "homepage": "https://typerpc.run",
+    "license": "BSD-2-Clause",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "directories": {
+        "lib": "src",
+        "test": "tests"
+    },
+    "files": [
+        "dist"
+    ],
+    "publishConfig": {
+        "access": "public"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/typerpc/typerpc.git"
+    },
+    "dependencies": {
+        "@typerpc/schema": "^0.1.17"
+    },
+    "scripts": {
+        "lint:fix": "eslint --fix src/**",
+        "build": "yarn run clean && yarn run tsc",
+        "clean": "rm -rf ./dist && rm -rf tsconfig.build.tsbuildinfo",
+        "tsc": "tsc -b tsconfig.build.json",
+        "prepublishOnly": "yarn run build"
+    },
+    "bugs": {
+        "url": "https://github.com/typerpc/typerpc/issues"
+    },
+    "gitHead": "9277a584a98be1d5b9d97eb7aa43435b41c79d66"
 }

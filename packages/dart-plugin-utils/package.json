@@ -22,7 +22,8 @@
         "lint:fix": "eslint --fix src/**",
         "build": "yarn run clean && yarn run tsc",
         "clean": "rm -rf ./dist && rm -rf tsconfig.build.tsbuildinfo",
-        "tsc": "tsc -b tsconfig.build.json"
+        "tsc": "tsc -b tsconfig.build.json",
+        "prepublishOnly": "yarn run build"
     },
     "dependencies": {
         "@typerpc/plugin-utils": "^0.1.17",

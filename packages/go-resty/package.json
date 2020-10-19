@@ -1,44 +1,45 @@
 {
-  "name": "@typerpc/go-resty",
-  "version": "0.1.28",
-  "description": "typerpc plugin http client for go using https://github.com/go-resty/resty ",
-  "keywords": [
-    "typerpc",
-    "go",
-    "http",
-    "json",
-    "rpc",
-    "cbor",
-    "typescript"
-  ],
-  "author": "Gary Becks <techstar.dev@hotmail.com>",
-  "homepage": "https://typerpc.run",
-  "license": "BSD-2-Clause",
-  "main": "dist/index.js",
-  "files": [
-    "dist"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/typerpc/typerpc.git"
-  },
-  "scripts": {
-    "lint:fix": "eslint --fix src/**",
-    "build": "yarn run clean && yarn run tsc",
-    "clean": "rm -rf ./dist && rm -rf tsconfig.build.tsbuildinfo",
-    "tsc": "tsc -b tsconfig.build.json"
-  },
-  "dependencies": {
-    "@typerpc/go-plugin-utils": "^0.1.17",
-    "@typerpc/plugin": "^0.1.17",
-    "@typerpc/plugin-utils": "^0.1.17",
-    "@typerpc/schema": "^0.1.17"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "bugs": {
-    "url": "https://github.com/typerpc/typerpc/issues"
-  },
-  "gitHead": "9277a584a98be1d5b9d97eb7aa43435b41c79d66"
+    "name": "@typerpc/go-resty",
+    "version": "0.1.28",
+    "description": "typerpc plugin http client for go using https://github.com/go-resty/resty ",
+    "keywords": [
+        "typerpc",
+        "go",
+        "http",
+        "json",
+        "rpc",
+        "cbor",
+        "typescript"
+    ],
+    "author": "Gary Becks <techstar.dev@hotmail.com>",
+    "homepage": "https://typerpc.run",
+    "license": "BSD-2-Clause",
+    "main": "dist/index.js",
+    "files": [
+        "dist"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/typerpc/typerpc.git"
+    },
+    "scripts": {
+        "lint:fix": "eslint --fix src/**",
+        "build": "yarn run clean && yarn run tsc",
+        "clean": "rm -rf ./dist && rm -rf tsconfig.build.tsbuildinfo",
+        "tsc": "tsc -b tsconfig.build.json",
+        "prepublishOnly": "yarn run build"
+    },
+    "dependencies": {
+        "@typerpc/go-plugin-utils": "^0.1.17",
+        "@typerpc/plugin": "^0.1.17",
+        "@typerpc/plugin-utils": "^0.1.17",
+        "@typerpc/schema": "^0.1.17"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "bugs": {
+        "url": "https://github.com/typerpc/typerpc/issues"
+    },
+    "gitHead": "9277a584a98be1d5b9d97eb7aa43435b41c79d66"
 }

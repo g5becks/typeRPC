@@ -1,77 +1,78 @@
 {
-  "name": "@typerpc/cli",
-  "version": "0.1.38",
-  "description": "typerpc command line tooling",
-  "keywords": [
-    "typerpc",
-    "rpc",
-    "json",
-    "graphql",
-    "typescript",
-    "generator"
-  ],
-  "author": "Gary Becks <techstar.dev@hotmail.com>",
-  "homepage": "https://typerpc.run",
-  "license": "BSD-2-Clause",
-  "bin": {
-    "typerpc": "./dist/index.js"
-  },
-  "preferGlobal": true,
-  "engines": {
-    "node": ">=8.4.0"
-  },
-  "files": [
-    "/bin",
-    "/dist"
-  ],
-  "publishConfig": {
-    "access": "public"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/typerpc/typerpc.git"
-  },
-  "scripts": {
-    "run": "node ./dist/index.js",
-    "lint:fix": "eslint --fix src/**",
-    "build": "yarn run clean && yarn run tsc && yarn run pkg",
-    "pkg": "pkg --targets node12-linux-x64,node12-macos-x64,node12-win-x64 --out-path ./dist/pkg package.json",
-    "clean": "rm -rf ./dist && rm -rf tsconfig.build.tsbuildinfo",
-    "tsc": "tsc -b tsconfig.build.json",
-    "postpack": "rm -f oclif.manifest.json",
-    "posttest": "eslint . --ext .ts --config .eslintrc",
-    "prepack": "yarn run build",
-    "version": "git add README.md"
-  },
-  "bugs": {
-    "url": "https://github.com/typerpc/typerpc/issues"
-  },
-  "devDependencies": {
-    "@types/debug": "^4.1.5",
-    "@types/figlet": "^1.2.0",
-    "@types/fs-extra": "^9.0.1",
-    "@types/yargs": "^15.0.5",
-    "pkg": "^4.4.9"
-  },
-  "dependencies": {
-    "@typerpc/config": "^0.1.17",
-    "@typerpc/plugin": "^0.1.17",
-    "@typerpc/plugin-manager": "^0.1.38",
-    "@typerpc/schema": "^0.1.17",
-    "@types/prettyjson": "^0.0.29",
-    "chalk": "^4.1.0",
-    "debug": "^4.1.1",
-    "figlet": "^1.5.0",
-    "fs-extra": "^9.0.1",
-    "ora": "^5.1.0",
-    "prettyjson": "^1.2.1",
-    "ts-morph": "^8.1.0",
-    "tslog": "^2.8.0",
-    "yargonaut": "^1.1.4",
-    "yargs": "^16.0.3"
-  },
-  "pkg": {
-    "assets": "../../node_modules/figlet/fonts/Standard.flf"
-  },
-  "gitHead": "9277a584a98be1d5b9d97eb7aa43435b41c79d66"
+    "name": "@typerpc/cli",
+    "version": "0.1.38",
+    "description": "typerpc command line tooling",
+    "keywords": [
+        "typerpc",
+        "rpc",
+        "json",
+        "graphql",
+        "typescript",
+        "generator"
+    ],
+    "author": "Gary Becks <techstar.dev@hotmail.com>",
+    "homepage": "https://typerpc.run",
+    "license": "BSD-2-Clause",
+    "bin": {
+        "typerpc": "./dist/index.js"
+    },
+    "preferGlobal": true,
+    "engines": {
+        "node": ">=8.4.0"
+    },
+    "files": [
+        "/bin",
+        "/dist"
+    ],
+    "publishConfig": {
+        "access": "public"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/typerpc/typerpc.git"
+    },
+    "scripts": {
+        "run": "node ./dist/index.js",
+        "lint:fix": "eslint --fix src/**",
+        "build": "yarn run clean && yarn run tsc && yarn run pkg",
+        "pkg": "pkg --targets node12-linux-x64,node12-macos-x64,node12-win-x64 --out-path ./dist/pkg package.json",
+        "clean": "rm -rf ./dist && rm -rf tsconfig.build.tsbuildinfo",
+        "tsc": "tsc -b tsconfig.build.json",
+        "postpack": "rm -f oclif.manifest.json",
+        "posttest": "eslint . --ext .ts --config .eslintrc",
+        "prepack": "yarn run build",
+        "version": "git add README.md",
+        "prepublishOnly": "yarn run build"
+    },
+    "bugs": {
+        "url": "https://github.com/typerpc/typerpc/issues"
+    },
+    "devDependencies": {
+        "@types/debug": "^4.1.5",
+        "@types/figlet": "^1.2.0",
+        "@types/fs-extra": "^9.0.1",
+        "@types/yargs": "^15.0.5",
+        "pkg": "^4.4.9"
+    },
+    "dependencies": {
+        "@typerpc/config": "^0.1.17",
+        "@typerpc/plugin": "^0.1.17",
+        "@typerpc/plugin-manager": "^0.1.38",
+        "@typerpc/schema": "^0.1.17",
+        "@types/prettyjson": "^0.0.29",
+        "chalk": "^4.1.0",
+        "debug": "^4.1.1",
+        "figlet": "^1.5.0",
+        "fs-extra": "^9.0.1",
+        "ora": "^5.1.0",
+        "prettyjson": "^1.2.1",
+        "ts-morph": "^8.1.0",
+        "tslog": "^2.8.0",
+        "yargonaut": "^1.1.4",
+        "yargs": "^16.0.3"
+    },
+    "pkg": {
+        "assets": "../../node_modules/figlet/fonts/Standard.flf"
+    },
+    "gitHead": "9277a584a98be1d5b9d97eb7aa43435b41c79d66"
 }

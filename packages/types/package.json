@@ -1,39 +1,40 @@
 {
-  "name": "@typerpc/types",
-  "version": "0.1.17",
-  "description": "typerpc type system",
-  "keywords": [
-    "typerpc",
-    "typescript",
-    "rpc"
-  ],
-  "author": "Gary Becks <techstar.dev@hotmail.com>",
-  "homepage": "https://github.com/typerpc/typerpc",
-  "license": "BSD-2-Clause",
-  "directories": {
-    "lib": "src",
-    "test": "tests"
-  },
-  "files": [
-    "dist"
-  ],
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/typerpc/typerpc.git"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "scripts": {
-    "lint:fix": "eslint --fix src/**",
-    "build": "yarn run clean && yarn run tsc",
-    "clean": "rm -rf ./dist && rm -rf tsconfig.build.tsbuildinfo",
-    "tsc": "tsc -b tsconfig.build.json"
-  },
-  "bugs": {
-    "url": "https://github.com/typerpc/typerpc/issues"
-  },
-  "gitHead": "1349ec02ed5ba04bf6ecbe8f564780791e858d9a"
+    "name": "@typerpc/types",
+    "version": "0.1.17",
+    "description": "typerpc type system",
+    "keywords": [
+        "typerpc",
+        "typescript",
+        "rpc"
+    ],
+    "author": "Gary Becks <techstar.dev@hotmail.com>",
+    "homepage": "https://github.com/typerpc/typerpc",
+    "license": "BSD-2-Clause",
+    "directories": {
+        "lib": "src",
+        "test": "tests"
+    },
+    "files": [
+        "dist"
+    ],
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/typerpc/typerpc.git"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "scripts": {
+        "lint:fix": "eslint --fix src/**",
+        "build": "yarn run clean && yarn run tsc",
+        "clean": "rm -rf ./dist && rm -rf tsconfig.build.tsbuildinfo",
+        "tsc": "tsc -b tsconfig.build.json",
+        "prepublishOnly": "yarn run build"
+    },
+    "bugs": {
+        "url": "https://github.com/typerpc/typerpc/issues"
+    },
+    "gitHead": "1349ec02ed5ba04bf6ecbe8f564780791e858d9a"
 }

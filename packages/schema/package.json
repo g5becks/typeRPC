@@ -1,47 +1,48 @@
 {
-  "name": "@typerpc/schema",
-  "version": "0.1.17",
-  "description": "typerpc schema definitions",
-  "keywords": [
-    "typerpc",
-    "schema",
-    "json",
-    "typescript",
-    "cbor",
-    "rest",
-    "graphql"
-  ],
-  "author": "Gary Becks <techstar.dev@hotmail.com>",
-  "homepage": "https://github.com/typerpc/typerpc",
-  "license": "BSD-2-Clause",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "directories": {
-    "lib": "src",
-    "test": "tests"
-  },
-  "files": [
-    "dist"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/typerpc/typerpc.git"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "scripts": {
-    "lint:fix": "eslint --fix src/**",
-    "build": "yarn run clean && yarn run tsc",
-    "clean": "rm -rf ./dist && rm -rf tsconfig.build.tsbuildinfo",
-    "tsc": "tsc -b tsconfig.build.json",
-    "test": "jest"
-  },
-  "dependencies": {
-    "@typerpc/types": "^0.1.17"
-  },
-  "bugs": {
-    "url": "https://github.com/typerpc/typerpc/issues"
-  },
-  "gitHead": "9277a584a98be1d5b9d97eb7aa43435b41c79d66"
+    "name": "@typerpc/schema",
+    "version": "0.1.17",
+    "description": "typerpc schema definitions",
+    "keywords": [
+        "typerpc",
+        "schema",
+        "json",
+        "typescript",
+        "cbor",
+        "rest",
+        "graphql"
+    ],
+    "author": "Gary Becks <techstar.dev@hotmail.com>",
+    "homepage": "https://github.com/typerpc/typerpc",
+    "license": "BSD-2-Clause",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "directories": {
+        "lib": "src",
+        "test": "tests"
+    },
+    "files": [
+        "dist"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/typerpc/typerpc.git"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "scripts": {
+        "lint:fix": "eslint --fix src/**",
+        "build": "yarn run clean && yarn run tsc",
+        "clean": "rm -rf ./dist && rm -rf tsconfig.build.tsbuildinfo",
+        "tsc": "tsc -b tsconfig.build.json",
+        "test": "jest",
+        "prepublishOnly": "yarn run build"
+    },
+    "dependencies": {
+        "@typerpc/types": "^0.1.17"
+    },
+    "bugs": {
+        "url": "https://github.com/typerpc/typerpc/issues"
+    },
+    "gitHead": "9277a584a98be1d5b9d97eb7aa43435b41c79d66"
 }
