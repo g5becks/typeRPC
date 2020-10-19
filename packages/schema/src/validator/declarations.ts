@@ -11,6 +11,7 @@
  */
 
 import { ImportDeclaration, SourceFile, SyntaxKind, TypeAliasDeclaration } from 'ts-morph'
+import { validateMessages } from './message'
 import {
     isMsg,
     isMutationSvc,
@@ -20,7 +21,6 @@ import {
     validateNotGeneric,
     Violator,
 } from './utils'
-import { validateMessages } from './message'
 
 const validate = (declarations: Violator[]): Error[] =>
     declarations.length > 0 ? [multiValidationErr(declarations)] : []
@@ -217,15 +217,16 @@ const preValidateType = (type: TypeAliasDeclaration): Error[] => {
     if (typeof type.getTypeNode() === 'undefined') {
         return [singleValidationErr(type, `${type.getName()} has no type node`)]
     }
-    if (type.getTypeNode()!.getChildrenOfKind(SyntaxKind.TypeLiteral).length !== 1) {
+    if (
+        type.getTypeNodeOrThrow().getChildrenOfKind(SyntaxKind.TypeLiteral).length !== 1 &&
+        type.getTypeNodeOrThrow().getChildrenOfKind(SyntaxKind.TupleType).length !== 1
+    ) {
         return [
             singleValidationErr(
                 type,
-                `All typerpc messages and services must be Type Literals, E.G.
-      type  Mytype = {
-      (properties with valid type rpc data types or other rpc.Msg types)
-      },
-      Typescript types (number, string[]), intersections, and unions are not supported.`,
+                `Invalid type found. All types inside of schema files must be valid rpc types (any type exported from the '$' or 'rpc'
+                 modules).
+      Typescript types (number, string[], etc), intersections, and unions are not supported.`,
             ),
         ]
     }
