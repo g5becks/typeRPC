@@ -12,18 +12,18 @@
 
 import { capitalize, lowerCase } from '@typerpc/plugin-utils'
 import {
-  DataType,
-  Import,
-  is,
-  make,
-  Message,
-  Method,
-  MutationService,
-  Param,
-  QueryService,
-  Schema,
-  StructLiteralProp,
-  Union
+    DataType,
+    Import,
+    is,
+    make,
+    Message,
+    Method,
+    MutationService,
+    Param,
+    QueryService,
+    Schema,
+    StructLiteralProp,
+    Union,
 } from '@typerpc/schema'
 
 export const typeMap: Map<string, string> = new Map<string, string>([
@@ -185,7 +185,17 @@ export const buildTypes = (schema: Schema): string => {
     return types
 }
 
-export const buildUnion = (union: Union)
+export const buildUnion = (union: Union): string =>
+    `export type ${capitalize(union.name)} = ${unionLiteral(union.types)}
+    `
+
+export const buildUnions = (schema: Schema): string => {
+    let unions = ''
+    for (const union of schema.unions) {
+        unions = unions.concat(buildUnion(union))
+    }
+    return unions
+}
 
 // builds all of the parameters of a method
 export const buildParams = (params: ReadonlyArray<Param>): string => {
@@ -276,7 +286,7 @@ export const buildMsgImports = (imports: ReadonlyArray<Import>): string => {
             i++
         }
         importsStr = importsStr.concat(`import {${msgs}} from './${imp.fileName}'\n`)
-import { Union } from '../../schema/src/schema';
+        import { Union } from '../../schema/src/schema'
     }
     return importsStr
 }
