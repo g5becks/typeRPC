@@ -15,6 +15,7 @@ import { Node, PropertySignature, TypeNode } from 'ts-morph'
 import { useCbor } from './builder'
 import { DataType, scalarsMap, Struct, structLiteralProp, StructLiteralProp } from './data-type'
 import { isOptionalProp, parseMsgProps, parseTypeParams } from './parser'
+import { parseUnionTypes } from './parser/index'
 import { isValidMsg } from './validator'
 
 export const typeError = (type: TypeNode | Node) =>
@@ -59,11 +60,20 @@ export const make = {
             },
         }
     },
-    /*
+
     unionLiteral: (type: TypeNode | Node, makeDataType: (type: TypeNode | Node) => DataType): DataType => {
-      const types =
+        const types = parseUnionTypes(type).map((t) => makeDataType(t))
+        return {
+            types,
+            toString(): string {
+                let opts = ''
+                for (const t of types) {
+                    opts = opts.concat(t.toString() + '\n')
+                }
+                return `rpc.Union<[${opts}]>`
+            },
+        }
     },
-    */
 
     map: (type: TypeNode | Node, makeDataType: (type: TypeNode | Node) => DataType): DataType => {
         const params = parseTypeParams(type)

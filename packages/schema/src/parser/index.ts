@@ -68,6 +68,7 @@ export const parseJsDocComment = (
         ?.trim()
 }
 
+// get all nodes of a union type
 export const parseUnionTypes = (type: TypeAliasDeclaration | TypeNode | Node): Node<ts.Node>[] => {
     let types: Node<ts.Node>[] = []
     if (isTypeAlias(type)) {

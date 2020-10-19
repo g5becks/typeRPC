@@ -11,8 +11,8 @@
  */
 
 /* eslint-disable new-cap */
-import { DataType, queryParamables, scalarsMap, Struct, StructLiteral } from './data-type'
 import { $, internal as x } from '@typerpc/types'
+import { DataType, queryParamables, scalarsMap, Struct, StructLiteral, UnionLiteral } from './data-type'
 
 const validateType = (type: unknown, ...propNames: string[]): boolean => {
     const props = Object.getOwnPropertyNames(type).filter((prop) => !prop.includes('toString'))
@@ -40,6 +40,7 @@ export const is = {
     list: (type: unknown): type is $.list<x.Paramable> => validateType(type, 'dataType'),
     struct: (type: unknown): type is Struct => validateType(type, 'name', 'useCbor'),
     structLiteral: (type: unknown): type is StructLiteral => validateType(type, 'properties'),
+    unionLiteral: (type: unknown): type is UnionLiteral => validateType(type, 'types'),
     container: (type: unknown): boolean =>
         [
             is.struct,
