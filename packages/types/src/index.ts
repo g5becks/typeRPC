@@ -153,6 +153,12 @@ export namespace rpc {
      * Types defined without using this type are not allowed.
      */
     export type Msg<T extends internal.MsgProps> = T
+
+    /**
+     *
+     * Used to construct a discriminated union of rpc types.
+     */
+    export type Union<T extends internal.RpcType> = T[]
 }
 
 export namespace internal {
