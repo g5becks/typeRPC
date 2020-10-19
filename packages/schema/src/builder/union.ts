@@ -11,33 +11,24 @@
  */
 
 // builds all properties of an rpc.Msg
-import { PropertySignature, SourceFile } from 'ts-morph'
-import { isOptionalProp, parseMessages, parseMsgProps } from '../parser'
-import { Message, Property } from '../schema'
+import { SourceFile } from 'ts-morph'
+import { parseUnions, parseUnionTypes } from '../parser/index'
+import { Union } from '../schema'
 import { makeDataType } from './data-type'
 
-const buildProps = (properties: PropertySignature[]): Property[] =>
-    properties.map((prop) => {
-        return {
-            isOptional: isOptionalProp(prop),
-            type: makeDataType(prop.getTypeNodeOrThrow()),
-            name: prop.getName().trim(),
-        }
-    })
-
 // Converts all rpc.Msg types in files into Schema Messages
-export const buildMessages = (file: SourceFile): Message[] => {
-    const messages = parseMessages(file)
-    if (messages.length === 0) {
+export const buildUnions = (file: SourceFile): Union[] => {
+    const unions = parseUnions(file)
+    if (unions.length === 0) {
         return []
     }
 
     return [
         ...new Set(
-            messages.map((msg) => {
+            unions.map((union) => {
                 return {
-                    name: msg.getNameNode().getText().trim(),
-                    properties: [...new Set(buildProps(parseMsgProps(msg)))],
+                    name: union.getNameNode().getText().trim(),
+                    types: parseUnionTypes(union).map((type) => makeDataType(type)),
                 }
             }),
         ),

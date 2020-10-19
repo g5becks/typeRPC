@@ -12,6 +12,7 @@
 
 import { SourceFile } from 'ts-morph'
 import { Import, Schema } from '../index'
+import { isType, makeDataType, useCbor } from './data-type'
 import { buildMessages } from './message'
 import {
     buildErrCode,
@@ -24,7 +25,7 @@ import {
     buildResponseCode,
     hasCborParams,
 } from './service'
-import { isType, makeDataType, useCbor } from './data-type'
+import { buildUnions } from './union'
 
 export { useCbor }
 const buildImports = (file: SourceFile): ReadonlyArray<Import> =>
@@ -45,6 +46,7 @@ const buildSchema = (file: SourceFile, packageName: string): Schema => {
         fileName: file.getBaseNameWithoutExtension(),
         messages: buildMessages(file),
         queryServices: buildQueryServices(file),
+        unions: buildUnions(file),
         mutationServices: buildMutationServices(file),
         get hasCbor(): boolean {
             return (
