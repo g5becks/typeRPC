@@ -13,8 +13,8 @@
 import { internal as _ } from '@typerpc/types'
 import { make } from './make'
 
-// A reference to a Type Alias (rpc.Msg) defined in a schema file
-// and used as Type in either another rpc.Msg or a service MutationMethod parameter
+// A reference to a Type Alias (rpc.Msg | rpc.Union) defined in a schema file
+// and used as Type in either another rpc.Msg | rpc.Union | service method parameter
 // or return Type.
 export type Struct = Readonly<{
     name: string
@@ -39,6 +39,12 @@ export type StructLiteralProp = Readonly<{
 // If used as a method return, use the QueryService name + MutationMethod name + 'Result'
 export type StructLiteral = Readonly<{
     properties: ReadonlyArray<StructLiteralProp>
+    toString(): string
+}>
+
+// An anonymous rpc.Union
+export type UnionLiteral = Readonly<{
+    types: ReadonlyArray<DataType>
     toString(): string
 }>
 
@@ -114,4 +120,4 @@ export const queryParamables = [
     '$.list',
 ]
 
-export type DataType = _.RpcType | Struct | StructLiteral
+export type DataType = _.RpcType | Struct | StructLiteral | UnionLiteral
