@@ -122,6 +122,8 @@ export const validateNotGeneric = (type: TypeAliasDeclaration | MethodSignature)
 // is the node an rpc.Msg literal?
 export const isMsgLiteral = (type: TypeNode | Node): boolean => type.getText().trim().startsWith('rpc.Msg<{')
 
+// is the node an rpc.Union Literal?
+export const isUnionLiteral = (type: TypeNode | Node): boolean => type.getText().trim().startsWith('rpc.Union<')
 // is the node a valid typerpc data type?
 export const isValidDataType = (type: TypeNode | Node | undefined): boolean => {
     if (typeof type === 'undefined') {

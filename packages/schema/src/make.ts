@@ -59,6 +59,11 @@ export const make = {
             },
         }
     },
+    /*
+    unionLiteral: (type: TypeNode | Node, makeDataType: (type: TypeNode | Node) => DataType): DataType => {
+      const types =
+    },
+    */
 
     map: (type: TypeNode | Node, makeDataType: (type: TypeNode | Node) => DataType): DataType => {
         const params = parseTypeParams(type)

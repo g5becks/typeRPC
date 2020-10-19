@@ -67,6 +67,9 @@ export const parseJsDocComment = (
         ?.trim()
 }
 
+/*
+export const parseUnionTypes = (type: TypeAliasDeclaration | TypeNode | Node)
+*/
 // parses all message declarations location a schema file
 export const parseMessages = (file: SourceFile): TypeAliasDeclaration[] =>
     file.getTypeAliases().filter((alias) => isMsg(alias))
