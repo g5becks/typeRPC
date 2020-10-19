@@ -1,6 +1,6 @@
 {
     "name": "@typerpc/ts-plugin-utils",
-    "version": "0.1.40",
+    "version": "0.1.41",
     "description": "utility functions for building typerpc plugins for typescript",
     "keywords": [
         "typerpc",
@@ -30,8 +30,8 @@
         "access": "public"
     },
     "dependencies": {
-        "@typerpc/plugin-utils": "^0.1.40",
-        "@typerpc/schema": "^0.1.40"
+        "@typerpc/plugin-utils": "^0.1.41",
+        "@typerpc/schema": "^0.1.41"
     },
     "scripts": {
         "lint:fix": "eslint --fix src/**",
