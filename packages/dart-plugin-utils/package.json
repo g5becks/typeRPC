@@ -1,6 +1,6 @@
 {
     "name": "@typerpc/dart-plugin-utils",
-    "version": "0.1.41",
+    "version": "0.1.42",
     "description": "utility functions for generating dart code",
     "keywords": [
         "typerpc",
@@ -26,8 +26,8 @@
         "prepublishOnly": "yarn run build"
     },
     "dependencies": {
-        "@typerpc/plugin-utils": "^0.1.41",
-        "@typerpc/schema": "^0.1.41"
+        "@typerpc/plugin-utils": "^0.1.42",
+        "@typerpc/schema": "^0.1.42"
     },
     "repository": {
         "type": "git",
