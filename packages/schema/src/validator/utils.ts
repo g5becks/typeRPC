@@ -96,8 +96,8 @@ export const multiValidationErr = (violators: Violator[]): Error =>
     } ${violators[0].getKindName()} declarations
    errors: ${violators.map((vio) =>
        canGetName(vio)
-           ? vio.getName()?.trim()
-           : vio.getText().trim() + ', at line number: ' + String(vio?.getStartLineNumber()) + '\n',
+           ? vio?.getName()?.trim()
+           : vio?.getText().trim() + ', at line number: ' + String(vio?.getStartLineNumber()) + '\n',
    )}
    message: typerpc schemas can only contain a single import statement (import {t} from '@typerpc/types'), typeAlias (message), and interface (service) declarations.`)
 
@@ -129,5 +129,5 @@ export const isValidDataType = (type: TypeNode | Node | undefined): boolean => {
     if (typeof type === 'undefined') {
         return false
     }
-    return isScalar(type) || isContainer(type) || isValidMsg(type) || isMsgLiteral(type)
+    return isScalar(type) || isContainer(type) || isValidMsg(type) || isMsgLiteral(type) || isUnionLiteral(type)
 }
