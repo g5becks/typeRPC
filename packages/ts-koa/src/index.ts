@@ -11,6 +11,7 @@
  */
 
 import { Code } from '@typerpc/plugin'
+import { capitalize, fileHeader, lowerCase, serverResponseContentType } from '@typerpc/plugin-utils'
 import {
     isQueryMethod,
     MutationMethod,
@@ -20,12 +21,12 @@ import {
     QueryService,
     Schema,
 } from '@typerpc/schema'
-import { capitalize, fileHeader, lowerCase, serverResponseContentType } from '@typerpc/plugin-utils'
 import {
     buildInterfaces,
     buildMsgImports,
     buildParamsVar,
     buildTypes,
+    buildUnions,
     dataType,
     fromQueryString,
     paramNames,
@@ -140,6 +141,7 @@ const buildFile = (schema: Schema): Code => {
 ${buildImports(schema)}
 ${fileHeader()}
 ${logger}
+${buildUnions(schema)}
 ${buildTypes(schema)}
 ${buildInterfaces(schema)}
 ${buildServices(schema)}

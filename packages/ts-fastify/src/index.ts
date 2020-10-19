@@ -29,6 +29,7 @@ import {
     buildRequestSchema,
     buildResponseSchema,
     buildType,
+    buildUnions,
     dataType,
     fromQueryString,
     paramNames,
@@ -411,6 +412,7 @@ import S from 'fluent-schema'
 import { pluginOpts, registerOptions, RpcPlugin } from './fastify.rpc.server'
 
     ${types}
+    ${buildUnions(schema)}
     ${buildInterfaces(schema)}
     ${buildPlugins(schema)}
     `

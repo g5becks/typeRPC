@@ -11,9 +11,16 @@
  */
 
 import { Code } from '@typerpc/plugin'
-import { buildMsgImports, buildParamsWithTypes, buildTypes, dataType, paramNames } from '@typerpc/ts-plugin-utils'
-import { isQueryMethod, MutationMethod, MutationService, QueryMethod, QueryService, Schema } from '@typerpc/schema'
 import { capitalize, clientRequestContentType, fileHeader, lowerCase } from '@typerpc/plugin-utils'
+import { isQueryMethod, MutationMethod, MutationService, QueryMethod, QueryService, Schema } from '@typerpc/schema'
+import {
+    buildMsgImports,
+    buildParamsWithTypes,
+    buildTypes,
+    buildUnions,
+    dataType,
+    paramNames,
+} from '@typerpc/ts-plugin-utils'
 
 const rpcConfig = `
 type Excluded =
@@ -141,6 +148,7 @@ ${buildImports(schema)}
 ${fileHeader()}
 ${rpcConfig}
 ${interceptor(schema)}
+${buildUnions(schema)}
 ${buildTypes(schema)}
 ${buildServices(schema)}
 `
