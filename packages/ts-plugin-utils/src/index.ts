@@ -60,6 +60,16 @@ export const typeLiteral = (props: ReadonlyArray<StructLiteralProp>): string => 
     return `{${properties}}`
 }
 
+export const unionLiteral = (types: ReadonlyArray<DataType>): string => {
+    let opts = ''
+    const i = 0
+    while (i < types.length) {
+        const usePipe = i === types.length - 1 ? '' : '|'
+        opts = opts.concat(`${dataType(types[i])} ${usePipe}`)
+    }
+    return opts
+}
+
 // Converts the input dataType into a typescript representation
 export const dataType = (type: DataType): string => {
     if (is.dataType(type) !== true) {
