@@ -52,6 +52,7 @@ export const is = {
             is.tuple3,
             is.tuple5,
             is.structLiteral,
+            is.unionLiteral,
         ].some((func) => func(type)),
     queryParamable: (type: DataType): boolean => queryParamables.some((param) => type.toString().startsWith(param)),
     scalar: (type: any): type is x.Scalar => !is.container(type) && scalarsMap.has(type.toString()),
