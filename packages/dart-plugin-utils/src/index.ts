@@ -369,7 +369,7 @@ abstract class ${capitalize(svc.name)} {
 }\n`
 }
 
-// builds interfaces for all QuerySvc and MutationSvc in a schemaFile
+// builds interfaces for all Query and Mutation in a schemaFile
 export const buildInterfaces = (schema: Schema): string => {
     let services = ''
     for (const svc of schema.queryServices) {

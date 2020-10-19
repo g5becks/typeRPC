@@ -140,14 +140,14 @@ export namespace rpc {
      * Only valid typerpc QueryParamable types and rpc.Msg can be used as parameters
      * the return type can be any typerpc type or rpc.Msg
      */
-    export type MutationSvc<T extends { [key: string]: MutationFunc }> = T
+    export type Mutation<T extends { [key: string]: MutationFunc }> = T
 
     /** A service that can handle queries by using HTTP Get requests.
      *
      * Only valid typerpc Paramable types and rpc.Msg can be used as parameters
      * the return type can be any typerpc type or rpc.Msg
      */
-    export type QuerySvc<T extends { [key: string]: QueryFunc }> = T
+    export type Query<T extends { [key: string]: QueryFunc }> = T
     /**
      * Used to construct a type alias a typerpc Type alias.
      * Types defined without using this type are not allowed.
@@ -182,7 +182,7 @@ export namespace internal {
 
     export type Scalar = QueryParamableScalar | $.blob | $.dyn | $.unit | $.nil
     /**
-     * Types that are allowed to be used in rpc.QuerySvc methods
+     * Types that are allowed to be used in rpc.Query methods
      * as parameters
      */
     export type QueryParamable = QueryParamableScalar | $.list<QueryParamableScalar>

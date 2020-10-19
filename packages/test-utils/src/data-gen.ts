@@ -54,7 +54,7 @@ const comparables = [
 
 // creates a random @typerpc rpc.Comparable
 const genRandomComparable = () => comparables[randomNumber(0, comparables.length)]
-// creates a random scalar type that can be used as an rpc.QuerySvc param
+// creates a random scalar type that can be used as an rpc.Query param
 
 export const genRandomQueryParamableScalar = () =>
     queryParamables.filter((val) => val !== '$.list')[randomNumber(0, queryParamables.length - 1)]

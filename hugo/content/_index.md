@@ -25,12 +25,12 @@ type User = rpc.Msg<{
 }>
 
 // A query service used to query User data from the server using HTTP GET requests.
-type UserQueries = rpc.QuerySvc<{
+type UserQueries = rpc.Query<{
     getUserById(id: $.int8): User
 }>
 
 // A mutation service used to create or mutate data using HTTP POST requests.
-type UserMutations = rpc.MutationSvc<{
+type UserMutations = rpc.Mutation<{
     createUser(username: $.str, password: $.str): User
     updatePassword(password: $.str): $.bool
 }>

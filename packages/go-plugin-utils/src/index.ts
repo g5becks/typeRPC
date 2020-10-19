@@ -101,7 +101,7 @@ export const dataType = (type: DataType): string => {
 
 export const scalarFromQueryParam = (param: string, type: DataType): string => {
     if (is.scalar(type) !== true) {
-        throw new TypeError('invalid type used in QuerySvc')
+        throw new TypeError('invalid type used in Query')
     }
     if (is.scalar(type)) {
         switch (type.type) {
@@ -122,7 +122,7 @@ export const fromQueryString = (param: string, type: DataType): string => {
         return scalarFromQueryParam(param, type)
     }
     if (!is.list(type)) {
-        throw new TypeError('invalid type used in QuerySvc')
+        throw new TypeError('invalid type used in Query')
     }
     if (is.list(type)) {
         if (is.scalar(type.dataType)) {

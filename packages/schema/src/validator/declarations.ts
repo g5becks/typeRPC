@@ -234,7 +234,7 @@ const preValidateType = (type: TypeAliasDeclaration): Error[] => {
         errs = errs.concat(
             singleValidationErr(
                 type,
-                'typerpc schema files can only declare rpc.Msg, rpc.QuerySvc and rpc.MutationSvc definitions.',
+                'typerpc schema files can only declare rpc.Msg, rpc.Query and rpc.Mutation definitions.',
             ),
         )
     }

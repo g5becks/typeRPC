@@ -87,11 +87,11 @@ export const parseMessages = (file: SourceFile): TypeAliasDeclaration[] =>
 export const parseUnions = (file: SourceFile): TypeAliasDeclaration[] =>
     file.getTypeAliases().filter((alias) => isUnion(alias))
 
-// parses all rpc.QuerySvc declarations location a schema file
+// parses all rpc.Query declarations location a schema file
 export const parseQueryServices = (file: SourceFile): TypeAliasDeclaration[] =>
     file.getTypeAliases().filter((alias) => isQuerySvc(alias))
 
-// parses all rpc.MutationSvc declarations location a schema file
+// parses all rpc.Mutation declarations location a schema file
 export const parseMutationServices = (file: SourceFile): TypeAliasDeclaration[] =>
     file.getTypeAliases().filter((alias) => isMutationSvc(alias))
 

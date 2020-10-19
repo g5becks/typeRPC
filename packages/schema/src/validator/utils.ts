@@ -39,13 +39,13 @@ export const isUnion = (type: TypeAliasDeclaration | PropertySignature | Paramet
 
 const getTypeNodeText = (type: TypeAliasDeclaration): string | undefined => type.getTypeNode()?.getText()
 
-// is the type alias an rpc.QuerySvc?
+// is the type alias an rpc.Query?
 export const isQuerySvc = (type: TypeAliasDeclaration): boolean =>
-    Boolean(getTypeNodeText(type)?.trim().startsWith('rpc.QuerySvc'))
+    Boolean(getTypeNodeText(type)?.trim().startsWith('rpc.Query'))
 
-// determines if the type alias an rpc.MutationSvc
+// determines if the type alias an rpc.Mutation
 export const isMutationSvc = (type: TypeAliasDeclaration): boolean =>
-    Boolean(getTypeNodeText(type)?.trim().startsWith('rpc.MutationSvc'))
+    Boolean(getTypeNodeText(type)?.trim().startsWith('rpc.Mutation'))
 
 // determines if the type alias is a valid rpc.Msg that was either
 // defined is this file or imported location another file in this project.

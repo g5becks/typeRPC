@@ -125,7 +125,7 @@ const validateQueryMethodParam = (param: ParameterDeclaration): Error[] => {
           ]
 }
 
-// validates that all methods of an rpc.QuerySvc have valid params
+// validates that all methods of an rpc.Query have valid params
 const validateQueryMethodParams = (method: MethodSignature): Error[] => {
     const params = method.getParameters()
     if (params.length === 0) {

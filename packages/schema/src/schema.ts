@@ -99,8 +99,8 @@ export interface Method {
     /**
      * HTTP Method for this method to use for sending and receiving requests
      *
-     * Set to 'GET' for rpc.QuerySvc methods
-     * and 'POST' for rpc.MutationSvc methods
+     * Set to 'GET' for rpc.Query methods
+     * and 'POST' for rpc.Mutation methods
      */
     readonly httpMethod: HttpMethod
     /**
@@ -125,12 +125,12 @@ export interface Method {
     readonly isVoidReturn: boolean
 }
 
-/** A Method that belongs to an rpc.QuerySvc */
+/** A Method that belongs to an rpc.Query */
 export interface QueryMethod extends Method {
     readonly httpMethod: 'GET'
 }
 
-/** A Method that belongs to an rpc.MutationSvc */
+/** A Method that belongs to an rpc.Mutation */
 export interface MutationMethod extends Method {
     readonly httpMethod: 'POST'
     /**
@@ -143,7 +143,7 @@ export interface MutationMethod extends Method {
     readonly hasCborParams: boolean
 }
 
-/** An rpc.QuerySvc */
+/** An rpc.Query */
 export type QueryService = Readonly<{
     type: 'QueryService'
     name: string
@@ -165,7 +165,7 @@ export const isMutationMethod = (method: any): method is MutationMethod => metho
 
 export const isQueryMethod = (method: any): method is QueryMethod => method.httpMethod === 'GET'
 
-/** An rpc.MutationSvc */
+/** An rpc.Mutation */
 export type MutationService = Readonly<{
     type: 'MutationService'
     name: string
@@ -227,9 +227,9 @@ export type Schema = Readonly<{
      * Discriminated unions for schema file
      */
     unions: ReadonlyArray<Union>
-    /** All rpc.QuerySvc's to be generated for this file */
+    /** All rpc.Query's to be generated for this file */
     queryServices: ReadonlyArray<QueryService>
-    /** All rpc.MutationSvc's to be generated for this file */
+    /** All rpc.Mutation's to be generated for this file */
     mutationServices: ReadonlyArray<MutationService>
     /**
      *  Determines whether or not this Schema file has any method's, Messages,
