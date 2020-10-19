@@ -1,6 +1,6 @@
 {
     "name": "@typerpc/go-resty",
-    "version": "0.1.45",
+    "version": "0.1.46",
     "description": "typerpc plugin http client for go using https://github.com/go-resty/resty ",
     "keywords": [
         "typerpc",
@@ -30,10 +30,10 @@
         "prepublishOnly": "yarn run build"
     },
     "dependencies": {
-        "@typerpc/go-plugin-utils": "^0.1.45",
-        "@typerpc/plugin": "^0.1.45",
-        "@typerpc/plugin-utils": "^0.1.45",
-        "@typerpc/schema": "^0.1.45"
+        "@typerpc/go-plugin-utils": "^0.1.46",
+        "@typerpc/plugin": "^0.1.46",
+        "@typerpc/plugin-utils": "^0.1.46",
+        "@typerpc/schema": "^0.1.46"
     },
     "publishConfig": {
         "access": "public"

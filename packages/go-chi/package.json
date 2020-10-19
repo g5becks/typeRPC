@@ -1,6 +1,6 @@
 {
     "name": "@typerpc/go-chi",
-    "version": "0.1.45",
+    "version": "0.1.46",
     "description": "typerpc plugin for Golang Chi framework",
     "keywords": [
         "typerpc",
@@ -36,10 +36,10 @@
         "prepublishOnly": "yarn run build"
     },
     "dependencies": {
-        "@typerpc/go-plugin-utils": "^0.1.45",
-        "@typerpc/plugin": "^0.1.45",
-        "@typerpc/plugin-utils": "^0.1.45",
-        "@typerpc/schema": "^0.1.45"
+        "@typerpc/go-plugin-utils": "^0.1.46",
+        "@typerpc/plugin": "^0.1.46",
+        "@typerpc/plugin-utils": "^0.1.46",
+        "@typerpc/schema": "^0.1.46"
     },
     "bugs": {
         "url": "https://github.com/typerpc/typerpc/issues"
