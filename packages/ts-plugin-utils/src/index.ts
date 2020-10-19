@@ -286,7 +286,6 @@ export const buildMsgImports = (imports: ReadonlyArray<Import>): string => {
             i++
         }
         importsStr = importsStr.concat(`import {${msgs}} from './${imp.fileName}'\n`)
-        import { Union } from '../../schema/src/schema'
     }
     return importsStr
 }
