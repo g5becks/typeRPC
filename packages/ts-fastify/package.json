@@ -1,6 +1,6 @@
 {
     "name": "@typerpc/ts-fastify",
-    "version": "0.1.46",
+    "version": "0.1.47",
     "description": "typerpc plugin for fastifyjs",
     "keywords": [
         "typerpc",
@@ -32,7 +32,7 @@
         "@typerpc/plugin": "^0.1.46",
         "@typerpc/plugin-utils": "^0.1.46",
         "@typerpc/schema": "^0.1.46",
-        "@typerpc/ts-plugin-utils": "^0.1.46"
+        "@typerpc/ts-plugin-utils": "^0.1.47"
     },
     "devDependencies": {
         "@typerpc/test-utils": "^0.1.46"
