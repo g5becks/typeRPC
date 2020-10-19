@@ -156,7 +156,7 @@ export namespace rpc {
 
     /**
      *
-     * Used to construct a discriminated union of rpc types.
+     * Used to construct a discriminated union of rpc types
      */
     export type Union<T extends internal.RpcType> = T[]
 }
