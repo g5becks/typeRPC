@@ -1,6 +1,6 @@
 {
     "name": "@typerpc/plugin",
-    "version": "0.1.42",
+    "version": "0.1.43",
     "description": "typerpc plugin types",
     "keywords": [
         "typerpc",
@@ -37,7 +37,7 @@
         "prepublishOnly": "yarn run build"
     },
     "dependencies": {
-        "@typerpc/schema": "^0.1.42"
+        "@typerpc/schema": "^0.1.43"
     },
     "bugs": {
         "url": "https://github.com/typerpc/typerpc/issues"
