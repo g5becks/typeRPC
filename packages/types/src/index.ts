@@ -158,7 +158,7 @@ export namespace rpc {
      *
      * Used to construct a discriminated union of rpc types
      */
-    export type Union<T extends (messagable | Msg<internal.MsgProps>)[]> = Readonly<{
+    export type Union<T extends (messagable | Msg<internal.MsgProps>)[] | string[]> = Readonly<{
         types: T
         toString(): string
     }>
