@@ -1,6 +1,6 @@
 {
     "name": "@typerpc/ts-axios",
-    "version": "0.1.39",
+    "version": "0.1.40",
     "description": "typerpc typescript axios plugin",
     "keywords": [
         "typerpc",
@@ -39,10 +39,10 @@
         "prepublishOnly": "yarn run build"
     },
     "dependencies": {
-        "@typerpc/plugin": "^0.1.39",
-        "@typerpc/plugin-utils": "^0.1.39",
-        "@typerpc/schema": "^0.1.39",
-        "@typerpc/ts-plugin-utils": "^0.1.39"
+        "@typerpc/plugin": "^0.1.40",
+        "@typerpc/plugin-utils": "^0.1.40",
+        "@typerpc/schema": "^0.1.40",
+        "@typerpc/ts-plugin-utils": "^0.1.40"
     },
     "bugs": {
         "url": "https://github.com/typerpc/typerpc/issues"
