@@ -14,8 +14,8 @@
 import { MethodSignature, Node, TypeAliasDeclaration, TypeNode } from 'ts-morph'
 import { DataType, make, typeError } from '../index'
 import { parseJsDocComment } from '../parser'
-import { isContainer, isMsgLiteral, isValidDataType } from '../validator'
-import { isUnionLiteral } from '../validator/utils'
+import { isContainer, isMsgLiteral, isUnionLiteral, isValidDataType } from '../validator'
+import { isStringLiteral } from '../validator/utils'
 
 export const isType = (type: TypeNode | Node, typeText: string): boolean => type.getText().trim().startsWith(typeText)
 
@@ -26,6 +26,9 @@ export const makeDataType = (type: TypeNode | Node): DataType => {
     const prim = make.scalar(type)
     if (prim) {
         return prim
+    }
+    if (isStringLiteral(type)) {
+        return make.stringLiteral(type)
     }
     if (isMsgLiteral(type)) {
         return make.structLiteral(type, makeDataType)

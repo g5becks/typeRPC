@@ -75,6 +75,10 @@ export const make = {
         }
     },
 
+    stringLiteral: (type: TypeNode | Node): DataType => {
+        return { value: type.getText().trim() }
+    },
+
     map: (type: TypeNode | Node, makeDataType: (type: TypeNode | Node) => DataType): DataType => {
         const params = parseTypeParams(type)
         const keyType = make.scalar(params[0])

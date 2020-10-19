@@ -48,6 +48,10 @@ export type UnionLiteral = Readonly<{
     toString(): string
 }>
 
+export type StringLiteral = Readonly<{
+    value: string
+}>
+
 export const structLiteralProp = (name: string, type: DataType, isOptional: boolean): StructLiteralProp => {
     return {
         name,
@@ -120,4 +124,4 @@ export const queryParamables = [
     '$.list',
 ]
 
-export type DataType = _.RpcType | Struct | StructLiteral | UnionLiteral
+export type DataType = _.RpcType | Struct | StructLiteral | UnionLiteral | StringLiteral

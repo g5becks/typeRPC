@@ -21,6 +21,8 @@ import {
     isMutationSvc,
     isQuerySvc,
     isScalar,
+    isStringLiteral,
+    isUnionLiteral,
     isValidDataType,
     isValidMsg,
 } from './utils'
@@ -33,6 +35,7 @@ export const validateSchemas = (schemas: SourceFile[]): Error[] =>
     schemas.flatMap((schema) => [...validateSchema(schema, schemas)])
 
 export {
+    isStringLiteral,
     isMutationSvc,
     isMsg,
     isValidMsg,
@@ -44,6 +47,7 @@ export {
     isResponseCode,
     validateMessage,
     isScalar,
+    isUnionLiteral,
 }
 
 export const internal = {

@@ -16,6 +16,7 @@ import {
     ParameterDeclaration,
     PropertySignature,
     SourceFile,
+    SyntaxKind,
     TypeAliasDeclaration,
     TypeNode,
 } from 'ts-morph'
@@ -122,6 +123,7 @@ export const validateNotGeneric = (type: TypeAliasDeclaration | MethodSignature)
 // is the node an rpc.Msg literal?
 export const isMsgLiteral = (type: TypeNode | Node): boolean => type.getText().trim().startsWith('rpc.Msg<{')
 
+export const isStringLiteral = (type: TypeNode | Node): boolean => type.getKind() === SyntaxKind.LiteralType
 // is the node an rpc.Union Literal?
 export const isUnionLiteral = (type: TypeNode | Node): boolean => type.getText().trim().startsWith('rpc.Union<')
 // is the node a valid typerpc data type?
@@ -129,5 +131,12 @@ export const isValidDataType = (type: TypeNode | Node | undefined): boolean => {
     if (typeof type === 'undefined') {
         return false
     }
-    return isScalar(type) || isContainer(type) || isValidMsg(type) || isMsgLiteral(type) || isUnionLiteral(type)
+    return (
+        isStringLiteral(type) ||
+        isScalar(type) ||
+        isContainer(type) ||
+        isValidMsg(type) ||
+        isMsgLiteral(type) ||
+        isUnionLiteral(type)
+    )
 }
