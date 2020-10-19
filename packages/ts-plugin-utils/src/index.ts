@@ -63,10 +63,11 @@ export const typeLiteral = (props: ReadonlyArray<StructLiteralProp>): string => 
 
 export const unionLiteral = (types: ReadonlyArray<DataType>): string => {
     let opts = ''
-    const i = 0
+    let i = 0
     while (i < types.length) {
         const usePipe = i === types.length - 1 ? '' : '|'
         opts = opts.concat(`${dataType(types[i])} ${usePipe}`)
+        i++
     }
     return opts
 }
