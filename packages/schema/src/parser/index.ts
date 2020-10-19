@@ -20,8 +20,9 @@ import {
     TypeNode,
     TypeReferenceNode,
 } from 'ts-morph'
+import ts from 'typescript'
 import { isMsg, isMsgLiteral, isMutationSvc, isQuerySvc } from '../validator'
-import { isUnion } from '../validator/utils'
+import { isUnion, isUnionLiteral } from '../validator/utils'
 
 const isTypeAlias = (type: any): type is TypeAliasDeclaration => 'getName' in type
 const isTypeNode = (type: any): type is TypeNode => !('getName' in type)
@@ -34,7 +35,7 @@ export const parseMsgProps = (type: TypeAliasDeclaration | TypeNode | Node): Pro
     let kids: PropertySignature[] = []
     if (isTypeAlias(type)) {
         kids = type
-            .getTypeNode()!
+            .getTypeNodeOrThrow()
             .getChildrenOfKind(SyntaxKind.TypeLiteral)[0]
             .getChildrenOfKind(SyntaxKind.PropertySignature)
     }
@@ -67,9 +68,17 @@ export const parseJsDocComment = (
         ?.trim()
 }
 
-/*
-export const parseUnionTypes = (type: TypeAliasDeclaration | TypeNode | Node)
-*/
+export const parseUnionTypes = (type: TypeAliasDeclaration | TypeNode | Node): Node<ts.Node>[] => {
+    let types: Node<ts.Node>[] = []
+    if (isTypeAlias(type)) {
+        types = type.getTypeNodeOrThrow().getChildrenOfKind(SyntaxKind.TupleType)[0].forEachChildAsArray()
+    }
+    if (isTypeNode(type) && isUnionLiteral(type)) {
+        types = type.getChildrenOfKind(SyntaxKind.TupleType)[0].forEachChildAsArray()
+    }
+    return types
+}
+
 // parses all message declarations location a schema file
 export const parseMessages = (file: SourceFile): TypeAliasDeclaration[] =>
     file.getTypeAliases().filter((alias) => isMsg(alias))
