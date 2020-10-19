@@ -20,7 +20,8 @@ import {
     TypeNode,
     TypeReferenceNode,
 } from 'ts-morph'
-import { isMsg, isMsgLiteral, isQuerySvc, isMutationSvc } from '../validator'
+import { isMsg, isMsgLiteral, isMutationSvc, isQuerySvc } from '../validator'
+import { isUnion } from '../validator/utils'
 
 const isTypeAlias = (type: any): type is TypeAliasDeclaration => 'getName' in type
 const isTypeNode = (type: any): type is TypeNode => !('getName' in type)
@@ -69,6 +70,9 @@ export const parseJsDocComment = (
 // parses all message declarations location a schema file
 export const parseMessages = (file: SourceFile): TypeAliasDeclaration[] =>
     file.getTypeAliases().filter((alias) => isMsg(alias))
+
+export const parseUnions = (file: SourceFile): TypeAliasDeclaration[] =>
+    file.getTypeAliases().filter((alias) => isUnion(alias))
 
 // parses all rpc.QuerySvc declarations location a schema file
 export const parseQueryServices = (file: SourceFile): TypeAliasDeclaration[] =>

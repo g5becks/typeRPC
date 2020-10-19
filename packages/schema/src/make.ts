@@ -10,12 +10,12 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import { internal as _ } from '@typerpc/types'
 import { Node, PropertySignature, TypeNode } from 'ts-morph'
+import { useCbor } from './builder'
 import { DataType, scalarsMap, Struct, structLiteralProp, StructLiteralProp } from './data-type'
 import { isOptionalProp, parseMsgProps, parseTypeParams } from './parser'
-import { useCbor } from './builder'
 import { isValidMsg } from './validator'
-import { internal as _ } from '@typerpc/types'
 
 export const typeError = (type: TypeNode | Node) =>
     new TypeError(`error in file ${type.getSourceFile().getFilePath()}
@@ -59,6 +59,7 @@ export const make = {
             },
         }
     },
+
     map: (type: TypeNode | Node, makeDataType: (type: TypeNode | Node) => DataType): DataType => {
         const params = parseTypeParams(type)
         const keyType = make.scalar(params[0])

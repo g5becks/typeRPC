@@ -33,6 +33,10 @@ export const isContainer = (type: TypeNode | Node): boolean =>
 export const isMsg = (type: TypeAliasDeclaration | PropertySignature | ParameterDeclaration): boolean =>
     Boolean(type.getTypeNode()?.getText().startsWith('rpc.Msg'))
 
+// is the type alias or node an rpc.Union ?
+export const isUnion = (type: TypeAliasDeclaration | PropertySignature | ParameterDeclaration): boolean =>
+    Boolean(type.getTypeNode()?.getText().startsWith('rpc.Union'))
+
 const getTypeNodeText = (type: TypeAliasDeclaration): string | undefined => type.getTypeNode()?.getText()
 
 // is the type alias an rpc.QuerySvc?
