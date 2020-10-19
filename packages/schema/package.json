@@ -1,6 +1,6 @@
 {
     "name": "@typerpc/schema",
-    "version": "0.1.48",
+    "version": "0.2.0",
     "description": "typerpc schema definitions",
     "keywords": [
         "typerpc",
@@ -39,7 +39,7 @@
         "prepublishOnly": "yarn run build"
     },
     "dependencies": {
-        "@typerpc/types": "^0.1.46"
+        "@typerpc/types": "^0.2.0"
     },
     "bugs": {
         "url": "https://github.com/typerpc/typerpc/issues"

@@ -1,6 +1,6 @@
 {
     "name": "@typerpc/types",
-    "version": "0.1.46",
+    "version": "0.2.0",
     "description": "typerpc type system",
     "keywords": [
         "typerpc",
