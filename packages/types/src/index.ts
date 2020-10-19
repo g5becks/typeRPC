@@ -158,7 +158,10 @@ export namespace rpc {
      *
      * Used to construct a discriminated union of rpc types
      */
-    export type Union<T extends internal.RpcType> = T[]
+    export type Union<T extends internal.RpcType> = Readonly<{
+        types: T[]
+        toString(): string
+    }>
 }
 
 export namespace internal {
