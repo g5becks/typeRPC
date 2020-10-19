@@ -1,6 +1,6 @@
 {
     "name": "@typerpc/plugin-manager",
-    "version": "0.1.43",
+    "version": "0.1.44",
     "description": "typerpc plugin manager",
     "keywords": [
         "typerpc",
@@ -36,8 +36,8 @@
         "url": "https://github.com/typerpc/typerpc/issues"
     },
     "dependencies": {
-        "@typerpc/config": "^0.1.43",
-        "@typerpc/plugin": "^0.1.43",
+        "@typerpc/config": "^0.1.44",
+        "@typerpc/plugin": "^0.1.44",
         "live-plugin-manager": "^0.15.1",
         "ts-morph": "^8.1.0"
     },
