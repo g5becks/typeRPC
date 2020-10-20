@@ -78,6 +78,10 @@ export const dataType = (type: DataType): string => {
         throw new TypeError(`invalid data type: ${type.toString()}`)
     }
 
+    if (is.stringLiteral(type)) {
+        return type.value
+    }
+
     if (is.scalar(type)) {
         const res = typeMap.get(type.type)
         if (!res) {
