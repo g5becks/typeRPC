@@ -118,9 +118,11 @@ const parseParams = (method: QueryMethod | MutationMethod): string => {
     return `${variable} = {${parsedParams}}`
 }
 const buildRoute = (svcName: string, method: QueryMethod | MutationMethod): string => {
-    return `instance.route<{
-        ${method.hasParams ? (isQueryMethod(method) ? 'Querystring' : 'Body') : ''}: ${buildReqBodyOrParamsType(method)}
-    }>({
+    const genericRequestType = `<{
+        ${isQueryMethod(method) ? 'Querystring' : 'Body'}: ${buildReqBodyOrParamsType(method)}
+    }>`
+
+    return `instance.route${method.hasParams ? genericRequestType : ''}({
       method: '${method.httpMethod.toUpperCase().trim()}',
       url: '/${lowerCase(method.name)}',
       schema: {
