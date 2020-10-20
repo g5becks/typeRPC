@@ -121,7 +121,7 @@ const buildUnionLiteralSchema = (union: UnionLiteral | Union): string => {
     let i = 0
     while (i < union.types.length) {
         const useComma = i === union.types.length - 1 ? '' : ','
-        types = types.concat(`${is.struct(types[i]) ? '' : 'S.'}${schemaType(union.types[i])}` + useComma)
+        types = types.concat(`${is.struct(union.types[i]) ? '' : 'S.'}${schemaType(union.types[i])}` + useComma)
         i++
     }
     return types
