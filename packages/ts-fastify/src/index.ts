@@ -39,6 +39,10 @@ import {
 // build generic route types for fastify route methods
 // https://www.fastify.io/docs/latest/TypeScript/#using-generics
 const buildReqBodyOrParamsType = (method: QueryMethod | MutationMethod): string => {
+    if (!method.hasParams) {
+        return ''
+    }
+
     let props = ''
 
     for (const param of method.params) {
@@ -115,7 +119,7 @@ const parseParams = (method: QueryMethod | MutationMethod): string => {
 }
 const buildRoute = (svcName: string, method: QueryMethod | MutationMethod): string => {
     return `instance.route<{
-        ${isQueryMethod(method) ? 'Querystring' : 'Body'}: ${buildReqBodyOrParamsType(method)}
+        ${method.hasParams ? (isQueryMethod(method) ? 'Querystring' : 'Body') : ''}: ${buildReqBodyOrParamsType(method)}
     }>({
       method: '${method.httpMethod.toUpperCase().trim()}',
       url: '/${lowerCase(method.name)}',
