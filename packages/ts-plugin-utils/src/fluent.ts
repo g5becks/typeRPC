@@ -78,7 +78,7 @@ const schemaType = (type: DataType): string => {
     }
 
     if (is.unionLiteral(type)) {
-        return `anyOf([${buildUnionSchema(type)}])`
+        return `anyOf([${buildUnionLiteralSchema(type)}])`
     }
 
     if (is.list(type)) {
@@ -111,7 +111,7 @@ const schemaType = (type: DataType): string => {
     return '{}'
 }
 
-const buildUnionSchema = (union: UnionLiteral): string => {
+const buildUnionLiteralSchema = (union: UnionLiteral): string => {
     let types = ''
     let i = 0
     while (i < union.types.length) {
