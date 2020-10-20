@@ -58,5 +58,5 @@ export const is = {
         ].some((func) => func(type)),
     queryParamable: (type: DataType): boolean => queryParamables.some((param) => type.toString().startsWith(param)),
     scalar: (type: any): type is x.Scalar => !is.container(type) && scalarsMap.has(type.toString()),
-    dataType: (type: any): type is DataType => is.container(type) || is.scalar(type),
+    dataType: (type: any): type is DataType => is.container(type) || is.scalar(type) || is.stringLiteral(type),
 }

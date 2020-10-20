@@ -1428,6 +1428,13 @@
     multimatch "^4.0.0"
     typescript "~4.0.2"
 
+"@typerpc/test-utils@^0.1.1":
+  version "0.1.46"
+  resolved "https://registry.yarnpkg.com/@typerpc/test-utils/-/test-utils-0.1.46.tgz#422e63f008a8c70f0f8169733f0a4c3595228d44"
+  integrity sha512-bBH4HogaCkHslQiMOSYHUc2fJCKIB74OqZss8OYWiO2A2pC3oVCGrForJ3xGBOaOXlSq9PL6U6XItGipXHnBlA==
+  dependencies:
+    faker "^5.1.0"
+
 "@types/babel__core@^7.0.0", "@types/babel__core@^7.1.7":
   version "7.1.10"
   resolved "https://registry.yarnpkg.com/@types/babel__core/-/babel__core-7.1.10.tgz#ca58fc195dd9734e77e57c6f2df565623636ab40"
