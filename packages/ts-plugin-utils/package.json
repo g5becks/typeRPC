@@ -1,6 +1,6 @@
 {
     "name": "@typerpc/ts-plugin-utils",
-    "version": "0.2.3",
+    "version": "0.2.4",
     "description": "utility functions for building typerpc plugins for typescript",
     "keywords": [
         "typerpc",
