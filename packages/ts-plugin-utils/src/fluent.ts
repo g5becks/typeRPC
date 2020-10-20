@@ -21,6 +21,7 @@ import {
     MutationMethod,
     QueryMethod,
     StructLiteral,
+    Union,
     UnionLiteral,
 } from '@typerpc/schema'
 
@@ -111,7 +112,7 @@ const schemaType = (type: DataType): string => {
     return '{}'
 }
 
-const buildUnionLiteralSchema = (union: UnionLiteral): string => {
+const buildUnionLiteralSchema = (union: UnionLiteral | Union): string => {
     let types = ''
     let i = 0
     while (i < union.types.length) {
@@ -120,6 +121,12 @@ const buildUnionLiteralSchema = (union: UnionLiteral): string => {
         i++
     }
     return types
+}
+
+export const buildUnionSchema = (union: Union): string => {
+    return `
+export const ${lowerCase(union.name)}Schema = S.anyOf([${buildUnionLiteralSchema(union)}])
+`
 }
 export const buildMsgSchema = (msg: Message, file: string): string => {
     let schema = `S.object().id('${msg.name}_${file}.ts').title('${msg.name} Schema').description('Schema for ${msg.name} rpc message')`
@@ -160,3 +167,5 @@ export const buildResponseSchema = (svcName: string, method: MutationMethod | Qu
           } Response').description('${svcName}.${method.name} Response Schema').prop('data', ${
               is.struct(method.returnType) ? '' : 'S.'
           }${schemaType(method.returnType)})`
+
+export const buildUnionSchemas = (unions: ReadonlyArray<Union>): string => {}
