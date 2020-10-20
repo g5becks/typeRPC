@@ -1,6 +1,6 @@
 {
     "name": "@typerpc/dart-shelf",
-    "version": "0.2.2",
+    "version": "0.2.3",
     "description": "A typerpc plugin for generating dart servers",
     "keywords": [
         "typerpc",
@@ -30,10 +30,10 @@
         "prepublishOnly": "yarn run build"
     },
     "dependencies": {
-        "@typerpc/dart-plugin-utils": "^0.2.2",
-        "@typerpc/plugin": "^0.2.2",
-        "@typerpc/plugin-utils": "^0.2.2",
-        "@typerpc/schema": "^0.2.2"
+        "@typerpc/dart-plugin-utils": "^0.2.3",
+        "@typerpc/plugin": "^0.2.3",
+        "@typerpc/plugin-utils": "^0.2.3",
+        "@typerpc/schema": "^0.2.3"
     },
     "author": "Gary Becks <techstar.dev@hotmail.com>",
     "homepage": "http://typerpc.run",

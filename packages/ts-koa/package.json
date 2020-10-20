@@ -1,6 +1,6 @@
 {
     "name": "@typerpc/ts-koa",
-    "version": "0.2.2",
+    "version": "0.2.3",
     "description": "typerpc typescript koa plugin",
     "keywords": [
         "typerpc",
@@ -31,10 +31,10 @@
         "access": "public"
     },
     "dependencies": {
-        "@typerpc/plugin": "^0.2.2",
-        "@typerpc/plugin-utils": "^0.2.2",
-        "@typerpc/schema": "^0.2.2",
-        "@typerpc/ts-plugin-utils": "^0.2.2"
+        "@typerpc/plugin": "^0.2.3",
+        "@typerpc/plugin-utils": "^0.2.3",
+        "@typerpc/schema": "^0.2.3",
+        "@typerpc/ts-plugin-utils": "^0.2.3"
     },
     "devDependencies": {
         "@typerpc/test-utils": "^0.2.0"
