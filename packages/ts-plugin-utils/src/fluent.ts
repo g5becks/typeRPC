@@ -168,4 +168,10 @@ export const buildResponseSchema = (svcName: string, method: MutationMethod | Qu
               is.struct(method.returnType) ? '' : 'S.'
           }${schemaType(method.returnType)})`
 
-export const buildUnionSchemas = (unions: ReadonlyArray<Union>): string => {}
+export const buildUnionSchemas = (unions: ReadonlyArray<Union>): string => {
+    let types = ''
+    for (const union of unions) {
+        types = types.concat(buildUnionSchema(union))
+    }
+    return types
+}

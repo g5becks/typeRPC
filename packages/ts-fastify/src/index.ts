@@ -30,6 +30,7 @@ import {
     buildResponseSchema,
     buildType,
     buildUnions,
+    buildUnionSchemas,
     dataType,
     fromQueryString,
     paramNames,
@@ -413,6 +414,7 @@ import { pluginOpts, registerOptions, RpcPlugin } from './fastify.rpc.server'
 
     ${types}
     ${buildUnions(schema)}
+    ${buildUnionSchemas(schema.unions)}
     ${buildInterfaces(schema)}
     ${buildPlugins(schema)}
     `

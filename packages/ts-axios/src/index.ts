@@ -18,6 +18,7 @@ import {
     buildParamsWithTypes,
     buildTypes,
     buildUnions,
+    buildUnionSchemas,
     dataType,
     paramNames,
 } from '@typerpc/ts-plugin-utils'
@@ -149,6 +150,7 @@ ${fileHeader()}
 ${rpcConfig}
 ${interceptor(schema)}
 ${buildUnions(schema)}
+${buildUnionSchemas(schema.unions)}
 ${buildTypes(schema)}
 ${buildServices(schema)}
 `

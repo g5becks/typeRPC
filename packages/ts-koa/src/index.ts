@@ -27,6 +27,7 @@ import {
     buildParamsVar,
     buildTypes,
     buildUnions,
+    buildUnionSchemas,
     dataType,
     fromQueryString,
     paramNames,
@@ -142,6 +143,7 @@ ${buildImports(schema)}
 ${fileHeader()}
 ${logger}
 ${buildUnions(schema)}
+${buildUnionSchemas(schema.unions)}
 ${buildTypes(schema)}
 ${buildInterfaces(schema)}
 ${buildServices(schema)}
