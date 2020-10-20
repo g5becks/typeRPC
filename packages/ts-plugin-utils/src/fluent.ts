@@ -21,7 +21,9 @@ import {
     MutationMethod,
     QueryMethod,
     StructLiteral,
+    UnionLiteral,
 } from '@typerpc/schema'
+
 const typeMap: Map<string, string> = new Map<string, string>([
     [make.bool.type, 'boolean()'],
     [make.int8.type, 'number()'],
@@ -75,6 +77,10 @@ const schemaType = (type: DataType): string => {
         return 'object()'
     }
 
+    if (is.unionLiteral(type)) {
+        return `anyOf([${buildUnionSchema(type)}])`
+    }
+
     if (is.list(type)) {
         return `array().items(${is.struct(type.dataType) ? '' : 'S.'}${schemaType(type.dataType)})`
     }
@@ -105,6 +111,16 @@ const schemaType = (type: DataType): string => {
     return '{}'
 }
 
+const buildUnionSchema = (union: UnionLiteral): string => {
+    let types = ''
+    let i = 0
+    while (i < union.types.length) {
+        const useComma = i === union.types.length - 1 ? '' : ','
+        types = types.concat(schemaType(union.types[i]) + useComma)
+        i++
+    }
+    return types
+}
 export const buildMsgSchema = (msg: Message, file: string): string => {
     let schema = `S.object().id('${msg.name}_${file}.ts').title('${msg.name} Schema').description('Schema for ${msg.name} rpc message')`
     for (const prop of msg.properties) {

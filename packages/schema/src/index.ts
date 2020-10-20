@@ -11,7 +11,17 @@
  */
 
 import { buildSchemas, internalTesting } from './builder'
-import { containers, DataType, queryParamables, scalars, Struct, StructLiteral, StructLiteralProp } from './data-type'
+import {
+    containers,
+    DataType,
+    queryParamables,
+    scalars,
+    StringLiteral,
+    Struct,
+    StructLiteral,
+    StructLiteralProp,
+    UnionLiteral,
+} from './data-type'
 import { is } from './is'
 import { make, typeError } from './make'
 import {
@@ -44,6 +54,8 @@ import {
 import { internal, validateSchemas } from './validator'
 
 export {
+    StringLiteral,
+    UnionLiteral,
     Union,
     buildSchemas,
     validateSchemas,
