@@ -1,6 +1,6 @@
 {
     "name": "@typerpc/plugin-utils",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "description": "utility functions for creating typerpc plugins",
     "keywords": [
         "typerpc",
@@ -31,7 +31,7 @@
         "url": "git+https://github.com/typerpc/typerpc.git"
     },
     "dependencies": {
-        "@typerpc/schema": "^0.2.0"
+        "@typerpc/schema": "^0.2.1"
     },
     "scripts": {
         "lint:fix": "eslint --fix src/**",
