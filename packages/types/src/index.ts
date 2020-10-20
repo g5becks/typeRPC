@@ -158,7 +158,7 @@ export namespace rpc {
      *
      * Used to construct a discriminated union of rpc types
      */
-    export type Union<T extends (messagable | Msg<internal.MsgProps>)[] | string[]> = Readonly<{
+    export type Union<T extends internal.UnionProps> = Readonly<{
         types: T
         toString(): string
     }>
@@ -187,11 +187,9 @@ export namespace internal {
      */
     export type QueryParamable = QueryParamableScalar | $.list<QueryParamableScalar>
 
+    export type UnionProps = (messagable | rpc.Msg<MsgProps>)[] | string[]
     export type MsgProps = {
-        [key: string]:
-            | messagable
-            | rpc.Msg<{ [key: string]: messagable }>
-            | rpc.Union<(messagable | rpc.Msg<MsgProps>)[]>
+        [key: string]: messagable | rpc.Msg<{ [key: string]: messagable }> | rpc.Union<UnionProps>
     }
 
     // valid method, generic type params
@@ -202,5 +200,5 @@ export namespace internal {
         | Paramable
         | returnableContainer
         | rpc.Msg<MsgProps>
-        | rpc.Union<(messagable | rpc.Msg<MsgProps>)[]>
+        | rpc.Union<UnionProps>
 }
