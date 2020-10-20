@@ -12,7 +12,7 @@
 
 /* eslint-disable new-cap */
 import { $, internal as x } from '@typerpc/types'
-import { DataType, queryParamables, scalarsMap, Struct, StructLiteral, UnionLiteral } from './data-type'
+import { DataType, queryParamables, scalarsMap, StringLiteral, Struct, StructLiteral, UnionLiteral } from './data-type'
 
 const validateType = (type: unknown, ...propNames: string[]): boolean => {
     const props = Object.getOwnPropertyNames(type).filter((prop) => !prop.includes('toString'))
@@ -41,6 +41,8 @@ export const is = {
     struct: (type: unknown): type is Struct => validateType(type, 'name', 'useCbor'),
     structLiteral: (type: unknown): type is StructLiteral => validateType(type, 'properties'),
     unionLiteral: (type: unknown): type is UnionLiteral => validateType(type, 'types'),
+
+    stringLiteral: (type: unknown): type is StringLiteral => validateType(type, 'value'),
     container: (type: unknown): boolean =>
         [
             is.struct,
