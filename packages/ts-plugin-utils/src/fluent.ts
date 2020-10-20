@@ -90,6 +90,10 @@ const schemaType = (type: DataType): string => {
         return buildObjectSchema(type)
     }
 
+    if (is.stringLiteral(type)) {
+        return 'string()'
+    }
+
     if (is.struct(type)) {
         return `${lowerCase(type.name)}Schema`
     }
@@ -117,7 +121,7 @@ const buildUnionLiteralSchema = (union: UnionLiteral | Union): string => {
     let i = 0
     while (i < union.types.length) {
         const useComma = i === union.types.length - 1 ? '' : ','
-        types = types.concat(schemaType(union.types[i]) + useComma)
+        types = types.concat(`${is.struct(types[i]) ? '' : 'S.'}${schemaType(union.types[i])}` + useComma)
         i++
     }
     return types
