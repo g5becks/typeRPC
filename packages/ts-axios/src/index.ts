@@ -66,7 +66,6 @@ const addInterceptors = (client: AxiosInstance) => {
 const buildImports = (schema: Schema): string => {
     return `
 import axios, {AxiosInstance, AxiosRequestConfig, AxiosResponse} from 'axios'
-import {URL} from 'url'
 ${schema.hasCbor ? "import {encodeAsync,decodeAll} location 'cbor'" : ''}
 ${buildMsgImports(schema.imports)}
 `
