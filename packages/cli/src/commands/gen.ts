@@ -102,12 +102,12 @@ const generateCode = (configs: ParsedConfig[], manager: PluginManager, files: So
     for (const cfg of configs) {
         const schemas = buildSchemas(files, cfg.pkg)
         console.log(schemas)
-        const gen = manager.require(cfg.plugin.name)
-        if (gen instanceof Error) {
-            throw Error(`error is ${gen.message}`)
+        const generator = manager.require(cfg.plugin.name)
+        if (generator instanceof Error) {
+            throw Error(`error is ${generator.message}`)
         }
-        if (isValidPlugin(gen)) {
-            generated = [...generated, { code: gen(schemas), outputPath: cfg.out }]
+        if (isValidPlugin(generator)) {
+            generated = [...generated, { code: generator(schemas), outputPath: cfg.out }]
         } else {
             spinner.fail(
                 chalk.red(
@@ -117,7 +117,7 @@ const generateCode = (configs: ParsedConfig[], manager: PluginManager, files: So
             throw new Error(
                 `${cfg.plugin.name} is not a valid typerpc plugin. Plugins must be functions, typeof ${
                     cfg.plugin.name
-                } = ${typeof gen}`,
+                } = ${typeof generator}`,
             )
         }
     }
