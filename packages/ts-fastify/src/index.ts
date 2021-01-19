@@ -180,9 +180,10 @@ const buildPlugin = (svc: MutationService | QueryService): string => `
 export const ${lowerCase(svc.name)}Routes = (
   ${lowerCase(svc.name)}: ${capitalize(svc.name)},
   logLevel: LogLevel,
-  opts: PluginOptions = {}
+  opts: PluginOptions = {},
+  ...plugins: FastifyPluginAsync[]
 ): RpcPlugin => ({
-  plugin: fp(${lowerCase(svc.name)}Plugin(${lowerCase(svc.name)}), pluginOpts("${svc.name}Routes", opts)),
+  plugin: fp(${lowerCase(svc.name)}Plugin(${lowerCase(svc.name)}, ...plugins), pluginOpts("${svc.name}Routes", opts)),
   opts: registerOptions("/${lowerCase(svc.name)}", logLevel),
 })
 `
