@@ -251,7 +251,7 @@ const handler = async (args: Args): Promise<void> => {
             throw new Error('no source file found in your project. Please check your ts.config.json file for errors')
         }
         // if user provides command line arguments the config file will
-        // be overridden - Be sure to document this behaviour
+        // be overridden - Be sure to document this behavior
         if ((local || github) && out && pkg) {
             configs = [
                 {
