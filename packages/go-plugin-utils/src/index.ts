@@ -10,21 +10,21 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import {
-    DataType,
-    is,
-    isQueryMethod,
-    make,
-    Message,
-    MutationMethod,
-    MutationService,
-    Param,
-    Property,
-    QueryMethod,
-    QueryService,
-    Schema,
-} from '@typerpc/schema'
 import { capitalize, lowerCase } from '@typerpc/plugin-utils'
+import {
+  DataType,
+  is,
+  isQueryMethod,
+  make,
+  Message,
+  MutationMethod,
+  MutationService,
+  Param,
+  Property,
+  QueryMethod,
+  QueryService,
+  Schema
+} from '@typerpc/schema'
 
 export const typeMap: Map<string, string> = new Map<string, string>([
     [make.bool.type, 'bool'],
@@ -146,8 +146,6 @@ const scalarToQueryString = (param: string, type: DataType): string => {
     }
     if (is.scalar(type))
         switch (type.type) {
-            case 'str':
-                return `[]string{${param}}`
             case 'int8':
             case 'int16':
             case 'int32':
@@ -167,6 +165,7 @@ const scalarToQueryString = (param: string, type: DataType): string => {
                 return `[]string{strconv.FormatBool(${param})}`
             case 'timestamp':
                 return `[]string{strconv.FormatInt(${param}.Unix(), 10)}`
+            case 'str':
             default:
                 return `[]string{${param}}`
         }
