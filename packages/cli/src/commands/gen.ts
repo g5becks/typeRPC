@@ -10,19 +10,19 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { CommandModule } from 'yargs'
-import { Logger } from 'tslog'
-import { isValidPlugin, PluginManager } from '@typerpc/plugin-manager'
 import { Code } from '@typerpc/plugin'
-import { Project, SourceFile } from 'ts-morph'
-import { createLogger, format as formatter, getConfigFile, getRpcConfigPath, parseConfig, ParsedConfig } from './utils'
-import { outputFile, pathExistsSync } from 'fs-extra'
+import { isValidPlugin, PluginManager } from '@typerpc/plugin-manager'
 import { buildSchemas, validateSchemas } from '@typerpc/schema'
-import path from 'path'
-import ora from 'ora'
 import chalk from 'chalk'
-import { readFileSync } from 'fs'
 import Debug from 'debug'
+import { readFileSync } from 'fs'
+import { outputFile, pathExistsSync } from 'fs-extra'
+import ora from 'ora'
+import path from 'path'
+import { Project, SourceFile } from 'ts-morph'
+import { Logger } from 'tslog'
+import { CommandModule } from 'yargs'
+import { createLogger, format as formatter, getConfigFile, getRpcConfigPath, parseConfig, ParsedConfig } from './utils'
 const debug = Debug('@typerpc/cli.gen')
 
 // ensure that the path to tsconfig.json actually exists
@@ -84,12 +84,7 @@ const validateSchemaFiles = (files: SourceFile[]) => {
         return
     }
     spinner.fail(chalk.red(`Bummer, looks like we've spotter errors in you schema files`))
-    throw errs.reduce((err, val) => {
-        err.name.concat(val.name + '\n')
-        err.message.concat(val.message + '\n')
-        err.stack?.concat(val.stack + '\n')
-        return err
-    })
+    throw new AggregateError(errs, 'schema validation failed')
 }
 
 const installPlugins = async (configs: ParsedConfig[], manager: PluginManager, log: Logger) => {
