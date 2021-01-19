@@ -201,7 +201,7 @@ const buildPlugins = (schema: Schema): string => {
 
 const server = {
     source: `
-import fastify, {
+import server, {
 
     FastifyInstance,
     FastifyLoggerInstance,
@@ -317,7 +317,7 @@ export function createHttp2SecureServer<Server extends http2.Http2SecureServer>(
     logger: pino.Logger,
     ...plugins: RpcPlugin[]
 ): FastifyInstance<Server> {
-    const instance = fastify({
+    const instance = server({
         ...opts,
         logger,
         querystringParser: (str) => (parse(str) as unknown) as { [key: string]: string | string[] },
@@ -342,7 +342,7 @@ export function createHttp2Server<Server extends http2.Http2Server>(
     logger: pino.Logger,
     ...plugins: RpcPlugin[]
 ): FastifyInstance<Server> {
-    const instance = fastify({
+    const instance = server({
         ...opts,
         logger,
         querystringParser: (str) => (parse(str) as unknown) as { [key: string]: string | string[] },
@@ -368,7 +368,7 @@ export function createSecureServer<Server extends https.Server>(
     logger: pino.Logger,
     ...plugins: RpcPlugin[]
 ): FastifyInstance<Server> {
-    const instance = fastify({
+    const instance = server({
         ...opts,
         logger,
         querystringParser: (str) => (parse(str) as unknown) as { [key: string]: string | string[] },
@@ -394,7 +394,7 @@ export function createServer(
     logger: pino.Logger,
     ...plugins: RpcPlugin[]
 ): FastifyInstance {
-    const instance = fastify({
+    const instance = server({
         ...opts,
         logger,
         querystringParser: (str) => (parse(str) as unknown) as { [key: string]: string | string[] },
