@@ -139,11 +139,11 @@ const saveToDisk = async (generated: GeneratedCode[], configFilePath?: string) =
         // and store the path there, otherwise use cwd
         return configFilePath ? path.join(configFilePath, out, file) : path.join(out, file)
     }
-    for (const gen of generated) {
-        for (const entry of gen.code) {
+    for (const gened of generated) {
+        for (const entry of gened.code) {
             try {
                 await outputFile(
-                    filePath(gen.outputPath, entry.fileName, path.isAbsolute(gen.outputPath)),
+                    filePath(gened.outputPath, entry.fileName, path.isAbsolute(gened.outputPath)),
                     entry.source,
                 )
             } catch (error) {
