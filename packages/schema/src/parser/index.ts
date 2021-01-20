@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /*
  * Copyright (c) 2020. Gary Becks - <techstar.dev@hotmail.com>
  *
@@ -20,7 +21,6 @@ import {
     TypeNode,
     TypeReferenceNode,
 } from 'ts-morph'
-import ts from 'typescript'
 import { isMsg, isMsgLiteral, isMutationSvc, isQuerySvc } from '../validator'
 import { isUnion, isUnionLiteral } from '../validator/utils'
 
@@ -69,8 +69,8 @@ export const parseJsDocComment = (
 }
 
 // get all nodes of a union type
-export const parseUnionTypes = (type: TypeAliasDeclaration | TypeNode | Node): Node<ts.Node>[] => {
-    let types: Node<ts.Node>[] = []
+export const parseUnionTypes = (type: TypeAliasDeclaration | TypeNode | Node): Node[] => {
+    let types: Node[] = []
     if (isTypeAlias(type)) {
         types = type.getTypeNodeOrThrow().getChildrenOfKind(SyntaxKind.TupleType)[0].forEachChildAsArray()
     }
@@ -97,4 +97,5 @@ export const parseMutationServices = (file: SourceFile): TypeAliasDeclaration[] 
 
 // parse all of the methods location an rpc.QueryService type alias
 export const parseServiceMethods = (type: TypeAliasDeclaration): MethodSignature[] =>
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     type.getTypeNode()!.getChildrenOfKind(SyntaxKind.TypeLiteral)[0].getChildrenOfKind(SyntaxKind.MethodSignature)

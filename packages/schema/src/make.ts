@@ -18,7 +18,7 @@ import { isOptionalProp, parseMsgProps, parseTypeParams } from './parser'
 import { parseUnionTypes } from './parser/index'
 import { isValidMsg } from './validator'
 
-export const typeError = (type: TypeNode | Node) =>
+export const typeError = (type: TypeNode | Node): TypeError =>
     new TypeError(`error in file ${type.getSourceFile().getFilePath()}
     at line number: ${type.getStartLineNumber()}
     message: ${type.getText()} is neither a valid typerpc DataType or rpc.Msg that was imported or defined in this file.`)

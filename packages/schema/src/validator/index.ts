@@ -10,7 +10,7 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { SourceFile } from 'ts-morph'
+import { MethodSignature, Node, SourceFile, TypeAliasDeclaration, TypeNode } from 'ts-morph'
 import { internal as decInternal, validateDeclarations } from './declarations'
 import { validateMessage, validateMessages } from './message'
 import { isErrCode, isResponseCode, serviceValidatorTesting, validateServices } from './service'
@@ -50,7 +50,29 @@ export {
     isUnionLiteral,
 }
 
-export const internal = {
+export const internal: {
+    validateImports: (file: SourceFile, projectFiles: SourceFile[]) => Error[]
+    validateTypes: (file: SourceFile) => Error[]
+    validateFunctions: (file: SourceFile) => Error[]
+    validateMessage: (msg: TypeAliasDeclaration | TypeNode) => Error[]
+    validateJsDoc: (type: TypeAliasDeclaration) => Error[]
+    validateReturnType: (method: MethodSignature) => Error[]
+    validateExports: (file: SourceFile) => Error[]
+    validateNameSpaces: (file: SourceFile) => Error[]
+    isValidMsg: (type: TypeNode | Node) => boolean
+    validateService: (service: TypeAliasDeclaration) => Error[]
+    validateNotGeneric: (type: TypeAliasDeclaration | MethodSignature) => Error[]
+    isValidDataType: (type: TypeNode | Node | undefined) => boolean
+    validateMessages: (file: SourceFile) => Error[]
+    validateEnums: (file: SourceFile) => Error[]
+    validateQueryMethodParams: (method: MethodSignature) => Error[]
+    validateMethodJsDoc: (method: MethodSignature) => Error[]
+    validateVariables: (file: SourceFile) => Error[]
+    validateClasses: (file: SourceFile) => Error[]
+    isScalar: (type: TypeNode | Node) => boolean
+    validateStatements: (file: SourceFile) => Error[]
+    validateInterfaces: (file: SourceFile) => Error[]
+} = {
     ...decInternal,
     ...serviceValidatorTesting,
     validateMessage,

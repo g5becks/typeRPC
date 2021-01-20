@@ -52,6 +52,15 @@ import {
     Union,
 } from './schema'
 import { internal, validateSchemas } from './validator'
+import {
+    MethodSignature,
+    Node,
+    ParameterDeclaration,
+    PropertySignature,
+    SourceFile,
+    TypeAliasDeclaration,
+    TypeNode,
+} from 'ts-morph'
 
 export {
     StringLiteral,
@@ -87,7 +96,48 @@ export {
     containers,
 }
 
-export const _testing = {
+export const _testing: {
+    hasCborParams: (params: ReadonlyArray<Param>, method: MethodSignature, isCborSvc: boolean) => boolean
+    buildQueryMethod: (method: MethodSignature, isCborSvc: boolean) => QueryMethod
+    useCbor: (type: TypeAliasDeclaration | MethodSignature | undefined) => boolean
+    buildSchema: (file: SourceFile, packageName: string) => Schema
+    validateExports: (file: SourceFile) => Error[]
+    validateNotGeneric: (type: TypeAliasDeclaration | MethodSignature) => Error[]
+    isValidDataType: (type: TypeNode | Node | undefined) => boolean
+    buildErrCode: (method: MethodSignature) => HTTPErrCode
+    validateMessages: (file: SourceFile) => Error[]
+    validateEnums: (file: SourceFile) => Error[]
+    isOptionalProp: (prop: PropertySignature) => boolean
+    parseServiceMethods: (type: TypeAliasDeclaration) => MethodSignature[]
+    parseMessages: (file: SourceFile) => TypeAliasDeclaration[]
+    validateMethodJsDoc: (method: MethodSignature) => Error[]
+    buildMutationMethod: (method: MethodSignature, isCborSvc: boolean) => MutationMethod
+    validateClasses: (file: SourceFile) => Error[]
+    buildResponseCode: (method: MethodSignature) => HTTPResponseCode
+    buildImports: (file: SourceFile) => ReadonlyArray<Import>
+    validateImports: (file: SourceFile, projectFiles: SourceFile[]) => Error[]
+    parseQueryServices: (file: SourceFile) => TypeAliasDeclaration[]
+    validateTypes: (file: SourceFile) => Error[]
+    validateFunctions: (file: SourceFile) => Error[]
+    validateMessage: (msg: TypeAliasDeclaration | TypeNode) => Error[]
+    makeDataType: (type: TypeNode | Node) => DataType
+    buildMethod: (method: MethodSignature, isCborSvc: boolean) => Method
+    validateJsDoc: (type: TypeAliasDeclaration) => Error[]
+    validateReturnType: (method: MethodSignature) => Error[]
+    parseMutationServices: (file: SourceFile) => TypeAliasDeclaration[]
+    isType: (type: TypeNode | Node, typeText: string) => boolean
+    validateNameSpaces: (file: SourceFile) => Error[]
+    isValidMsg: (type: TypeNode | Node) => boolean
+    validateService: (service: TypeAliasDeclaration) => Error[]
+    buildMessages: (file: SourceFile) => Message[]
+    buildParams: (params: ParameterDeclaration[]) => Param[]
+    validateQueryMethodParams: (method: MethodSignature) => Error[]
+    validateVariables: (file: SourceFile) => Error[]
+    parseMsgProps: (type: TypeAliasDeclaration | TypeNode | Node) => PropertySignature[]
+    isScalar: (type: TypeNode | Node) => boolean
+    validateStatements: (file: SourceFile) => Error[]
+    validateInterfaces: (file: SourceFile) => Error[]
+} = {
     ...internalTesting,
     ...internal,
     parseMsgProps,

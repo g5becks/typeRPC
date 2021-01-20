@@ -10,8 +10,19 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { SourceFile } from 'ts-morph'
-import { Import, Schema } from '../index'
+import { MethodSignature, Node, ParameterDeclaration, SourceFile, TypeAliasDeclaration, TypeNode } from 'ts-morph'
+import {
+    DataType,
+    HTTPErrCode,
+    HTTPResponseCode,
+    Import,
+    Message,
+    Method,
+    MutationMethod,
+    Param,
+    QueryMethod,
+    Schema,
+} from '../index'
 import { isType, makeDataType, useCbor } from './data-type'
 import { buildMessages } from './message'
 import {
@@ -62,7 +73,21 @@ export const buildSchemas = (sourceFiles: SourceFile[], packageName: string): Sc
     ...new Set<Schema>(sourceFiles.map((file) => buildSchema(file, packageName))),
 ]
 
-export const internalTesting = {
+export const internalTesting: {
+    buildResponseCode: (method: MethodSignature) => HTTPResponseCode
+    buildImports: (file: SourceFile) => ReadonlyArray<Import>
+    makeDataType: (type: TypeNode | Node) => DataType
+    buildMethod: (method: MethodSignature, isCborSvc: boolean) => Method
+    hasCborParams: (params: ReadonlyArray<Param>, method: MethodSignature, isCborSvc: boolean) => boolean
+    buildQueryMethod: (method: MethodSignature, isCborSvc: boolean) => QueryMethod
+    useCbor: (type: TypeAliasDeclaration | MethodSignature | undefined) => boolean
+    isType: (type: TypeNode | Node, typeText: string) => boolean
+    buildSchema: (file: SourceFile, packageName: string) => Schema
+    buildErrCode: (method: MethodSignature) => HTTPErrCode
+    buildMessages: (file: SourceFile) => Message[]
+    buildParams: (params: ParameterDeclaration[]) => Param[]
+    buildMutationMethod: (method: MethodSignature, isCborSvc: boolean) => MutationMethod
+} = {
     useCbor,
     isType,
     buildSchema,
