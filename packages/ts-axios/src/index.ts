@@ -110,7 +110,7 @@ const buildService = (svc: MutationService | QueryService): string => {
 export class ${capitalize(svc.name)} {
 	private readonly client: AxiosInstance
 	private constructor(private readonly host: string, cfg?: RpcConfig) {
-	      this.client = axios.create({...cfg, baseURL: \`\${host}/${lowerCase(svc.name)}\`})
+	      this.client = axios.create({...cfg, baseURL: \`\${this.host}/${lowerCase(svc.name)}\`})
         addInterceptors(this.client)
 	}
 	public static use(host: string, cfg?: RpcConfig): ${capitalize(svc.name)} | Error {

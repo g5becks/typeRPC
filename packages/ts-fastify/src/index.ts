@@ -320,6 +320,7 @@ export function createHttp2SecureServer<Server extends http2.Http2SecureServer>(
     const instance = server({
         ...opts,
         logger,
+        caseSensitive: true,
         querystringParser: (str) => (parse(str) as unknown) as { [key: string]: string | string[] },
     })
     for (const plugin of plugins) {
@@ -344,7 +345,9 @@ export function createHttp2Server<Server extends http2.Http2Server>(
 ): FastifyInstance<Server> {
     const instance = server({
         ...opts,
+
         logger,
+        caseSensitive: true,
         querystringParser: (str) => (parse(str) as unknown) as { [key: string]: string | string[] },
     })
     for (const plugin of plugins) {
@@ -371,6 +374,7 @@ export function createSecureServer<Server extends https.Server>(
     const instance = server({
         ...opts,
         logger,
+        caseSensitive: true,
         querystringParser: (str) => (parse(str) as unknown) as { [key: string]: string | string[] },
     })
     for (const plugin of plugins) {
@@ -397,6 +401,7 @@ export function createServer(
     const instance = server({
         ...opts,
         logger,
+        caseSensitive: true,
         querystringParser: (str) => (parse(str) as unknown) as { [key: string]: string | string[] },
     })
     for (const plugin of plugins) {
