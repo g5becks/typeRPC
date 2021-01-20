@@ -174,7 +174,7 @@ const buildSvcRoutes = (svc: MutationService | QueryService): string => {
 }
 
 const buildPlugin = (svc: MutationService | QueryService): string => `
-export const ${lowerCase(svc.name)} = (
+export const ${lowerCase(svc.name)}RPC = (
   ${lowerCase(svc.name)}: ${capitalize(svc.name)},
   logLevel: LogLevel
 ): RpcPlugin => ({
