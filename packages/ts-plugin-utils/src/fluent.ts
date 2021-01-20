@@ -43,7 +43,7 @@ const typeMap: Map<string, string> = new Map<string, string>([
     // Math.round(Date.now() / 1000)
     [make.timestamp.type, 'number()'],
     [make.unit.type, 'object()'],
-    [make.blob.type, 'array().items(S.number())'],
+    [make.blob.type, 'array().items(Schema.number())'],
 ])
 
 export const requestSchemaName = (svcName: string, method: MutationMethod | QueryMethod): string =>
@@ -56,7 +56,7 @@ const buildObjectSchema = (struct: StructLiteral): string => {
     let obj = 'object()'
     for (const prop of struct.properties) {
         obj = obj.concat(
-            `.prop('${lowerCase(prop.name)}', S.${schemaType(prop.type)}${prop.isOptional ? '' : '.required()'})`,
+            `.prop('${lowerCase(prop.name)}', Schema.${schemaType(prop.type)}${prop.isOptional ? '' : '.required()'})`,
         )
     }
     return obj
@@ -83,7 +83,7 @@ const schemaType = (type: DataType): string => {
     }
 
     if (is.list(type)) {
-        return `array().items(${is.struct(type.dataType) ? '' : 'S.'}${schemaType(type.dataType)})`
+        return `array().items(${is.struct(type.dataType) ? '' : 'Schema.'}${schemaType(type.dataType)})`
     }
 
     if (is.structLiteral(type)) {
@@ -121,7 +121,7 @@ const buildUnionLiteralSchema = (union: UnionLiteral | Union): string => {
     let i = 0
     while (i < union.types.length) {
         const useComma = i === union.types.length - 1 ? '' : ','
-        types = types.concat(`${is.struct(union.types[i]) ? '' : 'S.'}${schemaType(union.types[i])}` + useComma)
+        types = types.concat(`${is.struct(union.types[i]) ? '' : 'Schema.'}${schemaType(union.types[i])}` + useComma)
         i++
     }
     return types
@@ -129,14 +129,14 @@ const buildUnionLiteralSchema = (union: UnionLiteral | Union): string => {
 
 export const buildUnionSchema = (union: Union): string => {
     return `
-export const ${lowerCase(union.name)}Schema = S.anyOf([${buildUnionLiteralSchema(union)}])
+export const ${lowerCase(union.name)}Schema = Schema.anyOf([${buildUnionLiteralSchema(union)}])
 `
 }
 export const buildMsgSchema = (msg: Message, file: string): string => {
-    let schema = `S.object().id('${msg.name}_${file}.ts').title('${msg.name} Schema').description('Schema for ${msg.name} rpc message')`
+    let schema = `Schema.object().id('${msg.name}_${file}.ts').title('${msg.name} Schema').description('Schema for ${msg.name} rpc message')`
     for (const prop of msg.properties) {
         schema = schema.concat(
-            `.prop('${lowerCase(prop.name)}', ${is.struct(prop.type) ? '' : 'S.'}${schemaType(prop.type)})${
+            `.prop('${lowerCase(prop.name)}', ${is.struct(prop.type) ? '' : 'Schema.'}${schemaType(prop.type)})${
                 prop.isOptional ? '' : '.required()'
             }`,
         )
@@ -146,17 +146,17 @@ export const buildMsgSchema = (msg: Message, file: string): string => {
 }
 
 export const buildRequestSchema = (svcName: string, method: MutationMethod | QueryMethod): string => {
-    let schema = `S.object().id('${svcName}.${method.name}Request').title('${svcName}.${method.name} Body').description('${svcName}.${method.name} Request Schema')`
+    let schema = `Schema.object().id('${svcName}.${method.name}Request').title('${svcName}.${method.name} Body').description('${svcName}.${method.name} Request Schema')`
     for (const param of method.params) {
         if (isMutationMethod(method)) {
             schema = schema.concat(
-                `.prop('${param.name}', ${is.struct(param.type) ? '' : 'S.'}${schemaType(param.type)})`,
+                `.prop('${param.name}', ${is.struct(param.type) ? '' : 'Schema.'}${schemaType(param.type)})`,
             )
         } else if (isQueryMethod(method)) {
             schema = schema.concat(
-                `.prop('${param.name}', S.${is.scalar(param.type) ? 'string()' : 'array().items(S.string())'})${
-                    param.isOptional ? '' : '.required()'
-                }`,
+                `.prop('${param.name}', Schema.${
+                    is.scalar(param.type) ? 'string()' : 'array().items(Schema.string())'
+                })${param.isOptional ? '' : '.required()'}`,
             )
         }
     }
@@ -166,10 +166,10 @@ export const buildRequestSchema = (svcName: string, method: MutationMethod | Que
 export const buildResponseSchema = (svcName: string, method: MutationMethod | QueryMethod): string =>
     method.isVoidReturn
         ? '{}'
-        : `S.object().id('${svcName}.${method.name}Response').title('${svcName}.${
+        : `Schema.object().id('${svcName}.${method.name}Response').title('${svcName}.${
               method.name
           } Response').description('${svcName}.${method.name} Response Schema').prop('data', ${
-              is.struct(method.returnType) ? '' : 'S.'
+              is.struct(method.returnType) ? '' : 'Schema.'
           }${schemaType(method.returnType)})`
 
 export const buildUnionSchemas = (unions: ReadonlyArray<Union>): string => {

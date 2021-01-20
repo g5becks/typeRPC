@@ -167,10 +167,7 @@ const buildRoutes = (svc: MutationService | QueryService): string => {
 
 const buildSvcRoutes = (svc: MutationService | QueryService): string => {
     return `const ${lowerCase(svc.name)}Plugin = (${lowerCase(svc.name)}: ${capitalize(svc.name)},
-    ...plugins: FastifyPluginAsync[]): FastifyPluginAsync => async (instance) => {
-       instance.register(fastifySensible)
-       plugins.forEach((plugin) => instance.register(plugin))
-
+    ): FastifyPluginAsync => async (instance) => {
        ${buildRoutes(svc)}
     }
     `
@@ -179,11 +176,9 @@ const buildSvcRoutes = (svc: MutationService | QueryService): string => {
 const buildPlugin = (svc: MutationService | QueryService): string => `
 export const ${lowerCase(svc.name)}Routes = (
   ${lowerCase(svc.name)}: ${capitalize(svc.name)},
-  logLevel: LogLevel,
-  opts: PluginOptions = {},
-  ...plugins: FastifyPluginAsync[]
+  logLevel: LogLevel
 ): RpcPlugin => ({
-  plugin: fp(${lowerCase(svc.name)}Plugin(${lowerCase(svc.name)}, ...plugins), pluginOpts("${svc.name}Routes", opts)),
+  plugin: ${lowerCase(svc.name)}Plugin(${lowerCase(svc.name)}),
   opts: registerOptions("/${lowerCase(svc.name)}", logLevel),
 })
 `
@@ -202,39 +197,16 @@ const buildPlugins = (schema: Schema): string => {
 const server = {
     source: `
 import server, {
-
     FastifyInstance,
     FastifyLoggerInstance,
     FastifyPluginCallback,
     FastifyServerOptions,
     LogLevel,
 } from 'fastify'
-import { PluginOptions } from 'fastify-plugin'
 import { RegisterOptions } from 'fastify/types/register'
 import http2 from 'http2'
 import https from 'https'
-import pino from 'pino'
 import { parse } from 'qs'
-
-/**
- * Creates an implementation of PluginOptions for a fastify-plugin
- * @see {@link https://github.com/fastify/fastify-plugin#metadata}
- *
- * @function pluginOpts
- * @param {string} name @see {@link https://github.com/fastify/fastify-plugin#name}
- * @param {PluginOptions} opts additional options for the generated plugin
- * @returns {PluginOptions} PluginOptions
- */
-export const pluginOpts = (
-  name: string,
-  opts?: PluginOptions
-): PluginOptions => {
-  return {
-    ...opts,
-    fastify: "3.x",
-    name,
-  }
-}
 
 /**
  * Used as a container for the plugin and the options to pass to
@@ -409,11 +381,10 @@ const buildFile = (schema: Schema): Code => {
         types = types.concat(buildType(msg).concat('\n' + buildMsgSchema(msg, schema.fileName)))
     }
     const source = `
-import fastify, { FastifyPluginAsync, LogLevel } from 'fastify'
-import fp, { PluginOptions } from 'fastify-plugin'
+import { FastifyPluginAsync, LogLevel } from 'fastify'
 import fastifySensible from 'fastify-sensible'
-import S from 'fluent-json-schema'
-import { pluginOpts, registerOptions, RpcPlugin } from './fastify.rpc.server'
+import Schema from 'fluent-json-schema'
+import { registerOptions, RpcPlugin } from './fastify.rpc.server'
 
     ${types}
     ${buildUnions(schema)}
