@@ -166,7 +166,7 @@ const buildRoutes = (svc: MutationService | QueryService): string => {
 }
 
 const buildSvcRoutes = (svc: MutationService | QueryService): string => {
-    return `const ${lowerCase(svc.name)}Plugin = (${lowerCase(svc.name)}: ${capitalize(svc.name)},
+    return `const ${lowerCase(svc.name)}Routes = (${lowerCase(svc.name)}: ${capitalize(svc.name)},
     ): FastifyPluginAsync => async (instance) => {
        ${buildRoutes(svc)}
     }
@@ -174,13 +174,14 @@ const buildSvcRoutes = (svc: MutationService | QueryService): string => {
 }
 
 const buildPlugin = (svc: MutationService | QueryService): string => `
-export const ${lowerCase(svc.name)}Routes = (
+export const ${lowerCase(svc.name)} = (
   ${lowerCase(svc.name)}: ${capitalize(svc.name)},
   logLevel: LogLevel
 ): RpcPlugin => ({
-  plugin: ${lowerCase(svc.name)}Plugin(${lowerCase(svc.name)}),
+  plugin: ${lowerCase(svc.name)}Routes(${lowerCase(svc.name)}),
   opts: registerOptions("/${lowerCase(svc.name)}", logLevel),
 })
+
 `
 
 const buildPlugins = (schema: Schema): string => {
