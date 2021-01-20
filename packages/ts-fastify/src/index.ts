@@ -382,7 +382,6 @@ const buildFile = (schema: Schema): Code => {
     }
     const source = `
 import { FastifyPluginAsync, LogLevel } from 'fastify'
-import fastifySensible from 'fastify-sensible'
 import Schema from 'fluent-json-schema'
 import { registerOptions, RpcPlugin } from './fastify.rpc.server'
 
