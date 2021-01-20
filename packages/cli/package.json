@@ -1,6 +1,6 @@
 {
     "name": "@typerpc/cli",
-    "version": "0.2.5",
+    "version": "0.2.9",
     "description": "typerpc command line tooling",
     "keywords": [
         "typerpc",
@@ -55,10 +55,10 @@
         "pkg": "^4.4.9"
     },
     "dependencies": {
-        "@typerpc/config": "^0.2.5",
-        "@typerpc/plugin": "^0.2.5",
-        "@typerpc/plugin-manager": "^0.2.5",
-        "@typerpc/schema": "^0.2.5",
+        "@typerpc/config": "^0.2.9",
+        "@typerpc/plugin": "^0.2.9",
+        "@typerpc/plugin-manager": "^0.2.9",
+        "@typerpc/schema": "^0.2.9",
         "@types/prettyjson": "^0.0.29",
         "chalk": "^4.1.0",
         "debug": "^4.1.1",
