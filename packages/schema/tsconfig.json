@@ -1,6 +1,7 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
+    "lib": ["ES2020"]
   },
   "exclude": [
     "node_modules"

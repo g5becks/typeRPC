@@ -11,8 +11,8 @@
  */
 
 import { genMsgNames, genServices, genSourceFile, hasCborParamsTestData, testQuerySvc } from '@typerpc/test-utils'
-import { _testing } from '../../src'
 import { Project } from 'ts-morph'
+import { _testing } from '../../src'
 
 let project: Project
 beforeEach(() => {

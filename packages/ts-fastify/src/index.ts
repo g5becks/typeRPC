@@ -308,18 +308,15 @@ export type FastifyHttpsOptions<
  * @export
  * @template Server the type of server to create
  * @param {FastifyHttp2SecureOptions<Server>} opts @see {@link https://www.fastify.io/docs/latest/Server/}
- * @param {pino.Logger} logger a pino.Logger instance @see {@link https://github.com/pinojs/pino/blob/HEAD/docs/api.md}
  * @param {...RpcPlugin[]} plugins list of plugins to register
  * @returns {FastifyInstance<Server>} configured {@link FastifyInstance}
  */
 export function createHttp2SecureServer<Server extends http2.Http2SecureServer>(
     opts: FastifyHttp2SecureOptions<Server>,
-    logger: pino.Logger,
     ...plugins: RpcPlugin[]
 ): FastifyInstance<Server> {
     const instance = server({
         ...opts,
-        logger,
         caseSensitive: true,
         querystringParser: (str) => (parse(str) as unknown) as { [key: string]: string | string[] },
     })
@@ -334,19 +331,16 @@ export function createHttp2SecureServer<Server extends http2.Http2SecureServer>(
  * @export
  * @template Server the type of server to create
  * @param {FastifyHttp2SecureOptions<Server>} opts @see {@link https://www.fastify.io/docs/latest/Server/}
- * @param {pino.Logger} logger a pino.Logger instance @see {@link https://github.com/pinojs/pino/blob/HEAD/docs/api.md}
+
  * @param {...RpcPlugin[]} plugins list of plugins to register
  * @returns {FastifyInstance<Server>} configured {@link FastifyInstance}
  */
 export function createHttp2Server<Server extends http2.Http2Server>(
     opts: FastifyHttp2Options<Server>,
-    logger: pino.Logger,
     ...plugins: RpcPlugin[]
 ): FastifyInstance<Server> {
     const instance = server({
         ...opts,
-
-        logger,
         caseSensitive: true,
         querystringParser: (str) => (parse(str) as unknown) as { [key: string]: string | string[] },
     })
@@ -362,18 +356,16 @@ export function createHttp2Server<Server extends http2.Http2Server>(
  * @export
  * @template Server the type of server to create
  * @param {FastifyHttp2SecureOptions<Server>} opts @see {@link https://www.fastify.io/docs/latest/Server/}
- * @param {pino.Logger} logger a pino.Logger instance @see {@link https://github.com/pinojs/pino/blob/HEAD/docs/api.md}
+
  * @param {...RpcPlugin[]} plugins list of plugins to register
  * @returns {FastifyInstance<Server>} configured {@link FastifyInstance}
  */
 export function createSecureServer<Server extends https.Server>(
     opts: FastifyHttpsOptions<Server>,
-    logger: pino.Logger,
     ...plugins: RpcPlugin[]
 ): FastifyInstance<Server> {
     const instance = server({
         ...opts,
-        logger,
         caseSensitive: true,
         querystringParser: (str) => (parse(str) as unknown) as { [key: string]: string | string[] },
     })
@@ -389,18 +381,16 @@ export function createSecureServer<Server extends https.Server>(
  * @export
  * @template Server the type of server to create
  * @param {FastifyHttp2SecureOptions<Server>} opts @see {@link https://www.fastify.io/docs/latest/Server/}
- * @param {pino.Logger} logger a pino.Logger instance @see {@link https://github.com/pinojs/pino/blob/HEAD/docs/api.md}
+
  * @param {...RpcPlugin[]} plugins list of plugins to register
  * @returns {FastifyInstance<Server>} configured {@link FastifyInstance}
  */
 export function createServer(
     opts: FastifyServerOptions,
-    logger: pino.Logger,
     ...plugins: RpcPlugin[]
 ): FastifyInstance {
     const instance = server({
         ...opts,
-        logger,
         caseSensitive: true,
         querystringParser: (str) => (parse(str) as unknown) as { [key: string]: string | string[] },
     })

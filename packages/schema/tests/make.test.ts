@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /*
  * Copyright (c) 2020. Gary Becks - <techstar.dev@hotmail.com>
  *
@@ -12,9 +13,9 @@
 
 /* eslint-disable new-cap */
 import { genSourceFile, typesTestData } from '@typerpc/test-utils'
-import { make, StructLiteral, _testing } from '../src'
-import { Node, Project, TypeNode } from 'ts-morph'
 import { $, internal as _ } from '@typerpc/types'
+import { Node, Project, TypeNode } from 'ts-morph'
+import { make, StructLiteral, _testing } from '../src'
 
 export const types: { [key: string]: Node | TypeNode } = {}
 
